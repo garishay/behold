@@ -162,7 +162,7 @@ doc-only fix repairing a merged entry's ordering or a factual error.
 squash the only merge, review threads resolved, no bypass. Secret scanning with push protection is
 on. `scripts/review-threads.ts` lists a PR's unresolved inline review threads and exits non-zero
 while any remain — and refuses, rather than reads as clean, a payload with no pull request or an
-incomplete page — so "clean" is a computed claim. A PreToolUse hook in `.claude/settings.json`
-that blocks pushes to `main`, force pushes, and dependency adds — a dependency is asked for on the
-queue — lands in 01c. If a hook blocks something you believe is right, stop and queue it; do not
-work around it.
+incomplete page — so "clean" is a computed claim. A PreToolUse hook in `.claude/settings.json`,
+`scripts/tool-guard.ts`, blocks pushes to `main`, force pushes, and dependency adds — a dependency
+is asked for on the queue — and blocks what it cannot judge, naming the error, so it never fails
+open. If a hook blocks something you believe is right, stop and queue it; do not work around it.

@@ -15,3 +15,6 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   and its notice, the two lines, the prototype's palette and type, every word from the keyed
   strings module `src/strings/en.ts`; `CLAUDE.md` and `AGENTS.md`, the README, this changelog,
   `scripts/review-threads.ts`.
+- **01c — the tool-guard hook** (#15): `scripts/tool-guard.ts` and `.claude/settings.json`, ported
+  from Vigil — a PreToolUse hook that blocks a push to `main`, a force push, and a dependency add,
+  names the rule, and fails closed on anything it cannot judge.
