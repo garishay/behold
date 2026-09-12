@@ -50,9 +50,36 @@ describe('review-threads (ported from Vigil, its #45 [G28])', () => {
   })
 
   it('refuses to read an absent PR as clean — a wrong number is a null, not an error', () => {
-    expect(readThreads({})).toBeNull()
-    expect(readThreads({ data: { repository: { pullRequest: null } } })).toBeNull()
-    expect(readThreads({ data: { repository: null } })).toBeNull()
+    expect(readThreads({})).toEqual({ refused: 'absent' })
+    expect(readThreads({ data: { repository: { pullRequest: null } } })).toEqual({
+      refused: 'absent',
+    })
+    expect(readThreads({ data: { repository: null } })).toEqual({ refused: 'absent' })
+  })
+
+  it('refuses an incomplete page — a missing or null reviewThreads, nodes, or pageInfo is not clean (#14 review)', () => {
+    const withThreads = (reviewThreads: unknown) =>
+      readThreads({ data: { repository: { pullRequest: { reviewThreads } } } } as ThreadsPayload)
+    const page = { pageInfo: { hasNextPage: false }, nodes: [] }
+    expect(withThreads(undefined)).toEqual({ refused: 'incomplete', missing: 'reviewThreads' })
+    expect(withThreads(null)).toEqual({ refused: 'incomplete', missing: 'reviewThreads' })
+    expect(withThreads({ ...page, nodes: undefined })).toEqual({
+      refused: 'incomplete',
+      missing: 'nodes',
+    })
+    expect(withThreads({ ...page, nodes: null })).toEqual({
+      refused: 'incomplete',
+      missing: 'nodes',
+    })
+    expect(withThreads({ ...page, pageInfo: undefined })).toEqual({
+      refused: 'incomplete',
+      missing: 'pageInfo',
+    })
+    expect(withThreads({ ...page, pageInfo: null })).toEqual({
+      refused: 'incomplete',
+      missing: 'pageInfo',
+    })
+    expect(withThreads(page)).toEqual({ threads: [], more: false })
   })
 
   it('says when a page was left unread rather than claiming clean over one page', () => {

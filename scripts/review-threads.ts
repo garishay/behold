@@ -10,10 +10,11 @@
  * The reading is a pure function of the GraphQL payload, so the test feeds it payloads and
  * never reaches the network; the two calls — `gh` for the repository's name, then for the
  * threads — are made only by `main`. The clean claim is refused rather than faked (Vigil's #97
- * review): a PR the API does not return — a wrong number, or one the token cannot read — and a PR
- * with more threads than the one page read both exit 2 and say so, since a computed "clean" over
- * a payload that never described the PR is the failure the script exists to prevent. The exit
- * code is set, not forced, so a piped listing is not cut off.
+ * review; #14 review): a PR the API does not return — a wrong number, or one the token cannot
+ * read — a page with `reviewThreads`, `nodes`, or `pageInfo` missing or null, as a field-level
+ * error leaves it, and a PR with more threads than the one page read all exit 2 and say so, since
+ * a computed "clean" over a payload that never described the PR's threads is the failure the
+ * script exists to prevent. The exit code is set, not forced, so a piped listing is not cut off.
  */
 
 import { execFileSync } from 'node:child_process'
@@ -38,7 +39,10 @@ export interface ThreadsPayload {
   data?: {
     repository?: {
       pullRequest?: {
-        reviewThreads?: { pageInfo?: { hasNextPage: boolean }; nodes?: ThreadNode[] }
+        reviewThreads?: {
+          pageInfo?: { hasNextPage: boolean } | null
+          nodes?: ThreadNode[] | null
+        } | null
       } | null
     } | null
   }
@@ -51,14 +55,24 @@ export interface ThreadsReading {
 }
 
 /**
- * The reading of a payload, or null when the payload holds no pull request at all — the API
- * answers a wrong number or an unreadable PR with a null, not an error, and that is not "clean".
+ * Why a payload was not read: it holds no pull request at all — the API answers a wrong number
+ * or an unreadable PR with a null, not an error — or its thread page is incomplete, a field
+ * missing or nulled by a field-level error. Neither is "clean".
  */
-export function readThreads(payload: ThreadsPayload): ThreadsReading | null {
+export interface ThreadsRefusal {
+  refused: 'absent' | 'incomplete'
+  missing?: 'reviewThreads' | 'nodes' | 'pageInfo'
+}
+
+/** The reading of a payload, or the refusal. */
+export function readThreads(payload: ThreadsPayload): ThreadsReading | ThreadsRefusal {
   const pullRequest = payload.data?.repository?.pullRequest
-  if (!pullRequest) return null
+  if (!pullRequest) return { refused: 'absent' }
   const page = pullRequest.reviewThreads
-  const threads = (page?.nodes ?? [])
+  if (!page) return { refused: 'incomplete', missing: 'reviewThreads' }
+  if (!page.nodes) return { refused: 'incomplete', missing: 'nodes' }
+  if (!page.pageInfo) return { refused: 'incomplete', missing: 'pageInfo' }
+  const threads = page.nodes
     .filter((thread) => !thread.isResolved)
     .map((thread) => {
       const first = thread.comments.nodes[0]
@@ -73,7 +87,7 @@ export function readThreads(payload: ThreadsPayload): ThreadsReading | null {
             ?.trim() ?? '',
       }
     })
-  return { threads, more: page?.pageInfo?.hasNextPage ?? false }
+  return { threads, more: page.pageInfo.hasNextPage }
 }
 
 /** One line per thread, or the clean claim. */
@@ -141,8 +155,12 @@ function main(): void {
     return
   }
   const reading = readThreads(payload)
-  if (reading === null) {
-    process.stderr.write(`PR #${number} not found in ${repo.nameWithOwner}.\n`)
+  if ('refused' in reading) {
+    process.stderr.write(
+      reading.refused === 'absent'
+        ? `PR #${number} not found in ${repo.nameWithOwner}.\n`
+        : `PR #${number}: the API returned its review threads with no ${reading.missing}; the payload is incomplete, so this will not claim clean.\n`,
+    )
     process.exitCode = 2
     return
   }
