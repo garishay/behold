@@ -12,5 +12,6 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   `vite-plugin-pwa` with the prompt register and the "Update available" toast, the manifest, the
   placeholder lamp icons and `scripts/generate-icons.ts`; `deploy.yml`, GitHub Pages by the
   Actions artifact flow on every push to `main`; the placeholder screen — the title, the epigraph
-  and its notice, the two lines, the prototype's palette and type; `CLAUDE.md` and `AGENTS.md`,
-  the README, this changelog, `scripts/review-threads.ts`.
+  and its notice, the two lines, the prototype's palette and type, every word from the keyed
+  strings module `src/strings/en.ts`; `CLAUDE.md` and `AGENTS.md`, the README, this changelog,
+  `scripts/review-threads.ts`.

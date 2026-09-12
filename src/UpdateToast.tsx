@@ -1,3 +1,5 @@
+import { strings } from './strings/en.ts'
+
 interface UpdateToastProps {
   /** A new version is waiting; the toast shows only then. */
   open: boolean
@@ -13,9 +15,9 @@ export function UpdateToast({ open, onUpdate }: UpdateToastProps) {
   if (!open) return null
   return (
     <div className="toast" role="status">
-      <span>Update available</span>
+      <span>{strings.updateAvailable}</span>
       <button type="button" onClick={onUpdate}>
-        Update
+        {strings.update}
       </button>
     </div>
   )
