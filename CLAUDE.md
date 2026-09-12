@@ -10,9 +10,13 @@ owner's operating model lives in the user-level CLAUDE.md; this file holds what 
 
 - **Scripture is fetched, never shipped.** Case scripture appears verbatim only in the reveal,
   fetched from the translation service at display time — never in the repo or the bundle. The one
-  exception is the title screen's epigraph and its notice (Gate 01 A6).
-- **Nothing the player reads lives in code.** Every caption, document, sentence, word-bank word,
-  and hint is case data keyed by id.
+  exception is the title screen's epigraph and its notice (Gate 01 A6), which ship in the bundle
+  as app copy; the exception is about shipping the verse, not where it sits.
+- **Nothing the player reads lives in code.** Two kinds of player text, both data: case content —
+  every caption, document, sentence, word-bank word, and hint — in case files keyed by id, one
+  file per language, the case-file gate's job (#4); and app copy — the interface's own words, the
+  title screen's and the toast's included — in one keyed strings module, `src/strings/en.ts`, a
+  sibling per language later. A component renders by key and carries no sentence of its own.
 - **The ESV token exists only in the password manager and the Worker's secret store** — never in
   the repo, a chat, or the app.
 
@@ -76,9 +80,11 @@ a test paired with a fix shown failing on the pre-fix code; no dead code or cons
 ## Review
 
 Codex's hosted review is this repository's reviewer, running on PR open under the owner's account
-and reading `AGENTS.md`, which points it at this file. Its thumbs-up reaction with no comment is
-the clean receipt; no reaction means it did not run, and the review mention on the PR starts it.
-The thread rule and closure below do not change with the reviewer.
+and reading `AGENTS.md`, which points it at this file. Its receipt takes two forms: the thumbs-up
+reaction with no comment when it found nothing, and a "Codex Review" comment with inline threads
+when it has findings. Eyes means it is still reading; no reaction means it did not run, and the
+review mention on the PR starts it. The thread rule and closure below do not change with the
+reviewer.
 
 ## The plan gate
 
@@ -155,7 +161,8 @@ doc-only fix repairing a merged entry's ordering or a factual error.
 `main` is branch-protected: PR required, the four CI jobs required with the branch up to date,
 squash the only merge, review threads resolved, no bypass. Secret scanning with push protection is
 on. `scripts/review-threads.ts` lists a PR's unresolved inline review threads and exits non-zero
-while any remain, so "clean" is a computed claim. A PreToolUse hook in `.claude/settings.json`
+while any remain — and refuses, rather than reads as clean, a payload with no pull request or an
+incomplete page — so "clean" is a computed claim. A PreToolUse hook in `.claude/settings.json`
 that blocks pushes to `main`, force pushes, and dependency adds — a dependency is asked for on the
 queue — lands in 01c. If a hook blocks something you believe is right, stop and queue it; do not
 work around it.
