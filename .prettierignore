@@ -1,0 +1,8 @@
+dist
+coverage
+node_modules
+package-lock.json
+
+# authored documents — preserved verbatim. The world rules are committed unchanged (Gate 01 A5),
+# so the format check never rewrites them; CI's conflict-marker step still reads them.
+docs/world-rules.md
