@@ -21,10 +21,24 @@ import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { basename } from 'node:path'
 
+const runningAsHook = process.argv[1] !== undefined && basename(process.argv[1]) === 'tool-guard.ts'
+
+// A guard that cannot even load must still block: an error thrown while this module evaluates
+// would exit 1, which the harness reads as non-blocking. Registered before anything that can throw.
+if (runningAsHook)
+  process.on('uncaughtException', (error) => {
+    process.stderr.write(
+      `Blocked: tool-guard could not load (${String(error)}). Fix the guard before working around it.\n`,
+    )
+    process.exit(2)
+  })
+
+/** A word list, written as one string so a table reads as a table. */
+const list = (words: string) => new Set(words.split(' '))
+
 /** Why a command is blocked, or null when it may run. */
 export function judge(command: string, currentBranch: string): string | null {
-  const text = withoutHeredocProse(command)
-  return judgeText(text, currentBranch, changesBranchOrDirectory(text), true)
+  return judgeText(withoutHeredocProse(command), currentBranch, false, true)
 }
 
 /**
@@ -40,11 +54,24 @@ function withoutHeredocProse(command: string): string {
   )
 }
 
-/** A branch or directory change anywhere in the command: `HEAD` no longer means this branch. */
-function changesBranchOrDirectory(text: string): boolean {
-  return /(^|[\s;&|(`])((cd|pushd|popd|sl|Set-Location|Push-Location)(\s|$)|git\s+(-C\s|--git-dir|--work-tree|switch(\s|$)|checkout(\s|$)))/m.test(
-    text,
-  )
+/** Commands that change the working directory. */
+const CHDIR = list('cd pushd popd sl Set-Location Push-Location')
+
+/**
+ * Whether the segment changes branch or directory — after which `HEAD` no longer means this
+ * branch: a directory change, or git (by basename) with `-C`, `--git-dir`, `--work-tree`,
+ * `switch`, or `checkout`.
+ */
+function switchesIn(segment: Segment): boolean {
+  const words = segment.tokens.map((token) => token.text)
+  const at = commandIndex(words)
+  const command = name(words[at] ?? '')
+  if (CHDIR.has(command)) return true
+  if (command !== 'git') return false
+  let i = at + 1
+  for (; i < words.length && words[i].startsWith('-'); i += GIT_VALUE_OPTIONS.has(words[i]) ? 2 : 1)
+    if (words[i] === '-C' || /^--(git-dir|work-tree)/.test(words[i])) return true
+  return words[i] === 'switch' || words[i] === 'checkout'
 }
 
 interface Token {
@@ -137,6 +164,20 @@ function tokenize(text: string, plain: boolean): Segment[] | null {
       if (enclosing.length > 0 && !enclosing.at(-1)?.backtick) closeSubstitution()
       else endSegment()
       i += 1
+    } else if (ch === '<' || ch === '>') {
+      // A redirection operator ends the word before it, attached or not; a leading descriptor
+      // number or `&` and a trailing `&n` belong to the operator, and the operand starts fresh.
+      if (open && !/^(\d+|&)$/.test(current)) endToken()
+      let j = i
+      while (j < text.length && '<>'.includes(text[j])) j++
+      if (text[j] === '&') {
+        j++
+        while (j < text.length && /\d/.test(text[j])) j++
+      }
+      current += text.slice(i, j)
+      open = true
+      endToken()
+      i = j
     } else if (text.startsWith('&&', i) || text.startsWith('||', i)) {
       endSegment()
       i += 2
@@ -164,14 +205,26 @@ function tokenize(text: string, plain: boolean): Segment[] | null {
   return segments
 }
 
-/** A word list, written as one string so a table reads as a table. */
-const list = (words: string) => new Set(words.split(' '))
-
 /** The program a word names: its basename, without a Windows extension. */
 const name = (word: string) => word.replace(/^.*[\\/]/, '').replace(/\.(exe|cmd|bat)$/i, '')
 
-/** A word the guard cannot read as one: empty, a variable, or a substitution. */
-const unreadable = (word: string) => word === '' || word.startsWith('$') || word.includes('`')
+/** A word the guard cannot read as one: empty, or carrying a variable or a substitution anywhere. */
+const unreadable = (word: string) => word === '' || /[$`]/.test(word)
+
+/**
+ * Whether a string, read as a command of its own, has a command it cannot read — a word it
+ * cannot read in command position, or a substitution standing as the command. Handed to an
+ * executor, such a string is refused; as an argument it is data.
+ */
+function expansionAtCommand(text: string): boolean {
+  const segments = tokenize(text, false) ?? tokenize(text, true) ?? []
+  return segments.some((segment) => {
+    if (segment.substitutionAsCommand) return true
+    const words = segment.tokens.map((token) => token.text)
+    const command = words[commandIndex(words)]
+    return command !== undefined && unreadable(command)
+  })
+}
 
 /** Options whose value is prose — a message, a body, a title — never a command. */
 const PROSE_OPTIONS = list('-m --message -b --body -t --title --notes')
@@ -199,7 +252,7 @@ const UNPLACED =
   'Blocked: tool-guard could not place this command — a quote or a substitution never closes. Fix the command before working around it.'
 const PLAINLY = 'Write the command plainly.'
 
-function judgeText(text: string, branch: string, switched: boolean, top: boolean): string | null {
+function judgeText(text: string, branch: string, switchedIn: boolean, top: boolean): string | null {
   let segments = tokenize(text, false)
   if (!segments) {
     if (top) return UNPLACED
@@ -207,6 +260,7 @@ function judgeText(text: string, branch: string, switched: boolean, top: boolean
     // its quotes as plain characters, so its words are still judged.
     segments = tokenize(text, true) ?? []
   }
+  const switched = switchedIn || segments.some(switchesIn)
   for (const segment of segments) {
     if (top && segment.substitutionAsCommand)
       return `Blocked: tool-guard cannot judge a command that is a substitution's output. ${PLAINLY}`
@@ -237,10 +291,11 @@ function judgeText(text: string, branch: string, switched: boolean, top: boolean
         if (/\s/.test(token.text)) {
           const inner = judgeText(token.text, branch, switched, false)
           if (inner) return inner
-          // What the string stands for in its command: a variable or a substitution is still
-          // unreadable there, a quoted path with spaces in it still names its program.
+          // What the string stands for in its command: one that opens with a variable, carries a
+          // substitution, or has a command inside it the guard cannot read is still unreadable
+          // there; a quoted path with spaces in it still names its program.
           words.push(
-            /^\$|\$\(|`/.test(token.text)
+            /^\$|\$\(|`/.test(token.text) || expansionAtCommand(token.text)
               ? SUBSTITUTION
               : /[\\/]/.test(token.text)
                 ? name(token.text)
@@ -321,6 +376,8 @@ function judgeExecutor(words: string[], redirectedStdin: boolean): string | null
 /** Git's global options that take a separate value, which must be skipped with them. */
 const GIT_VALUE_OPTIONS = list('-C -c --git-dir --work-tree --namespace --exec-path')
 
+const FORCE_OPTIONS = ['--force', '--force-with-lease', '--force-if-includes', '--mirror']
+
 /** The git subcommand in the segment and the words after it, or null when git is not invoked. */
 function gitCall(words: string[]): { subcommand: string | undefined; args: string[] } | null {
   const at = words.findIndex((word) => name(word) === 'git')
@@ -351,10 +408,12 @@ function judgePush(words: string[], currentBranch: string, switched: boolean): s
   if (call.subcommand !== 'push') return null
   const flags = call.args.filter((word) => word.startsWith('-'))
   const positional = call.args.filter((word) => !word.startsWith('-'))
-  const isForce = (flag: string) =>
-    /^(-[A-Za-z0-9]*f[A-Za-z0-9]*|--force|--force-with-lease(=.*)?|--force-if-includes|--mirror)$/.test(
-      flag,
-    )
+  // Git takes any unambiguous prefix of a long option, so a prefix of a force option is force.
+  const isForce = (flag: string) => {
+    if (/^-[A-Za-z0-9]*f[A-Za-z0-9]*$/.test(flag)) return true
+    const long = flag.split('=')[0]
+    return long.length > 2 && FORCE_OPTIONS.some((option) => option.startsWith(long))
+  }
   if (flags.some(isForce))
     return 'Blocked: force push. History on a shared branch is not rewritten.'
   if (positional.some((word) => word.startsWith('+')))
@@ -492,4 +551,4 @@ function main(): void {
   }
 }
 
-if (process.argv[1] && basename(process.argv[1]) === 'tool-guard.ts') main()
+if (runningAsHook) main()

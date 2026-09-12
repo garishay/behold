@@ -1,5 +1,31 @@
+import { spawnSync } from 'node:child_process'
 import { describe, expect, it } from 'vitest'
 import { judge } from './tool-guard.ts'
+
+/** The hook as the harness runs it: the tool call as JSON on stdin, the verdict as the exit code. */
+function hook(input: unknown): { status: number | null; stderr: string } {
+  const run = spawnSync(process.execPath, ['scripts/tool-guard.ts'], {
+    input: typeof input === 'string' ? input : JSON.stringify(input),
+    encoding: 'utf8',
+  })
+  return { status: run.status, stderr: run.stderr }
+}
+
+describe('tool-guard as the hook, over stdin', () => {
+  it('blocks with exit 2 and the reason, allows with exit 0, ignores a non-shell tool', () => {
+    const blocked = hook({ tool_name: 'Bash', tool_input: { command: 'git push origin main' } })
+    expect(blocked.status).toBe(2)
+    expect(blocked.stderr).toMatch(/^Blocked: push to main/)
+    expect(hook({ tool_name: 'Bash', tool_input: { command: 'git status' } }).status).toBe(0)
+    expect(hook({ tool_name: 'Read', tool_input: { file_path: 'CLAUDE.md' } }).status).toBe(0)
+  })
+
+  it('blocks with exit 2 when it cannot judge — an unreadable payload', () => {
+    const run = hook('not json')
+    expect(run.status).toBe(2)
+    expect(run.stderr).toMatch(/could not judge/)
+  })
+})
 
 describe('tool-guard', () => {
   it('blocks a push to main by any spelling of the target', () => {
@@ -356,5 +382,55 @@ describe('tool-guard', () => {
     expect(judge('& "C:\\Program Files\\Git\\bin\\git.exe" push origin main', 'feat/x')).toMatch(
       /push to main/,
     )
+  })
+
+  // #15 re-review, round 4: four more, each a factual error against the same contract.
+
+  it('splits a redirection operator from the word it touches (#15 re-review)', () => {
+    expect(judge('git push origin main>/dev/null', 'feat/x')).toMatch(/push to main/)
+    expect(judge('git push origin main 2>err>/dev/null', 'feat/x')).toMatch(/push to main/)
+    expect(judge('bash<script.sh', 'feat/x')).toMatch(/cannot judge/)
+    expect(judge('npm install lodash>log', 'feat/x')).toMatch(/dependency add \(lodash\)/)
+    expect(judge('npm ci>log 2>&1', 'feat/x')).toBeNull()
+    expect(judge('git push origin feat/x>out', 'feat/x')).toBeNull()
+  })
+
+  it('refuses a program name that carries an expansion anywhere in it (#15 re-review)', () => {
+    for (const command of [
+      'CMD=git; /usr/bin/$CMD push origin main',
+      '/usr/bin/$(printf git) push origin main',
+      'gi$X push origin main',
+      'bash -c "true; $CMD push origin main"',
+      'bash -c "true; /usr/bin/$CMD push origin main"',
+    ]) {
+      expect(judge(command, 'feat/x'), command).toMatch(/cannot judge/)
+    }
+    expect(judge('bash -c "echo $HOME"', 'feat/x')).toBeNull()
+    expect(judge('echo "it costs $5"', 'feat/x')).toBeNull()
+  })
+
+  it('sees a repository change after git by path or in a quoted path (#15 re-review)', () => {
+    for (const command of [
+      '/usr/bin/git -C /tmp/other push origin HEAD',
+      '"C:\\Program Files\\Git\\bin\\git.exe" -C /tmp/other push origin HEAD',
+      '/usr/bin/git --git-dir=/tmp/other/.git push origin @',
+      '/usr/bin/git switch main && git push origin HEAD',
+    ]) {
+      expect(judge(command, 'feat/x'), command).toMatch(/cannot be judged/)
+    }
+    expect(judge('/usr/bin/git -C /tmp/other push origin feat/x', 'feat/x')).toBeNull()
+  })
+
+  it('reads an abbreviated long force option as force (#15 re-review)', () => {
+    for (const command of [
+      'git push --force-with-l=feat/x:abc origin feat/x',
+      'git push --forc origin feat/x',
+      'git push --force-if origin feat/x',
+      'git push --mirr origin',
+    ]) {
+      expect(judge(command, 'feat/x'), command).toMatch(/force push/)
+    }
+    expect(judge('git push --follow-tags origin feat/x', 'feat/x')).toBeNull()
+    expect(judge('git push --no-force-with-lease origin feat/x', 'feat/x')).toBeNull()
   })
 })
