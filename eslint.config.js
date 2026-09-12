@@ -28,5 +28,10 @@ export default tseslint.config(
     files: ['**/*.config.{js,ts}'],
     languageOptions: { globals: globals.node },
   },
+  {
+    // Hand-run tooling on Node: the review-thread lister and the icon generator.
+    files: ['scripts/**/*.ts'],
+    languageOptions: { globals: globals.node },
+  },
   prettier,
 )
