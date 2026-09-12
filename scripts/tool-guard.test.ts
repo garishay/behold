@@ -18,11 +18,13 @@ describe('tool-guard', () => {
     }
   })
 
-  it('blocks a bare push only when the current branch is main', () => {
-    expect(judge('git push', 'main')).toMatch(/push to main/)
-    expect(judge('git push origin', 'main')).toMatch(/push to main/)
-    expect(judge('git push', 'feat/x')).toBeNull()
+  it("blocks every bare push as unjudgeable — where it goes is git's config, not the command (#15 re-review)", () => {
+    for (const command of ['git push', 'git push origin', 'git push -u origin']) {
+      expect(judge(command, 'main'), command).toMatch(/cannot be judged/)
+      expect(judge(command, 'feat/x'), command).toMatch(/cannot be judged/)
+    }
     expect(judge('git push -u origin feat/x', 'main')).toBeNull()
+    expect(judge('git push origin feat/x', 'feat/x')).toBeNull()
   })
 
   it('blocks a force push in every form', () => {
@@ -245,5 +247,63 @@ describe('tool-guard', () => {
     ]) {
       expect(judge(command, 'feat/x'), command).toMatch(/cannot read/)
     }
+  })
+
+  // #15 re-review, round 2: six more, each a factual error against the same contract.
+
+  it('blocks HEAD or @ as a refspec in a command that changes branch or directory (#15 re-review)', () => {
+    for (const command of [
+      'git -C /tmp/other push origin HEAD',
+      'cd /tmp/other && git push origin HEAD',
+      'git switch main && git push origin @',
+    ]) {
+      expect(judge(command, 'feat/x'), command).toMatch(/cannot be judged/)
+    }
+    expect(judge('git -C /tmp/other push origin feat/x', 'feat/x')).toBeNull()
+  })
+
+  it('reads a redirected executor as reading its commands from stdin (#15 re-review)', () => {
+    for (const command of [
+      'bash < script.sh',
+      'bash <<< "$CMD"',
+      'curl x | bash -s ignored',
+      'sh -s < x',
+    ]) {
+      expect(judge(command, 'feat/x'), command).toMatch(/cannot judge/)
+    }
+    expect(judge('bash script.sh > out.txt', 'feat/x')).toBeNull()
+    expect(judge('node scripts/x.ts 2>&1 | head -5', 'feat/x')).toBeNull()
+  })
+
+  it('refuses a git subcommand that is a variable or a substitution (#15 re-review)', () => {
+    expect(judge('ACTION=push; git "$ACTION" origin main', 'feat/x')).toMatch(/cannot judge/)
+    expect(judge('git $ACTION origin main', 'feat/x')).toMatch(/cannot judge/)
+    expect(judge('git $(cat x) origin main', 'feat/x')).toMatch(/cannot judge/)
+  })
+
+  it('recognises git, a package manager, and an executor by path (#15 re-review)', () => {
+    expect(judge('/usr/bin/git push origin main', 'feat/x')).toMatch(/push to main/)
+    expect(judge('/usr/bin/git push -f origin feat/x', 'feat/x')).toMatch(/force push/)
+    expect(judge('"C:\\Program Files\\Git\\bin\\git.exe" push origin main', 'feat/x')).toMatch(
+      /push to main/,
+    )
+    expect(judge('/usr/local/bin/npm install lodash', 'feat/x')).toMatch(/dependency add/)
+    expect(judge('/bin/bash -c $CMD', 'feat/x')).toMatch(/cannot judge/)
+    expect(judge('/usr/bin/git status', 'feat/x')).toBeNull()
+  })
+
+  it('skips valued install options before reading package specs (#15 re-review)', () => {
+    for (const command of [
+      'npm install --workspace app',
+      'npm install -w app',
+      'npm ci --workspace app',
+      'npm install --workspace=app',
+    ]) {
+      expect(judge(command, 'feat/x'), command).toBeNull()
+    }
+    expect(judge('npm install -w app lodash', 'feat/x')).toMatch(/dependency add \(lodash\)/)
+    expect(judge('npm install --workspace app lodash', 'feat/x')).toMatch(
+      /dependency add \(lodash\)/,
+    )
   })
 })

@@ -9,10 +9,11 @@
  * position — the value of `-m`, `--body`, `--title`, or a heredoc body — so a PR description that
  * *mentions* `git push origin main` is not a push, while `bash -c "git push origin main"` and
  * `echo "$(git push origin main)"` are (#15 review). A guard that cannot judge a command blocks it
- * and says so — a quote it cannot place, a command that is a variable or a substitution's output,
- * an executor handed a variable, an encoded command, or its stdin, a bare push after a branch or
- * directory change, a refspec it cannot read, a package-manager subcommand it cannot locate —
- * since a hook that crashes exits non-blocking, and this one must never fail open.
+ * and says so — a quote it cannot place, a command or a git subcommand that is a variable or a
+ * substitution's output, an executor handed a variable, an encoded command, or its stdin, a bare
+ * push (where it goes is git's config, not the command), `HEAD` after a branch or directory
+ * change, a refspec it cannot read, a package-manager subcommand it cannot locate — since a hook
+ * that crashes exits non-blocking, and this one must never fail open.
  */
 import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
@@ -37,7 +38,7 @@ function withoutHeredocProse(command: string): string {
   )
 }
 
-/** A branch or directory change anywhere in the command makes a bare push unjudgeable. */
+/** A branch or directory change anywhere in the command: `HEAD` no longer means this branch. */
 function changesBranchOrDirectory(text: string): boolean {
   return /(^|[\s;&|(`])((cd|pushd|popd|sl|Set-Location|Push-Location)(\s|$)|git\s+(-C\s|--git-dir|--work-tree|switch(\s|$)|checkout(\s|$)))/m.test(
     text,
@@ -56,14 +57,20 @@ interface Segment {
   substitutionAsCommand: boolean
 }
 
+/** What a substitution stands for in the command that encloses it: a word that cannot be read. */
+const SUBSTITUTION = '$(…)'
+
 /**
- * The command split at the shell separators — `&&`, `||`, `;`, `|`, a newline, parentheses, `$(`,
- * a backtick — into tokens; a quoted string becomes one token that keeps its inner text and its
- * quotedness, so `git push origin "main"` still says `main`. Null on a quote that never closes.
- * In `plain` mode quotes are ordinary characters, for text that is not itself well-formed shell.
+ * The command split at the shell separators — `&&`, `||`, `;`, `|`, a newline, parentheses — into
+ * tokens; a quoted string becomes one token that keeps its inner text and its quotedness, so
+ * `git push origin "main"` still says `main`. A substitution (`$( )`, backticks) is its own
+ * segment, and stands in the enclosing command as `$(…)`. Null on a quote or a substitution that
+ * never closes. In `plain` mode quotes are ordinary characters, for text that is not itself
+ * well-formed shell.
  */
 function tokenize(text: string, plain: boolean): Segment[] | null {
   const segments: Segment[] = []
+  const enclosing: { segment: Segment; current: string; quoted: boolean; backtick: boolean }[] = []
   let segment: Segment = { tokens: [], substitutionAsCommand: false }
   let current = ''
   let quoted = false
@@ -74,10 +81,27 @@ function tokenize(text: string, plain: boolean): Segment[] | null {
     quoted = false
     open = false
   }
-  const endSegment = (substitutionAsCommand = false) => {
+  const endSegment = () => {
     endToken()
-    if (segment.tokens.length > 0) segments.push(segment)
-    segment = { tokens: [], substitutionAsCommand }
+    if (segment.tokens.length > 0 || segment.substitutionAsCommand) segments.push(segment)
+    segment = { tokens: [], substitutionAsCommand: false }
+  }
+  const openSubstitution = (backtick: boolean) => {
+    const asCommand = !open && segment.tokens.length === 0
+    enclosing.push({ segment, current: open ? current : '', quoted, backtick })
+    segment = { tokens: [], substitutionAsCommand: asCommand }
+    current = ''
+    quoted = false
+    open = false
+  }
+  const closeSubstitution = () => {
+    endSegment()
+    const outer = enclosing.pop()
+    if (!outer) return
+    segment = outer.segment
+    current = outer.current + SUBSTITUTION
+    quoted = outer.quoted
+    open = true
   }
   for (let i = 0; i < text.length;) {
     const ch = text[i]
@@ -100,13 +124,21 @@ function tokenize(text: string, plain: boolean): Segment[] | null {
       current += text[i + 1]
       open = true
       i += 2
-    } else if (text.startsWith('$(', i) || ch === '`') {
-      endSegment(!open && segment.tokens.length === 0)
-      i += ch === '`' ? 1 : 2
+    } else if (text.startsWith('$(', i)) {
+      openSubstitution(false)
+      i += 2
+    } else if (ch === '`') {
+      if (enclosing.at(-1)?.backtick) closeSubstitution()
+      else openSubstitution(true)
+      i += 1
+    } else if (ch === ')') {
+      if (enclosing.length > 0 && !enclosing.at(-1)?.backtick) closeSubstitution()
+      else endSegment()
+      i += 1
     } else if (text.startsWith('&&', i) || text.startsWith('||', i)) {
       endSegment()
       i += 2
-    } else if (';|\n()'.includes(ch)) {
+    } else if (';|\n('.includes(ch)) {
       endSegment()
       i += 1
     } else if (/\s/.test(ch)) {
@@ -118,12 +150,22 @@ function tokenize(text: string, plain: boolean): Segment[] | null {
       i += 1
     }
   }
+  while (enclosing.length > 0) {
+    if (!plain) return null
+    closeSubstitution()
+  }
   endSegment()
   return segments
 }
 
-/** A word list, written as one string so the table reads as a table. */
+/** A word list, written as one string so a table reads as a table. */
 const list = (words: string) => new Set(words.split(' '))
+
+/** The program a word names: its basename, without a Windows extension. */
+const name = (word: string) => word.replace(/^.*[\\/]/, '').replace(/\.(exe|cmd|bat)$/i, '')
+
+/** A word the guard cannot read as one: empty, a variable, or a substitution. */
+const unreadable = (word: string) => word === '' || word.startsWith('$') || word.includes('`')
 
 /** Options whose value is prose — a message, a body, a title — never a command. */
 const PROSE_OPTIONS = list('-m --message -b --body -t --title --notes')
@@ -136,7 +178,7 @@ const WRAPPERS = list('sudo doas env time nohup nice command exec xargs')
 function commandIndex(words: string[]): number {
   let i = 0
   while (i < words.length && /^[A-Za-z_][A-Za-z0-9_]*=/.test(words[i])) i++
-  while (i < words.length && WRAPPERS.has(words[i])) {
+  while (i < words.length && WRAPPERS.has(name(words[i]))) {
     i++
     while (i < words.length && words[i].startsWith('-')) i++
   }
@@ -144,7 +186,7 @@ function commandIndex(words: string[]): number {
 }
 
 const UNPLACED =
-  'Blocked: tool-guard could not place a quoted string — a quote never closes. Fix the command before working around it.'
+  'Blocked: tool-guard could not place this command — a quote or a substitution never closes. Fix the command before working around it.'
 const PLAINLY = 'Write the command plainly.'
 
 function judgeText(text: string, branch: string, switched: boolean, top: boolean): string | null {
@@ -171,15 +213,16 @@ function judgeText(text: string, branch: string, switched: boolean, top: boolean
         if (/\s/.test(token.text)) {
           const inner = judgeText(token.text, branch, switched, false)
           if (inner) return inner
-          words.push('""')
+          // A quoted path with spaces in it still names its program.
+          words.push(/[\\/]/.test(token.text) ? name(token.text) : '""')
           continue
         }
       }
       words.push(token.text)
     }
     const command = words[commandIndex(words)]
-    if (top && command !== undefined && (command.startsWith('$') || command === '""'))
-      return `Blocked: tool-guard cannot judge a command whose name is a variable or a quoted string. ${PLAINLY}`
+    if (top && command !== undefined && (unreadable(command) || command === '""'))
+      return `Blocked: tool-guard cannot judge a command whose name is a variable, a substitution, or a quoted string. ${PLAINLY}`
     const reason =
       judgeExecutor(segment.tokens, words) ??
       judgePush(words, branch, switched) ??
@@ -211,23 +254,27 @@ const EXECUTORS: Record<string, string[]> = {
 }
 const POWERSHELL = list('pwsh powershell')
 const TERMINAL = list('-v -V --version -h --help -?')
-
-/** A string the guard cannot read as a command: empty, a variable, or carrying a substitution. */
-const unreadable = (token: Token) =>
-  token.text === '' || token.text.startsWith('$') || /\$\(|`/.test(token.text)
+/** A redirection: not an argument, and what follows `<`, `<<<`, `>`, or `>>` is its operand. */
+const REDIRECTION = /^[\d&]*[<>]{1,3}[&\d]*$/
+const SELF_CONTAINED_REDIRECTION = /^\d*[<>]+&\d+$/
 
 function judgeExecutor(tokens: Token[], words: string[]): string | null {
-  const at = words.findIndex((word) => Object.hasOwn(EXECUTORS, word))
+  const at = words.findIndex((word) => Object.hasOwn(EXECUTORS, name(word)))
   if (at < 0) return null
-  const exe = words[at]
+  const exe = name(words[at])
   const rest = tokens.slice(at + 1)
   const cannot = (what: string) =>
     `Blocked: tool-guard cannot judge what ${exe} would run — ${what}. ${PLAINLY}`
   // A literal handed to an executor was judged as a command when its token was read; what is
   // left to refuse is a string the guard could not read at all.
-  if (exe === 'eval') return rest.some(unreadable) ? cannot('a variable or a substitution') : null
-  for (const [i, token] of rest.entries()) {
-    const option = token.text
+  if (exe === 'eval')
+    return rest.some((token) => unreadable(token.text))
+      ? cannot('a variable or a substitution')
+      : null
+  let argument = false
+  let stdin = false
+  for (let i = 0; i < rest.length; i++) {
+    const option = rest[i].text
     const abbreviated =
       POWERSHELL.has(exe) && option.startsWith('-') ? option.slice(1).toLowerCase() : ''
     if (abbreviated !== '' && 'encodedcommand'.startsWith(abbreviated))
@@ -238,13 +285,19 @@ function judgeExecutor(tokens: Token[], words: string[]): string | null {
     ) {
       const code = rest[i + 1]
       if (!code) return cannot('nothing follows the option')
-      return unreadable(code) ? cannot('the command is a variable or a substitution') : null
+      return unreadable(code.text) ? cannot('the command is a variable or a substitution') : null
     }
+    if (REDIRECTION.test(option)) {
+      if (!SELF_CONTAINED_REDIRECTION.test(option)) i++
+      if (option.startsWith('<')) stdin = true
+    } else if (option === '-s') stdin = true
+    else if (!/^[-/]/.test(option)) argument = true
   }
-  // No code option: a script argument runs that; none, and the executor reads its commands from
-  // stdin — judged only where the executor is the command itself, since `which node` names it too.
+  // No code option: a script argument runs that; a redirection into the executor, `-s`, or no
+  // argument at all means it reads its commands from stdin — judged only where the executor is
+  // the command itself, since `which node` names it too.
   if (at !== commandIndex(words)) return null
-  const argument = rest.some((token) => !/^[-/]/.test(token.text))
+  if (stdin) return cannot('it would read its commands from stdin')
   const terminal = rest.some((token) => TERMINAL.has(token.text))
   return argument || terminal ? null : cannot('it would read its commands from stdin')
 }
@@ -252,22 +305,25 @@ function judgeExecutor(tokens: Token[], words: string[]): string | null {
 /** Git's global options that take a separate value, which must be skipped with them. */
 const GIT_VALUE_OPTIONS = list('-C -c --git-dir --work-tree --namespace --exec-path')
 
-/** The words after `git <subcommand>`, or null when the segment is not that git subcommand. */
-function gitArgs(words: string[], subcommand: string): string[] | null {
-  const at = words.indexOf('git')
+/** The git subcommand in the segment and the words after it, or null when git is not invoked. */
+function gitCall(words: string[]): { subcommand: string | undefined; args: string[] } | null {
+  const at = words.findIndex((word) => name(word) === 'git')
   if (at < 0) return null
   let i = at + 1
   while (i < words.length && words[i].startsWith('-')) {
     i += GIT_VALUE_OPTIONS.has(words[i]) ? 2 : 1
   }
-  return words[i] === subcommand ? words.slice(i + 1) : null
+  return { subcommand: words[i], args: words.slice(i + 1) }
 }
 
 function judgePush(words: string[], currentBranch: string, switched: boolean): string | null {
-  const args = gitArgs(words, 'push')
-  if (!args) return null
-  const flags = args.filter((word) => word.startsWith('-'))
-  const positional = args.filter((word) => !word.startsWith('-'))
+  const call = gitCall(words)
+  if (!call) return null
+  if (call.subcommand !== undefined && (unreadable(call.subcommand) || call.subcommand === '""'))
+    return `Blocked: tool-guard cannot judge a git subcommand that is a variable or a substitution. ${PLAINLY}`
+  if (call.subcommand !== 'push') return null
+  const flags = call.args.filter((word) => word.startsWith('-'))
+  const positional = call.args.filter((word) => !word.startsWith('-'))
   const isForce = (flag: string) =>
     /^(-[A-Za-z0-9]*f[A-Za-z0-9]*|--force|--force-with-lease(=.*)?|--force-if-includes|--mirror)$/.test(
       flag,
@@ -277,22 +333,21 @@ function judgePush(words: string[], currentBranch: string, switched: boolean): s
   if (positional.some((word) => word.startsWith('+')))
     return 'Blocked: force push (a + refspec). History on a shared branch is not rewritten.'
   const refspecs = positional.slice(1)
+  const everyBranch = flags.some((flag) => flag === '--all' || flag === '--branches')
+  if (refspecs.length === 0 && !everyBranch)
+    return "Blocked: a bare push cannot be judged — where it goes is git's config, not the command. Name the refspec: git push origin <branch>."
   if (refspecs.some((word) => /[$`{}]/.test(word) || word === '""'))
     return 'Blocked: push with a refspec the guard cannot read — a variable, a substitution, or a placeholder. Name the branch.'
-  const everyBranch = flags.some((flag) => flag === '--all' || flag === '--branches')
-  if (refspecs.length === 0 && !everyBranch && switched)
-    return 'Blocked: a bare push after a branch or directory change cannot be judged from the current branch. Name the refspec.'
-  const destination = (refspec: string) => {
-    const target = refspec.includes(':') ? refspec.slice(refspec.indexOf(':') + 1) : refspec
-    return target === 'HEAD' || target === '@' ? currentBranch : target
+  const destination = (refspec: string) =>
+    refspec.includes(':') ? refspec.slice(refspec.indexOf(':') + 1) : refspec
+  const isHead = (target: string) => target === 'HEAD' || target === '@'
+  if (switched && refspecs.some((refspec) => isHead(destination(refspec))))
+    return 'Blocked: HEAD in a command that changes branch or directory cannot be judged from the current branch. Name the branch.'
+  const targetsMain = (refspec: string) => {
+    const target = destination(refspec)
+    return ['main', 'refs/heads/main'].includes(isHead(target) ? currentBranch : target)
   }
-  const targetsMain = (refspec: string) =>
-    ['main', 'refs/heads/main'].includes(destination(refspec))
-  if (
-    refspecs.some(targetsMain) ||
-    everyBranch ||
-    (refspecs.length === 0 && currentBranch === 'main')
-  )
+  if (refspecs.some(targetsMain) || everyBranch)
     return 'Blocked: push to main. Work on a branch and open a PR; main is merged only through one.'
   return null
 }
@@ -302,7 +357,7 @@ interface Manager {
   adders: Set<string>
   /** The rest of the manager's subcommands; a word that is neither cannot be located. */
   others: Set<string>
-  /** Options that take a separate value, skipped with it when they come before the subcommand. */
+  /** Options that take a separate value, skipped with it wherever they stand. */
   valued: Set<string>
 }
 
@@ -348,24 +403,28 @@ const MANAGERS: Record<string, Manager> = {
 }
 
 function judgeDependencyAdd(words: string[]): string | null {
-  const at = words.findIndex((word) => Object.hasOwn(MANAGERS, word))
+  const at = words.findIndex((word) => Object.hasOwn(MANAGERS, name(word)))
   if (at < 0) return null
-  const name = words[at]
-  const manager = MANAGERS[name]
+  const manager = name(words[at])
+  const { adders, others, valued } = MANAGERS[manager]
+  const skip = (i: number) => (words[i].includes('=') || !valued.has(words[i]) ? 1 : 2)
   let i = at + 1
   while (i < words.length && words[i].startsWith('-')) {
     if (TERMINAL.has(words[i])) return null // a version or help: nothing runs
-    i += words[i].includes('=') || !manager.valued.has(words[i]) ? 1 : 2
+    i += skip(i)
   }
   const subcommand = words[i]
   if (subcommand === undefined) return null // options alone: nothing to add
   if (
     !/^[A-Za-z][A-Za-z0-9-]*$/.test(subcommand) ||
-    !(manager.adders.has(subcommand) || manager.others.has(subcommand))
+    !(adders.has(subcommand) || others.has(subcommand))
   )
-    return `Blocked: tool-guard could not locate the ${name} subcommand ("${subcommand}"). Write it plainly: ${name} <subcommand> …`
-  if (!manager.adders.has(subcommand)) return null
-  const packages = words.slice(i + 1).filter((word) => !word.startsWith('-'))
+    return `Blocked: tool-guard could not locate the ${manager} subcommand ("${subcommand}"). Write it plainly: ${manager} <subcommand> …`
+  if (!adders.has(subcommand)) return null
+  const packages: string[] = []
+  for (i += 1; i < words.length; i += words[i].startsWith('-') ? skip(i) : 1) {
+    if (!words[i].startsWith('-')) packages.push(words[i])
+  }
   if (packages.length === 0) return null // a bare install from the lockfile is fine
   return `Blocked: dependency add (${packages.join(' ')}). A dependency is asked for on the adjudication queue, #12, with what it is for and what it costs.`
 }
