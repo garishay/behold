@@ -142,6 +142,7 @@ describe('tool-guard', () => {
   it('fails closed on what it cannot place: a variable or substitution run as the command, an executor fed one, an encoded command, stdin, an unbalanced quote (#15 review)', () => {
     for (const command of [
       'bash -c "$CMD"',
+      'bash -c "$CMD --x"',
       'bash -c $CMD',
       'eval $X',
       'eval "$(cat x)"',
@@ -305,5 +306,15 @@ describe('tool-guard', () => {
     expect(judge('npm install --workspace app lodash', 'feat/x')).toMatch(
       /dependency add \(lodash\)/,
     )
+  })
+
+  it("reads a redirection as a redirection — not a package spec, not a refspec (#15 round 2, the round's own probe)", () => {
+    expect(judge('npm install 2>&1 | tail -2', 'feat/x')).toBeNull()
+    expect(judge('npm install --workspace app 2>&1', 'feat/x')).toBeNull()
+    expect(judge('git push origin feat/x 2>&1', 'feat/x')).toBeNull()
+    expect(judge('git push origin > /dev/null', 'feat/x')).toMatch(/cannot be judged/)
+    expect(judge('git push origin main 2>&1', 'feat/x')).toMatch(/push to main/)
+    expect(judge('npm install lodash > log', 'feat/x')).toMatch(/dependency add \(lodash\)/)
+    expect(judge('bash <<< "git push origin main"', 'feat/x')).toMatch(/push to main/)
   })
 })

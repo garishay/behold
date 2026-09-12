@@ -171,6 +171,10 @@ const unreadable = (word: string) => word === '' || word.startsWith('$') || word
 const PROSE_OPTIONS = list('-m --message -b --body -t --title --notes')
 const PROSE_ASSIGNMENT = /^(--message|--body|--title|--notes|-m|-b|-t)=/
 
+/** A redirection is not a word of the command; what follows `<`, `<<<`, `>`, or `>>` is its operand. */
+const REDIRECTION = /^[\d&]*[<>]{1,3}[&\d]*$/
+const SELF_CONTAINED_REDIRECTION = /^\d*[<>]+&\d+$/
+
 /** Words that only hand the command on: the command word is the first after them. */
 const WRAPPERS = list('sudo doas env time nohup nice command exec xargs')
 
@@ -201,7 +205,21 @@ function judgeText(text: string, branch: string, switched: boolean, top: boolean
     if (top && segment.substitutionAsCommand)
       return `Blocked: tool-guard cannot judge a command that is a substitution's output. ${PLAINLY}`
     const words: string[] = []
-    for (const [i, token] of segment.tokens.entries()) {
+    let stdin = false
+    for (let i = 0; i < segment.tokens.length; i++) {
+      const token = segment.tokens[i]
+      if (!token.quoted && REDIRECTION.test(token.text)) {
+        if (token.text.includes('<')) stdin = true
+        if (!SELF_CONTAINED_REDIRECTION.test(token.text)) {
+          // The operand is not a word of the command either — but a here-string runs.
+          const operand = segment.tokens[++i]
+          if (operand?.quoted && /\s/.test(operand.text)) {
+            const inner = judgeText(operand.text, branch, switched, false)
+            if (inner) return inner
+          }
+        }
+        continue
+      }
       if (token.quoted) {
         const prose =
           PROSE_OPTIONS.has(segment.tokens[i - 1]?.text ?? '') || PROSE_ASSIGNMENT.test(token.text)
@@ -213,8 +231,15 @@ function judgeText(text: string, branch: string, switched: boolean, top: boolean
         if (/\s/.test(token.text)) {
           const inner = judgeText(token.text, branch, switched, false)
           if (inner) return inner
-          // A quoted path with spaces in it still names its program.
-          words.push(/[\\/]/.test(token.text) ? name(token.text) : '""')
+          // What the string stands for in its command: a variable or a substitution is still
+          // unreadable there, a quoted path with spaces in it still names its program.
+          words.push(
+            /^\$|\$\(|`/.test(token.text)
+              ? SUBSTITUTION
+              : /[\\/]/.test(token.text)
+                ? name(token.text)
+                : '""',
+          )
           continue
         }
       }
@@ -224,9 +249,7 @@ function judgeText(text: string, branch: string, switched: boolean, top: boolean
     if (top && command !== undefined && (unreadable(command) || command === '""'))
       return `Blocked: tool-guard cannot judge a command whose name is a variable, a substitution, or a quoted string. ${PLAINLY}`
     const reason =
-      judgeExecutor(segment.tokens, words) ??
-      judgePush(words, branch, switched) ??
-      judgeDependencyAdd(words)
+      judgeExecutor(words, stdin) ?? judgePush(words, branch, switched) ?? judgeDependencyAdd(words)
     if (reason) return reason
   }
   return null
@@ -254,27 +277,18 @@ const EXECUTORS: Record<string, string[]> = {
 }
 const POWERSHELL = list('pwsh powershell')
 const TERMINAL = list('-v -V --version -h --help -?')
-/** A redirection: not an argument, and what follows `<`, `<<<`, `>`, or `>>` is its operand. */
-const REDIRECTION = /^[\d&]*[<>]{1,3}[&\d]*$/
-const SELF_CONTAINED_REDIRECTION = /^\d*[<>]+&\d+$/
 
-function judgeExecutor(tokens: Token[], words: string[]): string | null {
+function judgeExecutor(words: string[], redirectedStdin: boolean): string | null {
   const at = words.findIndex((word) => Object.hasOwn(EXECUTORS, name(word)))
   if (at < 0) return null
   const exe = name(words[at])
-  const rest = tokens.slice(at + 1)
+  const rest = words.slice(at + 1)
   const cannot = (what: string) =>
     `Blocked: tool-guard cannot judge what ${exe} would run — ${what}. ${PLAINLY}`
   // A literal handed to an executor was judged as a command when its token was read; what is
   // left to refuse is a string the guard could not read at all.
-  if (exe === 'eval')
-    return rest.some((token) => unreadable(token.text))
-      ? cannot('a variable or a substitution')
-      : null
-  let argument = false
-  let stdin = false
-  for (let i = 0; i < rest.length; i++) {
-    const option = rest[i].text
+  if (exe === 'eval') return rest.some(unreadable) ? cannot('a variable or a substitution') : null
+  for (const [i, option] of rest.entries()) {
     const abbreviated =
       POWERSHELL.has(exe) && option.startsWith('-') ? option.slice(1).toLowerCase() : ''
     if (abbreviated !== '' && 'encodedcommand'.startsWith(abbreviated))
@@ -284,21 +298,17 @@ function judgeExecutor(tokens: Token[], words: string[]): string | null {
       EXECUTORS[exe].includes(option)
     ) {
       const code = rest[i + 1]
-      if (!code) return cannot('nothing follows the option')
-      return unreadable(code.text) ? cannot('the command is a variable or a substitution') : null
+      if (code === undefined) return cannot('nothing follows the option')
+      return unreadable(code) ? cannot('the command is a variable or a substitution') : null
     }
-    if (REDIRECTION.test(option)) {
-      if (!SELF_CONTAINED_REDIRECTION.test(option)) i++
-      if (option.startsWith('<')) stdin = true
-    } else if (option === '-s') stdin = true
-    else if (!/^[-/]/.test(option)) argument = true
   }
   // No code option: a script argument runs that; a redirection into the executor, `-s`, or no
   // argument at all means it reads its commands from stdin — judged only where the executor is
   // the command itself, since `which node` names it too.
   if (at !== commandIndex(words)) return null
-  if (stdin) return cannot('it would read its commands from stdin')
-  const terminal = rest.some((token) => TERMINAL.has(token.text))
+  if (redirectedStdin || rest.includes('-s')) return cannot('it would read its commands from stdin')
+  const argument = rest.some((word) => !/^[-/]/.test(word))
+  const terminal = rest.some((word) => TERMINAL.has(word))
   return argument || terminal ? null : cannot('it would read its commands from stdin')
 }
 
