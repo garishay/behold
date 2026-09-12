@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      # A conflict marker anywhere in the tracked tree fails the job, naming the file and line —
+      # the step ported from Vigil (#45 [G34]). The gap it closes is the Prettier-ignored paths —
+      # here the authored world rules and the lockfile — where a merge pushed with a hunk
+      # unresolved passes every other gate; elsewhere Prettier already fails on a marker and
+      # typecheck fails on one in a .ts file. First, before the install, so it always runs and its
+      # named lines print even when lint would also fail. `=======` alone is not matched: a
+      # conflict always carries the other two, and a bare `=======` line is a legal Markdown
+      # heading underline. `git grep` exits 1 on no match and above 1 on an error, so only exactly
+      # 1 passes — a failed scan is red, not silently green. Rides in the lint job, so the
+      # required checks stay the four jobs Gate 01 A3 names.
+      - name: no conflict markers
+        run: |
+          git grep -nE "^(<<<<<<<|>>>>>>>|\|\|\|\|\|\|\|)( |$)" -- . && exit 1
+          [ $? -eq 1 ]
+      - uses: actions/setup-node@v5
+        with:
+          # One Node pin, .nvmrc (Gate 01 A1), read here and by nvm.
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      # Formatting rides in the lint job rather than a job of its own, so the required-checks list
+      # stays the four jobs.
+      - run: npm run format:check
+
+  typecheck:
+    name: typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run test
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # A production build at `/`. The Pages deploy (01b) builds again with its own base.
+      - run: npm run build
