@@ -1,12 +1,143 @@
+/* The prototype's palette and type (Gate 01 A6): serif for scripture and titles, the system sans
+   for everything else. */
 :root {
-  font-family:
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
+  --night: #232a3d;
+  --slate: #2e3650;
+  --slate-deep: #1b2033;
+  --mist: #e6e1d6;
+  --mist-dim: #a9a69c;
+  --papyrus: #e8dcc2;
+  --papyrus-ink: #2b2418;
+  --papyrus-ink-dim: #6e5a3c;
+  --gold: #c9a94e;
+  --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  --sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --inset: 20px;
 }
 
+* {
+  box-sizing: border-box;
+}
+
+html,
 body {
   margin: 0;
+  background: var(--slate-deep);
+  color: var(--mist);
+  font-family: var(--sans);
+  -webkit-text-size-adjust: 100%;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* The placeholder screen: one portrait column, the masthead and the notice pushed to the ends. */
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 430px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: max(24px, env(safe-area-inset-top)) max(var(--inset), env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom)) max(var(--inset), env(safe-area-inset-left));
+  background: var(--night);
+}
+
+.masthead {
+  margin-top: auto;
+  text-align: center;
+}
+
+h1 {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 44px;
+  line-height: 1.1;
+}
+
+.kicker {
+  margin: 6px 0 0;
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.epigraph {
+  margin: 0;
+  padding: 16px 18px;
+  border-radius: 10px;
+  background: var(--papyrus);
+  color: var(--papyrus-ink);
+  font-family: var(--serif);
+}
+
+.epigraph p {
+  margin: 0;
+  font-size: 18px;
+  font-style: italic;
+  line-height: 1.55;
+}
+
+.epigraph footer {
+  margin-top: 8px;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--papyrus-ink-dim);
+}
+
+.line {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 19px;
+  line-height: 1.45;
+}
+
+.status {
+  margin: 0;
+  font-size: 15px;
+  color: var(--mist-dim);
+}
+
+.notice {
+  margin: auto 0 0;
+  padding-top: 24px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--mist-dim);
+}
+
+/* The "Update available" toast (Gate 01 A2), over the screen at the bottom. */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: var(--slate);
+  font-size: 15px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+
+.toast button {
+  min-height: 44px;
+  color: var(--gold);
 }
