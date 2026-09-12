@@ -317,4 +317,44 @@ describe('tool-guard', () => {
     expect(judge('npm install lodash > log', 'feat/x')).toMatch(/dependency add \(lodash\)/)
     expect(judge('bash <<< "git push origin main"', 'feat/x')).toMatch(/push to main/)
   })
+
+  // #15 re-review, round 3: three more, each a factual error against the same contract.
+
+  it('refuses a git subcommand it does not know — an alias can be a push (#15 re-review)', () => {
+    for (const command of [
+      'git -c alias.p=push p origin main',
+      'git p origin main',
+      'git -c alias.pm="push origin main" pm',
+    ]) {
+      expect(judge(command, 'feat/x'), command).toMatch(/cannot judge/)
+    }
+    for (const command of ['git status', 'git -c core.pager=cat log -1', 'git rev-parse HEAD']) {
+      expect(judge(command, 'feat/x'), command).toBeNull()
+    }
+  })
+
+  it('judges the command a package manager launches through exec, x, or dlx (#15 re-review)', () => {
+    for (const command of [
+      'npm exec -- npm install ./pkg',
+      'npm x -- npm i lodash',
+      'pnpm dlx npm install lodash',
+      'yarn exec npm install lodash',
+      'bun x npm add lodash',
+    ]) {
+      expect(judge(command, 'feat/x'), command).toMatch(/dependency add/)
+    }
+    expect(judge('npm exec -- prettier --check .', 'feat/x')).toBeNull()
+    expect(judge('npm exec -- npm ci', 'feat/x')).toBeNull()
+  })
+
+  it('reads a single ampersand as a separator, redirections apart (#15 re-review)', () => {
+    expect(judge('git push origin main&', 'feat/x')).toMatch(/push to main/)
+    expect(judge('echo hi & git push origin main', 'feat/x')).toMatch(/push to main/)
+    expect(judge('npm ci&npm install lodash', 'feat/x')).toMatch(/dependency add/)
+    expect(judge('npm ci 2>&1', 'feat/x')).toBeNull()
+    expect(judge('npm ci &> log', 'feat/x')).toBeNull()
+    expect(judge('& "C:\\Program Files\\Git\\bin\\git.exe" push origin main', 'feat/x')).toMatch(
+      /push to main/,
+    )
+  })
 })

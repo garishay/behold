@@ -10,10 +10,12 @@
  * *mentions* `git push origin main` is not a push, while `bash -c "git push origin main"` and
  * `echo "$(git push origin main)"` are (#15 review). A guard that cannot judge a command blocks it
  * and says so — a quote it cannot place, a command or a git subcommand that is a variable or a
- * substitution's output, an executor handed a variable, an encoded command, or its stdin, a bare
- * push (where it goes is git's config, not the command), `HEAD` after a branch or directory
- * change, a refspec it cannot read, a package-manager subcommand it cannot locate — since a hook
- * that crashes exits non-blocking, and this one must never fail open.
+ * substitution's output, a git subcommand that is not a built-in (an alias can be a push), an
+ * executor handed a variable, an encoded command, or its stdin, a bare push (where it goes is
+ * git's config, not the command), `HEAD` after a branch or directory change, a refspec it cannot
+ * read, a package-manager subcommand it cannot locate — since a hook that crashes exits
+ * non-blocking, and this one must never fail open. What a manager's `exec` launches is judged in
+ * turn.
  */
 import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
@@ -138,6 +140,10 @@ function tokenize(text: string, plain: boolean): Segment[] | null {
     } else if (text.startsWith('&&', i) || text.startsWith('||', i)) {
       endSegment()
       i += 2
+    } else if (ch === '&' && !'<>'.includes(text[i - 1] ?? '') && text[i + 1] !== '>') {
+      // A background separator, attached or not — unless it is the `&` of a redirection.
+      endSegment()
+      i += 1
     } else if (';|\n('.includes(ch)) {
       endSegment()
       i += 1
@@ -326,11 +332,22 @@ function gitCall(words: string[]): { subcommand: string | undefined; args: strin
   return { subcommand: words[i], args: words.slice(i + 1) }
 }
 
+/**
+ * Git's built-in commands. An alias — inline through `-c alias.<name>=…`, or from any config
+ * file — can stand for a push, and a built-in cannot be aliased away; so a subcommand that is not
+ * a built-in cannot be judged.
+ */
+const GIT_COMMANDS = list(
+  'add am apply archive bisect blame branch bugreport bundle cat-file check-ignore checkout cherry cherry-pick citool clean clone commit commit-tree config count-objects credential daemon describe diff diff-index diff-tree difftool fast-export fast-import fetch filter-branch for-each-ref format-patch fsck gc grep gui hash-object help hook init instaweb interpret-trailers log ls-files ls-remote ls-tree mailinfo mailsplit maintenance merge merge-base merge-file merge-tree mergetool mv name-rev notes pack-refs prune pull push range-diff read-tree rebase reflog remote repack replace request-pull reset restore rev-list rev-parse revert rm send-email shortlog show show-branch show-ref sparse-checkout stash status stripspace submodule switch symbolic-ref tag unpack-file update-index update-ref update-server-info var verify-commit verify-tag version whatchanged worktree write-tree',
+)
+
 function judgePush(words: string[], currentBranch: string, switched: boolean): string | null {
   const call = gitCall(words)
-  if (!call) return null
-  if (call.subcommand !== undefined && (unreadable(call.subcommand) || call.subcommand === '""'))
+  if (!call || call.subcommand === undefined) return null
+  if (unreadable(call.subcommand) || call.subcommand === '""')
     return `Blocked: tool-guard cannot judge a git subcommand that is a variable or a substitution. ${PLAINLY}`
+  if (!GIT_COMMANDS.has(call.subcommand))
+    return `Blocked: tool-guard cannot judge the git subcommand "${call.subcommand}" — not a built-in, so it may be an alias, and an alias can be a push. ${PLAINLY}`
   if (call.subcommand !== 'push') return null
   const flags = call.args.filter((word) => word.startsWith('-'))
   const positional = call.args.filter((word) => !word.startsWith('-'))
@@ -412,6 +429,9 @@ const MANAGERS: Record<string, Manager> = {
   },
 }
 
+/** Subcommands that launch the command after them, in every manager that has them. */
+const RUNNERS = list('exec x dlx')
+
 function judgeDependencyAdd(words: string[]): string | null {
   const at = words.findIndex((word) => Object.hasOwn(MANAGERS, name(word)))
   if (at < 0) return null
@@ -430,6 +450,12 @@ function judgeDependencyAdd(words: string[]): string | null {
     !(adders.has(subcommand) || others.has(subcommand))
   )
     return `Blocked: tool-guard could not locate the ${manager} subcommand ("${subcommand}"). Write it plainly: ${manager} <subcommand> …`
+  if (RUNNERS.has(subcommand)) {
+    // The manager launches the command after it: judge that one in turn.
+    const rest = words.slice(i + 1)
+    if (rest[0] === '--') rest.shift()
+    return judgeDependencyAdd(rest)
+  }
   if (!adders.has(subcommand)) return null
   const packages: string[] = []
   for (i += 1; i < words.length; i += words[i].startsWith('-') ? skip(i) : 1) {
