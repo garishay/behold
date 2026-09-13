@@ -137,9 +137,8 @@ describe('validate (Gate 02 A6)', () => {
       'spot "brook" cites "17:40" without its book in front, and the passages span more than one book',
     ])
     // Prefixed with the wrong book: no passage of 2 Samuel has a chapter 17.
-    const wrong: CaseStructure = { ...two, moments: [{ ...moment, spots: prefixed }] }
     const spots = prefixed.map((s) => (s.id === 'brook' ? { ...s, cites: '2SA 17:40' } : s))
-    expect(validate({ ...wrong, moments: [{ ...moment, spots }] }, en)).toEqual([
+    expect(validate({ ...two, moments: [{ ...moment, spots }] }, en)).toEqual([
       'spot "brook" cites "2SA 17:40", outside the passages',
     ])
   })
