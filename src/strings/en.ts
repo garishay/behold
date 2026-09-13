@@ -1,8 +1,11 @@
 /**
  * App copy, English — every word the interface shows, keyed by id (CLAUDE.md, Guardrails: nothing
  * the player reads lives in code). One module now; a sibling per language later. Case content is
- * the other kind of player text and lives in case files, not here.
+ * the other kind of player text and lives in case files, not here. A sentence with a number or a
+ * name in it is a function of them, so the language keeps its own word order.
  */
+type Copy = string | Readonly<Record<string, string>> | ((...args: never[]) => string)
+
 export const strings = {
   title: 'Behold',
   kicker: 'Bible Mystery Game',
@@ -19,4 +22,31 @@ export const strings = {
   update: 'Update',
   // The passage stub's one line (#6), shown in the reveal until the proxy (#3) answers.
   passagePending: 'The passage appears here once the translation service is connected.',
-} as const satisfies Record<string, string>
+
+  // The case cards (#6).
+  closed: 'Closed ✓',
+  inProgress: 'In progress',
+
+  // The case screen: its header and tabs.
+  cases: 'Cases',
+  restart: 'Restart',
+  restartConfirm: 'Start this case over? Its progress is cleared.',
+  moments: 'Moments',
+  papers: 'Papers',
+  zoom: 'Zoom',
+
+  // The bank, and the console above it.
+  thingsFound: (moment: string, found: number, total: number) =>
+    `${moment} · ${found} of ${total} things found here`,
+  tapPrompt: 'Tap anything that looks like it matters.',
+  found: 'Found:',
+  copiedToPapers: 'copied to Papers',
+  wordsFound: 'Words you’ve found',
+  legend: { name: 'names', noun: 'things', action: 'actions', number: 'numbers' },
+  bankEmpty: 'Nothing yet. Tap things in the picture.',
+
+  // Papers, and a paper opened.
+  papersEmpty:
+    'Nothing here yet. Things with writing on them open when you tap them, and a copy lands here.',
+  close: 'Close',
+} as const satisfies Record<string, Copy>
