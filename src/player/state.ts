@@ -178,7 +178,10 @@ export function chooseOrderSlot(
   return { progress: p, selection: { ...nothing, slot: sel.slot === index ? null : index } }
 }
 
-/** The case closed on the player's word: solved when nothing is wrong, else how far off. */
+/**
+ * The case closed on the player's word: solved when nothing is wrong, else unchanged — the screen
+ * says how far off.
+ */
 export function submit(s: CaseStructure, p: Progress): Progress {
   return wrong(s, p) === 0 ? { ...p, solved: true } : p
 }
