@@ -3,6 +3,14 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.3.0 — Gate 03, Player port (#6)
+
+- **03a — the model and the passage service** (#19): `src/player/state.ts` — a case's progress
+  and the moves on it, pure functions keyed by the structure's ids, a guided case stepping on and
+  closing itself, a case without steps closing on the submit; `src/passages/service.ts`, the
+  Worker's contract — a reference and a translation in, verses out — and `stub.ts`, the one line
+  the reveal shows until #3; the validator's face/blank sentence.
+
 ## v0.2.1 — Governance revision 1 (#13)
 
 - **the rule text of [G1]–[G6]** (#18): `CLAUDE.md` — [G1], [G4], and [G5] under Size in
