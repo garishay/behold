@@ -106,7 +106,13 @@ export const en = {
     },
     verdict: {
       heading: 'The prophet’s words',
-      parts: [{ t: 'Have you ' }, { b: 'v1' }, { t: ', and also ' }, { b: 'v2' }, { t: '?' }],
+      parts: [
+        { t: 'Was it not enough that you ' },
+        { b: 'v1' },
+        { t: ' him? Now you have ' },
+        { b: 'v2' },
+        { t: ' of his vineyard.' },
+      ],
     },
   },
   reveal: [

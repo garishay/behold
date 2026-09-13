@@ -25,6 +25,12 @@ describe('the case registry (Gate 02 A1, A5)', () => {
     expect(new Set(ids).size).toBe(ids.length)
   })
 
+  // The player's first case is the tutorial — a behaviour, held here. The full sequence is
+  // content, and the registry is its source of truth (review round 3, #16, the owner's ruling).
+  it('opens with the guided case', () => {
+    expect(cases[0].structure.steps?.length ?? 0).toBeGreaterThan(0)
+  })
+
   it.each(each)('%s: every moment’s picture is in its folder at the declared size', (id, c) => {
     for (const m of c.moments)
       expect(jpegSize(readFileSync(`public/cases/${id}/${m.picture}`)), m.id).toEqual([...m.size])
