@@ -51,8 +51,10 @@ export interface Block {
   readonly blanks: Readonly<Record<string, string>>
 }
 
-/** What ends a tutorial step: a spot tapped, or a face or blank filled with its answer. */
-export type Until = { readonly tapped: string } | { readonly filled: string }
+/** What ends a tutorial step: a spot tapped, or a face or blank filled with its answer — one or the other. */
+export type Until =
+  | { readonly tapped: string; readonly filled?: never }
+  | { readonly filled: string; readonly tapped?: never }
 
 /** A tutorial step; the last has no `until` and stays until the case closes. */
 export interface Step {
@@ -104,8 +106,9 @@ type Keyed<K extends string, V> = [K] extends [never]
   ? { readonly [key: string]: never }
   : Readonly<Record<K, V>>
 
-/** A run of text, or one of the block's blanks, in this language's own order. */
-export type Part<B extends string> = { readonly t: string } | { readonly b: B }
+/** A run of text, or one of the block's blanks, in this language's own order — never both. */
+export type Part<B extends string> =
+  { readonly t: string; readonly b?: never } | { readonly b: B; readonly t?: never }
 
 /** A case's text in one language, keyed by the structure's ids. */
 export type CaseText<S extends CaseStructure> = {

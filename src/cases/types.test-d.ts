@@ -53,6 +53,20 @@ export const noSteps = {
   steps: { surprise: 'Tap anything.' },
 } satisfies CaseText<typeof stepless>
 
+// A step that ends on both a tap and a fill (review round 3, #16): one or the other.
+export const both = {
+  ...valley,
+  // @ts-expect-error: a step ends on a tap or on a fill, not both
+  steps: [{ id: 'step1', until: { tapped: 'boy', filled: 'd1' } }],
+} as const satisfies CaseStructure
+
+// A part that is a run of text and a blank at once.
+export const partBoth = {
+  ...en,
+  // @ts-expect-error: a part is a run of text or a blank, not both
+  blocks: { account: { heading: 'The account', parts: [{ t: 'and ', b: 't1' }] } },
+} satisfies CaseText<typeof valley>
+
 // Step text for a case whose structure has no steps.
 export const steps = {
   ...vineyardEn,
