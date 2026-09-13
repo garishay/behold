@@ -101,6 +101,11 @@ describe('the model (#6)', () => {
     }
     expect(filled(vineyard, p)).toBe(3)
     expect(wrong(vineyard, p)).toBe(2 + 0 + 9)
+    // A partial order is nothing filled and one thing wrong — never a thing filled at the first
+    // tile, or the submit could open with the order half done (the owner's note at 03a's open).
+    const partial = { ...fresh(vineyard), order: ['bedchamber', null, null] }
+    expect(filled(vineyard, partial)).toBe(0)
+    expect(wrong(vineyard, partial)).toBe(3 + 1 + 9)
     p = { ...p, order: ['gate', 'bedchamber', 'vineyard'] }
     expect(wrong(vineyard, p)).toBe(2 + 1 + 9)
   })
