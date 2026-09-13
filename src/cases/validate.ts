@@ -5,7 +5,7 @@
  * runs it over every registered case (`cases.test.ts`); the checks are A6's list, (a) to (i),
  * and the reference is `docs/case-file.md`.
  */
-import type { CaseStructure, CaseText, Passage } from './types.ts'
+import type { CaseStructure, CaseText, Part, Passage } from './types.ts'
 
 /** An id (docs/case-file.md, Ids). */
 const slug = /^[a-z][a-z0-9-]*$/
@@ -167,10 +167,21 @@ export function validate(structure: CaseStructure, text: CaseText<CaseStructure>
       fail(`step ${q(s.id)} waits on ${q(filled)}, not a face or a blank`)
   })
 
-  // (i) No text is empty: whitespace alone is empty — but for a part's run of text, which may be
-  // the space between two blanks.
-  for (const [path, s] of strings(text, 'text'))
-    if ((/\.parts\.\d+\.t$/.test(path) ? s : s.trim()) === '') fail(`${path} is empty`)
+  // (i) No text is empty: whitespace alone is empty — but for a run of text between two blanks,
+  // which may be the space between them (review round 1, #17).
+  const { blocks: prose, ...rest } = text
+  for (const [path, s] of strings(rest, 'text')) if (s.trim() === '') fail(`${path} is empty`)
+  for (const [id, b] of Object.entries(prose)) {
+    if (b.heading.trim() === '') fail(`text.blocks.${id}.heading is empty`)
+    b.parts.forEach((p, i) => {
+      const between = isBlank(b.parts[i - 1]) && isBlank(b.parts[i + 1])
+      if (p.t !== undefined && (between ? p.t : p.t.trim()) === '')
+        fail(`text.blocks.${id}.parts.${i}.t is empty`)
+    })
+  }
 
   return problems
 }
+
+/** Whether a part is one of the block's blanks — off either end of the parts, nothing is. */
+const isBlank = (part: Part<string> | undefined) => part?.b !== undefined

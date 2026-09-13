@@ -213,9 +213,11 @@ describe('validate (Gate 02 A6)', () => {
     ])
   })
 
-  it('(i) an empty caption, paper body, reveal paragraph, or run of text', () => {
+  it('(i) an empty caption, paper body, reveal paragraph, heading, or run of text', () => {
     const boy: Text = { ...en, captions: { ...en.captions, boy: ' ' } }
     expect(validate(valley, boy)).toEqual(['text.captions.boy is empty'])
+    const heading: Text = { ...en, blocks: { account: { ...account, heading: ' ' } } }
+    expect(validate(valley, heading)).toEqual(['text.blocks.account.heading is empty'])
     const seal = { ...vineyardEn.papers.seal, body: '' }
     const papers: Text = { ...vineyardEn, papers: { ...vineyardEn.papers, seal } }
     expect(validate(vineyard, papers)).toEqual(['text.papers.seal.body is empty'])
@@ -227,8 +229,25 @@ describe('validate (Gate 02 A6)', () => {
     ])
   })
 
-  it('(i) a run of text that is one space between two blanks is not empty', () => {
-    const [first, ...rest] = account.parts
-    expect(validate(valley, withParts([first, { t: ' ' }, ...rest]))).toEqual([])
+  it('(i) a run of whitespace alone is empty unless it lies between two blanks', () => {
+    // The run between the first two blanks made a space: the space between them, allowed.
+    const between = account.parts.map((p, i) => (i === 2 ? { t: ' ' } : p))
+    expect(validate(valley, withParts(between))).toEqual([])
+    // Leading, trailing, and the only run of a block without blanks (review round 1, #17).
+    expect(validate(valley, withParts([{ t: ' ' }, ...account.parts]))).toEqual([
+      'text.blocks.account.parts.0.t is empty',
+    ])
+    expect(validate(valley, withParts([...account.parts, { t: '\n' }]))).toEqual([
+      'text.blocks.account.parts.11.t is empty',
+    ])
+    const note: CaseStructure = {
+      ...valley,
+      blocks: [...valley.blocks, { id: 'note', blanks: {} }],
+    }
+    const noteText: Text = {
+      ...en,
+      blocks: { ...en.blocks, note: { heading: 'A note', parts: [{ t: '  ' }] } },
+    }
+    expect(validate(note, noteText)).toEqual(['text.blocks.note.parts.0.t is empty'])
   })
 })

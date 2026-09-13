@@ -140,10 +140,10 @@ Three layers, from mechanical to read.
    each blank's answer is a word, and each blank appears exactly once in its block's text; an
    order, when present, is the moments in some order; every step but the last has an `until` and
    the last has none, and an `until` names a spot, or a face or a blank; no text is empty —
-   whitespace alone is empty, but for a run of text in a block, which may be the space between
-   two blanks. `src/cases/validate.test.ts` holds one broken fixture per check, each failing the
-   check it names and no other; the registry test, `src/cases/cases.test.ts`, holds the pictures,
-   the registry's ids, and the guided case first.
+   whitespace alone is empty, but for a run of text between two blanks, which may be the space
+   between them. `src/cases/validate.test.ts` holds one broken fixture per check, each failing
+   the check it names and no other; the registry test, `src/cases/cases.test.ts`, holds the
+   pictures, the registry's ids, and the guided case first.
 3. **Review**, by reading: every spot named or implied by the passage, with the cites as the
    handle; the game's own voice, never the translation's words; the picture checklist
    (`docs/world-rules.md` §7). These are the authoring gate's (#5).
