@@ -120,6 +120,21 @@ describe('the case screen explored (#6, 03b)', () => {
     expect(screen.queryByText(/Nothing here yet/)).not.toBeInTheDocument()
   })
 
+  // A second tap on the seal opens the paper again but copies nothing, and the console says so by
+  // saying nothing (review round 3, #20).
+  it('a repeat tap on a paper reopens it and reports no copy', () => {
+    render(<App />)
+    openCase(/The vineyard/)
+    fireEvent.click(screen.getByRole('button', { name: 'Bedchamber' }))
+    tapSpot('seal')
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+    tapSpot('seal')
+    expect(screen.getByRole('dialog', { name: 'The seal' })).toBeInTheDocument()
+    expect(screen.queryByText(/copied to Papers/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Found:/)).not.toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: /Papers/ })).toHaveTextContent('1')
+  })
+
   it('Papers says so while nothing has been opened', () => {
     render(<App />)
     openCase(/The valley/)

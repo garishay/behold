@@ -41,7 +41,9 @@ export function Player({ entry, progress, onProgress, onCases, onRestart }: Play
   const onTap = (spotId: string) => {
     const { progress: next, added } = tap(s, progress, spotId)
     const spot = s.moments.flatMap((m) => m.spots).find((x) => x.id === spotId)
-    setCaption({ spot: spotId, added })
+    // The note says "copied to Papers" only when this tap added the paper (review round 3, #20).
+    const opened = next.papers.length > progress.papers.length ? spot?.paper : undefined
+    setCaption({ spot: spotId, added, paper: opened })
     if (spot?.paper !== undefined) setPaper(spot.paper)
     onProgress(next)
   }

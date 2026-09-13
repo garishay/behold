@@ -10,14 +10,22 @@ export type Saved = Readonly<Record<string, Progress>>
 
 const record = (x: unknown): x is Record<string, unknown> =>
   typeof x === 'object' && x !== null && !Array.isArray(x)
+const ids = (x: unknown): x is string[] => Array.isArray(x) && x.every((s) => typeof s === 'string')
+const byId = (x: unknown): x is Record<string, string> =>
+  record(x) && Object.values(x).every((s) => typeof s === 'string')
 
-/** Whether a stored value has progress's shape; a stale or foreign entry is dropped, not trusted. */
+/**
+ * Whether a stored value has progress's shape, down to each list's and record's members; a stale
+ * or foreign entry is dropped, not trusted (review rounds 1 and 3, #20).
+ */
 const progress = (v: unknown): v is Progress =>
   record(v) &&
   typeof v.moment === 'string' &&
-  [v.tapped, v.bank, v.papers, v.order].every(Array.isArray) &&
-  record(v.faces) &&
-  record(v.fills) &&
+  [v.tapped, v.bank, v.papers].every(ids) &&
+  Array.isArray(v.order) &&
+  v.order.every((m) => m === null || typeof m === 'string') &&
+  byId(v.faces) &&
+  byId(v.fills) &&
   typeof v.step === 'number' &&
   typeof v.solved === 'boolean'
 

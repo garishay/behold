@@ -37,4 +37,20 @@ describe('progress on the device (#6, A6)', () => {
     localStorage.setItem(key, JSON.stringify({ valley: null, vineyard: 'done' }))
     expect(load()).toEqual({})
   })
+
+  // The shape reaches into each list and record: an entry whose members are not ids is not
+  // progress either, and would crash the screen that reads the case text by them (round 3, #20).
+  it('drops an entry whose lists or records hold anything but ids', () => {
+    const whole = fresh(vineyard)
+    for (const broken of [
+      { ...whole, papers: [null] },
+      { ...whole, bank: ['ahab', 7] },
+      { ...whole, order: [1, null, null] },
+      { ...whole, faces: { p1: 1 } },
+      { ...whole, fills: { s1: ['garden'] } },
+    ]) {
+      localStorage.setItem(key, JSON.stringify({ vineyard: broken }))
+      expect(load(), JSON.stringify(broken)).toEqual({})
+    }
+  })
 })

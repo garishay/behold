@@ -3,10 +3,11 @@ import type { CaseStructure, CaseText, Kind } from '../cases/types.ts'
 import { strings } from '../strings/en.ts'
 import { kindOf, type Progress, type Selection } from './state.ts'
 
-/** What the last tap said: the spot, and the words it added to the bank. */
+/** What the last tap said: the spot, the words it added to the bank, and the paper it opened for the first time. */
 export interface Caption {
   readonly spot: string
   readonly added: readonly string[]
+  readonly paper?: string
 }
 
 interface BankProps {
@@ -76,7 +77,6 @@ interface ConsoleProps {
 function Console({ structure, text, progress, caption }: ConsoleProps) {
   const moment = structure.moments.find((m) => m.id === progress.moment) ?? structure.moments[0]
   const found = moment.spots.filter((s) => progress.tapped.includes(s.id)).length
-  const spot = caption && moment.spots.find((s) => s.id === caption.spot)
   const notes: ReactNode[] = []
   if (caption && caption.added.length > 0)
     notes.push(
@@ -90,7 +90,7 @@ function Console({ structure, text, progress, caption }: ConsoleProps) {
         ))}
       </>,
     )
-  if (spot?.paper !== undefined) notes.push(strings.copiedToPapers)
+  if (caption?.paper !== undefined) notes.push(strings.copiedToPapers)
   return (
     <div className="console">
       <div className="where">
