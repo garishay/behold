@@ -45,17 +45,25 @@ Every push to `main` deploys to GitHub Pages.
   else with one — GitHub reads "does not close #1" as `close #1`. A PR that leaves its gate open
   says "leaves #1 open."
 - Size: ~400 implementation lines is a gate-time estimate check, not a rule at open. The gate
-  estimate lists App wiring and CSS as their own rows, states the actual-to-estimate ratio of the
-  last three merged feature PRs — pooled: the three actuals summed over the three estimates, never
-  a mean of three ratios; 1.0 with no history, 257 / 150 ≈ 1.7 from #11 alone at Gate 01 — and
-  scales its total by it; the ~400 check runs on the scaled number.
-  The budget counts implementation only. Tests, comments, and fixtures sit outside it — a size
-  target that discourages any of the three is buying small diffs with the things that make the
-  diff trustworthy — but they are reported, not ignored. Implementation is counted one way at the
-  gate and at open: insertions in non-test source, comments and blanks excluded, new files
-  included. At open the PR reports raw / implementation / tests, the deltas by file, and a reading
-  order. Growth past the scaled cap mid-build is a budget change: stop and re-gate. Once built and
-  verified, reviewability decides; no post-hoc split.
+  estimate lists App wiring and CSS as their own rows and, for a guess, states the
+  actual-to-estimate ratio of the last three merged PRs gated on a guess — pooled: the three
+  actuals summed over the three estimates, never a mean of three ratios; 1.0 with no history,
+  257 / 150 ≈ 1.7 from #11 alone at Gate 01 — and scales its total by it; the ~400 check runs on
+  the scaled number. A measured draft is a measurement, not an estimate. The ~400 check at the
+  gate runs on the measurement × 1.25 — the allowance for review growth — where a guess takes the
+  pooled ratio; at closure, an implementation count past measurement × 1.25 is disclosed in the
+  record, not a stop, under precedent [6]. Measured PRs stay out of the pool, which is the last
+  three merged PRs gated on a guess — so the pool stays 2.7 until a guessed gate lands.
+  The budget counts implementation only. A script the gate names counts as implementation in the
+  estimate; "docs, which don't count" covers prose only. Tests, comments, and fixtures sit outside
+  the budget — a size target that discourages any of the three is buying small diffs with the
+  things that make the diff trustworthy — but they are reported, not ignored. Implementation is
+  counted one way at the gate and at open: insertions in non-test source, comments and blanks
+  excluded, new files included; case files count in their own row, outside implementation,
+  reviewed as content against the passage and the world rules. At open the PR reports raw /
+  implementation / tests, the deltas by file, and a reading order. Growth past the scaled cap
+  mid-build is a budget change for a guess: stop and re-gate. Once built and verified,
+  reviewability decides; no post-hoc split.
 - One test per behavior change. A test paired with a fix is shown failing on the pre-fix code,
   and the PR or the thread reply says so; a test that cannot tell the fix from the code before it
   is disclosed as pinning the shape instead. No dead code, no `console` noise.
@@ -86,6 +94,23 @@ reaction with no comment when it found nothing, and a "Codex Review" comment wit
 when it has findings. Eyes means it is still reading; no reaction means it did not run, and the
 review mention on the PR starts it. The thread rule and closure below do not change with the
 reviewer.
+
+The review loop. Codex reviews on open. The lane triages every finding under the thread rule: a
+factual error is fixed with a test shown failing pre-fix; a judgment call is queued on #12 with
+options and a recommendation; a won't-fix gets the lane's reply and stays open for the owner. A
+finding is a factual error only against the cases the gate names; a finding that extends a check,
+guard, or rule to a case the gate does not name is a judgment call, queued on #12, the owner
+deciding whether the case is worth covering. After each round's push and a green CI, the lane
+requests the re-review itself — the exact review mention, as a PR comment through gh under the
+owner's account, and never any other mention form, which would make the reviewer an engineer —
+waits for the 👀 and the review, and goes again. It stops when the receipt is clean, when only
+queued or won't-fix items remain, after three lane-requested rounds, or when no reaction comes
+within fifteen minutes (a rate limit: report it, don't retry). The budget stays three. A round
+whose findings hold no P0 or P1 ends the loop after its fixes and queue entries, with no further
+request; the record calls that converged. The record says converged or budget exhausted; on the
+latter, the last round's fixes stand on their tests, or the owner grants one more request at
+closure. Then it posts the counts and stops. The owner rules the queue, declares closure, and
+merges.
 
 ## The plan gate
 
@@ -147,7 +172,8 @@ PR, never per-round; a factual error follows the factual-error rule.
 ## Lanes
 
 One session and one git worktree per lane; one open PR per lane. A session's first act is to check
-out `main` and pull: the hook and the rulebook are the checkout's. Surfaces are disjoint by default
+out `main` and pull: the hook and the rulebook are the checkout's. Every push names its refspec;
+command mentions in prose only in `-m`, `--body`, or a body file. Surfaces are disjoint by default
 — features to Lane A, scripts and docs to Lane B — but routing beats default: the lane holding an
 Issue owns every file its fix touches for the life of that PR, unless the other lane has an open
 PR touching that file, in which case the file is claimed on the queue. New files belong to the PR
