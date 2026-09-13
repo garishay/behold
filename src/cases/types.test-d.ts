@@ -29,6 +29,22 @@ export const blank = {
   blocks: { account: { heading: 'The account', parts: [{ b: 't9' }] } },
 } satisfies CaseText<typeof valley>
 
+// A paper for a case whose spots open none (review round 1, #16): with no paper ids the section
+// once collapsed to `{}`, which takes any key; an empty keyed section must refuse every key.
+export const paper = {
+  ...en,
+  // @ts-expect-error: a case with no paper spots has no paper text
+  papers: { surprise: { title: 'The note', body: 'Nothing opens this.' } },
+} satisfies CaseText<typeof valley>
+
+// The same collapse for a case with no faces.
+export const faceless = { ...valley, faces: [] } as const satisfies CaseStructure
+export const face = {
+  ...en,
+  // @ts-expect-error: a case with no faces has no face text
+  faces: { d1: 'the boy' },
+} satisfies CaseText<typeof faceless>
+
 // Step text for a case whose structure has no steps.
 export const steps = {
   ...vineyardEn,

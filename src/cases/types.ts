@@ -84,6 +84,26 @@ export interface CaseStructure {
 type SpotOf<S extends CaseStructure> = S['moments'][number]['spots'][number]
 type Labels<P extends readonly unknown[]> = { readonly [K in keyof P]: string }
 
+/**
+ * The paper ids: those the spots declare — a spot literal without `paper` has no such key to
+ * index, so they are read off the spots that carry one — or every string for the base structure.
+ */
+type PaperIds<S extends CaseStructure> = string extends SpotOf<S>['id']
+  ? string
+  : SpotOf<S> extends infer P
+    ? P extends { readonly paper: infer Id extends string }
+      ? Id
+      : never
+    : never
+
+/**
+ * A section keyed by the structure's ids — and, with no ids, one that refuses every key, where
+ * `Record<never, V>` is `{}` and takes any (review round 1, #16).
+ */
+type Keyed<K extends string, V> = [K] extends [never]
+  ? { readonly [key: string]: never }
+  : Readonly<Record<K, V>>
+
 /** A run of text, or one of the block's blanks, in this language's own order. */
 export type Part<B extends string> = { readonly t: string } | { readonly b: B }
 
@@ -93,19 +113,19 @@ export type CaseText<S extends CaseStructure> = {
   readonly subtitle: string
   readonly brief: string
   readonly passages: Labels<S['passages']>
-  readonly moments: Readonly<Record<S['moments'][number]['id'], string>>
-  readonly captions: Readonly<Record<SpotOf<S>['id'], string>>
-  readonly words: Readonly<Record<keyof S['words'], string>>
-  readonly faces: Readonly<Record<S['faces'][number]['id'], string>>
-  readonly papers: Readonly<
-    Record<NonNullable<SpotOf<S>['paper']>, { readonly title: string; readonly body: string }>
-  >
-  readonly blocks: {
-    readonly [B in S['blocks'][number] as B['id']]: {
-      readonly heading: string
-      readonly parts: readonly Part<keyof B['blanks'] & string>[]
-    }
-  }
+  readonly moments: Keyed<S['moments'][number]['id'], string>
+  readonly captions: Keyed<SpotOf<S>['id'], string>
+  readonly words: Keyed<keyof S['words'] & string, string>
+  readonly faces: Keyed<S['faces'][number]['id'], string>
+  readonly papers: Keyed<PaperIds<S>, { readonly title: string; readonly body: string }>
+  readonly blocks: [S['blocks'][number]] extends [never]
+    ? { readonly [block: string]: never }
+    : {
+        readonly [B in S['blocks'][number] as B['id']]: {
+          readonly heading: string
+          readonly parts: readonly Part<keyof B['blanks'] & string>[]
+        }
+      }
   readonly reveal: readonly string[]
 } & (S extends { readonly steps: infer T extends readonly Step[] }
   ? { readonly steps: Readonly<Record<T[number]['id'], string>> }
