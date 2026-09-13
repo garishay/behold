@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { valley } from '../cases/valley/case.ts'
 import { vineyard } from '../cases/vineyard/case.ts'
 import { fresh } from './state.ts'
@@ -13,6 +13,22 @@ describe('progress on the device (#6, A6)', () => {
     const all = { valley: fresh(valley), vineyard: { ...fresh(vineyard), bank: ['ahab'] } }
     save(all)
     expect(load()).toEqual(all)
+  })
+
+  // Private mode, or a full store: the write is refused, the session goes on, and what was
+  // stored stays (review round 4, #20).
+  it('a refused write keeps the session going and the store as it was', () => {
+    const all = { valley: fresh(valley) }
+    save(all)
+    const refuse = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('The quota has been exceeded.', 'QuotaExceededError')
+    })
+    try {
+      expect(() => save({ ...all, vineyard: fresh(vineyard) })).not.toThrow()
+      expect(load()).toEqual(all)
+    } finally {
+      refuse.mockRestore()
+    }
   })
 
   it('starts empty with nothing stored, or with a store that is not JSON', () => {
