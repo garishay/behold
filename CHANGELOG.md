@@ -3,6 +3,14 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.2.0 — Gate 02, Case file format (#4)
+
+- **02a — the case file format and the first two cases** (#16): `src/cases/types.ts` — a case as
+  two TypeScript files, the structure and one text file per language, the text's type computed
+  from the structure so the typecheck holds its keys; `src/cases/index.ts`, the registry; the
+  tutorial and case two from the prototype, text verbatim, with their pictures under
+  `public/cases/`; `docs/case-file.md`, the format's reference.
+
 ## v0.1.0 — Gate 01, Foundation (#1)
 
 - **01a — the scaffold, the quality gates, CI** (#11): Vite + React + TypeScript strict with Node

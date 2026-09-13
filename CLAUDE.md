@@ -13,10 +13,11 @@ owner's operating model lives in the user-level CLAUDE.md; this file holds what 
   exception is the title screen's epigraph and its notice (Gate 01 A6), which ship in the bundle
   as app copy; the exception is about shipping the verse, not where it sits.
 - **Nothing the player reads lives in code.** Two kinds of player text, both data: case content —
-  every caption, document, sentence, word-bank word, and hint — in case files keyed by id, one
-  file per language, the case-file gate's job (#4); and app copy — the interface's own words, the
-  title screen's and the toast's included — in one keyed strings module, `src/strings/en.ts`, a
-  sibling per language later. A component renders by key and carries no sentence of its own.
+  every caption, document, sentence, word-bank word, and hint — in `src/cases/<id>/`, keyed by
+  id, one text file per language, the format in `docs/case-file.md`; and app copy — the
+  interface's own words, the title screen's and the toast's included — in one keyed strings
+  module, `src/strings/en.ts`, a sibling per language later. A component renders by key and
+  carries no sentence of its own.
 - **The ESV token exists only in the password manager and the Worker's secret store** — never in
   the repo, a chat, or the app.
 
