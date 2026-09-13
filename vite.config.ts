@@ -16,6 +16,21 @@ export default defineConfig({
     VitePWA({
       registerType: 'prompt',
       includeAssets: ['icons/*.png'],
+      // The case pictures are fetched when a case opens and kept from then on (Gate 02 A5), so a
+      // played case stays offline; they are not precached, so the install stays the shell. The
+      // worker claims the page as soon as it first activates, so a case opened on the first visit
+      // is cached through the rule too (review round 2, #20); a new version still waits for the
+      // tap, since skipWaiting stays off.
+      workbox: {
+        clientsClaim: true,
+        runtimeCaching: [
+          {
+            urlPattern: /\/cases\/[^/]+\/[^/]+\.jpg$/,
+            handler: 'CacheFirst',
+            options: { cacheName: 'cases', expiration: { maxEntries: 200 } },
+          },
+        ],
+      },
       manifest: {
         name: 'Behold: Bible Mystery Game',
         short_name: 'Behold',

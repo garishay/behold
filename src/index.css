@@ -10,6 +10,11 @@
   --papyrus-ink: #2b2418;
   --papyrus-ink-dim: #6e5a3c;
   --gold: #c9a94e;
+  --wine: #7a2e3b;
+  --t-name: #e2c56a;
+  --t-noun: #bfc7d9;
+  --t-action: #e08a96;
+  --t-number: #7fc7c2;
   --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
   --sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --inset: 20px;
@@ -43,7 +48,8 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
-/* The placeholder screen: one portrait column, the masthead and the notice pushed to the ends. */
+/* The title screen: one portrait column, the masthead and the notice pushed to the ends, the
+   cases between the line and the status. */
 .screen {
   display: flex;
   flex-direction: column;
@@ -61,7 +67,7 @@ button:focus-visible {
   text-align: center;
 }
 
-h1 {
+.screen h1 {
   margin: 0;
   font-family: var(--serif);
   font-weight: 400;
@@ -140,4 +146,391 @@ h1 {
 .toast button {
   min-height: 44px;
   color: var(--gold);
+}
+
+/* The case cards (#6). */
+.case-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.case-card {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  background: var(--slate);
+  border-radius: 12px;
+  padding: 12px;
+  align-items: center;
+}
+
+.case-card img {
+  width: 84px;
+  height: 105px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.case-card .ct {
+  font-family: var(--serif);
+  font-size: 19px;
+  margin: 0 0 4px;
+}
+
+.case-card .cs {
+  font-size: 13px;
+  color: var(--mist-dim);
+  line-height: 1.4;
+}
+
+.case-card .done {
+  color: var(--gold);
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+/* The case screen (#6): the header with the brief and the tabs, the view, the bank at the foot. */
+.app {
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--night);
+}
+
+.top {
+  padding: max(14px, env(safe-area-inset-top)) var(--inset) 0;
+}
+
+.title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.app h1 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-style: italic;
+  font-size: 20px;
+  line-height: 1.25;
+  margin: 0 0 10px;
+}
+
+.hdr-btns {
+  display: flex;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.hdr-btn {
+  font-size: 13px;
+  color: var(--mist-dim);
+  padding: 6px 0;
+  white-space: nowrap;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--slate);
+}
+
+.tab {
+  flex: 1;
+  padding: 10px 0 12px;
+  font-size: 15px;
+  color: var(--mist-dim);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  border-radius: 6px 6px 0 0;
+}
+
+.tab.is-on {
+  color: var(--mist);
+  border-bottom-color: var(--gold);
+}
+
+.tab .n {
+  display: inline-block;
+  min-width: 18px;
+  margin-left: 4px;
+  font-size: 12px;
+  color: var(--gold);
+}
+
+.steps {
+  background: var(--wine);
+  color: var(--mist);
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin: 12px var(--inset) 0;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.app main {
+  flex: 1;
+  overflow: auto;
+  padding: 12px var(--inset) 16px;
+}
+
+.hint {
+  font-size: 13px;
+  color: var(--mist-dim);
+  margin: 0 0 10px;
+  line-height: 1.4;
+}
+
+/* Moments: the picker, the stage, the zoom. */
+.moment-picker {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.moment-btn {
+  flex: 1;
+  padding: 10px 6px;
+  border-radius: 8px;
+  background: var(--slate);
+  font-size: 14px;
+  color: var(--mist-dim);
+  min-height: 44px;
+}
+
+.moment-btn.is-on {
+  color: var(--mist);
+  box-shadow: inset 0 0 0 1.5px var(--gold);
+}
+
+.stage-wrap {
+  position: relative;
+}
+
+.stage {
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--slate-deep);
+}
+
+.stage svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.stage rect {
+  fill: rgba(0, 0, 0, 0.001);
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.stage.zoomed {
+  overflow: auto;
+  max-height: 68vh;
+}
+
+.stage.zoomed svg {
+  width: 200%;
+}
+
+.pill {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  min-height: 30px;
+  background: rgba(27, 32, 51, 0.82);
+  color: var(--mist);
+  font-size: 12px;
+  padding: 7px 10px;
+  border-radius: 16px;
+  line-height: 1;
+}
+
+.pill.is-on {
+  background: var(--gold);
+  color: var(--slate-deep);
+}
+
+/* The bank and its console. The bottom padding keeps the chips clear of the system's gesture
+   zone: the safe-area inset and a margin above it (Gate 03 [6]). */
+.bank {
+  position: sticky;
+  bottom: 0;
+  background: var(--slate-deep);
+  border-top: 1px solid var(--slate);
+  padding: 10px max(var(--inset), env(safe-area-inset-right))
+    calc(24px + env(safe-area-inset-bottom)) max(var(--inset), env(safe-area-inset-left));
+}
+
+.console {
+  font-family: var(--serif);
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--mist);
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--slate);
+  min-height: 3.6em;
+}
+
+.console .where {
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--mist-dim);
+  margin-bottom: 3px;
+}
+
+.console .found {
+  display: block;
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--gold);
+  margin-top: 4px;
+}
+
+.console .found b {
+  font-weight: 600;
+}
+
+.bank-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--mist-dim);
+  margin-bottom: 8px;
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.dot.name {
+  background: var(--t-name);
+}
+
+.dot.noun {
+  background: var(--t-noun);
+}
+
+.dot.action {
+  background: var(--t-action);
+}
+
+.dot.number {
+  background: var(--t-number);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-height: 26vh;
+  overflow: auto;
+}
+
+.chip {
+  min-height: 40px;
+  padding: 8px 14px 8px 12px;
+  border-radius: 20px;
+  background: var(--slate);
+  color: var(--mist);
+  font-size: 15px;
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1.5px solid transparent;
+}
+
+.chip.is-on {
+  background: var(--wine);
+  border-color: var(--wine);
+}
+
+.chip.is-new {
+  border-color: var(--gold);
+}
+
+.chip.is-dim {
+  opacity: 0.3;
+}
+
+.empty {
+  color: var(--mist-dim);
+  font-size: 14px;
+}
+
+/* Papers, and a paper opened over the screen. */
+.paper {
+  background: var(--papyrus);
+  color: var(--papyrus-ink);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  font-family: var(--serif);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.paper h3 {
+  margin: 0 0 6px;
+  font-weight: 400;
+  font-size: 14px;
+  font-family: var(--sans);
+  color: var(--papyrus-ink-dim);
+}
+
+.paper p {
+  margin: 0;
+  white-space: pre-line;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 12, 20, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 20;
+}
+
+.modal .paper {
+  max-width: 380px;
+  width: 100%;
+  margin: 0;
+  padding: 18px 18px 14px;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.modal .close {
+  display: block;
+  margin: 14px auto 0;
+  background: var(--wine);
+  color: var(--mist);
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-family: var(--sans);
+  font-size: 15px;
 }
