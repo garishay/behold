@@ -4,6 +4,7 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { cases } from './index.ts'
+import { validate } from './validate.ts'
 
 /** A JPEG's pixel size — width, height — read from its start-of-frame marker. */
 function jpegSize(file: Buffer): [number, number] {
@@ -42,5 +43,12 @@ describe('the case registry (Gate 02 A1, A5)', () => {
       expect(width, f.id).toBeGreaterThan(0)
       expect(height, f.id).toBeGreaterThan(0)
     }
+  })
+
+  // Layer 2 (Gate 02 A6): the validator's list is empty for every registered case, in each of
+  // its languages.
+  it.each(cases.map((c) => [c.structure.id, c] as const))('%s: validates', (_, c) => {
+    for (const [language, text] of Object.entries(c.text))
+      expect(validate(c.structure, text), language).toEqual([])
   })
 })
