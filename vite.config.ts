@@ -16,6 +16,17 @@ export default defineConfig({
     VitePWA({
       registerType: 'prompt',
       includeAssets: ['icons/*.png'],
+      // The case pictures are fetched when a case opens and kept from then on (Gate 02 A5), so a
+      // played case stays offline; they are not precached, so the install stays the shell.
+      workbox: {
+        runtimeCaching: [
+          {
+            urlPattern: /\/cases\/[^/]+\/[^/]+\.jpg$/,
+            handler: 'CacheFirst',
+            options: { cacheName: 'cases', expiration: { maxEntries: 200 } },
+          },
+        ],
+      },
       manifest: {
         name: 'Behold: Bible Mystery Game',
         short_name: 'Behold',

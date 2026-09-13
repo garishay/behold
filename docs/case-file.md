@@ -28,10 +28,10 @@ public/cases/
   vineyard/           vineyard.jpg, bedchamber.jpg, gate.jpg, p1.jpg, p2.jpg, p3.jpg
 ```
 
-The structure and the text are modules the player (#6) imports through the registry, so they ship
-in the bundle and the case list and every case's words are offline from the first visit. The
+The structure and the text are modules the player imports through the registry, so they ship in
+the bundle and the case list and every case's words are offline from the first visit. The
 pictures are plain files at stable paths, fetched when a case opens and cached by the service
-worker from then on (the player's rule, #6).
+worker from then on — the runtime rule in `vite.config.ts` (#6).
 
 ## The structure — `case.ts`
 

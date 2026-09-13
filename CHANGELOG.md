@@ -10,6 +10,13 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   closing itself, a case without steps closing on the submit; `src/passages/service.ts`, the
   Worker's contract — a reference and a translation in, verses out — and `stub.ts`, the one line
   the reveal shows until #3; the validator's face/blank and word-once sentences.
+- **03b — the case explored** (#20): the case cards on the title screen; `src/player/Player.tsx`,
+  the case screen — the brief, Moments and Papers, the tutorial's banner — with `Stage.tsx`, the
+  picture and its spots, `Bank.tsx`, the console and the word chips, and `Papers.tsx`, the
+  documents opened and one over the screen; progress kept on the device, `storage.ts`, and the
+  open case a history entry so the system's back returns to the cards (Gate 03 [1]); the runtime
+  cache rule for the case pictures; the stylesheet for all of it, the bank's chips clear of the
+  gesture zone ([6]).
 
 ## v0.2.1 — Governance revision 1 (#13)
 

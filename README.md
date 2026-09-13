@@ -17,8 +17,10 @@ Ahab, is being written.
 Gate 01 — Foundation: the scaffold, the quality gates and CI, the PWA shell, the Pages deploy, and
 the rulebook. Gate 02 — Case file format: the shape a case is authored in and the app loads,
 [`docs/case-file.md`](docs/case-file.md), with the tutorial and case two as the first case files
-under `src/cases/`; no player yet — that is the player port (#6). The world rules — the accuracy
-and art constraints every picture and every case is checked against — are
+under `src/cases/`. Gate 03 — Player port (#6), in progress: the case explored — the cards on the
+title screen, each case's pictures and their spots, the word bank, the papers, progress kept on
+the device; the case solved and the reveal land with the gate's last PR. The world rules — the
+accuracy and art constraints every picture and every case is checked against — are
 [`docs/world-rules.md`](docs/world-rules.md).
 
 ## Stack
