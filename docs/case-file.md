@@ -128,17 +128,22 @@ Three layers, from mechanical to read.
    keys against the structure's ids: a missing caption, an extra word, a part naming a blank its
    block lacks, step text for a case without steps, a kind the format lacks — each fails the
    typecheck. `src/cases/types.test-d.ts` holds those five shapes under `@ts-expect-error`.
-2. **The validator**, `src/cases/validate.ts` (02b), run by `npm run test` over every registered
-   case; one sentence per problem, an empty list a valid case. What it holds: ids are slugs and
-   unique within their kind; `thumb` is a moment, and each passage is a book code, a chapter, and
-   a verse range or none; a moment's picture is a file name, it has one to eight spots, and each
-   spot's box lies inside the picture, its words are words, its person a face, its paper a slug,
-   its cite within a passage with the book prefix as the passages require; every word is yielded
-   by some spot; a face's picture is a file name and its answer a name word; there is at least one
-   block, each blank's answer is a word, and each blank appears exactly once in its block's text;
-   an order, when present, is the moments in some order; every step but the last has an `until`
-   and the last has none, and an `until` names a spot, or a face or a blank; no text is empty.
-   Until 02b lands, the registry test holds the pictures and the ids of the registry.
+2. **The validator**, `src/cases/validate.ts`: `validate(structure, text)`, run by `npm run test`
+   over every registered case in each of its languages; one sentence per problem, an empty list a
+   valid case, and a problem names the thing by its id —
+   `spot "basket" cites "17:17-18", outside the passages`. What it holds: ids are slugs and unique
+   within their kind; `thumb` is a moment, and each passage is a book code, a chapter, and a verse
+   range or none; a moment's picture is a file name, it has one to eight spots, and each spot's
+   box lies inside the picture, its words are words, its person a face, its paper a slug, its cite
+   within a passage with the book prefix as the passages require; every word is yielded by some
+   spot; a face's picture is a file name and its answer a name word; there is at least one block,
+   each blank's answer is a word, and each blank appears exactly once in its block's text; an
+   order, when present, is the moments in some order; every step but the last has an `until` and
+   the last has none, and an `until` names a spot, or a face or a blank; no text is empty —
+   whitespace alone is empty, but for a run of text in a block, which may be the space between
+   two blanks. `src/cases/validate.test.ts` holds one broken fixture per check, each failing the
+   check it names and no other; the registry test, `src/cases/cases.test.ts`, holds the pictures,
+   the registry's ids, and the guided case first.
 3. **Review**, by reading: every spot named or implied by the passage, with the cites as the
    handle; the game's own voice, never the translation's words; the picture checklist
    (`docs/world-rules.md` §7). These are the authoring gate's (#5).
@@ -150,5 +155,5 @@ CaseStructure`, and `en.ts` exporting the text `satisfies CaseText<typeof <id>>`
 2. Put the pictures in `public/cases/<id>/`, and write each file's pixel size as its `size`.
 3. Add the case to `src/cases/index.ts`, in play order.
 4. `npm run typecheck` and `npm run test` — the typecheck reads the keys, the tests read the
-   pictures and, from 02b, the validator's list.
+   pictures and the validator's list.
 5. Review the case against its passage and the world rules before it ships.
