@@ -24,7 +24,7 @@ const entry = (state: unknown): Entry | null =>
  * so back returns to the cards, and leaves the app only from them.
  */
 export default function App() {
-  const [saved, setSaved] = useState<Saved>(load)
+  const [saved, setSaved] = useState<Saved>(() => load(cases))
   const [open, setOpen] = useState<string | null>(() => entry(history.state)?.case ?? null)
   const [restarts, setRestarts] = useState(0)
   useEffect(() => save(saved), [saved])

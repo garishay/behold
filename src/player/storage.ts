@@ -1,3 +1,5 @@
+import type { CaseEntry } from '../cases/index.ts'
+import type { CaseStructure } from '../cases/types.ts'
 import type { Progress } from './state.ts'
 
 /**
@@ -29,15 +31,46 @@ const progress = (v: unknown): v is Progress =>
   typeof v.step === 'number' &&
   typeof v.solved === 'boolean'
 
-/** The store's progress by case; a store that is not one, or an entry that is not progress, reads as none. */
-export function load(): Saved {
+/**
+ * Whether every id an entry holds is the case's — the moment, the spots tapped, the bank, the
+ * papers, the faces' and fills' keys and words, the order's moments — with the order the case's
+ * length and the step one of its steps. The store never trusts an id the case lacks: a case that
+ * no longer fits starts fresh (#12 [Q4]).
+ */
+const fits = (s: CaseStructure, p: Progress) => {
+  const spots = s.moments.flatMap((m) => m.spots)
+  const has = (list: readonly { readonly id: string }[]) => (id: string) =>
+    list.some((x) => x.id === id)
+  const word = (id: string) => Object.hasOwn(s.words, id)
+  const blanks = s.blocks.flatMap((b) => Object.keys(b.blanks))
+  return (
+    has(s.moments)(p.moment) &&
+    p.tapped.every(has(spots)) &&
+    p.bank.every(word) &&
+    p.papers.every((id) => spots.some((x) => x.paper === id)) &&
+    Object.entries(p.faces).every(([f, w]) => has(s.faces)(f) && word(w)) &&
+    Object.entries(p.fills).every(([b, w]) => blanks.includes(b) && word(w)) &&
+    p.order.length === (s.order?.length ?? 0) &&
+    p.order.every((m) => m === null || has(s.moments)(m)) &&
+    p.step >= 0 &&
+    p.step <= Math.max(0, (s.steps?.length ?? 1) - 1)
+  )
+}
+
+/**
+ * The store's progress by case, for the cases registered: a store that is not one, an entry
+ * that is not progress, or an entry whose ids its case no longer has, reads as none.
+ */
+export function load(registry: readonly CaseEntry[]): Saved {
   try {
     const raw = localStorage.getItem(key)
     const parsed: unknown = raw === null ? {} : JSON.parse(raw)
     if (!record(parsed)) return {}
-    return Object.fromEntries(
-      Object.entries(parsed).filter((e): e is [string, Progress] => progress(e[1])),
-    )
+    const kept = Object.entries(parsed).filter((e): e is [string, Progress] => {
+      const structure = registry.find((c) => c.structure.id === e[0])?.structure
+      return structure !== undefined && progress(e[1]) && fits(structure, e[1])
+    })
+    return Object.fromEntries(kept)
   } catch {
     return {}
   }

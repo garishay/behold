@@ -212,4 +212,37 @@ describe('the case screen explored (#6, 03b)', () => {
       vi.unstubAllGlobals()
     }
   })
+
+  // On the first visit the worker takes the page as it activates, and the prefetch waits for
+  // that, so its requests go through the worker's rule (#12 [Q5]).
+  it('the prefetch waits for the service worker where there is one', async () => {
+    const requested: string[] = []
+    vi.stubGlobal(
+      'Image',
+      class {
+        set src(url: string) {
+          requested.push(url)
+        }
+      },
+    )
+    let ready: () => void = () => {}
+    Object.defineProperty(navigator, 'serviceWorker', {
+      configurable: true,
+      value: {
+        ready: new Promise<void>((resolve) => {
+          ready = resolve
+        }),
+      },
+    })
+    try {
+      render(<App />)
+      openCase(/The valley/)
+      expect(requested).toEqual([])
+      ready()
+      await waitFor(() => expect(requested).toHaveLength(3))
+    } finally {
+      Reflect.deleteProperty(navigator, 'serviceWorker')
+      vi.unstubAllGlobals()
+    }
+  })
 })
