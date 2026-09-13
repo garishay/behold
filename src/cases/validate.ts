@@ -53,8 +53,9 @@ export function validate(structure: CaseStructure, text: CaseText<CaseStructure>
   const spots = moments.flatMap((m) => m.spots)
   const steps = structure.steps ?? []
 
-  // (a) Ids are slugs and unique within their kind — blank ids across every block. The list is
-  // of ids, or of the things that carry one.
+  // (a) Ids are slugs and unique within their kind — blank ids across every block, and no face id
+  // among them, since a step's `filled` names a face or a blank (#6). The list is of ids, or of
+  // the things that carry one.
   const ids = (kind: string, list: readonly (string | { readonly id: string })[]) => {
     const seen = new Set<string>()
     for (const item of list) {
@@ -73,6 +74,7 @@ export function validate(structure: CaseStructure, text: CaseText<CaseStructure>
   ids('block', blocks)
   const blanks = blocks.flatMap((b) => Object.keys(b.blanks))
   const blankIds = ids('blank', blanks)
+  for (const id of faceIds) if (blankIds.has(id)) fail(`face ${q(id)} is also a blank`)
   ids('step', steps)
 
   // (b) The thumb is a moment; a passage is a book code, a chapter, and a verse range or none.

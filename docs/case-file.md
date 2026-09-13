@@ -132,7 +132,8 @@ Three layers, from mechanical to read.
    over every registered case in each of its languages; one sentence per problem, an empty list a
    valid case, and a problem names the thing by its id —
    `spot "basket" cites "17:17-18", outside the passages`. What it holds: ids are slugs and unique
-   within their kind; `thumb` is a moment, and each passage is a book code, a chapter, and a verse
+   within their kind, and no face id is also a blank id, so a step's `filled` names one thing;
+   `thumb` is a moment, and each passage is a book code, a chapter, and a verse
    range or none; a moment's picture is a file name, it has one to eight spots, and each spot's
    box lies inside the picture, its words are words, its person a face, its paper a slug, its cite
    within a passage with the book prefix as the passages require; every word is yielded by some
