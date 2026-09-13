@@ -107,6 +107,14 @@ describe('validate (Gate 02 A6)', () => {
     ])
   })
 
+  // The bank adds each word once, a promise about the data the validator holds (#12 [Q3]).
+  it('(c) a spot yielding the same word twice', () => {
+    const [brook] = moment.spots
+    expect(validate(withSpot('brook', { words: [...brook.words, 'five'] }), en)).toEqual([
+      'spot "brook" yields "five" twice',
+    ])
+  })
+
   it('(c) a spot showing a person who is not a face', () => {
     expect(validate(withSpot('boy', { person: 'd9' }), en)).toEqual([
       'spot "boy" shows "d9", not a face',

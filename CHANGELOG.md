@@ -9,7 +9,7 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   and the moves on it, pure functions keyed by the structure's ids, a guided case stepping on and
   closing itself, a case without steps closing on the submit; `src/passages/service.ts`, the
   Worker's contract — a reference and a translation in, verses out — and `stub.ts`, the one line
-  the reveal shows until #3; the validator's face/blank sentence.
+  the reveal shows until #3; the validator's face/blank and word-once sentences.
 
 ## v0.2.1 — Governance revision 1 (#13)
 
