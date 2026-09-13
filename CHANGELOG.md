@@ -3,6 +3,13 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.2.1 — Governance revision 1 (#13)
+
+- **the rule text of [G1]–[G6]** (#18): `CLAUDE.md` — [G1], [G4], and [G5] under Size in
+  Conventions; [G2], [G3], and [G6] as the review loop in Review; [G3]'s refspec and mention rule
+  with the lane rules — each in the words of its ruling; `AGENTS.md` and the README untouched,
+  carrying none of the six today.
+
 ## v0.2.0 — Gate 02, Case file format (#4)
 
 - **02a — the case file format and the first two cases** (#16): `src/cases/types.ts` — a case as
