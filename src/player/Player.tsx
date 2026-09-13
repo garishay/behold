@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { CaseEntry } from '../cases/index.ts'
 import { strings } from '../strings/en.ts'
 import { Bank, type Caption } from './Bank.tsx'
 import { Papers, PaperModal } from './Papers.tsx'
+import { prefetch } from './pictures.ts'
 import { Stage } from './Stage.tsx'
 import { chooseWord, nothing, step, tap, type Outcome, type Progress } from './state.ts'
 
@@ -30,6 +31,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart }: Play
   const [selection, setSelection] = useState(nothing)
   const [caption, setCaption] = useState<Caption | null>(null)
   const [paper, setPaper] = useState<string | null>(null)
+  // Every picture of the case is requested as it opens, so the whole case is cached for offline.
+  useEffect(() => prefetch(s), [s])
 
   const apply = (o: Outcome) => {
     setSelection(o.selection)

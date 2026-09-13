@@ -172,4 +172,29 @@ describe('the case screen explored (#6, 03b)', () => {
     render(<App />)
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/A king stands/)
   })
+
+  // The service worker's rule caches what is requested, so a case once opened must request every
+  // picture it has, not the moment on the stage alone (review round 1, #20).
+  it('opening a case requests every picture of the case, so a case once opened stays offline', () => {
+    const requested: string[] = []
+    vi.stubGlobal(
+      'Image',
+      class {
+        set src(url: string) {
+          requested.push(url)
+        }
+      },
+    )
+    try {
+      render(<App />)
+      openCase(/The vineyard/)
+      expect(requested.sort()).toEqual(
+        ['bedchamber.jpg', 'gate.jpg', 'p1.jpg', 'p2.jpg', 'p3.jpg', 'vineyard.jpg'].map(
+          (f) => `/cases/vineyard/${f}`,
+        ),
+      )
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
 })

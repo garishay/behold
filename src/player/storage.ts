@@ -8,10 +8,28 @@ const key = 'behold.progress'
 
 export type Saved = Readonly<Record<string, Progress>>
 
+const record = (x: unknown): x is Record<string, unknown> =>
+  typeof x === 'object' && x !== null && !Array.isArray(x)
+
+/** Whether a stored value has progress's shape; a stale or foreign entry is dropped, not trusted. */
+const progress = (v: unknown): v is Progress =>
+  record(v) &&
+  typeof v.moment === 'string' &&
+  [v.tapped, v.bank, v.papers, v.order].every(Array.isArray) &&
+  record(v.faces) &&
+  record(v.fills) &&
+  typeof v.step === 'number' &&
+  typeof v.solved === 'boolean'
+
+/** The store's progress by case; a store that is not one, or an entry that is not progress, reads as none. */
 export function load(): Saved {
   try {
     const raw = localStorage.getItem(key)
-    return raw === null ? {} : (JSON.parse(raw) as Saved)
+    const parsed: unknown = raw === null ? {} : JSON.parse(raw)
+    if (!record(parsed)) return {}
+    return Object.fromEntries(
+      Object.entries(parsed).filter((e): e is [string, Progress] => progress(e[1])),
+    )
   } catch {
     return {}
   }
