@@ -45,6 +45,14 @@ export const face = {
   faces: { d1: 'the boy' },
 } satisfies CaseText<typeof faceless>
 
+// Step text for a case whose steps tuple is empty (review round 2, #16): the same collapse.
+export const stepless = { ...valley, steps: [] } as const satisfies CaseStructure
+export const noSteps = {
+  ...en,
+  // @ts-expect-error: a case with an empty steps tuple has no step text
+  steps: { surprise: 'Tap anything.' },
+} satisfies CaseText<typeof stepless>
+
 // Step text for a case whose structure has no steps.
 export const steps = {
   ...vineyardEn,

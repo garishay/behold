@@ -128,7 +128,7 @@ export type CaseText<S extends CaseStructure> = {
       }
   readonly reveal: readonly string[]
 } & (S extends { readonly steps: infer T extends readonly Step[] }
-  ? { readonly steps: Readonly<Record<T[number]['id'], string>> }
+  ? { readonly steps: Keyed<T[number]['id'], string> }
   : CaseStructure extends S
     ? { readonly steps?: Readonly<Record<string, string>> }
     : { readonly steps?: never })
