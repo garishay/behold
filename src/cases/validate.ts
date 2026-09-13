@@ -53,8 +53,9 @@ export function validate(structure: CaseStructure, text: CaseText<CaseStructure>
   const spots = moments.flatMap((m) => m.spots)
   const steps = structure.steps ?? []
 
-  // (a) Ids are slugs and unique within their kind — blank ids across every block. The list is
-  // of ids, or of the things that carry one.
+  // (a) Ids are slugs and unique within their kind — blank ids across every block, and no face id
+  // among them, since a step's `filled` names a face or a blank (#6). The list is of ids, or of
+  // the things that carry one.
   const ids = (kind: string, list: readonly (string | { readonly id: string })[]) => {
     const seen = new Set<string>()
     for (const item of list) {
@@ -73,6 +74,7 @@ export function validate(structure: CaseStructure, text: CaseText<CaseStructure>
   ids('block', blocks)
   const blanks = blocks.flatMap((b) => Object.keys(b.blanks))
   const blankIds = ids('blank', blanks)
+  for (const id of faceIds) if (blankIds.has(id)) fail(`face ${q(id)} is also a blank`)
   ids('step', steps)
 
   // (b) The thumb is a moment; a passage is a book code, a chapter, and a verse range or none.
@@ -88,7 +90,8 @@ export function validate(structure: CaseStructure, text: CaseText<CaseStructure>
   // (c) A moment's picture is a file name and it has one to eight spots (world rules §6); a
   // spot's box lies inside the picture, its words are words, its person a face, its paper a
   // slug, and its cite lies within a passage — the book in front exactly when the passages span
-  // more than one book (Gate 02 ruling [1]).
+  // more than one book (Gate 02 ruling [1]). A spot yields each word once: the bank's promise,
+  // held here rather than in the model (#12 [Q3]).
   const spans = new Set(passages.map((p) => p.book)).size > 1
   const within = (c: Cite) =>
     passages.some(
@@ -108,6 +111,8 @@ export function validate(structure: CaseStructure, text: CaseText<CaseStructure>
       if (!inside || left + width > 100 || top + height > 100)
         fail(`spot ${q(s.id)} box [${s.box.join(', ')}] does not lie inside the picture`)
       for (const w of s.words) if (!words.has(w)) fail(`spot ${q(s.id)} yields ${q(w)}, not a word`)
+      for (const [i, w] of s.words.entries())
+        if (s.words.indexOf(w) < i) fail(`spot ${q(s.id)} yields ${q(w)} twice`)
       if (s.person !== undefined && !faceIds.has(s.person))
         fail(`spot ${q(s.id)} shows ${q(s.person)}, not a face`)
       if (s.paper !== undefined && !slug.test(s.paper))

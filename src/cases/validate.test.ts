@@ -44,6 +44,18 @@ describe('validate (Gate 02 A6)', () => {
     expect(validate(twice, en)).toEqual(['face "d1" is declared twice'])
   })
 
+  // A face id that is also a blank id would make a step's `filled` name both (#6). The blank
+  // is given its part, so only the collision is reported.
+  it('(a) a face id that is also a blank id', () => {
+    const collide: CaseStructure = {
+      ...valley,
+      blocks: [{ id: 'account', blanks: { ...valley.blocks[0].blanks, d1: 'david' } }],
+    }
+    expect(validate(collide, withParts([...account.parts, { b: 'd1' }]))).toEqual([
+      'face "d1" is also a blank',
+    ])
+  })
+
   it('(b) a thumb that is not a moment', () => {
     expect(validate({ ...valley, thumb: 'brook' }, en)).toEqual(['thumb "brook" is not a moment'])
   })
@@ -92,6 +104,14 @@ describe('validate (Gate 02 A6)', () => {
     // A key the object's prototype has: `in` would have let it through.
     expect(validate(withSpot('brook', { words: [...brook.words, 'constructor'] }), en)).toEqual([
       'spot "brook" yields "constructor", not a word',
+    ])
+  })
+
+  // The bank adds each word once, a promise about the data the validator holds (#12 [Q3]).
+  it('(c) a spot yielding the same word twice', () => {
+    const [brook] = moment.spots
+    expect(validate(withSpot('brook', { words: [...brook.words, 'five'] }), en)).toEqual([
+      'spot "brook" yields "five" twice',
     ])
   })
 
