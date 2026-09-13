@@ -10,6 +10,10 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   from the structure so the typecheck holds its keys; `src/cases/index.ts`, the registry; the
   tutorial and case two from the prototype, text verbatim, with their pictures under
   `public/cases/`; `docs/case-file.md`, the format's reference.
+- **02b — the validator** (#17): `src/cases/validate.ts` — the checks the types cannot make,
+  A6's list over a case and one of its texts, one sentence per problem, run by the test job over
+  every registered case; `src/cases/validate.test.ts`, one broken fixture per check; the
+  validator's section of `docs/case-file.md` in the present tense.
 
 ## v0.1.0 — Gate 01, Foundation (#1)
 

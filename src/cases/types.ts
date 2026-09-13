@@ -4,7 +4,7 @@
  * one text file per language, `en.ts`, every word the player reads keyed by the structure's ids
  * (CLAUDE.md, Guardrails). The text's type is computed from the structure, so a missing or an
  * extra key fails the typecheck; what types cannot hold — a reference resolving, a word reachable,
- * a count — is the validator's, `validate.ts` (02b). The reference is `docs/case-file.md`.
+ * a count — is the validator's, `validate.ts`. The reference is `docs/case-file.md`.
  */
 
 /** The kinds a word can be; a blank takes only its own kind. */
