@@ -495,4 +495,44 @@ describe('the case solved (#6, 03c)', () => {
     await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
     expect(screen.getByText('Tap the boy with the sling.')).toBeInTheDocument()
   })
+
+  // Restart from the reveal steps back and leaves the reveal's entry ahead; forward must not show
+  // a fresh case's solution, so the entry becomes a case entry instead (review round 1, #21).
+  it('a reveal entry left ahead by a restart shows no solution, and becomes a case entry', async () => {
+    render(<App />)
+    openCase(/The valley/)
+    solveTheValley()
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    fireEvent.click(screen.getByRole('button', { name: 'Restart' }))
+    confirm.mockRestore()
+    await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
+    // jsdom fires the forward's popstate on a later task; the handler has run once it arrives.
+    const popped = new Promise<void>((r) => addEventListener('popstate', () => r(), { once: true }))
+    history.forward()
+    await popped
+    expect(history.state).toEqual({ case: 'valley' })
+    await waitFor(() => expect(screen.getByText('Tap the boy with the sling.')).toBeInTheDocument())
+    expect(screen.queryByRole('heading', { name: 'The case is closed.' })).not.toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: /Think/ })).toHaveTextContent('0/7')
+  })
+
+  // The case entry beneath the reveal is the case with its answers: forward from the cards, or a
+  // reload on that entry, shows Think, not Moments (review round 1, #21).
+  it('a solved case’s own entry mounts on Think: forward from the cards, and a reload on it', async () => {
+    const { unmount } = render(<App />)
+    openCase(/The valley/)
+    solveTheValley()
+    fireEvent.click(screen.getByRole('button', { name: 'Back to cases' }))
+    await waitFor(() => expect(screen.getByText('Closed ✓')).toBeInTheDocument())
+    history.forward()
+    await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
+    expect(screen.getByRole('heading', { name: 'Who is who' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: /Think/ })).toHaveTextContent('7/7')
+    expect(screen.queryByRole('heading', { name: 'The case is closed.' })).not.toBeInTheDocument()
+    unmount()
+    history.replaceState({ case: 'valley' }, '')
+    render(<App />)
+    expect(screen.getByRole('heading', { name: 'Who is who' })).toBeInTheDocument()
+    expect(document.querySelector('[data-slot="t4"]')).toHaveClass('is-right')
+  })
 })

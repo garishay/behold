@@ -52,8 +52,10 @@ const onReveal = (state: unknown) =>
 export function Player({ entry, progress, onProgress, onCases, onRestart, passages }: PlayerProps) {
   const { structure: s } = entry
   const text = entry.text.en
+  // A solved case mounts on its reveal when that is the entry on top, else on Think, where its
+  // answers are; a case still open mounts on Moments (review round 1, #21).
   const [view, setView] = useState<View>(() =>
-    progress.solved && onReveal(history.state) ? 'reveal' : 'moments',
+    progress.solved ? (onReveal(history.state) ? 'reveal' : 'think') : 'moments',
   )
   const [selection, setSelection] = useState(nothing)
   const [caption, setCaption] = useState<Caption | null>(null)
@@ -61,13 +63,18 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const [message, setMessage] = useState('')
   // Every picture of the case is requested as it opens, so the whole case is cached for offline.
   useEffect(() => prefetch(s), [s])
-  // Back from the reveal returns to Think; forward to the reveal's entry returns to the reveal.
+  // Back from the reveal returns to Think; forward to the reveal's entry returns to the reveal
+  // while the case is solved. A reveal entry left ahead by a restart names a solution the case no
+  // longer has, so it is made a case entry instead (review round 1, #21).
   useEffect(() => {
-    const onPop = (e: PopStateEvent) =>
-      setView((v) => (onReveal(e.state) ? 'reveal' : v === 'reveal' ? 'think' : v))
+    const onPop = (e: PopStateEvent) => {
+      if (!onReveal(e.state)) setView((v) => (v === 'reveal' ? 'think' : v))
+      else if (progress.solved) setView('reveal')
+      else history.replaceState({ case: s.id }, '')
+    }
     addEventListener('popstate', onPop)
     return () => removeEventListener('popstate', onPop)
-  }, [])
+  }, [progress.solved, s.id])
 
   /** Progress after a move; the case closing on it plays the sting and opens the reveal. */
   const close = (next: Progress) => {
