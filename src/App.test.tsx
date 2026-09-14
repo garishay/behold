@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
+import type { PassageService } from './passages/service.ts'
 
 const tapSpot = (id: string) => {
   const spot = document.querySelector(`[data-spot="${id}"]`)
@@ -10,6 +11,42 @@ const tapSpot = (id: string) => {
 const openCase = (title: RegExp) => fireEvent.click(screen.getByRole('button', { name: title }))
 const tab = (name: RegExp) => fireEvent.click(screen.getByRole('tab', { name }))
 const chips = () => within(document.querySelector('.chips')!).queryAllByRole('button')
+const chip = (word: string) =>
+  fireEvent.click(within(document.querySelector('.chips')!).getByRole('button', { name: word }))
+const slot = (id: string) => fireEvent.click(document.querySelector(`[data-slot="${id}"]`)!)
+const tile = (name: string) =>
+  fireEvent.click([...document.querySelectorAll('.tile')].find((t) => t.textContent === name)!)
+const orderSlot = (i: number) => fireEvent.click(document.querySelectorAll('.oslot')[i])
+const moment = (name: string) => fireEvent.click(screen.getByRole('button', { name }))
+
+/** A passage service for the tests: made-up words with verse numbers, never scripture. */
+const numbered: PassageService = () =>
+  Promise.resolve({
+    verses: [
+      { number: 38, text: 'One thing.' },
+      { number: 39, text: 'Another thing.' },
+      { text: 'A line with no number.' },
+    ],
+  })
+
+/** The tutorial played through: every spot tapped, every face and blank filled right. */
+const solveTheValley = () => {
+  for (const s of ['boy', 'giant', 'brook', 'armor', 'basket']) tapSpot(s)
+  tab(/Think/)
+  const answers: [string, string][] = [
+    ['d1', 'David'],
+    ['d2', 'Goliath'],
+    ['t1', 'cheeses'],
+    ['t2', 'armor'],
+    ['t3', 'five'],
+    ['t4', 'sling'],
+    ['t5', 'sword'],
+  ]
+  for (const [id, word] of answers) {
+    chip(word)
+    slot(id)
+  }
+}
 
 beforeEach(() => {
   localStorage.clear()
@@ -54,7 +91,11 @@ describe('the case screen explored (#6, 03b)', () => {
     render(<App />)
     openCase(/The valley/)
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/A giant lies face-down/)
-    expect(screen.getAllByRole('tab').map((t) => t.textContent)).toEqual(['Moments', 'Papers'])
+    expect(screen.getAllByRole('tab').map((t) => t.textContent)).toEqual([
+      'Moments',
+      'Think0/7',
+      'Papers',
+    ])
     expect(screen.getByText('Tap the boy with the sling.')).toBeInTheDocument()
     expect(screen.getByText('The valley · 0 of 6 things found here')).toBeInTheDocument()
     expect(screen.getByText('Tap anything that looks like it matters.')).toBeInTheDocument()
@@ -244,5 +285,254 @@ describe('the case screen explored (#6, 03b)', () => {
       Reflect.deleteProperty(navigator, 'serviceWorker')
       vi.unstubAllGlobals()
     }
+  })
+})
+
+describe('the case solved (#6, 03c)', () => {
+  it('the Think tab counts what is filled, and pulses while a step waits on it', () => {
+    render(<App />)
+    openCase(/The valley/)
+    expect(screen.getAllByRole('tab').map((t) => t.textContent)).toEqual([
+      'Moments',
+      'Think0/7',
+      'Papers',
+    ])
+    expect(screen.getByRole('tab', { name: /Think/ })).not.toHaveClass('pulse')
+    tapSpot('boy')
+    expect(screen.getByRole('tab', { name: /Think/ })).toHaveClass('pulse')
+    tab(/Think/)
+    expect(screen.getByRole('tab', { name: /Think/ })).not.toHaveClass('pulse')
+    expect(screen.getByRole('heading', { name: 'Who is who' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'The account' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Close the case/ })).not.toBeInTheDocument()
+  })
+
+  it('the console names a face found, and a blank refuses a word of another kind by name', () => {
+    render(<App />)
+    openCase(/The valley/)
+    tapSpot('boy')
+    expect(screen.getByText(/Found:/)).toHaveTextContent(
+      'Found: David, sling · one of the faces in Think',
+    )
+    tapSpot('brook')
+    tab(/Think/)
+    slot('t4')
+    chip('five')
+    expect(screen.getByRole('status')).toHaveTextContent('That blank wants a thing.')
+    chip('sling')
+    slot('t4')
+    expect(screen.getByRole('status')).toHaveTextContent('')
+    expect(document.querySelector('[data-slot="t4"]')).toHaveClass('is-right')
+    expect(screen.getByRole('tab', { name: /Think/ })).toHaveTextContent('1/7')
+  })
+
+  it('the tutorial closes itself on the last right answer, and the reveal reads the passages as verses', async () => {
+    render(<App passages={numbered} />)
+    openCase(/The valley/)
+    solveTheValley()
+    expect(screen.getByRole('heading', { name: 'The case is closed.' })).toBeInTheDocument()
+    expect(screen.getByText(/The boy was David/)).toBeInTheDocument()
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument()
+    expect(document.querySelector('.bank')).toBeNull()
+    expect(screen.getByText('1 Samuel 17:17–18')).toBeInTheDocument()
+    expect(screen.getByText('1 Samuel 17:38–51')).toBeInTheDocument()
+    expect(await screen.findAllByText('38')).toHaveLength(2)
+    const numberless = screen.getAllByText('A line with no number.')
+    expect(numberless).toHaveLength(2)
+    expect(numberless[0].querySelector('sup')).toBeNull()
+    expect(screen.getAllByText(/One thing\./)[0].querySelector('sup')).toHaveTextContent('38')
+    fireEvent.click(screen.getByRole('button', { name: 'Back to cases' }))
+    await waitFor(() => expect(screen.getByText('Closed ✓')).toBeInTheDocument())
+  })
+
+  it('a case without steps closes on the submit, and says how far off it was', () => {
+    render(<App />)
+    openCase(/The vineyard/)
+    for (const s of ['man-rows', 'cord', 'stain', 'balcony']) tapSpot(s)
+    moment('Bedchamber')
+    for (const s of ['tray', 'seal', 'purse', 'lamp']) tapSpot(s)
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+    moment('The gate')
+    for (const s of ['stones', 'accusers', 'letter', 'law']) tapSpot(s)
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+    tab(/Think/)
+    expect(screen.getByRole('button', { name: /Close the case — 0 of 13 filled/ })).toBeDisabled()
+    for (const [id, word] of [
+      ['p1', 'Ahab'],
+      ['p2', 'Jezebel'],
+      ['p3', 'Naboth'],
+    ] as const) {
+      chip(word)
+      slot(id)
+    }
+    tile('Bedchamber')
+    orderSlot(0)
+    tile('The gate')
+    orderSlot(1)
+    tile('The vineyard')
+    orderSlot(2)
+    const fills: [string, string][] = [
+      ['s1', 'silver'],
+      ['s2', 'garden'],
+      ['s3', 'lamp'],
+      ['s4', 'would not eat'],
+      ['s5', 'Jezebel'],
+      ['s6', 'two'],
+      ['s7', 'stoned'],
+      ['v1', 'killed'],
+      ['v2', 'taken possession'],
+    ]
+    for (const [id, word] of fills) {
+      chip(word)
+      slot(id)
+    }
+    const submit = screen.getByRole('button', { name: 'Close the case' })
+    expect(submit).toBeEnabled()
+    fireEvent.click(submit)
+    expect(screen.getByRole('status')).toHaveTextContent('Several are wrong.')
+    expect(screen.queryByRole('heading', { name: 'The case is closed.' })).not.toBeInTheDocument()
+    for (const [id, word] of [
+      ['s1', 'garden'],
+      ['s2', 'silver'],
+    ] as const) {
+      slot(id)
+      chip(word)
+      slot(id)
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(screen.getByRole('status')).toHaveTextContent('One or two are wrong.')
+    slot('s3')
+    chip('inheritance')
+    slot('s3')
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(screen.getByRole('heading', { name: 'The case is closed.' })).toBeInTheDocument()
+    expect(screen.getByText(/The man on the bed was Ahab/)).toBeInTheDocument()
+  })
+
+  it('the reveal shows the stub’s line under each passage, and the failure line when the service refuses', async () => {
+    const { unmount } = render(<App />)
+    openCase(/The valley/)
+    solveTheValley()
+    expect(
+      await screen.findAllByText(
+        'The passage appears here once the translation service is connected.',
+      ),
+    ).toHaveLength(2)
+    expect(document.querySelectorAll('.passage sup')).toHaveLength(0)
+    unmount()
+    history.replaceState(null, '')
+    // A closed case in the store opens on its reveal, and the service refuses.
+    localStorage.setItem(
+      'behold.progress',
+      JSON.stringify({
+        vineyard: {
+          moment: 'vineyard',
+          tapped: [],
+          bank: [],
+          papers: [],
+          faces: {},
+          order: [null, null, null],
+          fills: {},
+          step: 0,
+          solved: true,
+        },
+      }),
+    )
+    render(<App passages={() => Promise.reject(new Error('down'))} />)
+    expect(screen.getByText('Closed ✓')).toBeInTheDocument()
+    openCase(/The vineyard/)
+    expect(
+      await screen.findByText(
+        'The passage couldn’t be fetched. Read 1 Kings 21 in your own Bible.',
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it('the reveal is a history entry: back returns to the case, and Back to cases pops both (Gate 03 [1])', async () => {
+    render(<App />)
+    openCase(/The valley/)
+    solveTheValley()
+    expect(history.state).toEqual({ case: 'valley', view: 'reveal' })
+    history.back()
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: 'Who is who' })).toBeInTheDocument(),
+    )
+    expect(history.state).toEqual({ case: 'valley' })
+    expect(screen.getByRole('tab', { name: /Think/ })).toHaveTextContent('7/7')
+    history.forward()
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: 'The case is closed.' })).toBeInTheDocument(),
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Back to cases' }))
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { level: 1, name: 'Behold' })).toBeInTheDocument(),
+    )
+    expect(history.state).toBeNull()
+  })
+
+  it('a closed case opens on its reveal with both entries, and Restart from the reveal starts it over', async () => {
+    render(<App />)
+    openCase(/The valley/)
+    solveTheValley()
+    fireEvent.click(screen.getByRole('button', { name: 'Back to cases' }))
+    await waitFor(() => expect(screen.getByText('Closed ✓')).toBeInTheDocument())
+    openCase(/The valley/)
+    expect(screen.getByRole('heading', { name: 'The case is closed.' })).toBeInTheDocument()
+    expect(history.state).toEqual({ case: 'valley', view: 'reveal' })
+    history.back()
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: 'Who is who' })).toBeInTheDocument(),
+    )
+    history.forward()
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: 'The case is closed.' })).toBeInTheDocument(),
+    )
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    fireEvent.click(screen.getByRole('button', { name: 'Restart' }))
+    confirm.mockRestore()
+    expect(screen.getByText('Tap the boy with the sling.')).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: /Think/ })).toHaveTextContent('0/7')
+    await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
+    expect(screen.getByText('Tap the boy with the sling.')).toBeInTheDocument()
+  })
+
+  // Restart from the reveal steps back and leaves the reveal's entry ahead; forward must not show
+  // a fresh case's solution, so the entry becomes a case entry instead (review round 1, #21).
+  it('a reveal entry left ahead by a restart shows no solution, and becomes a case entry', async () => {
+    render(<App />)
+    openCase(/The valley/)
+    solveTheValley()
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    fireEvent.click(screen.getByRole('button', { name: 'Restart' }))
+    confirm.mockRestore()
+    await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
+    // jsdom fires the forward's popstate on a later task; the handler has run once it arrives.
+    const popped = new Promise<void>((r) => addEventListener('popstate', () => r(), { once: true }))
+    history.forward()
+    await popped
+    expect(history.state).toEqual({ case: 'valley' })
+    await waitFor(() => expect(screen.getByText('Tap the boy with the sling.')).toBeInTheDocument())
+    expect(screen.queryByRole('heading', { name: 'The case is closed.' })).not.toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: /Think/ })).toHaveTextContent('0/7')
+  })
+
+  // The case entry beneath the reveal is the case with its answers: forward from the cards, or a
+  // reload on that entry, shows Think, not Moments (review round 1, #21).
+  it('a solved case’s own entry mounts on Think: forward from the cards, and a reload on it', async () => {
+    const { unmount } = render(<App />)
+    openCase(/The valley/)
+    solveTheValley()
+    fireEvent.click(screen.getByRole('button', { name: 'Back to cases' }))
+    await waitFor(() => expect(screen.getByText('Closed ✓')).toBeInTheDocument())
+    history.forward()
+    await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
+    expect(screen.getByRole('heading', { name: 'Who is who' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: /Think/ })).toHaveTextContent('7/7')
+    expect(screen.queryByRole('heading', { name: 'The case is closed.' })).not.toBeInTheDocument()
+    unmount()
+    history.replaceState({ case: 'valley' }, '')
+    render(<App />)
+    expect(screen.getByRole('heading', { name: 'Who is who' })).toBeInTheDocument()
+    expect(document.querySelector('[data-slot="t4"]')).toHaveClass('is-right')
   })
 })
