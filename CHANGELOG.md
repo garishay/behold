@@ -17,6 +17,13 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   open case a history entry so the system's back returns to the cards (Gate 03 [1]); the runtime
   cache rule for the case pictures; the stylesheet for all of it, the bank's chips clear of the
   gesture zone ([6]).
+- **03c — the case solved, and the reveal** (#21): `src/player/Think.tsx` — who is who, what
+  happened first, the blocks with their blanks, a guided case marking each right answer and
+  closing itself, the other case's submit and how far off it was; the Think tab with its count and
+  its pulse; `sting.ts`, the three notes on the close; `Reveal.tsx` — the case in the game's words,
+  then each passage as verses through the service, the stub's one line until #3, the reveal its
+  own history entry so the system's back returns to the case (Gate 03 [1]); the stylesheet for
+  Think and the reveal, the reveal's foot clear of the gesture zone ([6]).
 
 ## v0.2.1 — Governance revision 1 (#13)
 

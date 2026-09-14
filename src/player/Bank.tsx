@@ -77,6 +77,7 @@ interface ConsoleProps {
 function Console({ structure, text, progress, caption }: ConsoleProps) {
   const moment = structure.moments.find((m) => m.id === progress.moment) ?? structure.moments[0]
   const found = moment.spots.filter((s) => progress.tapped.includes(s.id)).length
+  const spot = caption && moment.spots.find((x) => x.id === caption.spot)
   const notes: ReactNode[] = []
   if (caption && caption.added.length > 0)
     notes.push(
@@ -91,6 +92,7 @@ function Console({ structure, text, progress, caption }: ConsoleProps) {
       </>,
     )
   if (caption?.paper !== undefined) notes.push(strings.copiedToPapers)
+  if (spot?.person !== undefined) notes.push(strings.oneOfTheFaces)
   return (
     <div className="console">
       <div className="where">
