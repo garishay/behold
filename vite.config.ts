@@ -55,6 +55,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: false,
     setupFiles: ['./src/test/setup.ts'],
-    include: ['src/**/*.{test,spec}.{ts,tsx}', 'scripts/**/*.test.ts'],
+    // The Worker's tests run here too, on Node, so the test job holds the proxy as it holds the app.
+    include: ['src/**/*.{test,spec}.{ts,tsx}', 'scripts/**/*.test.ts', 'worker/src/**/*.test.ts'],
   },
 })

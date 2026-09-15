@@ -1,0 +1,27 @@
+// The ESV proxy's Worker (#3): its name gives its address, behold-esv.<subdomain>.workers.dev; its
+// code is src/index.ts, bundled by wrangler at deploy. The ESV token is not here — it is a secret
+// in the Worker's own store, put there once by hand (CLAUDE.md, Guardrails) — and nothing here
+// is: the origins the Worker answers, and the two rate limits, are configuration.
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "behold-esv",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  // The account, from `wrangler whoami` after the owner's login — an identifier, not a secret.
+  "account_id": "0391d5fec52f8ba5281ec9b59c76e9f5",
+  "workers_dev": true,
+  "preview_urls": false,
+  // No stored request logs: the Worker keeps nothing about a player. `wrangler tail` still
+  // shows a live session when one is needed.
+  "observability": { "enabled": false },
+  "vars": {
+    // The origins served, space-parted: the Pages site and the dev server (Gate 04 A2).
+    "ORIGINS": "https://garishay.github.io http://localhost:5173",
+  },
+  // Cloudflare's rate-limit bindings, counted per data centre and permissive by design: one
+  // per player address, and one for the Worker as a whole, under the ESV's 60 a minute.
+  "ratelimits": [
+    { "name": "PER_IP", "namespace_id": "1001", "simple": { "limit": 12, "period": 60 } },
+    { "name": "ALL", "namespace_id": "1002", "simple": { "limit": 50, "period": 60 } },
+  ],
+}

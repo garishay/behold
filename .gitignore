@@ -141,3 +141,7 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# wrangler's local state, and a dev shell's secrets — the ESV token is never in a file (CLAUDE.md, Guardrails)
+.wrangler/
+.dev.vars

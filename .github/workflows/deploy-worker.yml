@@ -1,0 +1,37 @@
+name: Deploy Worker
+
+# The ESV proxy ships from here (Gate 04 A6), as the Pages site does: a merge to `main` that
+# touches the Worker deploys it with wrangler from the lockfile and the API token the repository
+# holds — a token scoped to editing this account's Workers and nothing else. Nothing runs on a PC
+# after a merge. The ESV token is not here either: it lives in the Worker's secret store, put
+# there once by hand, and a deploy leaves it in place.
+on:
+  push:
+    branches: [main]
+    paths:
+      - worker/**
+      - package-lock.json
+      - .github/workflows/deploy-worker.yml
+
+# One deploy at a time, never cancelled, so a deploy always completes.
+concurrency:
+  group: worker
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: deploy (Worker)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run deploy -w worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

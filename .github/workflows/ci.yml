@@ -80,3 +80,6 @@ jobs:
       - run: npm ci
       # A production build at `/`. The Pages deploy (01b) builds again with its own base.
       - run: npm run build
+      # The Worker's bundle, built by wrangler without a deploy or a token (#3): a Worker that
+      # will not bundle fails the required check, not the deploy after the merge.
+      - run: npm run check -w worker
