@@ -7,5 +7,7 @@
     "check": "wrangler deploy --dry-run --outdir dist",
     "deploy": "wrangler deploy"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "wrangler": "^4.131.2"
+  }
 }

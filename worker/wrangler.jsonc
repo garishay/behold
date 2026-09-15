@@ -7,6 +7,8 @@
   "name": "behold-esv",
   "main": "src/index.ts",
   "compatibility_date": "2026-09-01",
+  // The account, from `wrangler whoami` after the owner's login — an identifier, not a secret.
+  "account_id": "0391d5fec52f8ba5281ec9b59c76e9f5",
   "workers_dev": true,
   "preview_urls": false,
   // No stored request logs: the Worker keeps nothing about a player. `wrangler tail` still
