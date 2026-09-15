@@ -3,6 +3,7 @@
 /// <reference types="node" />
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
+import { books } from '../../worker/src/books.ts'
 import { cases } from './index.ts'
 import { validate } from './validate.ts'
 
@@ -42,6 +43,16 @@ describe('the case registry (Gate 02 A1, A5)', () => {
       const [width, height] = jpegSize(readFileSync(`public/cases/${id}/${f.picture}`))
       expect(width, f.id).toBeGreaterThan(0)
       expect(height, f.id).toBeGreaterThan(0)
+    }
+  })
+
+  // Every passage is one the Worker can serve: its book in the one table, its chapter one the
+  // book has (#3, from 02b's closure) — so a reference the reveal could not show fails here, in
+  // CI, and never on a phone. The app itself carries no copy of the table.
+  it.each(each)('%s: every passage is in the Worker’s book table', (_, c) => {
+    for (const p of c.passages) {
+      expect(Object.hasOwn(books, p.book), p.book).toBe(true)
+      expect(p.chapter, `${p.book} ${p.chapter}`).toBeLessThanOrEqual(books[p.book][1])
     }
   })
 
