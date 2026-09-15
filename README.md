@@ -19,29 +19,38 @@ the rulebook. Gate 02 — Case file format: the shape a case is authored in and 
 [`docs/case-file.md`](docs/case-file.md), with the tutorial and case two as the first case files
 under `src/cases/`. Gate 03 — Player port (#6): the case player — the cards on the title screen,
 each case's pictures and their spots, the word bank, the papers, who is who, what happened first,
-the account and its blanks, the close, and the reveal; progress kept on the device. The tutorial
-and case two play through; the reveal's passage is one placeholder line until the ESV proxy (#3)
-answers it. The world rules — the accuracy and art constraints every picture and every case is
+the account and its blanks, the close, and the reveal; progress kept on the device. Gate 04 — ESV
+proxy (#3): [`worker/`](worker/README.md), the Cloudflare Worker between the app and the ESV API —
+a registered case's passage in, its verses out, the token in the Worker's own store — deployed
+from Actions on merge, its one book table held against every case's passages in CI. The tutorial
+and case two play through; the reveal's passage is one placeholder line until the app reads the
+proxy (04b). The world rules — the accuracy and art constraints every picture and every case is
 checked against — are [`docs/world-rules.md`](docs/world-rules.md).
 
 ## Stack
 
-Vite · React · TypeScript (strict) · vite-plugin-pwa · Vitest · ESLint · Prettier
+Vite · React · TypeScript (strict) · vite-plugin-pwa · Vitest · ESLint · Prettier · a Cloudflare
+Worker in `worker/`, its own workspace, built and deployed by wrangler
 
 ## Commands
 
 ```bash
-npm ci                          # install dependencies
+npm ci                          # install dependencies, the Worker's included
 npm run dev                     # start the dev server
 npm run build                   # production build
 npm run preview                 # serve the build
 npm run lint                    # ESLint
 npm run format:check            # Prettier
-npm run typecheck               # tsc --noEmit
-npm run test                    # Vitest
+npm run typecheck               # tsc --noEmit, the Worker's project included
+npm run test                    # Vitest — the app's tests and the Worker's
 npm run icons                   # regenerate the placeholder icons
 npm run review:threads -- <pr>  # list a PR's unresolved review threads
+npm run check -w worker         # bundle the Worker without deploying, as CI's build job does
+npm run dev -w worker           # the Worker at http://localhost:8787 (see worker/README.md)
 ```
+
+The Worker deploys from Actions on a merge to `main` that touches it; nothing runs on a PC after
+a merge.
 
 ## How this repo is built
 

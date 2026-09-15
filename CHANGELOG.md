@@ -3,6 +3,18 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.4.0 — Gate 04, ESV proxy (#3)
+
+- **04a — the Worker, its tests, its deploy, the one table held** (#22): `worker/`, the ESV proxy
+  as its own workspace — `src/index.ts`, the handler: a served origin, the two rate limits, a
+  reference the table knows, the ESV's text endpoint asked for verse numbers and nothing else,
+  the verses back as the contract has them, every other answer a status the app turns into the
+  reveal's unreachable line; `src/passage.ts`, the reference, the ESV's URL, and the parse;
+  `src/books.ts`, the one book table with its chapter counts, held against every registered
+  case's passages by the registry test; `wrangler.jsonc`, the origins, the limits, no stored logs;
+  `deploy-worker.yml`, the deploy from Actions on a merge that touches the Worker; CI's build job
+  bundling it with a dry run; the token put in the Worker's store by hand, once.
+
 ## v0.3.0 — Gate 03, Player port (#6)
 
 - **03a — the model and the passage service** (#19): `src/player/state.ts` — a case's progress

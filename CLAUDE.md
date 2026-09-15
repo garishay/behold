@@ -23,11 +23,13 @@ owner's operating model lives in the user-level CLAUDE.md; this file holds what 
 
 ## Stack and commands
 
-Vite · React · TypeScript (strict) · vite-plugin-pwa · Vitest · ESLint · Prettier. Scripts are
-Node; there is no Python on the dev machine.
+Vite · React · TypeScript (strict) · vite-plugin-pwa · Vitest · ESLint · Prettier · the ESV proxy,
+a Cloudflare Worker in `worker/`, its own workspace, bundled and deployed by wrangler
+(`worker/README.md`). Scripts are Node; there is no Python on the dev machine.
 
 `npm run dev` · `npm run build` · `npm run lint` · `npm run format:check` · `npm run typecheck` ·
-`npm run test` · `npm run icons` · `npm run review:threads -- <pr>`
+`npm run test` · `npm run icons` · `npm run review:threads -- <pr>` · `npm run check -w worker` ·
+`npm run dev -w worker`
 
 CI runs lint (the conflict-marker scan first, then ESLint, then the Prettier check), typecheck,
 test, and build on every PR push; the four are the required checks on `main`. Red CI is a stop.
