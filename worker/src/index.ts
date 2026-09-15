@@ -67,12 +67,12 @@ export async function handle(request: Request, env: Env, fetcher: Fetcher = fetc
     return refuse('reference', 404, cors)
   const ref = reference(url.searchParams)
   if (ref === undefined) return refuse('reference', 400, cors)
+  // The address's limit first, and the whole's only for a request it let through: a request
+  // refused for its address must not spend the whole's allowance, or one address flooding the
+  // Worker would close it to every player in the data centre (review round 1, #22).
   const ip = request.headers.get('cf-connecting-ip') ?? 'unknown'
-  const [perIp, all] = await Promise.all([
-    env.PER_IP.limit({ key: ip }),
-    env.ALL.limit({ key: 'all' }),
-  ])
-  if (!perIp.success || !all.success) return refuse('rate', 429, cors)
+  if (!(await env.PER_IP.limit({ key: ip })).success) return refuse('rate', 429, cors)
+  if (!(await env.ALL.limit({ key: 'all' })).success) return refuse('rate', 429, cors)
   const reply = await fetcher(esvUrl(ref), {
     headers: { authorization: `Token ${env.ESV_TOKEN}` },
     signal: AbortSignal.timeout(8000),

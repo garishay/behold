@@ -130,13 +130,17 @@ describe('the ESV proxy (#3)', () => {
     expect(asked).toHaveLength(0)
   })
 
-  it('refuses a request past a limit, keyed by the player’s address and by the whole', async () => {
+  it('refuses a request past a limit, keyed by the address and by the whole; one the address refused is not counted against the whole', async () => {
     const perIp = limiter(false)
+    const whole = limiter()
     const { fetcher, asked } = esv(200, '[1] Words.')
-    const reply = await handle(get(chapter), env({ PER_IP: perIp }), fetcher)
+    const reply = await handle(get(chapter), env({ PER_IP: perIp, ALL: whole }), fetcher)
     expect(reply.status).toBe(429)
     expect(await reply.json()).toEqual({ error: 'rate' })
     expect(perIp.limit).toHaveBeenCalledWith({ key: '203.0.113.9' })
+    // Refused by its address's limit, a request must not spend the whole's: one address flooding
+    // the Worker would otherwise close it to every player in that data centre (review round 1).
+    expect(whole.limit).not.toHaveBeenCalled()
     const all = limiter(false)
     expect((await handle(get(chapter), env({ ALL: all }), fetcher)).status).toBe(429)
     expect(all.limit).toHaveBeenCalledWith({ key: 'all' })
