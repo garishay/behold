@@ -3,8 +3,10 @@
  * a word reachable, a count, a box inside its picture, a string with words in it — over a case
  * and one of its texts. One sentence per problem; an empty list is a valid case. The test job
  * runs it over every registered case (`cases.test.ts`); the checks are A6's list, (a) to (i), and
- * the two of #26 [1], (j) and (k); the reference is `docs/case-file.md`.
+ * the two of #26 [1], (j) and (k), and #27 [1]'s, (l); the reference is
+ * `docs/case-file.md`.
  */
+import { crowded, fingertip, smallestPicture } from './spots.ts'
 import type { CaseStructure, CaseText, Kind, Part, Passage } from './types.ts'
 
 /** An id (docs/case-file.md, Ids). */
@@ -198,6 +200,15 @@ export function validate(structure: CaseStructure, text: CaseText<CaseStructure>
   // elimination (#26 [1]).
   if (faces.length > 0 && count('name') <= faces.length)
     fail(`the case has ${count('name')} names for ${faces.length} faces, not one more`)
+
+  // (l) Every spot owns a fingertip (#27 [1]): laid out 320 CSS px wide, as on a 360 phone, a 44 px
+  // square inside its box that no box drawn over it takes. It holds #27's floor too: a tenth of
+  // the width is 32 px at 320, so a box that keeps 44 on each side is over it.
+  for (const m of moments)
+    for (const s of crowded(m.spots, m.size))
+      fail(
+        `spot ${q(s.id)} keeps no ${fingertip} px square of its own at ${smallestPicture} px wide`,
+      )
 
   return problems
 }

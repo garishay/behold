@@ -51,13 +51,13 @@ export const vineyard = {
         { id: 'woman', box: [51, 4, 37, 47], words: [], person: 'p2', cites: '21:5-7' },
         {
           id: 'seal',
-          box: [56, 48, 26, 17],
+          box: [61.5, 49.5, 15, 11],
           words: ['ahab', 'seal'],
           paper: 'seal',
           cites: '21:8',
         },
-        { id: 'sheets', box: [44, 57, 38, 13], words: ['letters'], cites: '21:8' },
-        { id: 'purse', box: [82, 58, 10, 13], words: ['silver'], cites: '21:2' },
+        { id: 'sheets', box: [46, 57, 36, 11], words: ['letters'], cites: '21:8' },
+        { id: 'purse', box: [78, 59, 14, 12], words: ['silver'], cites: '21:2' },
       ],
     },
     {

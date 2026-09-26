@@ -123,6 +123,12 @@ portrait, 4:5 (`docs/world-rules.md` §6); the tutorial's valley is the prototyp
 so for testing, per §8. A tappable thing is at most eight to a moment (§6), and nothing that
 matters sits in the outer 8% of the width (§7).
 
+A tap finds its spot one way, in the player and the validator alike (`src/cases/spots.ts`, #27).
+Spots are drawn largest first, so where two boxes overlap the smaller is on top and takes the tap.
+A tap on no box goes to the nearest within 16 CSS px, so a box hugs the thing it names and is
+never padded. And every spot keeps a fingertip of its own: with the picture laid out 320 CSS px
+wide, its width on a 360 phone, a 44 px square inside its box that no box drawn over it takes.
+
 ## What holds a case to the format
 
 Three layers, from mechanical to read.
@@ -146,7 +152,9 @@ Three layers, from mechanical to read.
    the last has none, and an `until` names a spot, or a face or a blank; no text is empty —
    whitespace alone is empty, but for a run of text between two blanks, which may be the space
    between them; a blank's kind has at least three words in the case, and the case has one name
-   more than it has faces (`docs/case-design.md`, rule 1). `src/cases/validate.test.ts` holds one
+   more than it has faces (`docs/case-design.md`, rule 1); every spot keeps its fingertip
+   (_Pictures_), which holds its box to a tenth of the width on each side as well.
+   `src/cases/validate.test.ts` holds one
    broken fixture per check, each failing
    the check it names and no other; the registry test, `src/cases/cases.test.ts`, holds the
    pictures, the registry's ids, and the guided case first.
