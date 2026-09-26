@@ -148,8 +148,7 @@ describe('the case screen explored (#6, 03b)', () => {
   })
 
   // Spots are drawn largest first, so the smaller of two overlapping boxes is on top and takes the
-  // tap: the seal, padded for a near-miss, over the woman and the papyrus it overlaps (#26 [7],
-  // #28 [1]).
+  // tap: the seal over the woman and the papyrus it overlaps, the pouch over the papyrus (#26 [7]).
   it('draws a moment’s spots largest first, whatever the file’s order', () => {
     render(<App />)
     openCase(/The vineyard/)
@@ -157,7 +156,23 @@ describe('the case screen explored (#6, 03b)', () => {
     const drawn = [...document.querySelectorAll<SVGElement>('[data-spot]')].map(
       (r) => r.dataset.spot,
     )
-    expect(drawn).toEqual(['woman', 'man-bed', 'window', 'sheets', 'seal', 'tray', 'purse'])
+    expect(drawn).toEqual(['woman', 'man-bed', 'window', 'sheets', 'tray', 'purse', 'seal'])
+  })
+
+  // A tap on no spot goes to the nearest within 16 CSS px, so the seal's box hugs the ring and is
+  // not padded (#27 [2]). The bedchamber laid out 320 px wide, as on a 360 phone: 5.2 px right of
+  // the seal's box it takes the seal, though the woman's box is 10 px above and the papyrus's 14 px
+  // below; on the empty rug it takes nothing.
+  it('a tap just off a spot takes the nearest within a fingertip’s slip', () => {
+    render(<App />)
+    openCase(/The vineyard/)
+    moment('Bedchamber')
+    const svg = screen.getByRole('img', { name: 'Bedchamber' })
+    vi.spyOn(svg, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 320, 400))
+    fireEvent.click(svg, { clientX: 180, clientY: 380 })
+    expect(screen.getByText('Bedchamber · 0 of 7 things found here')).toBeInTheDocument()
+    fireEvent.click(svg, { clientX: 250, clientY: 214 })
+    expect(screen.getByRole('dialog', { name: 'The seal' })).toBeInTheDocument()
   })
 
   // The giant's sheathed sword is his own tap's: no spot inside his box, which at phone size read

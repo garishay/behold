@@ -79,9 +79,10 @@ describe('validate (Gate 02 A6)', () => {
   })
 
   it('(c) nine spots in a moment', () => {
-    const more = ['seven', 'eight', 'nine'].map((id) => ({
+    // In the sky over the boy's head, clear of every box and each above the floor (l).
+    const more = ['seven', 'eight', 'nine'].map((id, i) => ({
       id,
-      box: [0, 0, 1, 1] as const,
+      box: [50 + 16 * i, 2, 14, 12] as const,
       words: [],
     }))
     expect(validate(withSpots([...moment.spots, ...more]), en)).toEqual([
@@ -93,8 +94,10 @@ describe('validate (Gate 02 A6)', () => {
     expect(validate(withSpot('brook', { box: [80, 80, 30, 20] }), en)).toEqual([
       'spot "brook" box [80, 80, 30, 20] does not lie inside the picture',
     ])
+    // A box with no width has no room for a fingertip either (l).
     expect(validate(withSpot('brook', { box: [0, 80, 0, 20] }), en)).toEqual([
       'spot "brook" box [0, 80, 0, 20] does not lie inside the picture',
+      'spot "brook" keeps no 44 px square of its own at 320 px wide',
     ])
   })
 
@@ -297,6 +300,22 @@ describe('validate (Gate 02 A6)', () => {
     }
     expect(validate(noElijah, vineyardEn)).toEqual([
       'the case has 3 names for 3 faces, not one more',
+    ])
+  })
+
+  // (l) is #27 [1]'s: the fingertip every spot keeps for itself. The basket, smaller than the boy,
+  // laid over all of him but a 6.4 px rim at 320 px wide: drawn on top, it leaves the boy nowhere a
+  // fingertip lands on him alone.
+  it('(l) a spot with no fingertip of its own — the boy under the basket', () => {
+    expect(validate(withSpot('basket', { box: [62, 20, 30, 38] }), en)).toEqual([
+      'spot "boy" keeps no 44 px square of its own at 320 px wide',
+    ])
+  })
+
+  // #27's floor, a tenth of the width on a side, is 32 px at 320: a box under it fails (l) alone.
+  it('(l) a box under the floor — the basket 9% wide, 28.8 px at 320', () => {
+    expect(validate(withSpot('basket', { box: [80, 40, 9, 14] }), en)).toEqual([
+      'spot "basket" keeps no 44 px square of its own at 320 px wide',
     ])
   })
 })

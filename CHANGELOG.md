@@ -3,6 +3,15 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.6.0 — Gate 06, every spot owns a fingertip (#27)
+
+- **27a — a fingertip for every spot** (#40): one rule for how a tap finds its spot, read by the
+  player and the validator alike (`src/cases/spots.ts`); a tap on no box goes to the nearest spot
+  within 16 CSS px, so boxes hug what they name and are never padded; the validator's check (l),
+  every spot keeping a 44 px square of its own with the picture laid out 320 px wide, as on a
+  360 phone, which holds the floor of a tenth of the width too; the bedchamber's seal, papyrus,
+  and pouch boxes re-fit to it.
+
 ## v0.5.1 — The bedchamber's final picture (#28)
 
 - **28a — the seal found, the coins gone** (#39): the bedchamber edited by the owner and fitted to
