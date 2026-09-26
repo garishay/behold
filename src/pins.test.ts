@@ -32,6 +32,29 @@ describe('the service worker’s configuration (Gate 03 A3)', () => {
     expect(config).toMatch(/handler: 'CacheFirst'/)
     expect(config).toMatch(/cacheName: 'cases'/)
   })
+
+  // A passage read once reads offline: the rule's matcher, strategy, and the limits Gate 04 A4 set
+  // under the ESV's five hundred verses stored locally (review round 1, #31).
+  it('caches a passage the Worker returned, at most eight for thirty days, and nothing else', () => {
+    const rule = /\{\s*urlPattern: (\/[^\n]*\/),\s*handler: '(\w+)',([^}]*\}[^}]*)\}/.exec(
+      config.slice(config.indexOf("cacheName: 'cases'")),
+    )
+    expect(rule).not.toBeNull()
+    const [, pattern, handler, options] = rule!
+    const matches = new RegExp(pattern.slice(1, -1))
+    const worker = 'https://behold-esv.garishay.workers.dev'
+    expect(matches.test(`${worker}/passage?translation=ESV&book=1KI&chapter=21`)).toBe(true)
+    expect(matches.test(`${worker}/passage?translation=ESV&book=1SA&chapter=17&from=4&to=4`)).toBe(
+      true,
+    )
+    expect(matches.test(`${worker}/other?book=1KI`)).toBe(false)
+    expect(matches.test('https://elsewhere.workers.dev/passage?book=1KI&chapter=21')).toBe(false)
+    expect(matches.test('/cases/vineyard/gate.jpg')).toBe(false)
+    expect(handler).toBe('CacheFirst')
+    expect(options).toMatch(/cacheName: 'passages'/)
+    expect(options).toMatch(/maxEntries: 8,/)
+    expect(options).toMatch(/maxAgeSeconds: 30 \* 24 \* 60 \* 60/)
+  })
 })
 
 describe('the stylesheet’s one ruled measure (Gate 03 [6])', () => {
