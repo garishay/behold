@@ -12,6 +12,9 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   the tap; the validator's two checks, a blank's kind with its answer and two rivals in the case
   and one name more than the faces; the valley and the vineyard rewritten to the rules, the
   valley's passages gaining 1 Samuel 17:4 and its headline blank aimed at 17:51.
+- **05b — the giant's sword named** (#36): the valley's giant caption names the sheathed sword
+  across his back, in the owner's words, so the evidence for the headline blank is findable
+  before playtest 2 while the picture's edit waits (#34, #35).
 
 ## v0.4.0 — Gate 04, ESV proxy (#3)
 
