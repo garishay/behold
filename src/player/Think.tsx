@@ -1,7 +1,8 @@
 import type { CaseStructure, CaseText } from '../cases/types.ts'
 import { strings } from '../strings/en.ts'
 import { picture } from './pictures.ts'
-import { answer, filled, guided, kindOf, total, type Progress, type Selection } from './state.ts'
+import { answer, closable, filled, kindOf, marked, total } from './state.ts'
+import type { Progress, Selection } from './state.ts'
 
 interface ThinkProps {
   structure: CaseStructure
@@ -18,18 +19,17 @@ interface ThinkProps {
 
 /**
  * The Think view (#6): who is who, what happened first when the case asks, the blocks with their
- * blanks, and — in a case the player closes — the submit. A guided case marks each right answer
- * as it lands and closes itself; a case without steps shows nothing until the submit.
+ * blanks, and the submit. A ✓ lands only on the slots a guided step names; everything else is
+ * checked on the submit, which a guided case offers once its steps are done (#26 [4]).
  */
 export function Think(props: ThinkProps) {
   const { structure: s, text, progress: p, selection, message, onSubmit } = props
-  const marks = guided(s)
   const slot = (target: string, value: string | undefined, placeholder: string) => {
     const kind = kindOf(s, target)
     const state =
       (value ? ' is-filled' : '') +
       (selection.target === target ? ' is-target' : '') +
-      (marks && value === answer(s, target) ? ' is-right' : '') +
+      (marked(s, target) && value === answer(s, target) ? ' is-right' : '') +
       (selection.word !== null && s.words[selection.word] !== kind ? ' is-dim' : '')
     return (
       <button
@@ -76,7 +76,7 @@ export function Think(props: ThinkProps) {
           </div>
         </section>
       ))}
-      {!marks && (
+      {closable(s, p) && (
         <div className="submit-row">
           <button
             type="button"
@@ -113,8 +113,7 @@ function Order({ structure: s, text, progress: p, selection, onMoment, onOrderSl
               className={
                 'oslot' +
                 (id !== null ? ' is-filled' : '') +
-                (selection.slot === i ? ' is-target' : '') +
-                (guided(s) && id !== null && id === s.order?.[i] ? ' is-right' : '')
+                (selection.slot === i ? ' is-target' : '')
               }
               onClick={() => onOrderSlot(i)}
             >

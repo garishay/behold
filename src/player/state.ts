@@ -98,15 +98,25 @@ const met = (s: CaseStructure, p: Progress, until: Until) =>
     ? p.tapped.includes(until.tapped)
     : (p.faces[until.filled] ?? p.fills[until.filled]) === answer(s, until.filled)
 
-/** The steps moved past every met `until`; a guided case closes itself when all is right. */
+/**
+ * The steps moved past every met `until`. A guided case no longer closes itself: its last step
+ * points at Close the case, and it closes on the same check as every case (#26 [4]).
+ */
 function advance(s: CaseStructure, p: Progress): Progress {
   if (!guided(s)) return p
   const steps = s.steps ?? []
   let at = p.step
   while (at < steps.length - 1 && met(s, p, steps[at].until as Until)) at++
-  const solved = p.solved || (filled(s, p) === total(s) && wrong(s, p) === 0)
-  return { ...p, step: at, solved }
+  return { ...p, step: at }
 }
+
+/** Whether a slot shows its ✓ when right: only a face or blank a guided step names (#26 [4]). */
+export const marked = (s: CaseStructure, target: string) =>
+  s.steps?.some((x) => x.until?.filled === target) ?? false
+
+/** Whether Close the case is offered: in a guided case, once its guided steps are done. */
+export const closable = (s: CaseStructure, p: Progress) =>
+  !guided(s) || p.step === (s.steps?.length ?? 0) - 1
 
 /** A spot tapped: its words join the bank, its paper the papers; what was new is returned. */
 export function tap(s: CaseStructure, p: Progress, spotId: string) {
