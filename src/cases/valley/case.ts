@@ -1,8 +1,8 @@
 import type { CaseStructure } from '../types.ts'
 
 // The tutorial: the valley of Elah (world rules §1), one moment, guided by steps. Ids, boxes,
-// answers, and references only; every word the player reads is in en.ts. The sheath lies inside
-// the giant's box and is drawn over it, the smaller on top (#26 [7]).
+// answers, and references only; every word the player reads is in en.ts. The giant's sheathed
+// sword is his own tap's, not a spot inside his box: at phone size it did not read alone (#37).
 export const valley = {
   id: 'valley',
   thumb: 'valley',
@@ -21,11 +21,10 @@ export const valley = {
         {
           id: 'giant',
           box: [0, 44, 80, 26],
-          words: ['goliath', 'six', 'spear'],
+          words: ['goliath', 'six', 'spear', 'sword'],
           person: 'd2',
           cites: '17:4',
         },
-        { id: 'sheath', box: [6, 46, 26, 15], words: ['sword'], cites: '17:51' },
         { id: 'bearer', box: [2, 8, 46, 38], words: ['shield'], cites: '17:41' },
         {
           id: 'boy',
