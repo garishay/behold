@@ -148,7 +148,8 @@ describe('the case screen explored (#6, 03b)', () => {
   })
 
   // Spots are drawn largest first, so the smaller of two overlapping boxes is on top and takes the
-  // tap: the seal over the papyrus and the pouch (#26 [7]).
+  // tap: the seal, padded for a near-miss, over the woman and the papyrus it overlaps (#26 [7],
+  // #28 [1]).
   it('draws a moment’s spots largest first, whatever the file’s order', () => {
     render(<App />)
     openCase(/The vineyard/)
@@ -156,7 +157,7 @@ describe('the case screen explored (#6, 03b)', () => {
     const drawn = [...document.querySelectorAll<SVGElement>('[data-spot]')].map(
       (r) => r.dataset.spot,
     )
-    expect(drawn).toEqual(['woman', 'window', 'man-bed', 'tray', 'sheets', 'purse', 'seal'])
+    expect(drawn).toEqual(['woman', 'man-bed', 'window', 'sheets', 'seal', 'tray', 'purse'])
   })
 
   // The giant's sheathed sword is his own tap's: no spot inside his box, which at phone size read
