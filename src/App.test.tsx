@@ -100,7 +100,7 @@ describe('the case screen explored (#6, 03b)', () => {
       'Papers',
     ])
     expect(screen.getByText('Tap the boy with the sling.')).toBeInTheDocument()
-    expect(screen.getByText('The valley · 0 of 7 things found here')).toBeInTheDocument()
+    expect(screen.getByText('The valley · 0 of 6 things found here')).toBeInTheDocument()
     expect(screen.getByText('Tap anything that looks like it matters.')).toBeInTheDocument()
     expect(screen.getByText('Nothing yet. Tap things in the picture.')).toBeInTheDocument()
     expect(screen.queryByRole('group')).not.toBeInTheDocument()
@@ -112,7 +112,7 @@ describe('the case screen explored (#6, 03b)', () => {
     tapSpot('boy')
     expect(screen.getByText(/A shepherd boy in a plain tunic/)).toBeInTheDocument()
     expect(screen.getByText(/Found:/)).toHaveTextContent('Found: David, sling')
-    expect(screen.getByText('The valley · 1 of 7 things found here')).toBeInTheDocument()
+    expect(screen.getByText('The valley · 1 of 6 things found here')).toBeInTheDocument()
     expect(screen.getByText(/Open Think at the top/)).toBeInTheDocument()
     expect(chips().map((c) => c.textContent)).toEqual(['David', 'sling'])
     expect(chips().every((c) => c.classList.contains('is-new'))).toBe(true)
@@ -148,19 +148,26 @@ describe('the case screen explored (#6, 03b)', () => {
   })
 
   // Spots are drawn largest first, so the smaller of two overlapping boxes is on top and takes the
-  // tap: the seal over the papyrus and the pouch, the sheath inside the giant (#26 [7]).
+  // tap: the seal over the papyrus and the pouch (#26 [7]).
   it('draws a moment’s spots largest first, whatever the file’s order', () => {
-    const { unmount } = render(<App />)
+    render(<App />)
     openCase(/The vineyard/)
     moment('Bedchamber')
-    const drawn = () =>
-      [...document.querySelectorAll<SVGElement>('[data-spot]')].map((r) => r.dataset.spot)
-    expect(drawn()).toEqual(['woman', 'window', 'man-bed', 'tray', 'sheets', 'purse', 'seal'])
-    unmount()
-    history.replaceState(null, '')
+    const drawn = [...document.querySelectorAll<SVGElement>('[data-spot]')].map(
+      (r) => r.dataset.spot,
+    )
+    expect(drawn).toEqual(['woman', 'window', 'man-bed', 'tray', 'sheets', 'purse', 'seal'])
+  })
+
+  // The giant's sheathed sword is his own tap's: no spot inside his box, which at phone size read
+  // as one thing already found (#37).
+  it('the giant’s tap finds his sword, and no spot lies inside his box', () => {
     render(<App />)
     openCase(/The valley/)
-    expect(drawn().indexOf('sheath')).toBeGreaterThan(drawn().indexOf('giant'))
+    tapSpot('giant')
+    expect(screen.getByText(/Found:/)).toHaveTextContent('Found: Goliath, six, spear, sword')
+    expect(screen.getByText(/a sheathed sword across his back/)).toBeInTheDocument()
+    expect(document.querySelector('[data-spot="sheath"]')).toBeNull()
   })
 
   it('a paper opens over the screen on the tap, and its copy lands in Papers', () => {

@@ -332,6 +332,13 @@ button:focus-visible {
   height: auto;
 }
 
+/* No tap highlight: a spot's box is never drawn, so a tap never shows where one spot ends. The
+   caption is the tap's feedback until the layout designs one (#37, #24). */
+.stage svg,
+.stage rect {
+  -webkit-tap-highlight-color: transparent;
+}
+
 .stage rect {
   fill: rgba(0, 0, 0, 0.001);
   pointer-events: all;

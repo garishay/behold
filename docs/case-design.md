@@ -79,6 +79,7 @@ reference, with anything the passage does not say marked:
    a spot that yields each. A passage that names only one number can't give a number blank its
    two rivals, so it has no number blank. A blank a rival would make just as true — _killed_
    where the passage says _stoned_ — marks a true answer wrong; that detail stays in the prose.
+   Don't put a spot inside another spot's box unless the smaller thing reads clearly on its own.
 3. Write each caption as what is seen, with the passage's detail in it. The player reads the
    caption to fill the blank; the caption does not draw the inference for them.
 4. Write the brief as the case's questions.
