@@ -14,6 +14,12 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   case's passages by the registry test; `wrangler.jsonc`, the origins, the limits, no stored logs;
   `deploy-worker.yml`, the deploy from Actions on a merge that touches the Worker; CI's build job
   bundling it with a dry run; the token put in the Worker's store by hand, once.
+- **04b — the app's side: the proxy read, the attribution, the cache** (#31):
+  `src/passages/proxy.ts`, the passage service through the Worker, its reply checked against the
+  contract and anything else a rejection, so the reveal shows its unreachable line; the stub and
+  its line gone; the reveal marks each passage ESV and carries Crossway's notice and the link to
+  www.esv.org in every state; a runtime cache rule keeping at most eight passages a month for
+  offline; no test reaches the network.
 
 ## v0.3.0 — Gate 03, Player port (#6)
 

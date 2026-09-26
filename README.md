@@ -23,8 +23,9 @@ the account and its blanks, the close, and the reveal; progress kept on the devi
 proxy (#3): [`worker/`](worker/README.md), the Cloudflare Worker between the app and the ESV API —
 a registered case's passage in, its verses out, the token in the Worker's own store — deployed
 from Actions on merge, its one book table held against every case's passages in CI. The tutorial
-and case two play through; the reveal's passage is one placeholder line until the app reads the
-proxy (04b). The world rules — the accuracy and art constraints every picture and every case is
+and case two play through, and the reveal reads each passage through the Worker, marked ESV, with
+Crossway's notice and a link to www.esv.org beneath; the last eight passages read stay on the
+device, so a closed case reads offline. The world rules — the accuracy and art constraints every picture and every case is
 checked against — are [`docs/world-rules.md`](docs/world-rules.md).
 
 ## Stack
