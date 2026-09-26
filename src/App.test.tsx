@@ -334,8 +334,15 @@ describe('the case solved (#6, 03c)', () => {
     expect(screen.getByText(/The boy was David/)).toBeInTheDocument()
     expect(screen.queryByRole('tab')).not.toBeInTheDocument()
     expect(document.querySelector('.bank')).toBeNull()
-    expect(screen.getByText('1 Samuel 17:17–18')).toBeInTheDocument()
-    expect(screen.getByText('1 Samuel 17:38–51')).toBeInTheDocument()
+    // Each passage under its label, marked with its translation; the notice and its link beneath
+    // them (#3).
+    expect(screen.getByRole('heading', { name: '1 Samuel 17:17–18 ESV' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '1 Samuel 17:38–51 ESV' })).toBeInTheDocument()
+    expect(screen.getByText(/^Scripture quotations are from the ESV/)).toHaveClass('attribution')
+    expect(screen.getByRole('link', { name: 'www.esv.org' })).toHaveAttribute(
+      'href',
+      'https://www.esv.org',
+    )
     expect(await screen.findAllByText('38')).toHaveLength(2)
     const numberless = screen.getAllByText('A line with no number.')
     expect(numberless).toHaveLength(2)
@@ -409,15 +416,21 @@ describe('the case solved (#6, 03c)', () => {
     expect(screen.getByText(/The man on the bed was Ahab/)).toBeInTheDocument()
   })
 
-  it('the reveal shows the stub’s line under each passage, and the failure line when the service refuses', async () => {
+  it('the reveal shows the failure line under each passage when the proxy cannot be reached, or refuses', async () => {
+    // The default service asks the proxy, and no test reaches the network (src/test/setup.ts).
     const { unmount } = render(<App />)
     openCase(/The valley/)
     solveTheValley()
     expect(
-      await screen.findAllByText(
-        'The passage appears here once the translation service is connected.',
+      await screen.findByText(
+        'The passage couldn’t be fetched. Read 1 Samuel 17:17–18 in your own Bible.',
       ),
-    ).toHaveLength(2)
+    ).toBeInTheDocument()
+    expect(
+      await screen.findByText(
+        'The passage couldn’t be fetched. Read 1 Samuel 17:38–51 in your own Bible.',
+      ),
+    ).toBeInTheDocument()
     expect(document.querySelectorAll('.passage sup')).toHaveLength(0)
     unmount()
     history.replaceState(null, '')

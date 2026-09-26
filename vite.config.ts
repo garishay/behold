@@ -29,6 +29,18 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: { cacheName: 'cases', expiration: { maxEntries: 200 } },
           },
+          // A passage the reveal fetched through the proxy (#3) is kept too, so a case once
+          // closed reads offline: at most eight passages, a month each — within the ESV's
+          // allowance of five hundred verses stored locally (Gate 04 A4). An error is never
+          // cached; the rule keeps only a reply that came back whole.
+          {
+            urlPattern: /^https:\/\/behold-esv\.[^/]+\.workers\.dev\/passage\?/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'passages',
+              expiration: { maxEntries: 8, maxAgeSeconds: 30 * 24 * 60 * 60 },
+            },
+          },
         ],
       },
       manifest: {
