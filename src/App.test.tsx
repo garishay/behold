@@ -29,23 +29,26 @@ const numbered: PassageService = () =>
     ],
   })
 
-/** The tutorial played through: every spot tapped, every face and blank filled right. */
+/** The tutorial's answers, faces and blanks. */
+const valleyAnswers: [string, string][] = [
+  ['d1', 'David'],
+  ['d2', 'Goliath'],
+  ['t1', 'ten'],
+  ['t2', 'commander'],
+  ['t3', 'six'],
+  ['t4', 'sling'],
+  ['t5', 'Goliath'],
+]
+
+/** The tutorial played through: every spot with a word tapped, every slot filled right, closed. */
 const solveTheValley = () => {
   for (const s of ['boy', 'giant', 'brook', 'armor', 'basket']) tapSpot(s)
   tab(/Think/)
-  const answers: [string, string][] = [
-    ['d1', 'David'],
-    ['d2', 'Goliath'],
-    ['t1', 'cheeses'],
-    ['t2', 'armor'],
-    ['t3', 'five'],
-    ['t4', 'sling'],
-    ['t5', 'sword'],
-  ]
-  for (const [id, word] of answers) {
+  for (const [id, word] of valleyAnswers) {
     chip(word)
     slot(id)
   }
+  fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
 }
 
 beforeEach(() => {
@@ -97,7 +100,7 @@ describe('the case screen explored (#6, 03b)', () => {
       'Papers',
     ])
     expect(screen.getByText('Tap the boy with the sling.')).toBeInTheDocument()
-    expect(screen.getByText('The valley · 0 of 6 things found here')).toBeInTheDocument()
+    expect(screen.getByText('The valley · 0 of 7 things found here')).toBeInTheDocument()
     expect(screen.getByText('Tap anything that looks like it matters.')).toBeInTheDocument()
     expect(screen.getByText('Nothing yet. Tap things in the picture.')).toBeInTheDocument()
     expect(screen.queryByRole('group')).not.toBeInTheDocument()
@@ -107,9 +110,9 @@ describe('the case screen explored (#6, 03b)', () => {
     render(<App />)
     openCase(/The valley/)
     tapSpot('boy')
-    expect(screen.getByText(/A shepherd boy, sling still swinging/)).toBeInTheDocument()
+    expect(screen.getByText(/A shepherd boy in a plain tunic/)).toBeInTheDocument()
     expect(screen.getByText(/Found:/)).toHaveTextContent('Found: David, sling')
-    expect(screen.getByText('The valley · 1 of 6 things found here')).toBeInTheDocument()
+    expect(screen.getByText('The valley · 1 of 7 things found here')).toBeInTheDocument()
     expect(screen.getByText(/Open Think at the top/)).toBeInTheDocument()
     expect(chips().map((c) => c.textContent)).toEqual(['David', 'sling'])
     expect(chips().every((c) => c.classList.contains('is-new'))).toBe(true)
@@ -135,13 +138,29 @@ describe('the case screen explored (#6, 03b)', () => {
     tapSpot('cord')
     expect(screen.getByText(/Servants stretching a cord/)).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Bedchamber' }))
-    expect(screen.getByText('Bedchamber · 0 of 8 things found here')).toBeInTheDocument()
+    expect(screen.getByText('Bedchamber · 0 of 7 things found here')).toBeInTheDocument()
     expect(screen.getByText('Tap anything that looks like it matters.')).toBeInTheDocument()
     expect(screen.getByRole('img', { name: 'Bedchamber' })).toBeInTheDocument()
     const zoom = screen.getByRole('button', { name: 'Zoom' })
     expect(zoom).toHaveAttribute('aria-pressed', 'false')
     fireEvent.click(zoom)
     expect(zoom).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  // Spots are drawn largest first, so the smaller of two overlapping boxes is on top and takes the
+  // tap: the seal over the papyrus and the pouch, the sheath inside the giant (#26 [7]).
+  it('draws a moment’s spots largest first, whatever the file’s order', () => {
+    const { unmount } = render(<App />)
+    openCase(/The vineyard/)
+    moment('Bedchamber')
+    const drawn = () =>
+      [...document.querySelectorAll<SVGElement>('[data-spot]')].map((r) => r.dataset.spot)
+    expect(drawn()).toEqual(['woman', 'window', 'man-bed', 'tray', 'sheets', 'purse', 'seal'])
+    unmount()
+    history.replaceState(null, '')
+    render(<App />)
+    openCase(/The valley/)
+    expect(drawn().indexOf('sheath')).toBeGreaterThan(drawn().indexOf('giant'))
   })
 
   it('a paper opens over the screen on the tap, and its copy lands in Papers', () => {
@@ -226,7 +245,7 @@ describe('the case screen explored (#6, 03b)', () => {
   it('a reload inside a case reopens it from the history entry', () => {
     history.replaceState({ case: 'vineyard' }, '')
     render(<App />)
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/A king stands/)
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/A man walks a vineyard/)
   })
 
   // The service worker's rule caches what is requested, so a case once opened must request every
@@ -326,7 +345,45 @@ describe('the case solved (#6, 03c)', () => {
     expect(screen.getByRole('tab', { name: /Think/ })).toHaveTextContent('1/7')
   })
 
-  it('the tutorial closes itself on the last right answer, and the reveal reads the passages as verses', async () => {
+  // The tutorial goes all the way to rule 5 (#26 [4]): a ✓ only on the slots its steps name, Close
+  // the case once they are done, and the same coarse check as every case.
+  it('the tutorial marks only its guided slots and closes on Close the case, like any case', () => {
+    render(<App />)
+    openCase(/The valley/)
+    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket']) tapSpot(s)
+    tab(/Think/)
+    for (const [id, word] of valleyAnswers.slice(0, 3)) {
+      chip(word)
+      slot(id)
+    }
+    expect(screen.queryByRole('button', { name: /Close the case/ })).not.toBeInTheDocument()
+    expect(document.querySelector('[data-slot="d1"]')).toHaveClass('is-right')
+    expect(document.querySelector('[data-slot="d2"]')).not.toHaveClass('is-right')
+    expect(document.querySelector('[data-slot="t1"]')).not.toHaveClass('is-right')
+    chip('sling')
+    slot('t4')
+    expect(document.querySelector('[data-slot="t4"]')).toHaveClass('is-right')
+    expect(screen.getByText(/then Close the case at the end of Think/)).toBeInTheDocument()
+    for (const [id, word] of [
+      ['t2', 'brothers'],
+      ['t3', 'six'],
+      ['t5', 'Goliath'],
+    ] as const) {
+      chip(word)
+      slot(id)
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(screen.getByRole('status')).toHaveTextContent('One or two are wrong.')
+    expect(screen.queryByRole('heading', { name: 'The case is closed.' })).not.toBeInTheDocument()
+    slot('t2')
+    chip('commander')
+    slot('t2')
+    expect(document.querySelector('[data-slot="t2"]')).not.toHaveClass('is-right')
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(screen.getByRole('heading', { name: 'The case is closed.' })).toBeInTheDocument()
+  })
+
+  it('the tutorial closed, the reveal reads the passages as verses', async () => {
     render(<App passages={numbered} />)
     openCase(/The valley/)
     solveTheValley()
@@ -336,6 +393,7 @@ describe('the case solved (#6, 03c)', () => {
     expect(document.querySelector('.bank')).toBeNull()
     // Each passage under its label, marked with its translation; the notice and its link beneath
     // them (#3).
+    expect(screen.getByRole('heading', { name: '1 Samuel 17:4 ESV' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '1 Samuel 17:17–18 ESV' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '1 Samuel 17:38–51 ESV' })).toBeInTheDocument()
     expect(screen.getByText(/^Scripture quotations are from the ESV/)).toHaveClass('attribution')
@@ -343,9 +401,9 @@ describe('the case solved (#6, 03c)', () => {
       'href',
       'https://www.esv.org',
     )
-    expect(await screen.findAllByText('38')).toHaveLength(2)
+    expect(await screen.findAllByText('38')).toHaveLength(3)
     const numberless = screen.getAllByText('A line with no number.')
-    expect(numberless).toHaveLength(2)
+    expect(numberless).toHaveLength(3)
     expect(numberless[0].querySelector('sup')).toBeNull()
     expect(screen.getAllByText(/One thing\./)[0].querySelector('sup')).toHaveTextContent('38')
     fireEvent.click(screen.getByRole('button', { name: 'Back to cases' }))
@@ -355,15 +413,15 @@ describe('the case solved (#6, 03c)', () => {
   it('a case without steps closes on the submit, and says how far off it was', () => {
     render(<App />)
     openCase(/The vineyard/)
-    for (const s of ['man-rows', 'cord', 'stain', 'balcony']) tapSpot(s)
+    for (const s of ['man-rows', 'cord', 'prophet', 'balcony']) tapSpot(s)
     moment('Bedchamber')
-    for (const s of ['tray', 'seal', 'purse', 'lamp']) tapSpot(s)
+    for (const s of ['window', 'seal', 'purse']) tapSpot(s)
     fireEvent.click(screen.getByRole('button', { name: 'Close' }))
     moment('The gate')
-    for (const s of ['stones', 'accusers', 'letter', 'law']) tapSpot(s)
+    for (const s of ['letter', 'law']) tapSpot(s)
     fireEvent.click(screen.getByRole('button', { name: 'Close' }))
     tab(/Think/)
-    expect(screen.getByRole('button', { name: /Close the case — 0 of 13 filled/ })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /Close the case — 0 of 11 filled/ })).toBeDisabled()
     for (const [id, word] of [
       ['p1', 'Ahab'],
       ['p2', 'Jezebel'],
@@ -379,13 +437,11 @@ describe('the case solved (#6, 03c)', () => {
     tile('The vineyard')
     orderSlot(2)
     const fills: [string, string][] = [
-      ['s1', 'silver'],
+      ['s1', 'vineyard'],
       ['s2', 'garden'],
-      ['s3', 'lamp'],
-      ['s4', 'would not eat'],
-      ['s5', 'Jezebel'],
-      ['s6', 'two'],
-      ['s7', 'stoned'],
+      ['s3', 'silver'],
+      ['s4', 'Jezebel'],
+      ['s5', 'the king'],
       ['v1', 'killed'],
       ['v2', 'taken possession'],
     ]
@@ -400,7 +456,7 @@ describe('the case solved (#6, 03c)', () => {
     expect(screen.queryByRole('heading', { name: 'The case is closed.' })).not.toBeInTheDocument()
     for (const [id, word] of [
       ['s1', 'garden'],
-      ['s2', 'silver'],
+      ['s2', 'vineyard'],
     ] as const) {
       slot(id)
       chip(word)
@@ -426,11 +482,12 @@ describe('the case solved (#6, 03c)', () => {
         'The passage couldn’t be fetched. Read 1 Samuel 17:17–18 in your own Bible.',
       ),
     ).toBeInTheDocument()
-    expect(
-      await screen.findByText(
-        'The passage couldn’t be fetched. Read 1 Samuel 17:38–51 in your own Bible.',
-      ),
-    ).toBeInTheDocument()
+    for (const label of ['1 Samuel 17:4', '1 Samuel 17:38–51'])
+      expect(
+        await screen.findByText(
+          `The passage couldn’t be fetched. Read ${label} in your own Bible.`,
+        ),
+      ).toBeInTheDocument()
     expect(document.querySelectorAll('.passage sup')).toHaveLength(0)
     unmount()
     history.replaceState(null, '')

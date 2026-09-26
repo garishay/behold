@@ -3,6 +3,16 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.5.0 — Gate 05, case design (#26)
+
+- **05a — a case is solved by looking** (#32): `docs/case-design.md`, the six rules a case is
+  designed to, linked from the world rules and the case file format; the tutorial marks right
+  only the slots its guided steps name and closes on Close the case, the same coarse check as
+  every case; a moment's spots drawn largest first, so the smaller of two overlapping boxes takes
+  the tap; the validator's two checks, a blank's kind with its answer and two rivals in the case
+  and one name more than the faces; the valley and the vineyard rewritten to the rules, the
+  valley's passages gaining 1 Samuel 17:4 and its headline blank aimed at 17:51.
+
 ## v0.4.0 — Gate 04, ESV proxy (#3)
 
 - **04a — the Worker, its tests, its deploy, the one table held** (#22): `worker/`, the ESV proxy

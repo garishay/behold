@@ -2,10 +2,10 @@
  * The validator (Gate 02 A6, layer 2): the checks the types cannot make — a reference resolving,
  * a word reachable, a count, a box inside its picture, a string with words in it — over a case
  * and one of its texts. One sentence per problem; an empty list is a valid case. The test job
- * runs it over every registered case (`cases.test.ts`); the checks are A6's list, (a) to (i),
- * and the reference is `docs/case-file.md`.
+ * runs it over every registered case (`cases.test.ts`); the checks are A6's list, (a) to (i), and
+ * the two of #26 [1], (j) and (k); the reference is `docs/case-file.md`.
  */
-import type { CaseStructure, CaseText, Part, Passage } from './types.ts'
+import type { CaseStructure, CaseText, Kind, Part, Passage } from './types.ts'
 
 /** An id (docs/case-file.md, Ids). */
 const slug = /^[a-z][a-z0-9-]*$/
@@ -184,6 +184,20 @@ export function validate(structure: CaseStructure, text: CaseText<CaseStructure>
         fail(`text.blocks.${id}.parts.${i}.t is empty`)
     })
   }
+
+  // (j) Looking is cheaper than guessing (docs/case-design.md, rule 1): a blank's kind has at
+  // least three words in the case — its answer and two rivals — so no blank falls to its kind.
+  const count = (kind: Kind) => [...words].filter((w) => structure.words[w] === kind).length
+  for (const [blank, answer] of blocks.flatMap((b) => Object.entries(b.blanks))) {
+    const kind = structure.words[answer]
+    if (kind !== undefined && count(kind) < 3)
+      fail(`blank ${q(blank)} takes a ${q(kind)} word, and the case has ${count(kind)}, not three`)
+  }
+
+  // (k) A face has a rival too: one name more than the faces, so the last is not filled by
+  // elimination (#26 [1]).
+  if (faces.length > 0 && count('name') <= faces.length)
+    fail(`the case has ${count('name')} names for ${faces.length} faces, not one more`)
 
   return problems
 }

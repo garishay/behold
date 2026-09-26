@@ -1,6 +1,6 @@
 # World rules
 
-The accuracy and art constraints every picture and every case in Behold is checked against. Read before writing a case or generating a picture. Checked at two points: when a picture is accepted into a case, and when a case is reviewed against its passage.
+The accuracy and art constraints every picture and every case in Behold is checked against. Read before writing a case or generating a picture. Checked at two points: when a picture is accepted into a case, and when a case is reviewed against its passage. What makes a case a puzzle — the rules a case is designed to — is `docs/case-design.md`.
 
 Two principles sit above everything here.
 
