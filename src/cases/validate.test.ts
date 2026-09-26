@@ -79,7 +79,7 @@ describe('validate (Gate 02 A6)', () => {
   })
 
   it('(c) nine spots in a moment', () => {
-    const more = ['eight', 'nine'].map((id) => ({
+    const more = ['seven', 'eight', 'nine'].map((id) => ({
       id,
       box: [0, 0, 1, 1] as const,
       words: [],

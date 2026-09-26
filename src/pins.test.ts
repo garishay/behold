@@ -64,3 +64,10 @@ describe('the stylesheet’s one ruled measure (Gate 03 [6])', () => {
     expect(bank).toMatch(/padding:[^;]*calc\(24px \+ env\(safe-area-inset-bottom\)\)/)
   })
 })
+
+describe('the picture’s spots (#37)', () => {
+  it('draw no tap highlight, so a tap never shows a spot’s box', () => {
+    const rule = /\.stage svg,\s*\.stage rect \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    expect(rule).toMatch(/-webkit-tap-highlight-color: transparent/)
+  })
+})
