@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { cases } from './cases/index.ts'
+import { fetchedPassages } from './passages/proxy.ts'
 import type { PassageService } from './passages/service.ts'
-import { fixedPassages } from './passages/stub.ts'
 import { picture } from './player/pictures.ts'
 import { Player } from './player/Player.tsx'
 import { fresh, type Progress } from './player/state.ts'
@@ -25,7 +25,7 @@ const entry = (state: unknown): Entry | null =>
     : null
 
 interface AppProps {
-  /** The passage service the reveal reads through; the stub until the proxy (#3). */
+  /** The passage service the reveal reads through; the proxy (#3), or a test's own. */
   passages?: PassageService
 }
 
@@ -35,7 +35,7 @@ interface AppProps {
  * the device and restored on the next visit. An open case is a history entry — no route, no URL —
  * so back returns to the cards, and leaves the app only from them.
  */
-export default function App({ passages = fixedPassages }: AppProps) {
+export default function App({ passages = fetchedPassages }: AppProps) {
   const [saved, setSaved] = useState<Saved>(() => load(cases))
   const [open, setOpen] = useState<string | null>(() => entry(history.state)?.case ?? null)
   const [restarts, setRestarts] = useState(0)

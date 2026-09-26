@@ -416,15 +416,21 @@ describe('the case solved (#6, 03c)', () => {
     expect(screen.getByText(/The man on the bed was Ahab/)).toBeInTheDocument()
   })
 
-  it('the reveal shows the stub’s line under each passage, and the failure line when the service refuses', async () => {
+  it('the reveal shows the failure line under each passage when the proxy cannot be reached, or refuses', async () => {
+    // The default service asks the proxy, and no test reaches the network (src/test/setup.ts).
     const { unmount } = render(<App />)
     openCase(/The valley/)
     solveTheValley()
     expect(
-      await screen.findAllByText(
-        'The passage appears here once the translation service is connected.',
+      await screen.findByText(
+        'The passage couldn’t be fetched. Read 1 Samuel 17:17–18 in your own Bible.',
       ),
-    ).toHaveLength(2)
+    ).toBeInTheDocument()
+    expect(
+      await screen.findByText(
+        'The passage couldn’t be fetched. Read 1 Samuel 17:38–51 in your own Bible.',
+      ),
+    ).toBeInTheDocument()
     expect(document.querySelectorAll('.passage sup')).toHaveLength(0)
     unmount()
     history.replaceState(null, '')
