@@ -6,9 +6,11 @@ import {
   chooseOrderSlot,
   chooseSlot,
   chooseWord,
+  closable,
   filled,
   fresh,
   kindOf,
+  marked,
   nothing,
   step,
   submit,
@@ -24,7 +26,7 @@ describe('the model (#6)', () => {
     expect(p.moment).toBe('vineyard')
     expect(p.order).toEqual([null, null, null])
     expect(filled(vineyard, p)).toBe(0)
-    expect(total(vineyard)).toBe(3 + 1 + 9)
+    expect(total(vineyard)).toBe(3 + 1 + 7)
     expect(total(valley)).toBe(2 + 5)
   })
 
@@ -100,17 +102,19 @@ describe('the model (#6)', () => {
       fills: { s1: 'silver' },
     }
     expect(filled(vineyard, p)).toBe(3)
-    expect(wrong(vineyard, p)).toBe(2 + 0 + 9)
+    expect(wrong(vineyard, p)).toBe(2 + 0 + 7)
     // A partial order is nothing filled and one thing wrong — never a thing filled at the first
     // tile, or the submit could open with the order half done (the owner's note at 03a's open).
     const partial = { ...fresh(vineyard), order: ['bedchamber', null, null] }
     expect(filled(vineyard, partial)).toBe(0)
-    expect(wrong(vineyard, partial)).toBe(3 + 1 + 9)
+    expect(wrong(vineyard, partial)).toBe(3 + 1 + 7)
     p = { ...p, order: ['gate', 'bedchamber', 'vineyard'] }
-    expect(wrong(vineyard, p)).toBe(2 + 1 + 9)
+    expect(wrong(vineyard, p)).toBe(2 + 1 + 7)
   })
 
-  it('the guided case steps on as each until is met, and closes itself when all is right', () => {
+  // The tutorial goes all the way to rule 5 (#26 [4]): it steps on as each until is met, marks
+  // only the slots its steps name, and — all right — waits for the submit like any other case.
+  it('the guided case steps on as each until is met, then closes only on the submit', () => {
     let p = fresh(valley)
     expect(step(valley, p)?.id).toBe('step1')
     expect(thinkStep(valley, p)).toBe(false)
@@ -119,14 +123,24 @@ describe('the model (#6)', () => {
     expect(thinkStep(valley, p)).toBe(true)
     p = chooseSlot(valley, p, chooseWord(valley, p, nothing, 'david').selection, 'd1').progress
     expect(step(valley, p)?.id).toBe('step3')
+    expect(closable(valley, p)).toBe(false)
     p = chooseSlot(valley, p, chooseWord(valley, p, nothing, 'sling').selection, 't4').progress
     expect(step(valley, p)?.id).toBe('step4')
+    expect(closable(valley, p)).toBe(true)
+    expect(['d1', 't4', 'd2', 't1'].map((slot) => marked(valley, slot))).toEqual([
+      true,
+      true,
+      false,
+      false,
+    ])
     for (const spot of ['giant', 'brook', 'armor', 'basket']) p = tap(valley, p, spot).progress
-    const answers = { d2: 'goliath', t1: 'cheeses', t2: 'armor', t3: 'five', t5: 'sword' }
-    for (const [slot, word] of Object.entries(answers)) {
-      expect(p.solved).toBe(false)
+    const answers = { d2: 'goliath', t1: 'ten', t2: 'commander', t3: 'six', t5: 'goliath' }
+    for (const [slot, word] of Object.entries(answers))
       p = chooseSlot(valley, p, chooseWord(valley, p, nothing, word).selection, slot).progress
-    }
+    expect(wrong(valley, p)).toBe(0)
+    expect(p.solved).toBe(false)
+    expect(step(valley, p)?.id).toBe('step4')
+    p = submit(valley, p)
     expect(p.solved).toBe(true)
     expect(step(valley, p)).toBeUndefined()
   })
@@ -138,17 +152,15 @@ describe('the model (#6)', () => {
       order: ['bedchamber', 'gate', 'vineyard'],
       fills: {
         s1: 'garden',
-        s2: 'silver',
+        s2: 'vineyard',
         s3: 'inheritance',
-        s4: 'would-not-eat',
-        s5: 'jezebel',
-        s6: 'two',
-        s7: 'stoned',
+        s4: 'jezebel',
+        s5: 'the-king',
         v1: 'killed',
         v2: 'taken-possession',
       },
     }
-    p = { ...p, ...right, fills: { ...right.fills, s2: 'lamp' } }
+    p = { ...p, ...right, fills: { ...right.fills, s2: 'garden' } }
     expect(filled(vineyard, p)).toBe(total(vineyard))
     expect(p.solved).toBe(false)
     expect(submit(vineyard, p).solved).toBe(false)

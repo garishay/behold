@@ -39,9 +39,11 @@ describe('validate (Gate 02 A6)', () => {
     expect(validate({ ...valley, id: 'Valley' }, en)).toEqual(['case "Valley" is not a slug'])
   })
 
+  // A face declared twice would also leave the names one short of a rival for each (k), so the
+  // step stands in for it here.
   it('(a) an id declared twice within its kind', () => {
-    const twice: CaseStructure = { ...valley, faces: [...valley.faces, valley.faces[0]] }
-    expect(validate(twice, en)).toEqual(['face "d1" is declared twice'])
+    const twice: CaseStructure = { ...valley, steps: [valley.steps[0], ...valley.steps] }
+    expect(validate(twice, en)).toEqual(['step "step1" is declared twice'])
   })
 
   // A face id that is also a blank id would make a step's `filled` name both (#6). The blank
@@ -77,7 +79,7 @@ describe('validate (Gate 02 A6)', () => {
   })
 
   it('(c) nine spots in a moment', () => {
-    const more = ['seven', 'eight', 'nine'].map((id) => ({
+    const more = ['eight', 'nine'].map((id) => ({
       id,
       box: [0, 0, 1, 1] as const,
       words: [],
@@ -137,7 +139,9 @@ describe('validate (Gate 02 A6)', () => {
   })
 
   it('(c) a cite outside the passages — the basket with the 17:17–18 range removed', () => {
-    const one: CaseStructure = { ...valley, passages: [valley.passages[1]] }
+    const [giant, basket, rest] = valley.passages
+    const one: CaseStructure = { ...valley, passages: [giant, rest] }
+    expect(basket).toEqual({ book: '1SA', chapter: 17, from: 17, to: 18 })
     expect(validate(one, en)).toEqual(['spot "basket" cites "17:17-18", outside the passages'])
   })
 
@@ -269,5 +273,30 @@ describe('validate (Gate 02 A6)', () => {
       blocks: { ...en.blocks, note: { heading: 'A note', parts: [{ t: '  ' }] } },
     }
     expect(validate(note, noteText)).toEqual(['text.blocks.note.parts.0.t is empty'])
+  })
+
+  // (j) and (k) are #26 [1]'s: a blank's kind has its answer and two rivals in the case, and the
+  // names outnumber the faces.
+  it('(j) a blank whose kind has fewer than three words in the case — the valley without five', () => {
+    const words = Object.fromEntries(Object.entries(valley.words).filter(([w]) => w !== 'five'))
+    const noFive: CaseStructure = { ...withSpot('brook', { words: ['stones'] }), words }
+    expect(validate(noFive, en)).toEqual([
+      'blank "t1" takes a "number" word, and the case has 2, not three',
+      'blank "t3" takes a "number" word, and the case has 2, not three',
+    ])
+  })
+
+  it('(k) no more names than faces — the vineyard without Elijah', () => {
+    const [first, ...others] = vineyard.moments
+    const spots = first.spots.map((s) => (s.id === 'prophet' ? { ...s, words: ['killed'] } : s))
+    const words = Object.fromEntries(Object.entries(vineyard.words).filter(([w]) => w !== 'elijah'))
+    const noElijah: CaseStructure = {
+      ...vineyard,
+      words,
+      moments: [{ ...first, spots }, ...others],
+    }
+    expect(validate(noElijah, vineyardEn)).toEqual([
+      'the case has 3 names for 3 faces, not one more',
+    ])
   })
 })
