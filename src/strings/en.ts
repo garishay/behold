@@ -20,7 +20,8 @@ export const strings = {
   title: 'Behold',
   kicker: 'Bible Mystery Game',
   // The title screen's epigraph ships in the bundle by Gate 01 A6's exception; it is app copy, not
-  // a component's sentence, and its notice is Crossway's, verbatim.
+  // a component's sentence, and its notice is Crossway's, verbatim. The reveal shows the notice
+  // again under the passages (#3).
   epigraph:
     'It is the glory of God to conceal things, but the glory of kings is to search things out.',
   epigraphReference: 'Proverbs 25:2, ESV',
@@ -85,5 +86,9 @@ export const strings = {
   loadingPassage: (label: string) => `Loading ${label}…`,
   passageUnavailable: (label: string) =>
     `The passage couldn’t be fetched. Read ${label} in your own Bible.`,
+  // The translation's mark beside each passage's label, and the link the ESV's conditions of
+  // use ask for on every page that shows its text (#3).
+  translations: { ESV: 'ESV' },
+  esvLink: { text: 'www.esv.org', href: 'https://www.esv.org' },
   backToCases: 'Back to cases',
 } as const satisfies Record<string, Copy>

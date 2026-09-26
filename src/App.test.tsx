@@ -334,8 +334,15 @@ describe('the case solved (#6, 03c)', () => {
     expect(screen.getByText(/The boy was David/)).toBeInTheDocument()
     expect(screen.queryByRole('tab')).not.toBeInTheDocument()
     expect(document.querySelector('.bank')).toBeNull()
-    expect(screen.getByText('1 Samuel 17:17–18')).toBeInTheDocument()
-    expect(screen.getByText('1 Samuel 17:38–51')).toBeInTheDocument()
+    // Each passage under its label, marked with its translation; the notice and its link beneath
+    // them (#3).
+    expect(screen.getByRole('heading', { name: '1 Samuel 17:17–18 ESV' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '1 Samuel 17:38–51 ESV' })).toBeInTheDocument()
+    expect(screen.getByText(/^Scripture quotations are from the ESV/)).toHaveClass('attribution')
+    expect(screen.getByRole('link', { name: 'www.esv.org' })).toHaveAttribute(
+      'href',
+      'https://www.esv.org',
+    )
     expect(await screen.findAllByText('38')).toHaveLength(2)
     const numberless = screen.getAllByText('A line with no number.')
     expect(numberless).toHaveLength(2)
