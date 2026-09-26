@@ -103,6 +103,5 @@ Run before a picture enters a case.
 
 - Tutorial: the boy and the shield-bearer wear gold headbands — commoners wear plain cloth.
 - Tutorial: the armor heap is chain mail — regenerate as scale.
-- Bedchamber: the pouch spills coins — regenerate as cut silver with a balance scale on the table.
 
 Prototype pictures are accepted as-is for testing; each item above becomes an `art` Issue before season one ships.
