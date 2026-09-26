@@ -23,10 +23,10 @@ export const en = {
     'man-bed':
       'A man in a wine-red robe and a gold circlet lies with his face turned to the wall, his back to the room.',
     tray: 'Bread, figs, and a cup of wine beside the bed. Untouched.',
-    woman: 'A woman in teal and a gold headdress at the table. One hand rests on a gold seal.',
-    seal: 'A gold seal on the table, under the woman’s hand.',
+    woman: 'A woman in teal and a gold headdress at the table.',
+    seal: 'A gold signet ring with a dark stone beside her hand. On the corner of the papyrus, a lump of red clay carries its impression.',
     sheets: 'Blank sheets of papyrus and a reed pen on the table.',
-    purse: 'A leather pouch tipped open on the table, silver spilling out.',
+    purse: 'A leather pouch on the table, tied shut at the neck and heavy with silver.',
     crowd: 'The people of the city, gathered at the gate. Nobody is eating.',
     stones: 'Through the gate, outside the city, a heap of stones on open ground.',
     seated:

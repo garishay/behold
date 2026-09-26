@@ -3,6 +3,15 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.5.1 — The bedchamber's final picture (#28)
+
+- **28a — the seal found, the coins gone** (#39): the bedchamber edited by the owner and fitted to
+  900 × 1125, a large gold signet ring beside the woman's hand and its impression in red clay on
+  the papyrus, the pouch closed on the table; the boxes re-measured, the seal's padded so a tap
+  just off the ring or the clay still takes it and kept the smallest box it overlaps; the seal's,
+  the pouch's, and the woman's captions for what the picture now shows; world rules §8's
+  bedchamber line gone.
+
 ## v0.5.0 — Gate 05, case design (#26)
 
 - **05a — a case is solved by looking** (#32): `docs/case-design.md`, the six rules a case is

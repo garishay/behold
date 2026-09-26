@@ -62,4 +62,18 @@ describe('the case registry (Gate 02 A1, A5)', () => {
     for (const [language, text] of Object.entries(c.text))
       expect(validate(c.structure, text), language).toEqual([])
   })
+
+  // The vineyard turns on the seal, and its box is padded so a near-miss still counts; it must be
+  // the smallest box it overlaps, so it is drawn on top and takes the tap (#28 [1]).
+  it('the bedchamber’s seal is smaller than every box it overlaps', () => {
+    const vineyard = cases.find((c) => c.structure.id === 'vineyard')!.structure
+    const spots = vineyard.moments.find((m) => m.id === 'bedchamber')!.spots
+    const seal = spots.find((s) => s.id === 'seal')!
+    const area = ([, , w, h]: readonly number[]) => w * h
+    const overlaps = ([l, t, w, h]: readonly number[], [L, T, W, H]: readonly number[]) =>
+      l < L + W && L < l + w && t < T + H && T < t + h
+    const over = spots.filter((s) => s.id !== 'seal' && overlaps(s.box, seal.box))
+    expect(over.map((s) => s.id).sort()).toEqual(['sheets', 'woman'])
+    for (const s of over) expect(area(s.box), s.id).toBeGreaterThan(area(seal.box))
+  })
 })
