@@ -15,6 +15,10 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
 - **05b — the giant's sword named** (#36): the valley's giant caption names the sheathed sword
   across his back, in the owner's words, so the evidence for the headline blank is findable
   before playtest 2 while the picture's edit waits (#34, #35).
+- **05c — the sheath folded into the giant** (#38): the giant's tap finds his sword, the sheath
+  spot and its caption gone, six spots in the valley; no tap highlight on the picture's spots, so
+  a tap never draws a spot's box; the case design rules' note on a spot inside another's box
+  (#37).
 
 ## v0.4.0 — Gate 04, ESV proxy (#3)
 
