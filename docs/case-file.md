@@ -9,7 +9,8 @@ lives in code, and scripture is never in either file: the reveal fetches it by r
 (`CLAUDE.md`, Guardrails).
 
 The two prototype cases, the tutorial (`valley`) and case two (`vineyard`), are the worked examples;
-read them beside this page.
+read them beside this page. What a case must do to be a puzzle — its blanks, rivals, captions, and
+brief — is `docs/case-design.md`.
 
 ## Where a case lives
 
@@ -50,7 +51,7 @@ export const valley = { … } as const satisfies CaseStructure
 | `faces`    | the who-is-who slots: `id`, `picture` (a portrait in the picture folder), `answer` (a name word)                                                                                                                                                                                                                                   |
 | `order?`   | the moment ids in true order, present when the case asks what happened first                                                                                                                                                                                                                                                       |
 | `blocks`   | the prose with blanks — the account, and the verdict where the case has one: `id`, `blanks` (blank id → the word that fills it)                                                                                                                                                                                                    |
-| `steps?`   | the tutorial's steps: `id`, `until?` — `{ tapped: <spot> }` or `{ filled: <face or blank> }`, meaning filled with its answer; the last step has no `until`. A case with steps is played guided, each answer checked as it lands and the case closing itself when all are right; a case without steps closes on the player's submit |
+| `steps?`   | the tutorial's steps: `id`, `until?` — `{ tapped: <spot> }` or `{ filled: <face or blank> }`, meaning filled with its answer; the last step has no `until`. A case with steps is played guided: a ✓ lands only on the faces and blanks its steps name, and its final step points at Close the case (`docs/case-design.md`, rule 5) |
 
 Derived, never stored: a blank's kind is its answer's; a case is the tutorial when it has steps;
 the paper ids are those the spots open; a step whose `until` is `filled` is a Think step.
@@ -103,13 +104,15 @@ the app carries no book-name table, and the label the player sees is the text fi
 A spot's `cites` names the verses that put the thing in the picture: `17:40`, or `17:38-39` for a
 run of verses, always within one of the case's passages. When a case's passages span more than
 one book, every cite carries its book in front — `1KI 21:1` — and when they do not, none does.
-The cite is optional: a thing no verse names — the empty chairs at the gate — carries none, and
-the reviewer reads it by hand. A document that quotes scripture from outside the passage, as the
-vineyard's Law scroll paraphrases Deuteronomy and Leviticus, carries none either; whether every
-spot must cite is the authoring gate's rule (#5).
+The cite is optional for a document that quotes scripture from outside the passage, as the
+vineyard's Law scroll paraphrases Deuteronomy and Leviticus: it carries none, and the reviewer
+reads it by hand. A thing no verse names at all is not a spot; it stays in the picture as set
+dressing (`docs/world-rules.md`, _The text decides_). Whether every spot must cite is the
+authoring gate's rule (#5).
 
-The tutorial's basket is the reason the tutorial has two passages: the loaves and cheeses are
-1 Samuel 17:17–18, and the account asks for them, so the reveal shows 17:17–18 before 17:38–51.
+The account is the reason the tutorial has three passages: the champion's name and height are
+1 Samuel 17:4, and the loaves and cheeses are 17:17–18, and the account asks for both, so the
+reveal shows 17:4 and 17:17–18 before 17:38–51.
 
 ## Pictures
 
@@ -142,7 +145,9 @@ Three layers, from mechanical to read.
    order, when present, is the moments in some order; every step but the last has an `until` and
    the last has none, and an `until` names a spot, or a face or a blank; no text is empty —
    whitespace alone is empty, but for a run of text between two blanks, which may be the space
-   between them. `src/cases/validate.test.ts` holds one broken fixture per check, each failing
+   between them; a blank's kind has at least three words in the case, and the case has one name
+   more than it has faces (`docs/case-design.md`, rule 1). `src/cases/validate.test.ts` holds one
+   broken fixture per check, each failing
    the check it names and no other; the registry test, `src/cases/cases.test.ts`, holds the
    pictures, the registry's ids, and the guided case first.
 3. **Review**, by reading: every spot named or implied by the passage, with the cites as the
@@ -157,4 +162,5 @@ CaseStructure`, and `en.ts` exporting the text `satisfies CaseText<typeof <id>>`
 3. Add the case to `src/cases/index.ts`, in play order.
 4. `npm run typecheck` and `npm run test` — the typecheck reads the keys, the tests read the
    pictures and the validator's list.
-5. Review the case against its passage and the world rules before it ships.
+5. Review the case against its passage, the world rules, and the case design rules before it
+   ships.
