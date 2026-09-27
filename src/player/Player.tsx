@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import type { CaseEntry } from '../cases/index.ts'
+import type { Kind } from '../cases/types.ts'
 import type { PassageService } from '../passages/service.ts'
 import { strings } from '../strings/en.ts'
-import { Bank, type Caption } from './Bank.tsx'
-import { Papers, PaperModal } from './Papers.tsx'
+import { Bank } from './Bank.tsx'
+import { Dock, type Caption } from './Dock.tsx'
+import { PaperModal, PapersSheet } from './Papers.tsx'
 import { prefetch } from './pictures.ts'
 import { Reveal } from './Reveal.tsx'
 import { Stage } from './Stage.tsx'
@@ -26,7 +28,8 @@ import {
 import { sting } from './sting.ts'
 import { Think } from './Think.tsx'
 
-type View = 'moments' | 'think' | 'papers' | 'reveal'
+type View = 'look' | 'solve' | 'reveal'
+type Sheet = 'menu' | 'papers' | null
 
 interface PlayerProps {
   entry: CaseEntry
@@ -42,33 +45,41 @@ const onReveal = (state: unknown) =>
   typeof state === 'object' && state !== null && 'view' in state && state.view === 'reveal'
 
 /**
- * The case screen (#6): the brief as its title, the tabs — Moments, Think, Papers — the
- * tutorial's banner, the view, the word bank at the foot, a paper over it when one opens, and the
- * reveal once the case is closed. The reveal is its own history entry, so the system's back
- * returns from it to the case (Gate 03 [1]). What the player has done is `progress`, kept by the
- * app; what they are in the middle of — the view, a word picked up, the last caption — is this
- * screen's.
+ * The case screen (#6, #24): one phone screen that never scrolls. Two views, Look and Solve,
+ * switched from a bar at the foot, with the menu at its left end — the only chrome on both. Look is
+ * the picture and its caption; Solve is who is who, the account, and the word bank. The brief
+ * opens a fresh case as a card over the picture and lives in the menu after. The reveal is its own
+ * history entry, so the system's back returns from it to the case (Gate 03 [1]); Look and Solve
+ * are not entries, so back from either returns to the cards. What the player has done is
+ * `progress`, kept by the app; what they are in the middle of is this screen's.
  */
 export function Player({ entry, progress, onProgress, onCases, onRestart, passages }: PlayerProps) {
   const { structure: s } = entry
   const text = entry.text.en
-  // A solved case mounts on its reveal when that is the entry on top, else on Think, where its
-  // answers are; a case still open mounts on Moments (review round 1, #21).
+  // A solved case mounts on its reveal when that is the entry on top, else on Solve, where its
+  // answers are; a case still open mounts on Look (review round 1, #21).
   const [view, setView] = useState<View>(() =>
-    progress.solved ? (onReveal(history.state) ? 'reveal' : 'think') : 'moments',
+    progress.solved ? (onReveal(history.state) ? 'reveal' : 'solve') : 'look',
   )
   const [selection, setSelection] = useState(nothing)
   const [caption, setCaption] = useState<Caption | null>(null)
   const [paper, setPaper] = useState<string | null>(null)
+  const [sheet, setSheet] = useState<Sheet>(null)
+  // The brief's card, over the picture of a fresh case until Start or the first tap (#24).
+  const [brief, setBrief] = useState(true)
+  // Words found on Look since Solve was last left: the badge on Solve's button, then ringed in the
+  // bank while Solve is open (#24).
+  const [fresh, setFresh] = useState<readonly string[]>([])
+  const [refused, setRefused] = useState<Kind>()
   const [message, setMessage] = useState('')
   // Every picture of the case is requested as it opens, so the whole case is cached for offline.
   useEffect(() => prefetch(s), [s])
-  // Back from the reveal returns to Think; forward to the reveal's entry returns to the reveal
+  // Back from the reveal returns to Solve; forward to the reveal's entry returns to the reveal
   // while the case is solved. A reveal entry left ahead by a restart names a solution the case no
   // longer has, so it is made a case entry instead (review round 1, #21).
   useEffect(() => {
     const onPop = (e: PopStateEvent) => {
-      if (!onReveal(e.state)) setView((v) => (v === 'reveal' ? 'think' : v))
+      if (!onReveal(e.state)) setView((v) => (v === 'reveal' ? 'solve' : v))
       else if (progress.solved) setView('reveal')
       else history.replaceState({ case: s.id }, '')
     }
@@ -87,7 +98,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   }
   const apply = (o: Outcome) => {
     setSelection(o.selection)
-    setMessage(o.wants === undefined ? '' : strings.blankWants(o.wants))
+    setRefused(o.wants)
     close(o.progress)
   }
   const onTap = (spotId: string) => {
@@ -96,6 +107,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     // The note says "copied to Papers" only when this tap added the paper (review round 3, #20).
     const opened = next.papers.length > progress.papers.length ? spot?.paper : undefined
     setCaption({ spot: spotId, added, paper: opened })
+    setFresh([...fresh, ...added])
     if (spot?.paper !== undefined) setPaper(spot.paper)
     onProgress(next)
   }
@@ -104,92 +116,146 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     setMessage(off === 0 ? '' : off <= 2 ? strings.oneOrTwoWrong : strings.severalWrong)
     close(submit(s, progress))
   }
-  const current = step(s, progress)
-  const moment = s.moments.find((m) => m.id === progress.moment) ?? s.moments[0]
-  const tab = (id: View, label: string, count?: string, pulse = false) => (
-    <button
-      type="button"
-      role="tab"
-      aria-selected={view === id}
-      className={'tab' + (view === id ? ' is-on' : '') + (pulse ? ' pulse' : '')}
-      onClick={() => setView(id)}
-    >
-      {label}
-      {count && <span className="n">{count}</span>}
-    </button>
-  )
-  return (
-    <div className="app">
-      <header className="top">
-        <div className="title">
-          <h1>{text.brief}</h1>
-          <div className="hdr-btns">
-            <button type="button" className="hdr-btn" onClick={onCases}>
+  const show = (v: View) => {
+    if (view === 'solve') setFresh([])
+    setView(v)
+  }
+  // The menu: the one piece of chrome on every view, the reveal's included.
+  const menu = (
+    <>
+      <button
+        type="button"
+        className="menu-btn"
+        aria-label={strings.menu}
+        onClick={() => setSheet('menu')}
+      />
+      {sheet === 'menu' && (
+        <div className="modal sheet" onClick={() => setSheet(null)}>
+          <div
+            className="menu"
+            role="dialog"
+            aria-label={strings.menu}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2>{text.title}</h2>
+            <p>{text.brief}</p>
+            <button type="button" onClick={onCases}>
               {strings.cases}
             </button>
-            <button type="button" className="hdr-btn" onClick={onRestart}>
+            <button type="button" onClick={onRestart}>
               {strings.restart}
             </button>
           </div>
         </div>
-        {view !== 'reveal' && (
-          <nav className="tabs" role="tablist">
-            {tab('moments', strings.moments)}
-            {tab(
-              'think',
-              strings.think,
-              `${filled(s, progress)}/${total(s)}`,
-              thinkStep(s, progress) && view !== 'think',
-            )}
-            {tab(
-              'papers',
-              strings.papers,
-              progress.papers.length ? String(progress.papers.length) : '',
-            )}
-          </nav>
-        )}
-      </header>
-      {current && view !== 'reveal' && <div className="steps">{text.steps?.[current.id]}</div>}
-      <main>
-        {view === 'moments' && (
+      )}
+    </>
+  )
+  if (view === 'reveal')
+    return (
+      <div className="app reading">
+        {menu}
+        <Reveal structure={s} text={text} passages={passages} onBack={onCases} />
+      </div>
+    )
+  const current = step(s, progress)
+  const banner = current && <div className="steps">{text.steps?.[current.id]}</div>
+  const moment = s.moments.find((m) => m.id === progress.moment) ?? s.moments[0]
+  // Look carries the case's found count, as Solve carries what is filled (#24, rulings [1], [5]).
+  const spots = s.moments.flatMap((m) => m.spots)
+  const found = `${spots.filter((x) => progress.tapped.includes(x.id)).length}/${spots.length}`
+  const tab = (v: 'look' | 'solve') => (
+    <button
+      type="button"
+      role="tab"
+      data-view={v}
+      aria-selected={view === v}
+      className={
+        'tab' +
+        (view === v ? ' is-on' : '') +
+        (v === 'solve' && thinkStep(s, progress) && view !== 'solve' ? ' pulse' : '')
+      }
+      onClick={() => show(v)}
+    >
+      {strings[v]}
+      <span className="n">{v === 'look' ? found : `${filled(s, progress)}/${total(s)}`}</span>
+      {v === 'solve' && view !== 'solve' && fresh.length > 0 && (
+        <span key={fresh.length} className="new">{`+${fresh.length}`}</span>
+      )}
+    </button>
+  )
+  return (
+    <div className="app">
+      {view === 'look' ? (
+        <>
           <Stage
             structure={s}
             text={text}
             moment={moment}
+            tapped={progress.tapped}
             onMoment={(id) => {
               setCaption(null)
               onProgress({ ...progress, moment: id })
             }}
             onTap={onTap}
-          />
-        )}
-        {view === 'think' && (
-          <Think
+          >
+            {banner}
+            {brief && progress.tapped.length === 0 && (
+              <div className="card" role="dialog" aria-label={text.title}>
+                <h2>{text.title}</h2>
+                <p>{text.brief}</p>
+                <button type="button" onClick={() => setBrief(false)}>
+                  {strings.start}
+                </button>
+              </div>
+            )}
+          </Stage>
+          <Dock structure={s} text={text} caption={caption} />
+        </>
+      ) : (
+        <>
+          {/* Papers is held above the account while it scrolls, once a paper is found (#24 [4]). */}
+          {progress.papers.length > 0 && (
+            <div className="papers-row">
+              <button type="button" className="papers-btn" onClick={() => setSheet('papers')}>
+                {strings.papers}
+                <span className="n">{progress.papers.length}</span>
+              </button>
+            </div>
+          )}
+          <div className="solve">
+            <Think
+              structure={s}
+              text={text}
+              progress={progress}
+              selection={selection}
+              message={message}
+              banner={banner}
+              onSlot={(t) => apply(chooseSlot(s, progress, selection, t))}
+              onMoment={(id) => apply(chooseMoment(s, progress, selection, id))}
+              onOrderSlot={(i) => apply(chooseOrderSlot(s, progress, selection, i))}
+              onSubmit={onSubmit}
+            />
+          </div>
+          <Bank
             structure={s}
             text={text}
             progress={progress}
             selection={selection}
-            message={message}
-            onSlot={(t) => apply(chooseSlot(s, progress, selection, t))}
-            onMoment={(id) => apply(chooseMoment(s, progress, selection, id))}
-            onOrderSlot={(i) => apply(chooseOrderSlot(s, progress, selection, i))}
-            onSubmit={onSubmit}
+            fresh={fresh}
+            refused={refused}
+            onWord={(id) => apply(chooseWord(s, progress, selection, id))}
           />
-        )}
-        {view === 'papers' && <Papers text={text} papers={progress.papers} />}
-        {view === 'reveal' && (
-          <Reveal structure={s} text={text} passages={passages} onBack={onCases} />
-        )}
-      </main>
-      {view !== 'reveal' && (
-        <Bank
-          structure={s}
-          text={text}
-          progress={progress}
-          selection={selection}
-          console={view === 'moments' ? caption : undefined}
-          onWord={(id) => apply(chooseWord(s, progress, selection, id))}
-        />
+        </>
+      )}
+      <nav className="bar">
+        {menu}
+        <div role="tablist">
+          {tab('look')}
+          {tab('solve')}
+        </div>
+      </nav>
+      {sheet === 'papers' && (
+        <PapersSheet text={text} papers={progress.papers} onClose={() => setSheet(null)} />
       )}
       {paper !== null && <PaperModal text={text} paper={paper} onClose={() => setPaper(null)} />}
     </div>

@@ -36,34 +36,35 @@ export const strings = {
   closed: 'Closed ✓',
   inProgress: 'In progress',
 
-  // The case screen: its header and tabs.
+  // The case screen: the bar at its foot, the menu, and the brief's card (#24).
+  look: 'Look',
+  solve: 'Solve',
+  menu: 'Menu',
+  start: 'Start',
   cases: 'Cases',
   restart: 'Restart',
   restartConfirm: 'Start this case over? Its progress is cleared.',
-  moments: 'Moments',
   papers: 'Papers',
+  somethingLeft: 'something left to find',
   zoom: 'Zoom',
 
-  // The bank, and the console above it.
-  thingsFound: (moment: string, found: number, total: number) =>
-    `${moment} · ${found} of ${total} things found here`,
+  // Look: the caption docked under the picture.
   tapPrompt: 'Tap anything that looks like it matters.',
+  more: 'More',
+  less: 'Less',
   found: 'Found:',
   copiedToPapers: 'copied to Papers',
-  wordsFound: 'Words you’ve found',
+
+  // The bank, on Solve.
   legend: { name: 'names', noun: 'things', action: 'actions', number: 'numbers' },
   bankEmpty: 'Nothing yet. Tap things in the picture.',
 
-  // Papers, and a paper opened.
-  papersEmpty:
-    'Nothing here yet. Things with writing on them open when you tap them, and a copy lands here.',
+  // A paper opened, and Papers.
   close: 'Close',
 
-  // Think.
-  think: 'Think',
-  oneOfTheFaces: 'one of the faces in Think',
+  // Solve.
+  oneOfTheFaces: 'one of the faces in Solve',
   whoIsWho: 'Who is who',
-  facesHint: 'Names arrive in the word bank when you find them.',
   who: 'who?',
   whatHappenedFirst: 'What happened first',
   orderHint: 'Tap a picture below, then tap First, Then, or Last.',

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { CaseStructure, CaseText } from '../cases/types.ts'
 import { strings } from '../strings/en.ts'
 import { picture } from './pictures.ts'
@@ -11,6 +12,8 @@ interface ThinkProps {
   selection: Selection
   /** The result line under the submit: a kind refused, or how far off the case was. */
   message: string
+  /** The tutorial's banner, over who is who. */
+  banner: ReactNode
   onSlot: (target: string) => void
   onMoment: (id: string) => void
   onOrderSlot: (index: number) => void
@@ -18,9 +21,10 @@ interface ThinkProps {
 }
 
 /**
- * The Think view (#6): who is who, what happened first when the case asks, the blocks with their
- * blanks, and the submit. A ✓ lands only on the slots a guided step names; everything else is
- * checked on the submit, which a guided case offers once its steps are done (#26 [4]).
+ * The Solve view (#6; Think until #24), scrolling as one so the account has room on the smallest
+ * phone (#24, ruling [4]): who is who, what happened first when the case asks, the blocks with
+ * their blanks, and the submit. A ✓ lands only on the slots a guided step names; everything else
+ * is checked on the submit, which a guided case offers once its steps are done (#26 [4]).
  */
 export function Think(props: ThinkProps) {
   const { structure: s, text, progress: p, selection, message, onSubmit } = props
@@ -47,8 +51,8 @@ export function Think(props: ThinkProps) {
   return (
     <>
       <section className="blk">
+        {props.banner}
         <h2>{strings.whoIsWho}</h2>
-        <p className="hint">{strings.facesHint}</p>
         <div className={'faces' + (s.faces.length === 2 ? ' two' : '')}>
           {s.faces.map((f) => (
             <div key={f.id} className="face">
@@ -81,6 +85,7 @@ export function Think(props: ThinkProps) {
           <button
             type="button"
             className="submit"
+            data-close
             disabled={done < all || p.solved}
             onClick={onSubmit}
           >

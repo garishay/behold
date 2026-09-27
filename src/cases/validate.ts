@@ -202,8 +202,9 @@ export function validate(structure: CaseStructure, text: CaseText<CaseStructure>
     fail(`the case has ${count('name')} names for ${faces.length} faces, not one more`)
 
   // (l) Every spot owns a fingertip (#27 [1]): laid out 320 CSS px wide, as on a 360 phone, a 44 px
-  // square inside its box that no box drawn over it takes. It holds #27's floor too: a tenth of
-  // the width is 32 px at 320, so a box that keeps 44 on each side is over it.
+  // square inside its box that no box drawn over it takes, the Zoom pill's included (#24, ruling
+  // [1]). It holds #27's floor too: a tenth of the width is 32 px at 320, so a box that keeps 44 on
+  // each side is over it.
   for (const m of moments)
     for (const s of crowded(m.spots, m.size))
       fail(

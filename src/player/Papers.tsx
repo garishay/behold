@@ -4,20 +4,33 @@ import { strings } from '../strings/en.ts'
 interface PapersProps {
   text: CaseText<CaseStructure>
   papers: readonly string[]
+  onClose: () => void
 }
 
-/** The Papers view (#6): every document opened so far, a copy of each, in the order opened. */
-export function Papers({ text, papers }: PapersProps) {
-  if (papers.length === 0) return <p className="hint">{strings.papersEmpty}</p>
+/**
+ * Papers (#6), opened from Solve (#24): every document opened so far, a copy of each, in the order
+ * opened, in a sheet over the screen until closed.
+ */
+export function PapersSheet({ text, papers, onClose }: PapersProps) {
   return (
-    <>
-      {papers.map((id) => (
-        <div key={id} className="paper">
-          <h3>{text.papers[id].title}</h3>
-          <p>{text.papers[id].body}</p>
-        </div>
-      ))}
-    </>
+    <div className="modal sheet" onClick={onClose}>
+      <div
+        className="papers"
+        role="dialog"
+        aria-label={strings.papers}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {papers.map((id) => (
+          <div key={id} className="paper">
+            <h3>{text.papers[id].title}</h3>
+            <p>{text.papers[id].body}</p>
+          </div>
+        ))}
+        <button type="button" className="close" onClick={onClose}>
+          {strings.close}
+        </button>
+      </div>
+    </div>
   )
 }
 
