@@ -12,6 +12,10 @@ interface CoachMarkProps {
 /** Half a label's widest, and the gutter it keeps from the screen's edge. */
 const half = 150
 const gutter = 16
+/** Frames a target holds still before the mark stops following it, about half a second. */
+const settle = 30
+/** What wakes a mark that has stopped following ([Q6]). */
+const wakers = ['pointerdown', 'scroll', 'resize'] as const
 
 /**
  * A tutorial step shown at its target (#25): the target ringed, the rest of the screen dimmed,
@@ -30,13 +34,28 @@ export function CoachMark({ at, label, onTap }: CoachMarkProps) {
     const target = () => document.querySelector(at)
     const still = matchMedia('(prefers-reduced-motion: reduce)').matches
     target()?.scrollIntoView({ block: 'center', behavior: still ? 'auto' : 'smooth' })
-    // The target is followed as the account scrolls or the picture zooms.
-    let frame = requestAnimationFrame(function follow() {
+    // The target is followed as the account scrolls or the picture zooms. Once it has held still
+    // for about half a second the following sleeps, and a tap, a scroll, or a resize wakes it:
+    // every way the target moves starts with one of them ([Q6] on #12).
+    let [frame, held, last] = [0, 0, '']
+    const follow = () => {
       const r = target()?.getBoundingClientRect() ?? null
-      setRect((old) => (JSON.stringify(old) === JSON.stringify(r) ? old : r))
-      frame = requestAnimationFrame(follow)
-    })
-    return () => cancelAnimationFrame(frame)
+      const now = JSON.stringify(r)
+      held = now === last ? held + 1 : 0
+      last = now
+      setRect((old) => (JSON.stringify(old) === now ? old : r))
+      frame = held < settle ? requestAnimationFrame(follow) : 0
+    }
+    const wake = () => {
+      held = 0
+      if (frame === 0) frame = requestAnimationFrame(follow)
+    }
+    frame = requestAnimationFrame(follow)
+    for (const e of wakers) addEventListener(e, wake, true)
+    return () => {
+      cancelAnimationFrame(frame)
+      for (const e of wakers) removeEventListener(e, wake, true)
+    }
   }, [at])
   useEffect(() => {
     const tap = (e: Event) => {

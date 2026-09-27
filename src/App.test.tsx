@@ -497,6 +497,28 @@ describe('the tutorial’s marks (#25)', () => {
     await waitFor(() => expect(ring()).toHaveClass('dim'))
   })
 
+  // A step can sit on a phone for minutes, so the mark stops reading its target's place once it
+  // has held still, about half a second, and a scroll, a resize, or a tap wakes it ([Q6] on #12).
+  // jsdom's target never moves, so it settles after its first frames.
+  it('stops following a target that holds still, and a scroll wakes it', async () => {
+    const frames = vi.spyOn(window, 'requestAnimationFrame')
+    const pause = (ms: number) => new Promise((r) => setTimeout(r, ms))
+    try {
+      render(<App />)
+      openCase(/The valley/)
+      fireEvent.click(screen.getByRole('button', { name: 'Start' }))
+      await pause(1000)
+      const settled = frames.mock.calls.length
+      expect(settled).toBeGreaterThan(0)
+      await pause(300)
+      expect(frames.mock.calls.length).toBe(settled)
+      fireEvent.scroll(window)
+      expect(frames.mock.calls.length).toBe(settled + 1)
+    } finally {
+      frames.mockRestore()
+    }
+  })
+
   // The last step's words cover the account's end on Solve and the caption from Look, so they
   // leave on the next tap after they show; its ring stays until the case closes (#24, ruling [3]).
   it('the last step’s words leave on the next tap, and its ring stays', async () => {
