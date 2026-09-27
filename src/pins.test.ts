@@ -3,11 +3,12 @@
 /// <reference types="node" />
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
+import { zoomPill } from './cases/spots.ts'
 
 /*
  * Two things the tests cannot exercise, pinned as text (review round 4, #20): a Workbox option
  * has no unit test short of a build, and jsdom lays nothing out. These hold the shape — the
- * service worker's cache rule and its claim on first activation, and the bank's bottom padding —
+ * service worker's cache rule and its claim on first activation, and the bar's bottom padding —
  * against removal, not their behaviour; the build and the phone are the evidence for that.
  */
 const config = readFileSync('vite.config.ts', 'utf8')
@@ -58,10 +59,10 @@ describe('the service worker’s configuration (Gate 03 A3)', () => {
 })
 
 describe('the stylesheet’s one ruled measure (Gate 03 [6])', () => {
-  it('keeps the bank’s chips clear of the gesture zone: a margin above the safe-area inset', () => {
-    const bank = /\.bank \{([^}]*)\}/.exec(css)?.[1] ?? ''
-    expect(bank).toMatch(/position: sticky/)
-    expect(bank).toMatch(/padding:[^;]*calc\(24px \+ env\(safe-area-inset-bottom\)\)/)
+  // The bar is the case screen's foot since #24, so the margin moves from the bank to it.
+  it('keeps the bar clear of the gesture zone: a margin above the safe-area inset', () => {
+    const bar = /\.bar \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    expect(bar).toMatch(/padding:[^;]*calc\(24px \+ env\(safe-area-inset-bottom\)\)/)
   })
 })
 
@@ -69,5 +70,13 @@ describe('the picture’s spots (#37)', () => {
   it('draw no tap highlight, so a tap never shows a spot’s box', () => {
     const rule = /\.stage svg,\s*\.stage rect \{([^}]*)\}/.exec(css)?.[1] ?? ''
     expect(rule).toMatch(/-webkit-tap-highlight-color: transparent/)
+  })
+})
+
+describe('the Zoom pill (#24, ruling [1])', () => {
+  it('sits where check (l) counts it: the stylesheet’s box is spots.ts’s', () => {
+    const rule = /\n\.pill \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    const px = (name: string) => Number(new RegExp(`(?:^|\\s)${name}: (\\d+)px`).exec(rule)?.[1])
+    expect(['left', 'top', 'width', 'height'].map(px)).toEqual([...zoomPill])
   })
 })

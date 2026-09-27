@@ -71,7 +71,7 @@ The type is computed from the structure, so the keys below are exactly the struc
 | ---------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | `title`    | the case card's title                                                                                                                  |
 | `subtitle` | the card's second line                                                                                                                 |
-| `brief`    | the header line inside the case                                                                                                        |
+| `brief`    | the case's opening question: its card over the picture when a fresh case opens, and the menu's sheet after (#24)                       |
 | `passages` | one label per passage, in the language's own book names — `1 Samuel 17:38–51`                                                          |
 | `moments`  | moment id → its name                                                                                                                   |
 | `captions` | spot id → what the player reads on a tap                                                                                               |
@@ -82,7 +82,7 @@ The type is computed from the structure, so the keys below are exactly the struc
 | `steps`    | step id → the step's text; only when the structure has steps                                                                           |
 | `reveal`   | the paragraphs in the game's words, shown before the passage                                                                           |
 
-That is every string the player reads for a case. What the interface says around it — the tab
+That is every string the player reads for a case. What the interface says around it — the view
 names, "Who is who", "Close the case", the kind labels — is app copy in `src/strings/en.ts`.
 
 Captions, papers, and prose are the game's own voice: they paraphrase, and never quote, the
@@ -127,7 +127,8 @@ A tap finds its spot one way, in the player and the validator alike (`src/cases/
 Spots are drawn largest first, so where two boxes overlap the smaller is on top and takes the tap.
 A tap on no box goes to the nearest within 16 CSS px, so a box hugs the thing it names and is
 never padded. And every spot keeps a fingertip of its own: with the picture laid out 320 CSS px
-wide, its width on a 360 phone, a 44 px square inside its box that no box drawn over it takes.
+wide, its width on a 360 phone, a 44 px square inside its box that no box drawn over it takes. The
+Zoom pill counts as a box drawn over every picture, 56 × 32 px at its top left corner (#24).
 
 ## What holds a case to the format
 

@@ -11,11 +11,18 @@ export const slip = 16
 /** The fingertip every spot keeps for itself, a square this many CSS px on a side (#27 [1]). */
 export const fingertip = 44
 /**
- * The picture's width, in CSS px, on the smallest phone the game supports: 360 wide, less the case
- * screen's 20 px inset each side. The check lays every picture out at it; a layout that changes
- * the width changes this (#27, ruling on Gate 06 [1]; #24).
+ * The picture's width, in CSS px, on the smallest phone the game supports, 360 × 640: the case
+ * screen's picker, caption, and bar leave a case of several moments 401 px for its 4:5 picture,
+ * so 320.8 wide, and the check takes the floor (#24). The check lays every picture out at it; a
+ * layout that changes the width changes this (#27, ruling on Gate 06 [1]).
  */
 export const smallestPicture = 320
+/**
+ * The Zoom pill, the one thing drawn on the picture: left, top, width, and height in CSS px from
+ * the picture's top left corner, at every width. The stylesheet's `.pill` holds these numbers,
+ * and a test holds the two together (#24, ruling [1]).
+ */
+export const zoomPill = [10, 10, 56, 32] as const
 
 const area = ([, , w, h]: Box) => w * h
 
@@ -59,7 +66,8 @@ export function nearest<S extends Spot>(
 
 /**
  * The spots that keep no fingertip of their own: with the picture `smallestPicture` CSS px wide,
- * no square `fingertip` px on a side fits inside the spot's box clear of every box drawn over it.
+ * no square `fingertip` px on a side fits inside the spot's box clear of every box drawn over it,
+ * the Zoom pill's included.
  * Where one fits, it can be slid up and left until its corner meets the box's edge or an
  * overlying box's far edge, so those corners are the only places to try.
  */
@@ -68,7 +76,7 @@ export function crowded<S extends Spot>(spots: readonly S[], size: readonly [num
   return order.filter((s, i) => {
     const px = (b: Box) => pixels(b, size, smallestPicture)
     const [L, T, W, H] = px(s.box)
-    const over = order.slice(i + 1).map((o) => px(o.box))
+    const over = [...order.slice(i + 1).map((o) => px(o.box)), zoomPill]
     const clear = (x: number, y: number) =>
       x + fingertip <= L + W &&
       y + fingertip <= T + H &&

@@ -3,6 +3,16 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.7.0 — Gate 07, Look and Solve, and the marks (#24, #25)
+
+- **07a — Look and Solve on one phone screen** (#41): the case screen fits the phone and never
+  scrolls; a bar at the foot with the menu, Look, and Solve, Look carrying the case's found count
+  and Solve the filled count and a badge for new words; the brief as a card over a fresh case's
+  picture, and again in the menu; the caption docked under the picture with the finds right under
+  it and More for a long one; the bank on Solve, the account scrolling with who is who and Papers
+  held above it; the picker marking each moment with something left; the Zoom pill the one thing
+  on the picture, counted by check (l).
+
 ## v0.6.0 — Gate 06, every spot owns a fingertip (#27)
 
 - **27a — a fingertip for every spot** (#40): one rule for how a tap finds its spot, read by the

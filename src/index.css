@@ -194,68 +194,73 @@ button:focus-visible {
   margin-top: 6px;
 }
 
-/* The case screen (#6): the header with the brief and the tabs, the view, the bank at the foot. */
+/* The case screen (#6, #24): one phone screen that never scrolls — the view, then the bar at the
+   foot. The picture takes what the chrome leaves; on Solve only the account scrolls. */
 .app {
+  --dock: 104px;
   max-width: 430px;
+  height: 100dvh;
   margin: 0 auto;
-  min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  padding-top: env(safe-area-inset-top);
   background: var(--night);
 }
 
-.top {
+/* The reveal is read, not played: it scrolls as a page. */
+.app.reading {
+  height: auto;
+  min-height: 100dvh;
+  overflow: visible;
   padding: max(14px, env(safe-area-inset-top)) var(--inset) 0;
 }
 
-.title {
+/* The bar: the menu at its left end, then Look and Solve. The bottom padding keeps it clear of the
+   system's gesture zone: the safe-area inset and a margin above it (Gate 03 [6]). */
+.bar {
+  flex: none;
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 4px;
+  padding: 6px max(8px, env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom))
+    max(8px, env(safe-area-inset-left));
+  border-top: 1px solid var(--slate);
+  background: var(--slate-deep);
 }
 
-.app h1 {
-  font-family: var(--serif);
-  font-weight: 400;
-  font-style: italic;
-  font-size: 20px;
-  line-height: 1.25;
-  margin: 0 0 10px;
-}
-
-.hdr-btns {
+.bar [role='tablist'] {
+  flex: 1;
   display: flex;
-  gap: 14px;
-  flex-shrink: 0;
+  gap: 4px;
 }
 
-.hdr-btn {
-  font-size: 13px;
-  color: var(--mist-dim);
-  padding: 6px 0;
-  white-space: nowrap;
-}
-
-.tabs {
-  display: flex;
-  gap: 6px;
-  border-bottom: 1px solid var(--slate);
+.menu-btn {
+  flex: none;
+  width: 48px;
+  min-height: 48px;
+  border-radius: 10px;
+  background:
+    linear-gradient(var(--mist) 0 0) center 17px / 20px 2px no-repeat,
+    linear-gradient(var(--mist) 0 0) center 23px / 20px 2px no-repeat,
+    linear-gradient(var(--mist) 0 0) center 29px / 20px 2px no-repeat;
 }
 
 .tab {
+  position: relative;
   flex: 1;
-  padding: 10px 0 12px;
-  font-size: 15px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 10px;
+  font-size: 16px;
   color: var(--mist-dim);
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  border-radius: 6px 6px 0 0;
 }
 
 .tab.is-on {
+  background: var(--slate);
   color: var(--mist);
-  border-bottom-color: var(--gold);
 }
 
 .tab.pulse {
@@ -264,27 +269,54 @@ button:focus-visible {
 }
 
 .tab .n {
-  display: inline-block;
-  min-width: 18px;
-  margin-left: 4px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--gold);
+}
+
+/* A tap's new words on their way to Solve: a badge that bumps as it grows (#24). */
+.tab .new {
+  position: absolute;
+  top: 3px;
+  right: 8px;
+  padding: 1px 6px;
+  border-radius: 9px;
+  background: var(--gold);
+  color: var(--slate-deep);
+  font-size: 11px;
+  font-weight: 600;
+  animation: bump 0.3s ease-out;
+}
+
+@keyframes bump {
+  from {
+    transform: scale(1.5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab .new {
+    animation: none;
+  }
 }
 
 .steps {
   background: var(--wine);
   color: var(--mist);
-  padding: 10px 14px;
+  padding: 8px 12px;
   border-radius: 10px;
-  margin: 12px var(--inset) 0;
-  font-size: 15px;
-  line-height: 1.4;
+  font-size: 14px;
+  line-height: 1.35;
 }
 
-.app main {
-  flex: 1;
-  overflow: auto;
-  padding: 12px var(--inset) 16px;
+.frame .steps {
+  position: absolute;
+  top: 48px;
+  left: 10px;
+  right: 10px;
+}
+
+.solve .steps {
+  margin-top: 12px;
 }
 
 .hint {
@@ -294,11 +326,12 @@ button:focus-visible {
   line-height: 1.4;
 }
 
-/* Moments: the picker, the stage, the zoom. */
+/* Look: the picker, the picture as large as the screen leaves it, the pills on it. */
 .moment-picker {
+  flex: none;
   display: flex;
   gap: 8px;
-  margin-bottom: 10px;
+  padding: 6px 12px;
 }
 
 .moment-btn {
@@ -311,17 +344,49 @@ button:focus-visible {
   min-height: 44px;
 }
 
+/* A moment with something left to find (#24 [5]). */
+.moment-btn .left {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  vertical-align: 2px;
+}
+
+/* Words for a screen reader alone. */
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .moment-btn.is-on {
   color: var(--mist);
   box-shadow: inset 0 0 0 1.5px var(--gold);
 }
 
+/* Its natural height at the column's width, given up first when the screen is short. */
 .stage-wrap {
+  flex: 0 1 calc(min(100vw, 430px) / var(--ar));
+  min-height: 0;
+  container-type: size;
+  display: flex;
+  justify-content: center;
+}
+
+.frame {
   position: relative;
+  width: min(100cqw, 100cqh * var(--ar));
+  aspect-ratio: var(--ar);
 }
 
 .stage {
-  border-radius: 10px;
+  height: 100%;
   overflow: hidden;
   background: var(--slate-deep);
 }
@@ -333,7 +398,7 @@ button:focus-visible {
 }
 
 /* No tap highlight: a spot's box is never drawn, so a tap never shows where one spot ends. The
-   caption is the tap's feedback until the layout designs one (#37, #24). */
+   caption is the tap's feedback (#37, #24). */
 .stage svg,
 .stage rect {
   -webkit-tap-highlight-color: transparent;
@@ -347,22 +412,25 @@ button:focus-visible {
 
 .stage.zoomed {
   overflow: auto;
-  max-height: 68vh;
 }
 
 .stage.zoomed svg {
   width: 200%;
 }
 
+/* The Zoom pill: its box is `zoomPill` in src/cases/spots.ts, which check (l) counts. */
 .pill {
   position: absolute;
   top: 10px;
   left: 10px;
-  min-height: 30px;
+  width: 56px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: rgba(27, 32, 51, 0.82);
   color: var(--mist);
   font-size: 12px;
-  padding: 7px 10px;
   border-radius: 16px;
   line-height: 1;
 }
@@ -372,45 +440,157 @@ button:focus-visible {
   color: var(--slate-deep);
 }
 
-/* The bank and its console. The bottom padding keeps the chips clear of the system's gesture
-   zone: the safe-area inset and a margin above it (Gate 03 [6]). */
-.bank {
-  position: sticky;
-  bottom: 0;
-  background: var(--slate-deep);
-  border-top: 1px solid var(--slate);
-  padding: 10px max(var(--inset), env(safe-area-inset-right))
-    calc(24px + env(safe-area-inset-bottom)) max(var(--inset), env(safe-area-inset-left));
+/* The brief's card, over the picture while nothing is tapped (#24). */
+.card {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: var(--papyrus);
+  color: var(--papyrus-ink);
+  box-shadow: 0 0 0 100vmax rgba(10, 12, 20, 0.55);
 }
 
-.console {
+.card h2 {
+  margin: 0 0 6px;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 22px;
+}
+
+.card p {
+  margin: 0 0 14px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 17px;
+  line-height: 1.45;
+}
+
+.card button {
+  min-height: 44px;
+  padding: 0 22px;
+  border-radius: 8px;
+  background: var(--wine);
+  color: var(--mist);
+}
+
+/* The caption, docked under the picture: three lines, and the tap's finds under them. It takes
+   what the picture leaves on a tall phone. */
+.dock {
+  position: relative;
+  flex: 1 0 var(--dock);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 16px 8px;
+  border-top: 1px solid var(--slate);
+  background: var(--slate-deep);
+  overflow: hidden;
+}
+
+/* The caption gives up its last lines when the dock is short; the finds follow right under it. */
+.dock .said {
+  position: relative;
+  flex: 0 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dock p {
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
   font-family: var(--serif);
   font-size: 15px;
   line-height: 1.4;
-  color: var(--mist);
-  padding-bottom: 8px;
-  margin-bottom: 8px;
-  border-bottom: 1px solid var(--slate);
-  min-height: 3.6em;
 }
 
-.console .where {
-  font-family: var(--sans);
-  font-size: 12px;
-  color: var(--mist-dim);
-  margin-bottom: 3px;
-}
-
-.console .found {
-  display: block;
-  font-family: var(--sans);
-  font-size: 12px;
+.dock .more {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  font-size: 13px;
   color: var(--gold);
-  margin-top: 4px;
 }
 
-.console .found b {
-  font-weight: 600;
+.dock .more span {
+  padding-left: 12px;
+  line-height: 21px;
+  background: var(--slate-deep);
+}
+
+/* A long caption opened: whole, rising over the picture's foot from where it ended. */
+.dock.is-open {
+  overflow: visible;
+}
+
+.dock .whole {
+  position: absolute;
+  left: 0;
+  right: 0;
+  padding: 10px 16px 20px;
+  border-top: 1px solid var(--slate);
+  background: var(--slate-deep);
+}
+
+.dock .found {
+  flex: none;
+  min-height: 18px;
+  padding-top: 4px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--gold);
+}
+
+/* Solve: Papers held in a slim row once a paper is found, then the one part of the case screen
+   that scrolls — who is who and the account together, so the account has room on the smallest
+   phone (#24, ruling [4]) — and the bank docked below. */
+.papers-row {
+  flex: none;
+  display: flex;
+  justify-content: flex-end;
+  padding: 6px var(--inset);
+  border-bottom: 1px solid var(--slate);
+}
+
+.solve {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 0 var(--inset) 16px;
+}
+
+.papers-btn {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 18px;
+  background: var(--slate);
+  font-family: var(--sans);
+  font-size: 14px;
+}
+
+.papers-btn .n {
+  margin-left: 6px;
+  color: var(--gold);
+}
+
+/* The bank, docked on Solve above the bar (#24). */
+.bank {
+  flex: none;
+  background: var(--slate-deep);
+  border-top: 1px solid var(--slate);
+  padding: 8px var(--inset);
+}
+
+.refused {
+  color: var(--t-action);
 }
 
 .bank-head {
@@ -426,7 +606,7 @@ button:focus-visible {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  margin-left: 8px;
+  margin-right: 12px;
 }
 
 .dot {
@@ -457,7 +637,7 @@ button:focus-visible {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  max-height: 26vh;
+  max-height: 108px;
   overflow: auto;
 }
 
@@ -549,17 +729,59 @@ button:focus-visible {
   font-size: 15px;
 }
 
+/* A sheet: the menu, and Papers, risen from the foot (#24). */
+.modal.sheet {
+  align-items: flex-end;
+  padding: 0;
+}
+
+.menu,
+.papers {
+  width: 100%;
+  max-width: 430px;
+  max-height: 85dvh;
+  overflow: auto;
+  padding: 20px var(--inset) calc(24px + env(safe-area-inset-bottom));
+  border-radius: 16px 16px 0 0;
+  background: var(--slate);
+}
+
+.papers {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.menu h2 {
+  margin: 0 0 6px;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 22px;
+}
+
+.menu p {
+  margin: 0 0 16px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 17px;
+  line-height: 1.45;
+}
+
+.menu button {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  text-align: left;
+  border-top: 1px solid var(--night);
+  font-size: 16px;
+}
+
 /* Think: the faces, the order, the blocks, the submit. */
 .app h2 {
   font-family: var(--serif);
   font-weight: 400;
   font-size: 18px;
   margin: 18px 0 8px;
-}
-
-.app main > :first-child h2,
-.app main > h2:first-child {
-  margin-top: 4px;
 }
 
 .faces {
@@ -578,8 +800,8 @@ button:focus-visible {
 }
 
 .face img {
-  width: 72px;
-  height: 72px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   object-fit: cover;
   display: block;
@@ -592,7 +814,7 @@ button:focus-visible {
   color: var(--mist-dim);
   line-height: 1.3;
   min-height: 2.6em;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .face .slot {
