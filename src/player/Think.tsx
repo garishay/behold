@@ -1,7 +1,7 @@
 import type { CaseStructure, CaseText } from '../cases/types.ts'
 import { strings } from '../strings/en.ts'
 import { picture } from './pictures.ts'
-import { answer, closable, filled, kindOf, marked, total } from './state.ts'
+import { answer, kindOf, marked } from './state.ts'
 import type { Progress, Selection } from './state.ts'
 
 interface ThinkProps {
@@ -12,17 +12,16 @@ interface ThinkProps {
   onSlot: (target: string) => void
   onMoment: (id: string) => void
   onOrderSlot: (index: number) => void
-  onSubmit: () => void
 }
 
 /**
  * The Solve view (#6; Think until #24), scrolling as one so the account has room on the smallest
- * phone (#24, ruling [4]): who is who, what happened first when the case asks, the blocks with
- * their blanks, and the submit. A ✓ lands only on the slots a guided step names; everything else
- * is checked on the submit, which a guided case offers once its steps are done (#26 [4]).
+ * phone (#24, ruling [4]): who is who, what happened first when the case asks, and the blocks with
+ * their blanks. A ✓ lands only on the slots a guided step names; everything else is checked on
+ * Close the case, docked below the account (07d).
  */
 export function Think(props: ThinkProps) {
-  const { structure: s, text, progress: p, selection, onSubmit } = props
+  const { structure: s, text, progress: p, selection } = props
   const slot = (target: string, value: string | undefined, placeholder: string) => {
     const kind = kindOf(s, target)
     const state =
@@ -41,8 +40,6 @@ export function Think(props: ThinkProps) {
       </button>
     )
   }
-  const done = filled(s, p)
-  const all = total(s)
   return (
     <>
       <section className="blk">
@@ -74,19 +71,6 @@ export function Think(props: ThinkProps) {
           </div>
         </section>
       ))}
-      {closable(s, p) && (
-        <div className="submit-row">
-          <button
-            type="button"
-            className="submit"
-            data-close
-            disabled={done < all || p.solved}
-            onClick={onSubmit}
-          >
-            {done < all ? strings.closeCaseProgress(done, all) : strings.closeCase}
-          </button>
-        </div>
-      )}
     </>
   )
 }

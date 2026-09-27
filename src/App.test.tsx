@@ -455,32 +455,31 @@ describe('the tutorial’s marks (#25)', () => {
   })
   afterEach(() => vi.restoreAllMocks())
   /** The valley played to its fourth step: David named, sling picked up for its blank. */
-  const toSling = () => {
+  /** The valley played to its third step's end: David under the boy, the word sling marked next. */
+  const toDavid = () => {
     render(<App />)
     openCase(/The valley/)
     tapSpot('boy')
     tab(/Solve/)
     chip('David')
     slot('d1')
-    chip('sling')
   }
+  /** The sling's blank, in the account: step 4's target once sling is picked up. */
+  const blank = '[data-slot="t4"]'
 
   // The case screen never scrolls, so a mark brings its target to the middle of the target's own
   // scroll box, the account, and leaves the page alone (07c, #24 [1]). jsdom doesn't clamp a
-  // scroll at 0 as a phone does, so the test reads the one move to Close the case.
+  // scroll at 0 as a phone does, so the test reads the one move to the sling's blank.
   it('brings its target to the middle of the account, and never scrolls the page', () => {
     const intoView = vi.fn()
     Element.prototype.scrollIntoView = intoView
     try {
-      boxes = {
-        '[data-close]': new DOMRect(0, 500, 360, 50),
-        '.solve': new DOMRect(0, 0, 360, 400),
-      }
-      toSling()
+      boxes = { [blank]: new DOMRect(0, 500, 60, 30), '.solve': new DOMRect(0, 0, 360, 400) }
+      toDavid()
       const before = document.querySelector('.solve')!.scrollTop
-      slot('t4')
-      expect(at()).toBe('[data-close]')
-      expect(document.querySelector('.solve')!.scrollTop - before).toBe(325)
+      chip('sling')
+      expect(at()).toBe(blank)
+      expect(document.querySelector('.solve')!.scrollTop - before).toBe(315)
       expect(document.documentElement.scrollTop).toBe(0)
       expect(intoView).not.toHaveBeenCalled()
     } finally {
@@ -491,17 +490,31 @@ describe('the tutorial’s marks (#25)', () => {
   // A mark is drawn only where its target can be seen: out of the account's view it shows no ring
   // and no words, and part in view its ring is cut at the account's edge (07c, #24 [2]).
   it('shows nothing while its target is out of view, and cuts its ring at the scroll box', async () => {
-    boxes = { '[data-close]': new DOMRect(0, 500, 360, 50), '.solve': new DOMRect(0, 0, 360, 400) }
-    toSling()
-    slot('t4')
+    boxes = { [blank]: new DOMRect(0, 500, 60, 30), '.solve': new DOMRect(0, 0, 360, 400) }
+    toDavid()
+    chip('sling')
     await new Promise((r) => setTimeout(r, 100))
-    expect(at()).toBe('[data-close]')
+    expect(at()).toBe(blank)
     expect(ring()).toBeNull()
     expect(document.querySelector('.coach .label')).toBeNull()
-    boxes['[data-close]'] = new DOMRect(0, 380, 360, 50)
+    boxes[blank] = new DOMRect(0, 380, 60, 30)
     fireEvent.scroll(document.querySelector('.solve')!)
     await waitFor(() => expect(ring()).not.toBeNull())
     expect([ring()!.style.top, ring()!.style.height]).toEqual(['376px', '24px'])
+  })
+
+  // Close the case docks as its own row between the account and the bank, outside the scroll, so
+  // it never moves and never covers the account; its result shows in the bank's head below it
+  // (07d, #24).
+  it('docks Close the case between the account and the bank, outside the scroll', () => {
+    render(<App />)
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    const row = screen.getByRole('button', { name: /Close the case/ }).parentElement!
+    expect(row).toHaveClass('submit-row')
+    expect(row.closest('.solve')).toBeNull()
+    expect(row.previousElementSibling).toHaveClass('solve')
+    expect(row.nextElementSibling).toHaveClass('bank')
   })
 
   it('shows each step at its target, or at the button of the view that holds it', () => {

@@ -23,6 +23,8 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   by the address bar; a mark scrolls only its target's own scroll box, never the page, and shows
   only where its target can be seen, its ring cut at the scroll box's edge; Close the case held at
   the account's foot, and a close's result in the bank's head beside a refused word's message.
+- **07d — Close the case in its own row** (#44): Close the case docked between the account and
+  the bank, outside the scroll, so it never moves and never covers the account.
 
 ## v0.6.0 — Gate 06, every spot owns a fingertip (#27)
 

@@ -1038,13 +1038,11 @@ button:focus-visible {
   font-size: 13px;
 }
 
-/* Close the case sticks to the account's foot whenever it shows (07c, #24 [3]). */
+/* Close the case, docked as its own row between the account and the bank, outside the scroll, like
+   the bank and the bar: it never moves and never covers the account (07d, #24). */
 .submit-row {
-  position: sticky;
-  bottom: 0;
-  z-index: 1;
-  margin: 18px calc(-1 * var(--inset)) 0;
-  padding: 10px var(--inset);
+  flex: none;
+  padding: 8px var(--inset);
   border-top: 1px solid var(--slate);
   background: var(--night);
 }

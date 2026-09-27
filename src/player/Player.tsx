@@ -15,6 +15,7 @@ import {
   chooseOrderSlot,
   chooseSlot,
   chooseWord,
+  closable,
   filled,
   nothing,
   opened,
@@ -245,9 +246,26 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
               onSlot={(t) => apply(chooseSlot(s, progress, selection, t))}
               onMoment={(id) => apply(chooseMoment(s, progress, selection, id))}
               onOrderSlot={(i) => apply(chooseOrderSlot(s, progress, selection, i))}
-              onSubmit={onSubmit}
             />
           </div>
+          {/* Close the case docks as its own row below the account, outside the scroll, so it never
+              moves and never covers the account; a guided case offers it once its steps are done
+              (07d, #24; #26 [4]). */}
+          {closable(s, progress) && (
+            <div className="submit-row">
+              <button
+                type="button"
+                className="submit"
+                data-close
+                disabled={filled(s, progress) < total(s) || progress.solved}
+                onClick={onSubmit}
+              >
+                {filled(s, progress) < total(s)
+                  ? strings.closeCaseProgress(filled(s, progress), total(s))
+                  : strings.closeCase}
+              </button>
+            </div>
+          )}
           <Bank
             structure={s}
             text={text}
