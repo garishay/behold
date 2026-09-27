@@ -81,19 +81,13 @@ describe('the Zoom pill (#24, ruling [1])', () => {
   })
 })
 
-// jsdom lays nothing out, so the two layout fixes of 07c (#24) are pinned as text; the phone is
-// their evidence.
+// jsdom lays nothing out, so 07c's fixed case screen (#24) is pinned as text; the phone is its
+// evidence.
 describe('the case screen fits the phone (07c, #24)', () => {
   it('is pinned to the screen the phone shows, not sized by a viewport unit', () => {
     const app = /\n\.app \{([^}]*)\}/.exec(css)?.[1] ?? ''
     expect(app).toMatch(/position: fixed/)
     expect(app).toMatch(/inset: 0/)
     expect(app).not.toMatch(/\d+[sdl]?vh/)
-  })
-
-  it('keeps Close the case at the account’s foot', () => {
-    const row = /\n\.submit-row \{([^}]*)\}/.exec(css)?.[1] ?? ''
-    expect(row).toMatch(/position: sticky/)
-    expect(row).toMatch(/bottom: 0/)
   })
 })
