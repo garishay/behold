@@ -28,6 +28,9 @@ describe('the service worker’s configuration (Gate 03 A3)', () => {
     expect(pattern.test('/cases/vineyard/gate.jpg')).toBe(true)
     expect(pattern.test('/behold/cases/valley/valley.jpg')).toBe(true)
     expect(pattern.test('/cases/valley/d1.jpg')).toBe(true)
+    // Workbox matches the whole URL, query and all, so the stamped address must match too (#45).
+    expect(pattern.test('/behold/cases/vineyard/bedchamber.jpg?v=0123abcd')).toBe(true)
+    expect(pattern.test('/cases/vineyard/gate.jpg?w=320')).toBe(false)
     expect(pattern.test('/icons/icon-192.png')).toBe(false)
     expect(pattern.test('/cases/vineyard/notes.txt')).toBe(false)
     expect(config).toMatch(/handler: 'CacheFirst'/)
