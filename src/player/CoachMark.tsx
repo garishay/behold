@@ -59,15 +59,18 @@ function ringFor(el: Element | null): Box | null {
 /**
  * Brings a target to the middle of its own scroll box, and never scrolls the page: the case
  * screen does not scroll, and a target outside a scroll box is always in view (07c, #24 [1]).
- * The scroll box's `scroll-behavior` is the stylesheet's, so reduced motion jumps.
+ * The scroll box's `scroll-behavior` is the stylesheet's, so reduced motion jumps. Both axes move
+ * in one scroll: a second, even by nothing, would abort the first while it glides (#47).
  */
 function bring(el: Element | null) {
   const box = el && scroller(el)
   if (!el || !box) return
   const r = el.getBoundingClientRect()
   const b = box.getBoundingClientRect()
-  box.scrollTop += r.top + r.height / 2 - (b.top + b.height / 2)
-  box.scrollLeft += r.left + r.width / 2 - (b.left + b.width / 2)
+  box.scrollBy({
+    top: r.top + r.height / 2 - (b.top + b.height / 2),
+    left: r.left + r.width / 2 - (b.left + b.width / 2),
+  })
 }
 
 /**

@@ -469,18 +469,29 @@ describe('the tutorial’s marks (#25)', () => {
   const blank = '[data-slot="t4"]'
 
   // The case screen never scrolls, so a mark brings its target to the middle of the target's own
-  // scroll box, the account, and leaves the page alone (07c, #24 [1]). jsdom doesn't clamp a
-  // scroll at 0 as a phone does, so the test reads the one move to the sling's blank.
-  it('brings its target to the middle of the account, and never scrolls the page', () => {
+  // scroll box, the account, and leaves the page alone (07c, #24 [1]). The account scrolls
+  // smoothly, so the test gives it a browser's smooth scroll: a programmatic scroll lands a frame
+  // later, and a second one before then aborts it (CSSOM View, perform a scroll). Two assignments,
+  // one per axis, left the account where it was on a phone (#47); one scroll for both lands.
+  it('brings its target to the middle of the account in one scroll, and never scrolls the page', () => {
     const intoView = vi.fn()
     Element.prototype.scrollIntoView = intoView
     try {
       boxes = { [blank]: new DOMRect(0, 500, 60, 30), '.solve': new DOMRect(0, 0, 360, 400) }
       toDavid()
-      const before = document.querySelector('.solve')!.scrollTop
+      const solve = document.querySelector<HTMLElement>('.solve')!
+      let top = 0
+      let landing: number | null = null
+      Object.defineProperties(solve, {
+        scrollTop: { configurable: true, get: () => top, set: (v: number) => (landing = v) },
+        scrollLeft: { configurable: true, get: () => 0, set: () => (landing = null) },
+      })
+      solve.scrollBy = ((o: ScrollToOptions) =>
+        (landing = top + (o.top ?? 0))) as Element['scrollBy']
       chip('sling')
+      if (landing !== null) top = landing
       expect(at()).toBe(blank)
-      expect(document.querySelector('.solve')!.scrollTop - before).toBe(315)
+      expect(top).toBe(315)
       expect(document.documentElement.scrollTop).toBe(0)
       expect(intoView).not.toHaveBeenCalled()
     } finally {

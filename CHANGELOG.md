@@ -3,6 +3,13 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.7.2 — A mark brings its target into view (#47)
+
+- **47a — one scroll for both axes** (#48): a tutorial mark brings its target to the middle of
+  its scroll box with one `scrollBy`, where two assignments, one per axis, let the second abort
+  the first while the account glided; on a 360 × 640 phone, step 4's ring and words show on the
+  sling's blank again, where since 07c they vanished with the blank below the account's view.
+
 ## v0.7.1 — A changed picture reaches the phone (#45)
 
 - **45a — a picture's address carries its file's hash** (#46): each case picture requested at
