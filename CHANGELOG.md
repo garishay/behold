@@ -3,6 +3,16 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.7.1 — A changed picture reaches the phone (#45)
+
+- **45a — a picture's address carries its file's hash** (#46): each case picture requested at
+  its path stamped `?v=<hash>`, a short hash of its file computed from `public/cases/` by
+  `vite.config.ts`, so a changed picture is a new address the phone fetches after the update
+  instead of the old picture under the new boxes, and an unchanged one keeps its address and its
+  cached copy; the `cases` rule's pattern widened to match; a superseded copy left for the
+  200-entry limit to evict; the first update to carry the stamp moves every address once, so a
+  case played before it reads offline again after one online open.
+
 ## v0.7.0 — Gate 07, Look and Solve, and the marks (#24, #25)
 
 - **07a — Look and Solve on one phone screen** (#41): the case screen fits the phone and never
