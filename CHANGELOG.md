@@ -12,6 +12,12 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   it and More for a long one; the bank on Solve, the account scrolling with who is who and Papers
   held above it; the picker marking each moment with something left; the Zoom pill the one thing
   on the picture, counted by check (l).
+- **07b — the tutorial shown where the player looks** (#42): each guided step shown at its
+  target, a ring and a dim and eight words or fewer beside it, blocking nothing, the dim lifting
+  on a tap elsewhere; the valley's four moves and Close the case as five steps, with Solve opened
+  as a step of its own; a step already met never shown; the last step's words and dim leaving on
+  the next tap while its ring stays; the banner and the Solve pulse gone; the validator's check
+  (m), a step's words eight or fewer.
 
 ## v0.6.0 — Gate 06, every spot owns a fingertip (#27)
 
