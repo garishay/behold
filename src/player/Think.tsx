@@ -9,8 +9,6 @@ interface ThinkProps {
   text: CaseText<CaseStructure>
   progress: Progress
   selection: Selection
-  /** The result line under the submit: a kind refused, or how far off the case was. */
-  message: string
   onSlot: (target: string) => void
   onMoment: (id: string) => void
   onOrderSlot: (index: number) => void
@@ -24,7 +22,7 @@ interface ThinkProps {
  * is checked on the submit, which a guided case offers once its steps are done (#26 [4]).
  */
 export function Think(props: ThinkProps) {
-  const { structure: s, text, progress: p, selection, message, onSubmit } = props
+  const { structure: s, text, progress: p, selection, onSubmit } = props
   const slot = (target: string, value: string | undefined, placeholder: string) => {
     const kind = kindOf(s, target)
     const state =
@@ -89,9 +87,6 @@ export function Think(props: ThinkProps) {
           </button>
         </div>
       )}
-      <p className="result" role="status">
-        {message}
-      </p>
     </>
   )
 }

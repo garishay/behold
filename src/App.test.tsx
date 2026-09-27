@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
 import type { PassageService } from './passages/service.ts'
 
@@ -26,7 +26,8 @@ const menu = (item: string) => {
     within(screen.getByRole('dialog', { name: 'Menu' })).getByRole('button', { name: item }),
   )
 }
-const result = () => document.querySelector('.result')
+// A close's result, like a refused word's message, takes the bank's head (07c, #24 [3]).
+const result = () => document.querySelector('.bank-head')
 const coach = () => document.querySelector('.coach')
 
 /** A passage service for the tests: made-up words with verse numbers, never scripture. */
@@ -436,6 +437,72 @@ describe('the case screen explored (#6, 03b; #24)', () => {
 describe('the tutorial’s marks (#25)', () => {
   const at = () => coach()?.getAttribute('data-at')
   const said = () => coach()?.querySelector('[role="status"]')?.textContent
+  const ring = () => document.querySelector<HTMLElement>('.coach .ring')
+  /**
+   * jsdom lays nothing out, and a mark shows only where its target can be seen (07c), so every
+   * box is given a place on screen: the ones a test names in `boxes` where it says, the rest
+   * 100 × 40 at 10, 10.
+   */
+  let boxes: Record<string, DOMRect> = {}
+  beforeEach(() => {
+    boxes = {}
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: Element,
+    ) {
+      const hit = Object.keys(boxes).find((s) => this.matches(s))
+      return hit ? boxes[hit] : new DOMRect(10, 10, 100, 40)
+    })
+  })
+  afterEach(() => vi.restoreAllMocks())
+  /** The valley played to its fourth step: David named, sling picked up for its blank. */
+  const toSling = () => {
+    render(<App />)
+    openCase(/The valley/)
+    tapSpot('boy')
+    tab(/Solve/)
+    chip('David')
+    slot('d1')
+    chip('sling')
+  }
+
+  // The case screen never scrolls, so a mark brings its target to the middle of the target's own
+  // scroll box, the account, and leaves the page alone (07c, #24 [1]). jsdom doesn't clamp a
+  // scroll at 0 as a phone does, so the test reads the one move to Close the case.
+  it('brings its target to the middle of the account, and never scrolls the page', () => {
+    const intoView = vi.fn()
+    Element.prototype.scrollIntoView = intoView
+    try {
+      boxes = {
+        '[data-close]': new DOMRect(0, 500, 360, 50),
+        '.solve': new DOMRect(0, 0, 360, 400),
+      }
+      toSling()
+      const before = document.querySelector('.solve')!.scrollTop
+      slot('t4')
+      expect(at()).toBe('[data-close]')
+      expect(document.querySelector('.solve')!.scrollTop - before).toBe(325)
+      expect(document.documentElement.scrollTop).toBe(0)
+      expect(intoView).not.toHaveBeenCalled()
+    } finally {
+      Reflect.deleteProperty(Element.prototype, 'scrollIntoView')
+    }
+  })
+
+  // A mark is drawn only where its target can be seen: out of the account's view it shows no ring
+  // and no words, and part in view its ring is cut at the account's edge (07c, #24 [2]).
+  it('shows nothing while its target is out of view, and cuts its ring at the scroll box', async () => {
+    boxes = { '[data-close]': new DOMRect(0, 500, 360, 50), '.solve': new DOMRect(0, 0, 360, 400) }
+    toSling()
+    slot('t4')
+    await new Promise((r) => setTimeout(r, 100))
+    expect(at()).toBe('[data-close]')
+    expect(ring()).toBeNull()
+    expect(document.querySelector('.coach .label')).toBeNull()
+    boxes['[data-close]'] = new DOMRect(0, 380, 360, 50)
+    fireEvent.scroll(document.querySelector('.solve')!)
+    await waitFor(() => expect(ring()).not.toBeNull())
+    expect([ring()!.style.top, ring()!.style.height]).toEqual(['376px', '24px'])
+  })
 
   it('shows each step at its target, or at the button of the view that holds it', () => {
     render(<App />)
