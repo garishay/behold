@@ -117,7 +117,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     close(submit(s, progress))
   }
   const show = (v: View) => {
-    if (view === 'solve') setFresh([])
+    // The rings clear when Solve is left, not when its own tab is tapped again (review round 1).
+    if (view === 'solve' && v !== 'solve') setFresh([])
     setView(v)
   }
   // The menu: the one piece of chrome on every view, the reveal's included.

@@ -159,6 +159,9 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     tab(/Solve/)
     const ringed = chips().filter((c) => c.classList.contains('is-new'))
     expect(ringed.map((c) => c.textContent)).toEqual(['stones', 'five'])
+    // Solve tapped again is not Solve left: the rings stay (review round 1, #41).
+    tab(/Solve/)
+    expect(chips().filter((c) => c.classList.contains('is-new'))).toHaveLength(2)
   })
 
   it('a chip picked up is marked, and put down on a second tap', () => {
