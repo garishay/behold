@@ -71,8 +71,9 @@ export const valley = {
   ],
   steps: [
     { id: 'step1', until: { tapped: 'boy' } },
-    { id: 'step2', until: { filled: 'd1' } },
-    { id: 'step3', until: { filled: 't4' } },
-    { id: 'step4' },
+    { id: 'step2', until: { view: 'solve' } },
+    { id: 'step3', until: { filled: 'd1' } },
+    { id: 'step4', until: { filled: 't4' } },
+    { id: 'step5' },
   ],
 } as const satisfies CaseStructure

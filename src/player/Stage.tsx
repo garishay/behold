@@ -12,7 +12,7 @@ interface StageProps {
   tapped: readonly string[]
   onMoment: (id: string) => void
   onTap: (spotId: string) => void
-  /** What lies over the picture: the brief's card, the tutorial's banner. */
+  /** What lies over the picture: the brief's card. */
   children?: ReactNode
 }
 

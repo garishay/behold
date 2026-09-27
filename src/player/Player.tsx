@@ -4,22 +4,24 @@ import type { Kind } from '../cases/types.ts'
 import type { PassageService } from '../passages/service.ts'
 import { strings } from '../strings/en.ts'
 import { Bank } from './Bank.tsx'
+import { CoachMark } from './CoachMark.tsx'
 import { Dock, type Caption } from './Dock.tsx'
 import { PaperModal, PapersSheet } from './Papers.tsx'
 import { prefetch } from './pictures.ts'
 import { Reveal } from './Reveal.tsx'
 import { Stage } from './Stage.tsx'
 import {
+  answer,
   chooseMoment,
   chooseOrderSlot,
   chooseSlot,
   chooseWord,
   filled,
   nothing,
+  opened,
   step,
   submit,
   tap,
-  thinkStep,
   total,
   wrong,
   type Outcome,
@@ -70,6 +72,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   // Words found on Look since Solve was last left: the badge on Solve's button, then ringed in the
   // bank while Solve is open (#24).
   const [fresh, setFresh] = useState<readonly string[]>([])
+  // The last step's words leave on the next tap after they show, and its ring stays (#24 [3]).
+  const [lastSaid, setLastSaid] = useState(false)
   const [refused, setRefused] = useState<Kind>()
   const [message, setMessage] = useState('')
   // Every picture of the case is requested as it opens, so the whole case is cached for offline.
@@ -116,9 +120,10 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     setMessage(off === 0 ? '' : off <= 2 ? strings.oneOrTwoWrong : strings.severalWrong)
     close(submit(s, progress))
   }
-  const show = (v: View) => {
+  const show = (v: 'look' | 'solve') => {
     if (view === 'solve') setFresh([])
     setView(v)
+    onProgress(opened(s, progress, v))
   }
   // The menu: the one piece of chrome on every view, the reveal's included.
   const menu = (
@@ -157,9 +162,23 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
         <Reveal structure={s} text={text} passages={passages} onBack={onCases} />
       </div>
     )
-  const current = step(s, progress)
-  const banner = current && <div className="steps">{text.steps?.[current.id]}</div>
   const moment = s.moments.find((m) => m.id === progress.moment) ?? s.moments[0]
+  const card = brief && progress.tapped.length === 0
+  // Where the tutorial's step is shown (#25): at its target on this view — the spot, Solve's
+  // button, the answer's word and then its slot, or Close the case — or at the button of the view
+  // that holds it. Nothing is marked under a card, a sheet, or a paper.
+  const current = step(s, progress)
+  const markAt = (until = current?.until) => {
+    if (current === undefined || card || sheet !== null || paper !== null) return undefined
+    if (until?.tapped)
+      return view === 'look' ? `[data-spot="${until.tapped}"]` : '[data-view="look"]'
+    if (until?.view || view === 'look') return '[data-view="solve"]'
+    const filled = until?.filled
+    if (filled === undefined) return '[data-close]'
+    const word = answer(s, filled)
+    return selection.word === word ? `[data-slot="${filled}"]` : `[data-word="${word}"]`
+  }
+  const at = markAt()
   // Look carries the case's found count, as Solve carries what is filled (#24, rulings [1], [5]).
   const spots = s.moments.flatMap((m) => m.spots)
   const found = `${spots.filter((x) => progress.tapped.includes(x.id)).length}/${spots.length}`
@@ -169,11 +188,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
       role="tab"
       data-view={v}
       aria-selected={view === v}
-      className={
-        'tab' +
-        (view === v ? ' is-on' : '') +
-        (v === 'solve' && thinkStep(s, progress) && view !== 'solve' ? ' pulse' : '')
-      }
+      className={'tab' + (view === v ? ' is-on' : '')}
       onClick={() => show(v)}
     >
       {strings[v]}
@@ -198,8 +213,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
             }}
             onTap={onTap}
           >
-            {banner}
-            {brief && progress.tapped.length === 0 && (
+            {card && (
               <div className="card" role="dialog" aria-label={text.title}>
                 <h2>{text.title}</h2>
                 <p>{text.brief}</p>
@@ -229,7 +243,6 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
               progress={progress}
               selection={selection}
               message={message}
-              banner={banner}
               onSlot={(t) => apply(chooseSlot(s, progress, selection, t))}
               onMoment={(id) => apply(chooseMoment(s, progress, selection, id))}
               onOrderSlot={(i) => apply(chooseOrderSlot(s, progress, selection, i))}
@@ -258,6 +271,13 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
         <PapersSheet text={text} papers={progress.papers} onClose={() => setSheet(null)} />
       )}
       {paper !== null && <PaperModal text={text} paper={paper} onClose={() => setPaper(null)} />}
+      {at && current && (
+        <CoachMark
+          at={at}
+          label={current.until || !lastSaid ? (text.steps?.[current.id] ?? '') : ''}
+          onTap={current.until || lastSaid ? undefined : () => setLastSaid(true)}
+        />
+      )}
     </div>
   )
 }

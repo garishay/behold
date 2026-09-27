@@ -90,13 +90,12 @@ export const wrong = (s: CaseStructure, p: Progress) =>
 export const step = (s: CaseStructure, p: Progress) =>
   guided(s) && !p.solved ? s.steps?.[p.step] : undefined
 
-/** Whether the current step waits on Think — a face or a blank filled. */
-export const thinkStep = (s: CaseStructure, p: Progress) => step(s, p)?.until?.filled !== undefined
-
+// A view opened is met as it opens, by `opened`, never after the fact.
 const met = (s: CaseStructure, p: Progress, until: Until) =>
   until.tapped !== undefined
     ? p.tapped.includes(until.tapped)
-    : (p.faces[until.filled] ?? p.fills[until.filled]) === answer(s, until.filled)
+    : until.filled !== undefined &&
+      (p.faces[until.filled] ?? p.fills[until.filled]) === answer(s, until.filled)
 
 /**
  * The steps moved past every met `until`. A guided case no longer closes itself: its last step
@@ -109,6 +108,10 @@ function advance(s: CaseStructure, p: Progress): Progress {
   while (at < steps.length - 1 && met(s, p, steps[at].until as Until)) at++
   return { ...p, step: at }
 }
+
+/** A view opened: the step waiting on it is met, and any met after it (#25). */
+export const opened = (s: CaseStructure, p: Progress, view: 'look' | 'solve') =>
+  step(s, p)?.until?.view === view ? advance(s, { ...p, step: p.step + 1 }) : p
 
 /** Whether a slot shows its ✓ when right: only a face or blank a guided step names (#26 [4]). */
 export const marked = (s: CaseStructure, target: string) =>
