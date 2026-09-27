@@ -318,4 +318,13 @@ describe('validate (Gate 02 A6)', () => {
       'spot "basket" keeps no 44 px square of its own at 320 px wide',
     ])
   })
+
+  // The Zoom pill is drawn over every picture, so (l) counts it (#24, ruling [1]): a spot in the
+  // valley's top left corner, 48 × 46.9 px at 320, keeps its square only where the pill sits.
+  it('(l) a spot under the Zoom pill — a patch of sky in the valley’s corner', () => {
+    const sky = { id: 'sky', box: [0, 0, 15, 11], words: [] } as const
+    expect(validate(withSpots([...moment.spots, sky]), en)).toEqual([
+      'spot "sky" keeps no 44 px square of its own at 320 px wide',
+    ])
+  })
 })
