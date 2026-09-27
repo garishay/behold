@@ -390,9 +390,10 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     try {
       render(<App />)
       openCase(/The vineyard/)
+      // Each address carries its picture's hash (#45).
       expect(requested.sort()).toEqual(
-        ['bedchamber.jpg', 'gate.jpg', 'p1.jpg', 'p2.jpg', 'p3.jpg', 'vineyard.jpg'].map(
-          (f) => `/cases/vineyard/${f}`,
+        ['bedchamber.jpg', 'gate.jpg', 'p1.jpg', 'p2.jpg', 'p3.jpg', 'vineyard.jpg'].map((f) =>
+          expect.stringMatching(new RegExp(`^/cases/vineyard/${f}\\?v=[0-9a-f]{8}$`)),
         ),
       )
     } finally {

@@ -1,12 +1,30 @@
 import react from '@vitejs/plugin-react'
+import { hash } from 'node:crypto'
+import { readdirSync, readFileSync } from 'node:fs'
 import { VitePWA } from 'vite-plugin-pwa'
 import { defineConfig } from 'vitest/config'
+
+/**
+ * Each case picture's hash, the first eight hex digits of its file's SHA-256, by `<case>/<file>`
+ * under `root` (#45). A picture's address carries it, so a changed file is an address no phone has
+ * cached, and an unchanged one keeps its address and its cached copy.
+ */
+export function pictureHashes(root: string) {
+  const hashes: Record<string, string> = {}
+  for (const id of readdirSync(root))
+    for (const file of readdirSync(`${root}/${id}`))
+      hashes[`${id}/${file}`] = hash('sha256', readFileSync(`${root}/${id}/${file}`)).slice(0, 8)
+  return hashes
+}
 
 // https://vite.dev/config/
 export default defineConfig({
   // The Pages deploy serves the site from /<repository>/ (Gate 01 A4); the workflow passes the
   // path. Dev, tests, and a bare build stay at `/`, so nothing that pins a URL moves.
   base: process.env.PAGES_BASE ?? '/',
+  // The pictures' hashes, read from the files when the config loads, so the build, the dev
+  // server, and the tests stamp each address from the picture as it is (#45).
+  define: { __PICTURE_HASHES__: JSON.stringify(pictureHashes('public/cases')) },
   plugins: [
     react(),
     // The PWA shell (Gate 01 A2). `prompt`: a new version waits until the player taps the
@@ -20,12 +38,15 @@ export default defineConfig({
       // played case stays offline; they are not precached, so the install stays the shell. The
       // worker claims the page as soon as it first activates, so a case opened on the first visit
       // is cached through the rule too (review round 2, #20); a new version still waits for the
-      // tap, since skipWaiting stays off.
+      // tap, since skipWaiting stays off. A picture is kept by its address, which carries its
+      // file's hash (#45): a changed picture is a new address, fetched once and kept, and the copy
+      // it supersedes stays until the 200-entry limit evicts it. The pattern still takes a bare
+      // address, which a page left open on an older version asks for.
       workbox: {
         clientsClaim: true,
         runtimeCaching: [
           {
-            urlPattern: /\/cases\/[^/]+\/[^/]+\.jpg$/,
+            urlPattern: /\/cases\/[^/]+\/[^/]+\.jpg(\?v=[0-9a-f]+)?$/,
             handler: 'CacheFirst',
             options: { cacheName: 'cases', expiration: { maxEntries: 200 } },
           },

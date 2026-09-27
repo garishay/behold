@@ -1,8 +1,11 @@
 import type { CaseStructure } from '../cases/types.ts'
 
-/** A case's picture at its stable path under `public/cases/` (docs/case-file.md, Pictures). */
+/**
+ * A case's picture: its stable path under `public/cases/`, stamped with its file's hash, so a
+ * changed picture is an address the service worker has not cached (docs/case-file.md, Pictures).
+ */
 export const picture = (caseId: string, file: string) =>
-  `${import.meta.env.BASE_URL}cases/${caseId}/${file}`
+  `${import.meta.env.BASE_URL}cases/${caseId}/${file}?v=${__PICTURE_HASHES__[`${caseId}/${file}`]}`
 
 /**
  * Every picture of a case requested — its moments and its faces — so the service worker's rule

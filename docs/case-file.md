@@ -123,6 +123,15 @@ portrait, 4:5 (`docs/world-rules.md` §6); the tutorial's valley is the prototyp
 so for testing, per §8. A tappable thing is at most eight to a moment (§6), and nothing that
 matters sits in the outer 8% of the width (§7).
 
+A picture is requested at its path stamped with a short hash of its file —
+`cases/<id>/<file>?v=<hash>`, the first eight hex digits of the file's SHA-256 — which
+`vite.config.ts` computes from `public/cases/` when it loads, so the build, the dev server, and the
+tests stamp every address from the files as they are (#45). The service worker keeps a picture by
+its address. A changed picture, replaced in place under its own name, is a new address, which a
+phone fetches after the update instead of showing the old picture under the new boxes; an
+unchanged picture keeps its address and the copy the phone already holds. The copy a change
+supersedes stays in the phone's cache until the rule's 200-entry limit evicts it.
+
 A tap finds its spot one way, in the player and the validator alike (`src/cases/spots.ts`, #27).
 Spots are drawn largest first, so where two boxes overlap the smaller is on top and takes the tap.
 A tap on no box goes to the nearest within 16 CSS px, so a box hugs the thing it names and is
