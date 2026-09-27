@@ -18,6 +18,11 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   as a step of its own; a step already met never shown; the last step's words and dim leaving on
   the next tap while its ring stays; the banner and the Solve pulse gone; the validator's check
   (m), a step's words eight or fewer.
+- **07c — the case screen fits the phone** (#43): the case screen pinned to the screen the phone
+  shows instead of sized by `100dvh`, which on the owner's phone came out taller than the screen
+  by the address bar; a mark scrolls only its target's own scroll box, never the page, and shows
+  only where its target can be seen, its ring cut at the scroll box's edge; Close the case held at
+  the account's foot, and a close's result in the bank's head beside a refused word's message.
 
 ## v0.6.0 — Gate 06, every spot owns a fingertip (#27)
 
