@@ -51,12 +51,16 @@ export interface Block {
   readonly blanks: Readonly<Record<string, string>>
 }
 
-/** What ends a tutorial step: a spot tapped, or a face or blank filled with its answer — one or the other. */
+/**
+ * What ends a tutorial step, and so where its mark sits (#25): a spot tapped, a face or blank
+ * filled with its answer, or Solve opened — one of the three.
+ */
 export type Until =
-  | { readonly tapped: string; readonly filled?: never }
-  | { readonly filled: string; readonly tapped?: never }
+  | { readonly tapped: string; readonly filled?: never; readonly view?: never }
+  | { readonly filled: string; readonly tapped?: never; readonly view?: never }
+  | { readonly view: 'solve'; readonly tapped?: never; readonly filled?: never }
 
-/** A tutorial step; the last has no `until` and stays until the case closes. */
+/** A tutorial step; the last has no `until`, marks Close the case, and stays until the case closes. */
 export interface Step {
   readonly id: string
   readonly until?: Until

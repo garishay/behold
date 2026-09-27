@@ -27,6 +27,7 @@ const menu = (item: string) => {
   )
 }
 const result = () => document.querySelector('.result')
+const coach = () => document.querySelector('.coach')
 
 /** A passage service for the tests: made-up words with verse numbers, never scripture. */
 const numbered: PassageService = () =>
@@ -107,11 +108,12 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     )
     expect(screen.getAllByRole('tab').map((t) => t.textContent)).toEqual(['Look0/6', 'Solve0/7'])
     expect(screen.getByRole('tab', { name: /Look/ })).toHaveAttribute('aria-selected', 'true')
-    expect(screen.getByText('Tap the boy with the sling.')).toBeInTheDocument()
+    expect(coach()).toBeNull()
     expect(screen.getByText('Tap anything that looks like it matters.')).toBeInTheDocument()
     expect(document.querySelector('.bank')).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Start' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(coach()).toHaveTextContent('Tap the boy with the sling.')
   })
 
   it('the brief’s card goes with the first tap, and the menu holds the brief, Cases, and Restart', () => {
@@ -138,7 +140,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
       'Found: David, sling · one of the faces in Solve',
     )
     expect(screen.getByRole('tab', { name: /Look/ })).toHaveTextContent('Look1/6')
-    expect(screen.getByText(/Open Solve at the foot/)).toBeInTheDocument()
+    expect(coach()).toHaveTextContent('Open Solve to name him.')
     expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('Solve0/7+2')
     tapSpot('giant')
     expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('Solve0/7+6')
@@ -328,7 +330,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     expect(screen.getByText('In progress')).toBeInTheDocument()
     openCase(/The valley/)
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    expect(screen.getByText(/Open Solve at the foot/)).toBeInTheDocument()
+    expect(coach()).toHaveTextContent('Open Solve to name him.')
     tab(/Solve/)
     expect(chips()).toHaveLength(2)
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false)
@@ -337,7 +339,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     confirm.mockReturnValue(true)
     menu('Restart')
     expect(screen.getByRole('dialog', { name: 'The valley' })).toBeInTheDocument()
-    expect(screen.getByText('Tap the boy with the sling.')).toBeInTheDocument()
+    expect(coach()).toBeNull()
     tab(/Solve/)
     expect(screen.getByText('Nothing yet. Tap things in the picture.')).toBeInTheDocument()
     confirm.mockRestore()
@@ -431,15 +433,125 @@ describe('the case screen explored (#6, 03b; #24)', () => {
   })
 })
 
-describe('the case solved (#6, 03c; #24)', () => {
-  it('Solve counts what is filled, and pulses while a step waits on it', () => {
+describe('the tutorial’s marks (#25)', () => {
+  const at = () => coach()?.getAttribute('data-at')
+  const said = () => coach()?.querySelector('[role="status"]')?.textContent
+
+  it('shows each step at its target, or at the button of the view that holds it', () => {
     render(<App />)
     openCase(/The valley/)
-    expect(screen.getByRole('tab', { name: /Solve/ })).not.toHaveClass('pulse')
-    tapSpot('boy')
-    expect(screen.getByRole('tab', { name: /Solve/ })).toHaveClass('pulse')
+    fireEvent.click(screen.getByRole('button', { name: 'Start' }))
+    expect([at(), said()]).toEqual(['[data-spot="boy"]', 'Tap the boy with the sling.'])
     tab(/Solve/)
-    expect(screen.getByRole('tab', { name: /Solve/ })).not.toHaveClass('pulse')
+    expect(at()).toBe('[data-view="look"]')
+    tab(/Look/)
+    tapSpot('boy')
+    expect([at(), said()]).toEqual(['[data-view="solve"]', 'Open Solve to name him.'])
+    tab(/Solve/)
+    expect([at(), said()]).toEqual([
+      '[data-word="david"]',
+      'Tap David, then the slot under the boy.',
+    ])
+    chip('David')
+    expect(at()).toBe('[data-slot="d1"]')
+    slot('d1')
+    expect([at(), said()]).toEqual(['[data-word="sling"]', 'Now tap sling, then its blank.'])
+    slot('t4')
+    expect(at()).toBe('[data-word="sling"]')
+    chip('sling')
+    expect([at(), said()]).toEqual(['[data-close]', 'Fill the rest, then close the case.'])
+    tab(/Look/)
+    expect(at()).toBe('[data-view="solve"]')
+  })
+
+  it('marks nothing under the brief’s card or the menu, and nothing in a case without steps', async () => {
+    render(<App />)
+    openCase(/The valley/)
+    expect(coach()).toBeNull()
+    tapSpot('brook')
+    expect(at()).toBe('[data-spot="boy"]')
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }))
+    expect(coach()).toBeNull()
+    menu('Cases')
+    fireEvent.click(await screen.findByRole('button', { name: /The vineyard/ }))
+    tapSpot('cord')
+    expect(coach()).toBeNull()
+  })
+
+  // Persistent, not blocking (#25): the ring stays until the step is done, a tap elsewhere is
+  // still play, and the first one lifts the dim.
+  it('blocks nothing: a tap elsewhere plays, lifts the dim, and leaves the ring', async () => {
+    render(<App />)
+    openCase(/The valley/)
+    fireEvent.click(screen.getByRole('button', { name: 'Start' }))
+    const ring = () => document.querySelector('.coach .ring')
+    await waitFor(() => expect(ring()).toHaveClass('dim'))
+    fireEvent.pointerDown(document.querySelector('[data-spot="boy"]')!)
+    expect(ring()).toHaveClass('dim')
+    fireEvent.pointerDown(document.querySelector('[data-spot="giant"]')!)
+    tapSpot('giant')
+    expect(screen.getByText(/The Philistines’ champion/)).toBeInTheDocument()
+    expect(ring()).not.toHaveClass('dim')
+    expect([at(), said()]).toEqual(['[data-spot="boy"]', 'Tap the boy with the sling.'])
+    tapSpot('boy')
+    await waitFor(() => expect(ring()).toHaveClass('dim'))
+  })
+
+  // A step can sit on a phone for minutes, so the mark stops reading its target's place once it
+  // has held still, about half a second, and a scroll, a resize, or a tap wakes it ([Q6] on #12).
+  // jsdom's target never moves, so it settles after its first frames.
+  it('stops following a target that holds still, and a scroll wakes it', async () => {
+    const frames = vi.spyOn(window, 'requestAnimationFrame')
+    const pause = (ms: number) => new Promise((r) => setTimeout(r, ms))
+    try {
+      render(<App />)
+      openCase(/The valley/)
+      fireEvent.click(screen.getByRole('button', { name: 'Start' }))
+      await pause(1000)
+      const settled = frames.mock.calls.length
+      expect(settled).toBeGreaterThan(0)
+      await pause(300)
+      expect(frames.mock.calls.length).toBe(settled)
+      fireEvent.scroll(window)
+      expect(frames.mock.calls.length).toBe(settled + 1)
+    } finally {
+      frames.mockRestore()
+    }
+  })
+
+  // The last step's words cover the account's end on Solve and the caption from Look, so they
+  // leave on the next tap after they show; its ring stays until the case closes (#24, ruling [3]).
+  it('the last step’s words leave on the next tap, and its ring stays', async () => {
+    render(<App />)
+    openCase(/The valley/)
+    tapSpot('boy')
+    tab(/Solve/)
+    for (const [id, word] of [
+      ['d1', 'David'],
+      ['t4', 'sling'],
+    ] as const) {
+      chip(word)
+      slot(id)
+    }
+    await waitFor(() => expect(document.querySelector('.coach .label')).not.toBeNull())
+    expect([at(), said()]).toEqual(['[data-close]', 'Fill the rest, then close the case.'])
+    fireEvent.pointerDown(document.querySelector('[data-slot="t1"]')!)
+    expect(document.querySelector('.coach .label')).toBeNull()
+    expect(document.querySelector('.coach .ring')).not.toHaveClass('dim')
+    expect([at(), said()]).toEqual(['[data-close]', ''])
+    tab(/Look/)
+    expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
+    // The dim left with the words, and a new target doesn't bring it back (#24, addendum (b)).
+    expect(document.querySelector('.coach .ring')).not.toHaveClass('dim')
+  })
+})
+
+describe('the case solved (#6, 03c; #24)', () => {
+  it('Solve counts what is filled and holds who is who, the account, and the bank', () => {
+    render(<App />)
+    openCase(/The valley/)
+    tapSpot('boy')
+    tab(/Solve/)
     expect(screen.getByRole('heading', { name: 'Who is who' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'The account' })).toBeInTheDocument()
     expect(document.querySelector('.bank')).toHaveTextContent(
@@ -483,7 +595,7 @@ describe('the case solved (#6, 03c; #24)', () => {
     chip('sling')
     slot('t4')
     expect(document.querySelector('[data-slot="t4"]')).toHaveClass('is-right')
-    expect(screen.getByText(/then Close the case at the end of Solve/)).toBeInTheDocument()
+    expect(coach()).toHaveAttribute('data-at', '[data-close]')
     for (const [id, word] of [
       ['t2', 'brothers'],
       ['t3', 'six'],
@@ -680,10 +792,10 @@ describe('the case solved (#6, 03c; #24)', () => {
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
     menu('Restart')
     confirm.mockRestore()
-    expect(screen.getByText('Tap the boy with the sling.')).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'The valley' })).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('0/7')
     await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
-    expect(screen.getByText('Tap the boy with the sling.')).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'The valley' })).toBeInTheDocument()
   })
 
   // Restart from the reveal steps back and leaves the reveal's entry ahead; forward must not show
@@ -701,7 +813,9 @@ describe('the case solved (#6, 03c; #24)', () => {
     history.forward()
     await popped
     expect(history.state).toEqual({ case: 'valley' })
-    await waitFor(() => expect(screen.getByText('Tap the boy with the sling.')).toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.getByRole('dialog', { name: 'The valley' })).toBeInTheDocument(),
+    )
     expect(screen.queryByRole('heading', { name: 'The case is closed.' })).not.toBeInTheDocument()
     expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('0/7')
   })

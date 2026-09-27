@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react'
 import type { CaseStructure, CaseText } from '../cases/types.ts'
 import { strings } from '../strings/en.ts'
 import { picture } from './pictures.ts'
@@ -12,8 +11,6 @@ interface ThinkProps {
   selection: Selection
   /** The result line under the submit: a kind refused, or how far off the case was. */
   message: string
-  /** The tutorial's banner, over who is who. */
-  banner: ReactNode
   onSlot: (target: string) => void
   onMoment: (id: string) => void
   onOrderSlot: (index: number) => void
@@ -51,7 +48,6 @@ export function Think(props: ThinkProps) {
   return (
     <>
       <section className="blk">
-        {props.banner}
         <h2>{strings.whoIsWho}</h2>
         <div className={'faces' + (s.faces.length === 2 ? ' two' : '')}>
           {s.faces.map((f) => (

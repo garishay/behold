@@ -65,10 +65,10 @@ export const en = {
   },
   steps: {
     step1: 'Tap the boy with the sling.',
-    step2: 'Open Solve at the foot, then name him: tap David, then tap the slot under the boy.',
-    step3: 'Fill a blank the same way: tap sling, then tap the blank after “a staff and a”.',
-    step4:
-      'Now it’s yours: fill the rest from the picture, then Close the case at the end of Solve. It tells you roughly how many are wrong, never which.',
+    step2: 'Open Solve to name him.',
+    step3: 'Tap David, then the slot under the boy.',
+    step4: 'Now tap sling, then its blank.',
+    step5: 'Fill the rest, then close the case.',
   },
   reveal: [
     'The boy was David, sent by his father Jesse with ten loaves for his brothers and ten cheeses for the commander over their thousand. The fallen giant was Goliath of Gath, the Philistines’ champion, six cubits and a span tall.',

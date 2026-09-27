@@ -3,7 +3,7 @@
  * a word reachable, a count, a box inside its picture, a string with words in it — over a case
  * and one of its texts. One sentence per problem; an empty list is a valid case. The test job
  * runs it over every registered case (`cases.test.ts`); the checks are A6's list, (a) to (i), and
- * the two of #26 [1], (j) and (k), and #27 [1]'s, (l); the reference is
+ * the two of #26 [1], (j) and (k), #27 [1]'s, (l), and #25's, (m); the reference is
  * `docs/case-file.md`.
  */
 import { crowded, fingertip, smallestPicture } from './spots.ts'
@@ -210,6 +210,12 @@ export function validate(structure: CaseStructure, text: CaseText<CaseStructure>
       fail(
         `spot ${q(s.id)} keeps no ${fingertip} px square of its own at ${smallestPicture} px wide`,
       )
+
+  // (m) A step's words sit beside its target, eight at most (#25).
+  for (const [id, words] of Object.entries(text.steps ?? {})) {
+    const n = words.split(/\s+/).filter(Boolean).length
+    if (n > 8) fail(`step ${q(id)} says ${n} words, not eight or fewer`)
+  }
 
   return problems
 }
