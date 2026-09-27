@@ -327,4 +327,13 @@ describe('validate (Gate 02 A6)', () => {
       'spot "sky" keeps no 44 px square of its own at 320 px wide',
     ])
   })
+
+  // (m) is #25's: a step's words sit beside its target, eight at most.
+  it('(m) a step of nine words — step 3 with a second "tap"', () => {
+    const long: Text = {
+      ...en,
+      steps: { ...en.steps, step3: 'Tap David, then tap the slot under the boy.' },
+    }
+    expect(validate(valley, long)).toEqual(['step "step3" says 9 words, not eight or fewer'])
+  })
 })

@@ -12,10 +12,10 @@ import {
   kindOf,
   marked,
   nothing,
+  opened,
   step,
   submit,
   tap,
-  thinkStep,
   total,
   wrong,
 } from './state.ts'
@@ -117,15 +117,17 @@ describe('the model (#6)', () => {
   it('the guided case steps on as each until is met, then closes only on the submit', () => {
     let p = fresh(valley)
     expect(step(valley, p)?.id).toBe('step1')
-    expect(thinkStep(valley, p)).toBe(false)
+    expect(opened(valley, p, 'solve')).toBe(p)
     p = tap(valley, p, 'boy').progress
     expect(step(valley, p)?.id).toBe('step2')
-    expect(thinkStep(valley, p)).toBe(true)
-    p = chooseSlot(valley, p, chooseWord(valley, p, nothing, 'david').selection, 'd1').progress
+    expect(opened(valley, p, 'look')).toBe(p)
+    p = opened(valley, p, 'solve')
     expect(step(valley, p)?.id).toBe('step3')
+    p = chooseSlot(valley, p, chooseWord(valley, p, nothing, 'david').selection, 'd1').progress
+    expect(step(valley, p)?.id).toBe('step4')
     expect(closable(valley, p)).toBe(false)
     p = chooseSlot(valley, p, chooseWord(valley, p, nothing, 'sling').selection, 't4').progress
-    expect(step(valley, p)?.id).toBe('step4')
+    expect(step(valley, p)?.id).toBe('step5')
     expect(closable(valley, p)).toBe(true)
     expect(['d1', 't4', 'd2', 't1'].map((slot) => marked(valley, slot))).toEqual([
       true,
@@ -139,10 +141,20 @@ describe('the model (#6)', () => {
       p = chooseSlot(valley, p, chooseWord(valley, p, nothing, word).selection, slot).progress
     expect(wrong(valley, p)).toBe(0)
     expect(p.solved).toBe(false)
-    expect(step(valley, p)?.id).toBe('step4')
+    expect(step(valley, p)?.id).toBe('step5')
     p = submit(valley, p)
     expect(p.solved).toBe(true)
     expect(step(valley, p)).toBeUndefined()
+  })
+
+  // A step already done never shows (#25): sling in its blank before David is named, and the
+  // tutorial goes from David's slot straight to Close the case.
+  it('skips a step whose until is already met', () => {
+    let p = opened(valley, tap(valley, fresh(valley), 'boy').progress, 'solve')
+    p = chooseSlot(valley, p, chooseWord(valley, p, nothing, 'sling').selection, 't4').progress
+    expect(step(valley, p)?.id).toBe('step3')
+    p = chooseSlot(valley, p, chooseWord(valley, p, nothing, 'david').selection, 'd1').progress
+    expect(step(valley, p)?.id).toBe('step5')
   })
 
   it('a case without steps closes only on a submit with nothing wrong', () => {
