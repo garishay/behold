@@ -195,11 +195,15 @@ button:focus-visible {
 }
 
 /* The case screen (#6, #24): one phone screen that never scrolls — the view, then the bar at the
-   foot. The picture takes what the chrome leaves; on Solve only the account scrolls. */
+   foot. The picture takes what the chrome leaves; on Solve only the account scrolls. It is pinned
+   to the screen the phone shows, not sized by a viewport unit: on a phone whose browser gives
+   `100dvh` the height with its address bar hidden, the page came out taller than the screen by
+   the bar, and scrolled (07c, #24). Fixed, it leaves the document nothing to scroll. */
 .app {
   --dock: 104px;
+  position: fixed;
+  inset: 0;
   max-width: 430px;
-  height: 100dvh;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -210,7 +214,7 @@ button:focus-visible {
 
 /* The reveal is read, not played: it scrolls as a page. */
 .app.reading {
-  height: auto;
+  position: static;
   min-height: 100dvh;
   overflow: visible;
   padding: max(14px, env(safe-area-inset-top)) var(--inset) 0;
@@ -619,8 +623,24 @@ button:focus-visible {
   padding: 8px var(--inset);
 }
 
-.refused {
+.note {
   color: var(--t-action);
+}
+
+/* A mark brings its target to the middle of its scroll box: smoothly, and at once under reduced
+   motion (07c, #24). */
+.solve,
+.chips,
+.stage {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .solve,
+  .chips,
+  .stage {
+    scroll-behavior: auto;
+  }
 }
 
 .bank-head {
@@ -1018,8 +1038,15 @@ button:focus-visible {
   font-size: 13px;
 }
 
+/* Close the case sticks to the account's foot whenever it shows (07c, #24 [3]). */
 .submit-row {
-  margin-top: 18px;
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  margin: 18px calc(-1 * var(--inset)) 0;
+  padding: 10px var(--inset);
+  border-top: 1px solid var(--slate);
+  background: var(--night);
 }
 
 .submit {
@@ -1035,13 +1062,6 @@ button:focus-visible {
   background: var(--slate);
   color: var(--mist-dim);
   cursor: default;
-}
-
-.result {
-  margin: 12px 0 0;
-  font-family: var(--serif);
-  font-size: 17px;
-  min-height: 1.5em;
 }
 
 /* The reveal: the case in the game's words, then the passage. No bank below it, so its own

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import type { CaseEntry } from '../cases/index.ts'
-import type { Kind } from '../cases/types.ts'
 import type { PassageService } from '../passages/service.ts'
 import { strings } from '../strings/en.ts'
 import { Bank } from './Bank.tsx'
@@ -74,8 +73,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const [fresh, setFresh] = useState<readonly string[]>([])
   // The last step's words leave on the next tap after they show, and its ring stays (#24 [3]).
   const [lastSaid, setLastSaid] = useState(false)
-  const [refused, setRefused] = useState<Kind>()
-  const [message, setMessage] = useState('')
+  // The bank's head: a refused word's message, or how far off a close was (07c, #24 [3]).
+  const [note, setNote] = useState('')
   // Every picture of the case is requested as it opens, so the whole case is cached for offline.
   useEffect(() => prefetch(s), [s])
   // Back from the reveal returns to Solve; forward to the reveal's entry returns to the reveal
@@ -102,7 +101,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   }
   const apply = (o: Outcome) => {
     setSelection(o.selection)
-    setRefused(o.wants)
+    setNote(o.wants === undefined ? '' : strings.blankWants(o.wants))
     close(o.progress)
   }
   const onTap = (spotId: string) => {
@@ -117,7 +116,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   }
   const onSubmit = () => {
     const off = wrong(s, progress)
-    setMessage(off === 0 ? '' : off <= 2 ? strings.oneOrTwoWrong : strings.severalWrong)
+    setNote(off === 0 ? '' : off <= 2 ? strings.oneOrTwoWrong : strings.severalWrong)
     close(submit(s, progress))
   }
   const show = (v: 'look' | 'solve') => {
@@ -243,7 +242,6 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
               text={text}
               progress={progress}
               selection={selection}
-              message={message}
               onSlot={(t) => apply(chooseSlot(s, progress, selection, t))}
               onMoment={(id) => apply(chooseMoment(s, progress, selection, id))}
               onOrderSlot={(i) => apply(chooseOrderSlot(s, progress, selection, i))}
@@ -256,7 +254,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
             progress={progress}
             selection={selection}
             fresh={fresh}
-            refused={refused}
+            note={note}
             onWord={(id) => apply(chooseWord(s, progress, selection, id))}
           />
         </>
