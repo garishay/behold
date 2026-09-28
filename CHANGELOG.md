@@ -3,6 +3,18 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.10.0 — Gate 10, sound (#52)
+
+- **52a — the sound effects** (#55): five effects on the player's own moves, in place of the
+  sting: a lyre's pluck on a spot's first tap, a scroll's rustle on a paper copied, a knock on
+  wood for anything set in a slot, right or wrong alike, two falling lyre notes when Close the
+  case is answered wrong, and three rising ones, the sting's shape, when it is answered right;
+  silence everywhere else; one Web Audio context, made on the first tap with the session ambient,
+  suspended while the app is hidden; the Music and Effects switches on the title screen and in
+  the menu, both on, kept on the phone; the effects precached with the shell; world rules §9,
+  _Sound_; and the register, `docs/sound.md`, each file's source, author, CC0 licence, and the
+  command that cut and levelled it, held by a test.
+
 ## v0.9.0 — Gate 09, the battle (#53)
 
 - **53a — the battle** (#54): case four, Micaiah and the four hundred and the battle at Ramoth-gilead,

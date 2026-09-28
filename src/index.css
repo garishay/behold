@@ -826,6 +826,34 @@ button:focus-visible {
   font-size: 16px;
 }
 
+/* The sound switches (Gate 10 A4): two pills in a row, under the case cards and under Restart;
+   gold while on, dim while off. */
+.switches {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.menu .switches {
+  margin-top: 16px;
+}
+
+.switches .switch {
+  display: inline-block;
+  width: auto;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  color: var(--gold);
+  font-size: 15px;
+}
+
+.switches .switch[aria-pressed='false'] {
+  border-color: var(--mist-dim);
+  color: var(--mist-dim);
+}
+
 /* Think: the faces, the order, the blocks, the submit. */
 .app h2 {
   font-family: var(--serif);

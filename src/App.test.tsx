@@ -89,7 +89,7 @@ describe('the title screen (Gate 01 A6, #6)', () => {
 
   it('lists every registered case as a card, the tutorial first, with no status before a visit', () => {
     render(<App />)
-    const cards = screen.getAllByRole('button')
+    const cards = screen.getAllByRole('button').filter((b) => b.classList.contains('case-card'))
     expect(cards.map((c) => c.querySelector('.ct')?.textContent)).toEqual([
       'The valley',
       'The mountain',
@@ -119,7 +119,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     expect(coach()).toHaveTextContent('Tap the boy with the sling.')
   })
 
-  it('the brief’s card goes with the first tap, and the menu holds the brief, Cases, and Restart', () => {
+  it('the brief’s card goes with the first tap, and the menu holds the brief, Cases, Restart, and the switches', () => {
     render(<App />)
     openCase(/The vineyard/)
     tapSpot('cord')
@@ -131,7 +131,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
       within(sheet)
         .getAllByRole('button')
         .map((b) => b.textContent),
-    ).toEqual(['Cases', 'Restart'])
+    ).toEqual(['Cases', 'Restart', 'Music · On', 'Effects · On'])
   })
 
   it('a tap shows the caption and what it found, and its words wait on Solve, ringed', () => {

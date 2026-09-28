@@ -6,6 +6,7 @@ import { picture } from './player/pictures.ts'
 import { Player } from './player/Player.tsx'
 import { fresh, type Progress } from './player/state.ts'
 import { load, save, type Saved } from './player/storage.ts'
+import { Switches } from './sound/Switches.tsx'
 import { strings } from './strings/en.ts'
 
 /**
@@ -117,6 +118,7 @@ export default function App({ passages = fetchedPassages }: AppProps) {
           )
         })}
       </div>
+      <Switches />
       <p className="status">{strings.status}</p>
       <p className="notice">{strings.notice}</p>
     </main>

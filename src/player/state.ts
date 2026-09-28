@@ -192,6 +192,15 @@ export function chooseOrderSlot(
 }
 
 /**
+ * Whether a move set something in a slot: a word in a face or a blank, or a moment in the order,
+ * right or wrong alike. Picking up, emptying, and a refused word set nothing (Gate 10 A3).
+ */
+export const placed = (before: Progress, after: Progress) =>
+  Object.entries({ ...after.faces, ...after.fills }).some(
+    ([id, word]) => (before.faces[id] ?? before.fills[id]) !== word,
+  ) || after.order.some((m, i) => m !== null && m !== before.order[i])
+
+/**
  * The case closed on the player's word: solved when nothing is wrong, else unchanged — the screen
  * says how far off.
  */
