@@ -140,6 +140,15 @@ describe('the sound engine (Gate 10 A4)', () => {
     ac.currentTime = 1
     await vi.advanceTimersByTimeAsync(150)
     expect(ac.calls).toEqual(['suspend', 'resume'])
+    // Hidden again before the check: the check leaves the context suspended.
+    ac.calls = []
+    hide(true)
+    hide(false)
+    await vi.advanceTimersByTimeAsync(100)
+    hide(true)
+    await vi.advanceTimersByTimeAsync(150)
+    expect(ac.calls).toEqual(['suspend', 'resume', 'suspend'])
+    expect(ac.state).toBe('suspended')
   })
 
   it('stays silent, and throws nothing, where the browser has no Web Audio', async () => {

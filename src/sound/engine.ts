@@ -41,7 +41,8 @@ function onVisibility(ac: AudioContext) {
     void ac.resume().then(() => {
       const at = ac.currentTime
       setTimeout(() => {
-        if (ac.currentTime === at) void ac.suspend().then(() => ac.resume())
+        // Unless the app was hidden again meanwhile, and its suspend is the one that stopped it.
+        if (ac.currentTime === at && !document.hidden) void ac.suspend().then(() => ac.resume())
       }, 250)
     })
 }
