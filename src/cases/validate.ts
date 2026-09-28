@@ -217,6 +217,11 @@ export function validate(structure: CaseStructure, text: CaseText<CaseStructure>
     if (n > 8) fail(`step ${q(id)} says ${n} words, not eight or fewer`)
   }
 
+  // (n) A case that teaches the order has one, and the mark's words are eight at most (#30).
+  if (structure.teach === 'order' && order === undefined) fail('the case teaches an order it lacks')
+  const taught = text.teach?.split(/\s+/).filter(Boolean).length ?? 0
+  if (taught > 8) fail(`the case's lesson says ${taught} words, not eight or fewer`)
+
   return problems
 }
 

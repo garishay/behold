@@ -180,6 +180,17 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     return selection.word === word ? `[data-slot="${filled}"]` : `[data-word="${word}"]`
   }
   const at = markAt()
+  // The case's one new idea, marked where it is first met (#30): on Solve, while the order is empty,
+  // the pictures to place and then, once one is picked, the slots it goes in, as the tutorial marks
+  // a word and then its slot. A tutorial's step comes first; nothing is marked under a sheet or a
+  // paper.
+  const lesson =
+    s.teach === 'order' &&
+    view === 'solve' &&
+    at === undefined &&
+    sheet === null &&
+    paper === null &&
+    progress.order.every((m) => m === null)
   // Look carries the case's found count, as Solve carries what is filled (#24, rulings [1], [5]).
   const spots = s.moments.flatMap((m) => m.spots)
   const found = `${spots.filter((x) => progress.tapped.includes(x.id)).length}/${spots.length}`
@@ -294,6 +305,9 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
           label={current.until || !lastSaid ? (text.steps?.[current.id] ?? '') : ''}
           onTap={current.until || lastSaid ? undefined : () => setLastSaid(true)}
         />
+      )}
+      {lesson && (
+        <CoachMark at={selection.moment === null ? '.tiles' : '.order'} label={text.teach ?? ''} />
       )}
     </div>
   )
