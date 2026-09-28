@@ -1,7 +1,7 @@
 // The test reads the pictures from disk under Vitest, which runs on Node; the app project declares
 // no Node types, so this file brings them in itself rather than widening tsconfig.app.json.
 /// <reference types="node" />
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { books } from '../../worker/src/books.ts'
 import { cases } from './index.ts'
@@ -45,6 +45,22 @@ describe('the case registry (Gate 02 A1, A5)', () => {
       expect(height, f.id).toBeGreaterThan(0)
     }
   })
+
+  // A moment's picture is generated from its scene brief, written from its spots (world rules §6,
+  // #30). Where a case has its briefs, each moment has one, and each spot is named in it with the
+  // box the structure holds, so a re-fitted box re-writes its line. The valley and the vineyard
+  // were drawn before the rule; each brings its briefs when its picture is next generated.
+  it.each(each.filter(([id]) => existsSync(`src/cases/${id}/scenes.md`)))(
+    '%s: every spot is named in its moment’s scene brief, with its box',
+    (id, c) => {
+      const briefs = readFileSync(`src/cases/${id}/scenes.md`, 'utf8').split('\n## ').slice(1)
+      for (const m of c.moments) {
+        const brief = briefs.find((b) => b.startsWith(`${m.id} `))
+        expect(brief, m.id).toBeDefined()
+        for (const s of m.spots) expect(brief, s.id).toContain(`\`${s.id}\` [${s.box.join(', ')}]`)
+      }
+    },
+  )
 
   // Every passage is one the Worker can serve: its book in the one table, its chapter one the
   // book has (#3, from 02b's closure) — so a reference the reveal could not show fails here, in
