@@ -1,7 +1,7 @@
 import type { CaseText } from '../types.ts'
 import type { vineyard } from './case.ts'
 
-// Case two's English text, keyed by the ids in case.ts.
+// Case three's English text, keyed by the ids in case.ts.
 export const en = {
   title: 'The vineyard',
   subtitle: 'Case three · ten to fifteen minutes',

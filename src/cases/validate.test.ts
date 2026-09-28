@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
+import { carmel } from './carmel/case.ts'
+import { en as carmelEn } from './carmel/en.ts'
 import type { CaseStructure, CaseText, Spot } from './types.ts'
 import { validate } from './validate.ts'
 import { valley } from './valley/case.ts'
 import { en } from './valley/en.ts'
 import { vineyard } from './vineyard/case.ts'
-import { carmel } from './carmel/case.ts'
-import { en as carmelEn } from './carmel/en.ts'
 import { en as vineyardEn } from './vineyard/en.ts'
 
 /*

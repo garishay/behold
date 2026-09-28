@@ -87,8 +87,8 @@ export interface CaseStructure {
   readonly steps?: readonly Step[]
   /**
    * The case's one new idea, marked where the player first meets it (#30; docs/case-design.md,
-   * rule 6): today only the order, its slots ringed on Solve until a moment is placed. It is not
-   * a step, and the case is not guided by it.
+   * rule 6): today only the order, on Solve, its pictures ringed and then its slots, until a
+   * moment is placed. It is not a step, and the case is not guided by it.
    */
   readonly teach?: 'order'
 }
