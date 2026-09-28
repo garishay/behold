@@ -29,6 +29,11 @@ export const strings = {
   status: 'Season one is being written.',
   notice:
     'Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), © 2001 by Crossway, a publishing ministry of Good News Publishers. ESV Text Edition: 2025. The ESV text may not be quoted in any publication made available to the public by a Creative Commons license. The ESV may not be translated in whole or in part into any other language. Used by permission. All rights reserved.',
+  // The music's credit, under the notice (Gate 10 A1): each CC BY piece by name, its author, its
+  // source, that it was edited, and the licence, linked. The register's test holds every CC BY
+  // file to a name here.
+  credit: 'Music: “Desert City” and “Lamentation” by Kevin MacLeod (incompetech.com), edited,',
+  creditLicence: { text: 'CC BY 4.0', href: 'https://creativecommons.org/licenses/by/4.0/' },
   updateAvailable: 'Update available',
   update: 'Update',
 

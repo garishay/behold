@@ -17,14 +17,32 @@ export function pictureHashes(root: string) {
   return hashes
 }
 
+/**
+ * Each sound file's hash by its path under `root`, as a picture's: the music's address carries it,
+ * so a changed cue reaches a phone that cached the old one (Gate 10 A6).
+ */
+export function audioHashes(root: string) {
+  const hashes: Record<string, string> = {}
+  for (const file of readdirSync(root, { recursive: true, encoding: 'utf8' }))
+    if (file.endsWith('.m4a'))
+      hashes[file.replaceAll('\\', '/')] = hash('sha256', readFileSync(`${root}/${file}`)).slice(
+        0,
+        8,
+      )
+  return hashes
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   // The Pages deploy serves the site from /<repository>/ (Gate 01 A4); the workflow passes the
   // path. Dev, tests, and a bare build stay at `/`, so nothing that pins a URL moves.
   base: process.env.PAGES_BASE ?? '/',
-  // The pictures' hashes, read from the files when the config loads, so the build, the dev
+  // The pictures' and the sound files' hashes, read from the files when the config loads, so the build, the dev
   // server, and the tests stamp each address from the picture as it is (#45).
-  define: { __PICTURE_HASHES__: JSON.stringify(pictureHashes('public/cases')) },
+  define: {
+    __PICTURE_HASHES__: JSON.stringify(pictureHashes('public/cases')),
+    __AUDIO_HASHES__: JSON.stringify(audioHashes('public/audio')),
+  },
   plugins: [
     react(),
     // The PWA shell (Gate 01 A2). `prompt`: a new version waits until the player taps the
@@ -63,6 +81,14 @@ export default defineConfig({
               cacheName: 'passages',
               expiration: { maxEntries: 8, maxAgeSeconds: 30 * 24 * 60 * 60 },
             },
+          },
+          // A cue is fetched when it first plays and kept from then on, so the install stays the
+          // shell and a cue heard once plays offline (Gate 10 A6). Its address carries its file's
+          // hash, as a picture's does; the effects, precached, never reach this rule.
+          {
+            urlPattern: /\/audio\/music\/[^/]+\.m4a\?v=[0-9a-f]+$/,
+            handler: 'CacheFirst',
+            options: { cacheName: 'music', expiration: { maxEntries: 8 } },
           },
         ],
       },

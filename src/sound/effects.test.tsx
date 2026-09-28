@@ -1,12 +1,19 @@
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../App'
 import { play } from './engine.ts'
+import { useCue } from './music.ts'
 import { turn } from './settings.ts'
 
 vi.mock('./engine.ts', () => ({ play: vi.fn() }))
+vi.mock('./music.ts', () => {
+  const useCue = vi.fn()
+  return { useCue, Music: ({ cue }: { cue: string | null }) => (useCue(cue), null) }
+})
 
 const played = vi.mocked(play)
+/** The cue the screen on show last asked for. */
+const cue = () => vi.mocked(useCue).mock.calls.at(-1)?.[0]
 /** The effects played since the last call, in order. */
 const heard = () => {
   const calls = played.mock.calls.map(([effect]) => effect)
@@ -156,6 +163,48 @@ describe('the effects, each beside what the screen shows (Gate 10 A3, A5)', () =
     tab(/Look/)
     fireEvent.click(screen.getByRole('button', { name: 'Menu' }))
     expect(heard()).toEqual([])
+  })
+})
+
+describe('the music by screen (Gate 10 A2)', () => {
+  it('asks for the title theme, the case bed on Look and Solve, quiet on the reveal, and the theme again', async () => {
+    render(<App />)
+    expect(cue()).toBe('title')
+    openCase(/The valley/)
+    expect(cue()).toBe('case')
+    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket']) tapSpot(s)
+    tab(/Solve/)
+    expect(cue()).toBe('case')
+    for (const [id, word] of [
+      ['d1', 'David'],
+      ['d2', 'Goliath'],
+      ['t1', 'ten'],
+      ['t2', 'commander'],
+      ['t3', 'six'],
+      ['t4', 'sling'],
+      ['t5', 'Goliath'],
+    ]) {
+      chip(word)
+      slot(id)
+    }
+    closeTheCase()
+    expect(heard().at(-1)).toBe('close')
+    expect(screen.getByRole('heading', { name: 'The case is closed.' })).toBeInTheDocument()
+    expect(cue()).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Back to cases' }))
+    await waitFor(() => expect(cue()).toBe('title'))
+  })
+
+  it('credits the music under the notice, each piece by name, with the licence linked', () => {
+    render(<App />)
+    const credit = document.querySelector('.notice + .credit')
+    expect(credit).toHaveTextContent(
+      'Music: “Desert City” and “Lamentation” by Kevin MacLeod (incompetech.com), edited, CC BY 4.0',
+    )
+    expect(within(credit as HTMLElement).getByRole('link', { name: 'CC BY 4.0' })).toHaveAttribute(
+      'href',
+      'https://creativecommons.org/licenses/by/4.0/',
+    )
   })
 })
 

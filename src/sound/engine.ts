@@ -17,13 +17,17 @@ type WithSession = Navigator & { audioSession?: { type: string } }
 let context: AudioContext | undefined
 const decoded = new Map<string, Promise<AudioBuffer>>()
 
-/** A file fetched whole and decoded, once; a failed fetch is forgotten, so the next play retries. */
+/** A file under `public/audio/`, at its address, fetched whole and decoded. */
+export const decode = (ac: AudioContext, address: string) =>
+  fetch(`${import.meta.env.BASE_URL}audio/${address}`)
+    .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(`${r.status} ${address}`))))
+    .then((bytes) => ac.decodeAudioData(bytes))
+
+/** An effect decoded, once; a failed fetch is forgotten, so the next play retries. */
 function load(ac: AudioContext, file: string) {
   let buffer = decoded.get(file)
   if (buffer === undefined) {
-    buffer = fetch(`${import.meta.env.BASE_URL}audio/${file}`)
-      .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(`${r.status} ${file}`))))
-      .then((bytes) => ac.decodeAudioData(bytes))
+    buffer = decode(ac, file)
     buffer.catch(() => decoded.delete(file))
     decoded.set(file, buffer)
   }
@@ -51,8 +55,9 @@ function onVisibility(ac: AudioContext) {
  * The one context everything plays through, never an `<audio>` element (A4): made on the first
  * sound, which is always a tap's, with the session set to ambient first, so the silent switch
  * silences it and the player's own audio plays on under it. The effects are decoded as it is made.
+ * Only a tap calls it: a context made without one would start suspended.
  */
-function wake() {
+export function wake() {
   if (context === undefined) {
     const session = (navigator as WithSession).audioSession
     if (session !== undefined) session.type = 'ambient'
@@ -64,6 +69,9 @@ function wake() {
   if (context.state !== 'running') void context.resume()
   return context
 }
+
+/** The context, once a tap has made it and while it runs. */
+export const running = () => (context?.state === 'running' ? context : undefined)
 
 /** An effect, played once over whatever else is playing, while Effects is on. */
 export function play(effect: Effect) {

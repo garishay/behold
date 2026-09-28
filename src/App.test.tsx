@@ -98,7 +98,7 @@ describe('the title screen (Gate 01 A6, #6)', () => {
     ])
     expect(cards[0]).toHaveTextContent('Learn to play')
     expect(screen.queryByText('In progress')).not.toBeInTheDocument()
-    expect(screen.queryAllByRole('link')).toHaveLength(0)
+    expect(screen.getAllByRole('link').map((l) => l.textContent)).toEqual(['CC BY 4.0'])
   })
 })
 
