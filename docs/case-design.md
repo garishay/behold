@@ -43,16 +43,19 @@ rules below are the answer, ruled on #26.
 6. **One new idea per case.** A case adds one thing the player has not done before, and names it
    in its brief to the author. Season one's first rungs:
 
-   | case         | what it adds                                    |
-   | ------------ | ----------------------------------------------- |
-   | the valley   | tap, name, fill, close — the whole loop, guided |
-   | the mountain | several moments, and the order they happened in |
-   | the vineyard | papers, and names worked out by cross-reference |
+   | case         | what it adds                                                 |
+   | ------------ | ------------------------------------------------------------ |
+   | the valley   | tap, name, fill, close — the whole loop, guided              |
+   | the mountain | several moments, and the order they happened in              |
+   | the vineyard | papers, and names worked out by cross-reference              |
+   | the battle   | a disguise: a face without its marker, named by what happens |
 
    The mountain marks its one idea the first time the player meets it: the pictures to place,
-   then the slots they go in (`teach`, #30). In the valley and on the mountain a person's tap gives
+   then the slots they go in (`teach`, #30). The battle marks its own at the disguised man's face,
+   until the player names him (#53). In the valley and on the mountain a person's tap gives
    their name; from the vineyard on, the names the faces need come from something that bears
-   them — a seal, a letter, a note — and the player works out whose each one is.
+   them — a seal, a letter, a note, or another person's words — and the player works out whose
+   each one is.
 
 ## What holds a case to them
 

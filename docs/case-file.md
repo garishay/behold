@@ -28,10 +28,15 @@ src/cases/
   vineyard/
     case.ts
     en.ts
+  micaiah/
+    case.ts
+    en.ts
+    scenes.md
 public/cases/
   valley/             valley.jpg, d1.jpg, d2.jpg — the moment picture and the face portraits
   carmel/             water.jpg, fire.jpg, baal.jpg, c1.jpg, c2.jpg
   vineyard/           vineyard.jpg, bedchamber.jpg, gate.jpg, p1.jpg, p2.jpg, p3.jpg
+  micaiah/            battle.jpg, pool.jpg, thrones.jpg, m1.jpg, m2.jpg
 ```
 
 The structure and the text are modules the player imports through the registry, so they ship in
@@ -57,7 +62,7 @@ export const valley = { … } as const satisfies CaseStructure
 | `order?`   | the moment ids in true order, present when the case asks what happened first                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `blocks`   | the prose with blanks — the account, and the verdict where the case has one: `id`, `blanks` (blank id → the word that fills it)                                                                                                                                                                                                                                                                                                                                                                                    |
 | `steps?`   | the tutorial's steps: `id`, `until?` — `{ tapped: <spot> }`, `{ filled: <face or blank> }`, meaning filled with its answer, or `{ view: 'solve' }`; the last step has no `until`. A case with steps is played guided: each step is shown as a mark at the target its `until` names — the spot, Solve's button, the answer's word and then its slot — and the last at Close the case; a step already met is never shown; a ✓ lands only on the faces and blanks its steps name (`docs/case-design.md`, rule 5; #25) |
-| `teach?`   | the case's one new idea, marked where the player first meets it; today only `'order'`: on Solve, while the order is empty, the pictures to place are ringed, then the slots once one is picked. It is not a step, and the case is not guided by it (`docs/case-design.md`, rule 6; #30)                                                                                                                                                                                                                            |
+| `teach?`   | the case's one new idea, marked on Solve where the player first meets it: `'order'`, while the order is empty, rings the pictures to place, then the slots once one is picked (#30); `{ face: <face> }` rings that face while it is empty, as the battle rings its disguised man (#53). It is not a step, and the case is not guided by it (`docs/case-design.md`, rule 6)                                                                                                                                         |
 
 Derived, never stored: a blank's kind is its answer's; a case is the tutorial when it has steps;
 the paper ids are those the spots open; a step whose `until` is `filled` is a Solve step.
@@ -181,7 +186,8 @@ Three layers, from mechanical to read.
    between them; a blank's kind has at least three words in the case, and the case has one name
    more than it has faces (`docs/case-design.md`, rule 1); every spot keeps its fingertip
    (_Pictures_), which holds its box to a tenth of the width on each side as well; a step's words are eight or fewer;
-   a case that teaches the order has one, and its lesson is eight words or fewer.
+   a case that teaches the order has one, a face it teaches is one of its faces, and its lesson
+   is eight words or fewer.
    `src/cases/validate.test.ts` holds one
    broken fixture per check, each failing
    the check it names and no other; the registry test, `src/cases/cases.test.ts`, holds the

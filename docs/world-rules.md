@@ -42,18 +42,18 @@ Regenerate any picture containing: crosses in any form · Greek or Roman columns
 
 Levantine skin tones and features; adult Israelite men are bearded (a shaved man is in mourning, or an Egyptian); hair dark and worn short to shoulder-length. Plain headbands on commoners. Ages read clearly: a boy is a boy, an elder is grey. Crowds are individuals in plain cloth, faces mostly turned to the scene.
 
-**The marker rule.** Every recurring character carries one marker that reads at thumbnail size and appears in every picture of them — this is how a player tracks a person across moments, and it is the answer to the Obra Dinn problem of confusable figures. Markers come from the text where the text gives one.
+**The marker rule.** Every recurring character carries one marker that reads at thumbnail size and appears in every picture of them, except where the text has them disguised — this is how a player tracks a person across moments, and it is the answer to the Obra Dinn problem of confusable figures. Markers come from the text where the text gives one. A disguised character (1 Kings 22:30) is drawn in the disguise, without the marker, and the player names them by what the pictures show happening, never by telling two faces apart.
 
 | Character | Marker | Source |
 |---|---|---|
-| Ahab | deep wine-red robe with gold trim, thin gold disc circlet, short dark beard | cast sheet |
+| Ahab | deep wine-red robe with gold trim, thin gold disc circlet, short dark beard; disguised at Ramoth-gilead: plain bronze scale armor, no robe, no circlet | cast sheet; 1 Kings 22:30 |
 | Jezebel | teal robe with gold geometric trim, gold disc headdress; painted eyes in the finale | cast sheet; 2 Kings 9:30 |
 | Elijah | a cloak of animal hair with a leather belt, a wooden staff, wild hair | 2 Kings 1:8 |
 | Elisha | bald, plain robe; carries Elijah's hair cloak after 2 Kings 2 | 2 Kings 2:13, 2:23 |
 | Obadiah | the household steward: a ring of keys or a staff of office, sober dress | 1 Kings 18:3 |
 | Micaiah | the plainest man in the room; a prisoner's undyed tunic | 1 Kings 22:27 |
 | Zedekiah son of Chenaanah | iron horns in hand | 1 Kings 22:11 |
-| Jehoshaphat | royal robes — the point of the disguise scene | 1 Kings 22:30 |
+| Jehoshaphat | royal robes of deep blue with white and gold trim, a plain gold band — the point of the disguise scene, never to be taken for Ahab's wine-red at a glance | cast sheet; 1 Kings 22:10, 22:30 |
 | Jehu | a captain's scale armor and a bow; a chariot driven hard | 2 Kings 9:20, 9:24 |
 | Joram (Ahab's son) | the wine-red of his father's house with a plainer band, no disc circlet; recovering from a wound at Jezreel in the finale | 2 Kings 8:29, 9:15 |
 | The Shunammite | a wealthy woman's dress without royal color; her roof chamber with bed, table, chair, lamp | 2 Kings 4:8–10 |
