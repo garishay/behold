@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest'
+import { carmel } from './carmel/case.ts'
+import { en as carmelEn } from './carmel/en.ts'
 import type { CaseStructure, CaseText, Spot } from './types.ts'
 import { validate } from './validate.ts'
 import { valley } from './valley/case.ts'
@@ -335,5 +337,20 @@ describe('validate (Gate 02 A6)', () => {
       steps: { ...en.steps, step3: 'Tap David, then tap the slot under the boy.' },
     }
     expect(validate(valley, long)).toEqual(['step "step3" says 9 words, not eight or fewer'])
+  })
+
+  // (n) is #30's: a case that teaches the order has one, and the lesson is eight words at most.
+  it('(n) a lesson on the order in a case without one — Carmel with its order cut', () => {
+    expect(validate({ ...carmel, order: undefined }, carmelEn)).toEqual([
+      'the case teaches an order it lacks',
+    ])
+  })
+
+  it('(n) a lesson of nine words — Carmel’s with a "that"', () => {
+    const long: Text = {
+      ...carmelEn,
+      teach: 'Put the pictures in the order that they happened.',
+    }
+    expect(validate(carmel, long)).toEqual(["the case's lesson says 9 words, not eight or fewer"])
   })
 })

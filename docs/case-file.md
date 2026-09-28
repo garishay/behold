@@ -21,11 +21,16 @@ src/cases/
   valley/
     case.ts           the structure
     en.ts             the English text
+  carmel/
+    case.ts
+    en.ts
+    scenes.md         the scene briefs its pictures are generated from
   vineyard/
     case.ts
     en.ts
 public/cases/
   valley/             valley.jpg, d1.jpg, d2.jpg — the moment picture and the face portraits
+  carmel/             water.jpg, fire.jpg, baal.jpg, c1.jpg, c2.jpg
   vineyard/           vineyard.jpg, bedchamber.jpg, gate.jpg, p1.jpg, p2.jpg, p3.jpg
 ```
 
@@ -52,6 +57,7 @@ export const valley = { … } as const satisfies CaseStructure
 | `order?`   | the moment ids in true order, present when the case asks what happened first                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `blocks`   | the prose with blanks — the account, and the verdict where the case has one: `id`, `blanks` (blank id → the word that fills it)                                                                                                                                                                                                                                                                                                                                                                                    |
 | `steps?`   | the tutorial's steps: `id`, `until?` — `{ tapped: <spot> }`, `{ filled: <face or blank> }`, meaning filled with its answer, or `{ view: 'solve' }`; the last step has no `until`. A case with steps is played guided: each step is shown as a mark at the target its `until` names — the spot, Solve's button, the answer's word and then its slot — and the last at Close the case; a step already met is never shown; a ✓ lands only on the faces and blanks its steps name (`docs/case-design.md`, rule 5; #25) |
+| `teach?`   | the case's one new idea, marked where the player first meets it; today only `'order'`: on Solve, while the order is empty, the pictures to place are ringed, then the slots once one is picked. It is not a step, and the case is not guided by it (`docs/case-design.md`, rule 6; #30)                                                                                                                                                                                                                            |
 
 Derived, never stored: a blank's kind is its answer's; a case is the tutorial when it has steps;
 the paper ids are those the spots open; a step whose `until` is `filled` is a Solve step.
@@ -80,6 +86,7 @@ The type is computed from the structure, so the keys below are exactly the struc
 | `papers`   | paper id → `title` and `body`; a paragraph break is `\n`                                                                               |
 | `blocks`   | block id → `heading` and `parts`: runs of text, `{ t: '…' }`, and the block's blanks, `{ b: 't1' }`, in this language's own word order |
 | `steps`    | step id → the step's words, eight or fewer, beside its mark; only when the structure has steps                                         |
+| `teach`    | the lesson's words, eight or fewer, beside its mark; only when the structure teaches                                                   |
 | `reveal`   | the paragraphs in the game's words, shown before the passage                                                                           |
 
 That is every string the player reads for a case. What the interface says around it — the view
@@ -123,6 +130,16 @@ portrait, 4:5 (`docs/world-rules.md` §6); the tutorial's valley is the prototyp
 so for testing, per §8. A tappable thing is at most eight to a moment (§6), and nothing that
 matters sits in the outer 8% of the width (§7).
 
+A moment's picture is generated from its scene brief (§6, _Describe, then generate_), kept beside
+the structure in `src/cases/<id>/scenes.md`: one section per moment, headed by its id, with its
+_Scene_, and its _Spots_ each by id and box, with what the spot needs, how large it reads, where it
+sits, and what stays clear of it. The generator can't place by percent, so a generation prompt is
+§6's style header followed by the Scene and Spots as prose, without ids or boxes; each section
+records its prompt as sent, with its attachments and edits, verbatim (#30). The registry test
+holds every spot to its moment's brief, box and all, so a box re-fitted to a new picture re-writes
+its line. The valley and the vineyard were drawn before the rule and bring their briefs when their
+pictures are next generated.
+
 A picture is requested at its path stamped with a short hash of its file —
 `cases/<id>/<file>?v=<hash>`, the first eight hex digits of the file's SHA-256 — which
 `vite.config.ts` computes from `public/cases/` when it loads, so the build, the dev server, and the
@@ -163,11 +180,12 @@ Three layers, from mechanical to read.
    whitespace alone is empty, but for a run of text between two blanks, which may be the space
    between them; a blank's kind has at least three words in the case, and the case has one name
    more than it has faces (`docs/case-design.md`, rule 1); every spot keeps its fingertip
-   (_Pictures_), which holds its box to a tenth of the width on each side as well; a step's words are eight or fewer.
+   (_Pictures_), which holds its box to a tenth of the width on each side as well; a step's words are eight or fewer;
+   a case that teaches the order has one, and its lesson is eight words or fewer.
    `src/cases/validate.test.ts` holds one
    broken fixture per check, each failing
    the check it names and no other; the registry test, `src/cases/cases.test.ts`, holds the
-   pictures, the registry's ids, and the guided case first.
+   pictures, the registry's ids, the guided case first, and every spot in its scene brief.
 3. **Review**, by reading: every spot named or implied by the passage, with the cites as the
    handle; the game's own voice, never the translation's words; the picture checklist
    (`docs/world-rules.md` §7). These are the authoring gate's (#5).
@@ -176,7 +194,9 @@ Three layers, from mechanical to read.
 
 1. Make `src/cases/<id>/` with `case.ts` exporting the structure `as const satisfies
 CaseStructure`, and `en.ts` exporting the text `satisfies CaseText<typeof <id>>`.
-2. Put the pictures in `public/cases/<id>/`, and write each file's pixel size as its `size`.
+2. Write `scenes.md`, a brief per moment from its spots, and generate each picture from its brief.
+   Put the pictures in `public/cases/<id>/`, write each file's pixel size as its `size`, and
+   re-fit the boxes, in `case.ts` and the brief alike, to the pictures as they came out.
 3. Add the case to `src/cases/index.ts`, in play order.
 4. `npm run typecheck` and `npm run test` — the typecheck reads the keys, the tests read the
    pictures and the validator's list.

@@ -1,6 +1,6 @@
 import type { CaseStructure } from '../types.ts'
 
-// Case two: Naboth's vineyard (1 Kings 21) — three moments the player puts in order, four papers,
+// Case three: Naboth's vineyard (1 Kings 21) — three moments the player puts in order, four papers,
 // and a second block, the prophet's words. One spot carries no cite: the Law scroll, whose sources
 // are Deuteronomy and Leviticus. The empty chairs at the gate are set dressing, not a spot, since
 // no verse names them (#26).

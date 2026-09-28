@@ -92,6 +92,7 @@ describe('the title screen (Gate 01 A6, #6)', () => {
     const cards = screen.getAllByRole('button')
     expect(cards.map((c) => c.querySelector('.ct')?.textContent)).toEqual([
       'The valley',
+      'The mountain',
       'The vineyard',
     ])
     expect(cards[0]).toHaveTextContent('Learn to play')
@@ -567,6 +568,26 @@ describe('the tutorial’s marks (#25)', () => {
     menu('Cases')
     fireEvent.click(await screen.findByRole('button', { name: /The vineyard/ }))
     tapSpot('cord')
+    expect(coach()).toBeNull()
+  })
+
+  // Carmel's one new idea is the order, marked where it is first met (#30): on Solve while the order
+  // is empty, the pictures to place and then the slots. The vineyard has an order and no lesson.
+  it('marks the pictures and then the slots in the case that teaches the order, until one is placed', async () => {
+    render(<App />)
+    openCase(/The mountain/)
+    expect(coach()).toBeNull()
+    tab(/Solve/)
+    await waitFor(() => expect(at()).toBe('.tiles'))
+    expect(said()).toBe('Put the pictures in the order they happened.')
+    tile('Baal’s altar')
+    expect(at()).toBe('.order')
+    expect(said()).toBe('Put the pictures in the order they happened.')
+    orderSlot(0)
+    expect(coach()).toBeNull()
+    menu('Cases')
+    fireEvent.click(await screen.findByRole('button', { name: /The vineyard/ }))
+    tab(/Solve/)
     expect(coach()).toBeNull()
   })
 

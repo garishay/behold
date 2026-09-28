@@ -1,3 +1,5 @@
+import { carmel } from './carmel/case.ts'
+import { en as carmelEn } from './carmel/en.ts'
 import type { CaseStructure, CaseText, Language } from './types.ts'
 import { valley } from './valley/case.ts'
 import { en as valleyEn } from './valley/en.ts'
@@ -19,5 +21,6 @@ const entry = <S extends CaseStructure>(
 /** Every case, in play order; the player (#6) and the check read the same list. */
 export const cases: readonly CaseEntry[] = [
   entry(valley, { en: valleyEn }),
+  entry(carmel, { en: carmelEn }),
   entry(vineyard, { en: vineyardEn }),
 ]

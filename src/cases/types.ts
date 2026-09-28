@@ -85,6 +85,12 @@ export interface CaseStructure {
   readonly order?: readonly string[]
   readonly blocks: readonly Block[]
   readonly steps?: readonly Step[]
+  /**
+   * The case's one new idea, marked where the player first meets it (#30; docs/case-design.md,
+   * rule 6): today only the order, on Solve, its pictures ringed and then its slots, until a
+   * moment is placed. It is not a step, and the case is not guided by it.
+   */
+  readonly teach?: 'order'
 }
 
 type SpotOf<S extends CaseStructure> = S['moments'][number]['spots'][number]
@@ -138,4 +144,9 @@ export type CaseText<S extends CaseStructure> = {
   ? { readonly steps: Keyed<T[number]['id'], string> }
   : CaseStructure extends S
     ? { readonly steps?: Readonly<Record<string, string>> }
-    : { readonly steps?: never })
+    : { readonly steps?: never }) &
+  (S extends { readonly teach: string }
+    ? { readonly teach: string }
+    : CaseStructure extends S
+      ? { readonly teach?: string }
+      : { readonly teach?: never })

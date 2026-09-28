@@ -3,6 +3,17 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.8.0 — Gate 08, the mountain (#30)
+
+- **30a — the mountain** (#49): case two, the contest on Mount Carmel, 1 Kings 18:17–40, between
+  the valley and the vineyard, which becomes case three; three moments put in the order they
+  happened — Baal's altar at noon, the water, the fire — read from the sun, the altar, and the
+  trench; fourteen spots, four blanks on the details people get wrong, and names from a person's
+  tap as in the valley; the lesson, a first-encounter mark on the order's pictures and then its
+  slots, with the validator's check (n); each moment's scene brief in `scenes.md`, written from
+  its spots, with its prompt as sent, and a registry test holding every spot to its brief; world
+  rules §6's _Describe, then generate_ in place of _Edits over regeneration_.
+
 ## v0.7.2 — A mark brings its target into view (#47)
 
 - **47a — one scroll for both axes** (#48): a tutorial mark brings its target to the middle of

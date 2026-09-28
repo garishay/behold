@@ -46,12 +46,13 @@ rules below are the answer, ruled on #26.
    | case         | what it adds                                    |
    | ------------ | ----------------------------------------------- |
    | the valley   | tap, name, fill, close — the whole loop, guided |
-   | Carmel (#30) | several moments, and the order they happened in |
+   | the mountain | several moments, and the order they happened in |
    | the vineyard | papers, and names worked out by cross-reference |
 
-   In the valley a person's tap gives their name; from the vineyard on, the names the faces need
-   come from something that bears them — a seal, a letter, a note — and the player works out
-   whose each one is.
+   The mountain marks its one idea the first time the player meets it: the pictures to place,
+   then the slots they go in (`teach`, #30). In the valley and on the mountain a person's tap gives
+   their name; from the vineyard on, the names the faces need come from something that bears
+   them — a seal, a letter, a note — and the player works out whose each one is.
 
 ## What holds a case to them
 
