@@ -5,7 +5,7 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
 
 ## v0.9.0 — Gate 09, the battle (#53)
 
-- **53a — the battle**: case four, Micaiah and the four hundred and the battle at Ramoth-gilead,
+- **53a — the battle** (#54): case four, Micaiah and the four hundred and the battle at Ramoth-gilead,
   1 Kings 22:1–40, after the vineyard; its one new idea a disguise — the king of Israel rides out
   without his marker, and the player names him by what the pictures show happening: the captains
   turning back from the man in robes, the bow drawn at no one, the chariot washed out at the pool
