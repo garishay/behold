@@ -118,6 +118,20 @@ the width of the prophets' altar, which reads as something built and thrown down
 sent the two changes as two edits, one at a time; each redrew the whole picture, kept under half
 its fine detail, lost Elijah's grin, and came back wider than 4:5, so it was discarded.
 
+The accepted picture gave Ahab a beaded band, not his cast sheet's flat band with round discs
+(#50). **Edit 2**, the circlet, sent to the accepted picture after 30a merged:
+
+```
+Same picture, with only one change: make King Ahab's circlet match his cast sheet, a flat gold band around his head with round gold discs set along it and the largest disc at the center of his forehead. Keep everything else exactly as it is.
+```
+
+It came back with the circlet right but the whole picture redrawn and re-framed, everything smaller
+and the scene moved, so it was not used as a picture. Instead the circlet was retouched in the
+accepted picture itself, following that result and the cast sheet: the beads along its top edge
+were painted over with hair, and a flat gold band with a central disc was painted in their place.
+The retouch changed 621 pixels, all inside x 937–981, y 90–117 of the 1122 × 1402 picture. Nothing
+else moved, so the boxes stand as fitted, and `c2` is re-cropped from the retouched picture.
+
 ## water — The water
 
 **Scene.** Early afternoon. The sun stands high in the west, at the upper right, and the daylight
@@ -232,4 +246,5 @@ Each portrait is a 144 × 144 crop, head and shoulders, from the accepted pictur
 (1122 × 1402):
 
 - `c1`, Elijah, from _The water_'s `caller`: the 120 px square at 112, 245.
-- `c2`, Ahab, from _Baal's altar_'s `king`: the 96 px square at 912, 84.
+- `c2`, Ahab, from _Baal's altar_'s `king`: the 96 px square at 912, 84, re-cropped from the
+  retouched picture (#50).

@@ -3,6 +3,13 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.8.1 — Ahab's circlet on the mountain (#50)
+
+- **50a — the circlet retouched** (#51): on Baal's altar, Ahab wears his cast sheet's flat gold
+  band with a central disc, retouched in place in the accepted picture — 621 pixels, nothing else
+  moved — and fitted as before; his portrait re-cropped at the same square; the boxes unchanged
+  and check (l) passing; the circlet's edit and retouch recorded in the scene briefs.
+
 ## v0.8.0 — Gate 08, the mountain (#30)
 
 - **30a — the mountain** (#49): case two, the contest on Mount Carmel, 1 Kings 18:17–40, between
