@@ -66,6 +66,13 @@ export interface Step {
   readonly until?: Until
 }
 
+/**
+ * A case's one new idea, marked on Solve where the player first meets it (docs/case-design.md,
+ * rule 6): the order (#30), its pictures ringed and then its slots until a moment is placed; or a
+ * face, ringed until a name is placed in it, as the battle's disguised man is (#53).
+ */
+export type Teach = 'order' | { readonly face: string }
+
 /** Verses within one chapter, by USFM book code; without `from` and `to`, the whole chapter. */
 export interface Passage {
   readonly book: string
@@ -86,11 +93,10 @@ export interface CaseStructure {
   readonly blocks: readonly Block[]
   readonly steps?: readonly Step[]
   /**
-   * The case's one new idea, marked where the player first meets it (#30; docs/case-design.md,
-   * rule 6): today only the order, on Solve, its pictures ringed and then its slots, until a
-   * moment is placed. It is not a step, and the case is not guided by it.
+   * The case's one new idea, marked where the player first meets it (`Teach`). It is not a step,
+   * and the case is not guided by it.
    */
-  readonly teach?: 'order'
+  readonly teach?: Teach
 }
 
 type SpotOf<S extends CaseStructure> = S['moments'][number]['spots'][number]
@@ -145,7 +151,7 @@ export type CaseText<S extends CaseStructure> = {
   : CaseStructure extends S
     ? { readonly steps?: Readonly<Record<string, string>> }
     : { readonly steps?: never }) &
-  (S extends { readonly teach: string }
+  (S extends { readonly teach: Teach }
     ? { readonly teach: string }
     : CaseStructure extends S
       ? { readonly teach?: string }

@@ -3,6 +3,19 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.9.0 — Gate 09, the battle (#53)
+
+- **53a — the battle** (#54): case four, Micaiah and the four hundred and the battle at Ramoth-gilead,
+  1 Kings 22:1–40, after the vineyard; its one new idea a disguise — the king of Israel rides out
+  without his marker, and the player names him by what the pictures show happening: the captains
+  turning back from the man in robes, the bow drawn at no one, the chariot washed out at the pool
+  of Samaria; three moments in order, thirteen spots, six blanks on the details people get wrong,
+  and no paper — the faces' names come from people's words, the king's naming Micaiah and
+  Micaiah's vision naming Ahab, as rule 6 now allows; the lesson on the disguised man's face
+  (`teach: { face }`), with check (n) holding the face to the case; each moment's scene brief with
+  its prompt as sent; world rules §4's marker rule excepting a disguise, and Jehoshaphat's deep
+  blue.
+
 ## v0.8.1 — Ahab's circlet on the mountain (#50)
 
 - **50a — the circlet retouched** (#51): on Baal's altar, Ahab wears his cast sheet's flat gold

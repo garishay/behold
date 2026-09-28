@@ -1,5 +1,7 @@
 import { carmel } from './carmel/case.ts'
 import { en as carmelEn } from './carmel/en.ts'
+import { micaiah } from './micaiah/case.ts'
+import { en as micaiahEn } from './micaiah/en.ts'
 import type { CaseStructure, CaseText, Language } from './types.ts'
 import { valley } from './valley/case.ts'
 import { en as valleyEn } from './valley/en.ts'
@@ -23,4 +25,5 @@ export const cases: readonly CaseEntry[] = [
   entry(valley, { en: valleyEn }),
   entry(carmel, { en: carmelEn }),
   entry(vineyard, { en: vineyardEn }),
+  entry(micaiah, { en: micaiahEn }),
 ]

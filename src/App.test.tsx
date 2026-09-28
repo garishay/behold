@@ -94,6 +94,7 @@ describe('the title screen (Gate 01 A6, #6)', () => {
       'The valley',
       'The mountain',
       'The vineyard',
+      'The battle',
     ])
     expect(cards[0]).toHaveTextContent('Learn to play')
     expect(screen.queryByText('In progress')).not.toBeInTheDocument()
@@ -589,6 +590,24 @@ describe('the tutorial’s marks (#25)', () => {
     fireEvent.click(await screen.findByRole('button', { name: /The vineyard/ }))
     tab(/Solve/)
     expect(coach()).toBeNull()
+  })
+
+  // The battle's one new idea is a disguise (#53): on Solve, while the disguised man's face is
+  // empty, it is ringed with the lesson's words. A name placed takes the mark away, and emptying the
+  // face brings it back. The battle asks the order too, and marks nothing on it.
+  it('marks the disguised man’s face in the case that teaches it, until a name is placed', async () => {
+    render(<App />)
+    openCase(/The battle/)
+    moment('The thrones')
+    tapSpot('plain')
+    tab(/Solve/)
+    await waitFor(() => expect(at()).toBe('[data-face="m1"]'))
+    expect(said()).toBe('He’s in disguise. Name him by what happens.')
+    chip('Ahab')
+    slot('m1')
+    expect(coach()).toBeNull()
+    slot('m1')
+    expect(at()).toBe('[data-face="m1"]')
   })
 
   // Persistent, not blocking (#25): the ring stays until the step is done, a tap elsewhere is

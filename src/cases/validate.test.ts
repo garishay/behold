@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { carmel } from './carmel/case.ts'
 import { en as carmelEn } from './carmel/en.ts'
+import { micaiah } from './micaiah/case.ts'
+import { en as micaiahEn } from './micaiah/en.ts'
 import type { CaseStructure, CaseText, Spot } from './types.ts'
 import { validate } from './validate.ts'
 import { valley } from './valley/case.ts'
@@ -352,5 +354,12 @@ describe('validate (Gate 02 A6)', () => {
       teach: 'Put the pictures in the order that they happened.',
     }
     expect(validate(carmel, long)).toEqual(["the case's lesson says 9 words, not eight or fewer"])
+  })
+
+  // #53 adds the face the battle teaches at: it must be one of the case's faces.
+  it('(n) a lesson on a face the case lacks — the battle’s on "m3"', () => {
+    expect(validate({ ...micaiah, teach: { face: 'm3' } }, micaiahEn)).toEqual([
+      'the case teaches face "m3", not a face',
+    ])
   })
 })
