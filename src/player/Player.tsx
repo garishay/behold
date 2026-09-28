@@ -180,17 +180,19 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     return selection.word === word ? `[data-slot="${filled}"]` : `[data-word="${word}"]`
   }
   const at = markAt()
-  // The case's one new idea, marked where it is first met (#30): on Solve, while the order is empty,
-  // the pictures to place and then, once one is picked, the slots it goes in, as the tutorial marks
-  // a word and then its slot. A tutorial's step comes first; nothing is marked under a sheet or a
-  // paper.
-  const lesson =
-    s.teach === 'order' &&
-    view === 'solve' &&
-    at === undefined &&
-    sheet === null &&
-    paper === null &&
-    progress.order.every((m) => m === null)
+  // The case's one new idea, marked on Solve where it is first met: while the order is empty, the
+  // pictures to place and then, once one is picked, the slots it goes in, as the tutorial marks a
+  // word and then its slot (#30); or a face, until a name is placed in it (#53). A tutorial's step
+  // comes first; nothing is marked under a sheet or a paper.
+  const lessonAt = (teach = s.teach) => {
+    if (teach === undefined || view !== 'solve' || at !== undefined) return undefined
+    if (sheet !== null || paper !== null) return undefined
+    if (teach !== 'order')
+      return progress.faces[teach.face] === undefined ? `[data-face="${teach.face}"]` : undefined
+    if (progress.order.some((m) => m !== null)) return undefined
+    return selection.moment === null ? '.tiles' : '.order'
+  }
+  const lesson = lessonAt()
   // Look carries the case's found count, as Solve carries what is filled (#24, rulings [1], [5]).
   const spots = s.moments.flatMap((m) => m.spots)
   const found = `${spots.filter((x) => progress.tapped.includes(x.id)).length}/${spots.length}`
@@ -306,9 +308,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
           onTap={current.until || lastSaid ? undefined : () => setLastSaid(true)}
         />
       )}
-      {lesson && (
-        <CoachMark at={selection.moment === null ? '.tiles' : '.order'} label={text.teach ?? ''} />
-      )}
+      {lesson && <CoachMark at={lesson} label={text.teach ?? ''} />}
     </div>
   )
 }

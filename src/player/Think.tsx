@@ -46,7 +46,7 @@ export function Think(props: ThinkProps) {
         <h2>{strings.whoIsWho}</h2>
         <div className={'faces' + (s.faces.length === 2 ? ' two' : '')}>
           {s.faces.map((f) => (
-            <div key={f.id} className="face">
+            <div key={f.id} className="face" data-face={f.id}>
               <img src={picture(s.id, f.picture)} alt="" />
               <div className="who">{text.faces[f.id]}</div>
               {slot(f.id, p.faces[f.id], strings.who)}

@@ -3,7 +3,7 @@
  * a word reachable, a count, a box inside its picture, a string with words in it — over a case
  * and one of its texts. One sentence per problem; an empty list is a valid case. The test job
  * runs it over every registered case (`cases.test.ts`); the checks are A6's list, (a) to (i), and
- * the two of #26 [1], (j) and (k), #27 [1]'s, (l), and #25's, (m); the reference is
+ * the two of #26 [1], (j) and (k), #27 [1]'s, (l), #25's, (m), and #30's, (n); the reference is
  * `docs/case-file.md`.
  */
 import { crowded, fingertip, smallestPicture } from './spots.ts'
@@ -217,8 +217,12 @@ export function validate(structure: CaseStructure, text: CaseText<CaseStructure>
     if (n > 8) fail(`step ${q(id)} says ${n} words, not eight or fewer`)
   }
 
-  // (n) A case that teaches the order has one, and the mark's words are eight at most (#30).
-  if (structure.teach === 'order' && order === undefined) fail('the case teaches an order it lacks')
+  // (n) A case that teaches the order has one (#30), a face it teaches is one of its faces (#53),
+  // and the mark's words are eight at most.
+  const teach = structure.teach
+  if (teach === 'order' && order === undefined) fail('the case teaches an order it lacks')
+  if (typeof teach === 'object' && !faceIds.has(teach.face))
+    fail(`the case teaches face ${q(teach.face)}, not a face`)
   const taught = text.teach?.split(/\s+/).filter(Boolean).length ?? 0
   if (taught > 8) fail(`the case's lesson says ${taught} words, not eight or fewer`)
 
