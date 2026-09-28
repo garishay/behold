@@ -85,7 +85,7 @@ The attached image is a previously accepted scene from the same season (for styl
 
 **Composition rules.** At most eight tappable things in a moment, six is better; each large enough to read at arm's length (a rough test: nothing that matters is smaller than a tenth of the picture's width). A figure's action must be readable in the pose alone. Strong value contrast between figures and ground. The thing a case turns on is never in a corner.
 
-**Edits over regeneration.** When one element is wrong, reply to the image with "Same picture, but …" rather than regenerating; composition drift breaks tap regions.
+**Describe, then generate.** A moment's picture is generated from its scene brief, so the scene is composed around its evidence. A picture whose evidence doesn't read is regenerated from a revised brief; an edit is for one small thing in a picture that otherwise passes, and any change to a picture re-fits its boxes.
 
 ## 7. Picture acceptance checklist
 
