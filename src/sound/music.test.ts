@@ -17,13 +17,19 @@ interface Gain {
   ramps: string[]
 }
 const made: FakeContext[] = []
-class FakeContext {
+class FakeContext extends EventTarget {
   state = 'suspended'
   currentTime = 0
   destination = {}
   sources: Source[] = []
   constructor() {
+    super()
     made.push(this)
+  }
+  /** The phone suspending or resuming the context, as its `statechange` reports it. */
+  become(state: string) {
+    this.state = state
+    this.dispatchEvent(new Event('statechange'))
   }
   resume() {
     this.state = 'running'
@@ -188,6 +194,21 @@ describe('the music (Gate 10 A2, A4)', () => {
       ['music/desert-city.m4a', 0],
       ['music/lamentation.m4a', 31],
     ])
+  })
+
+  it('finishes a handover the app was hidden during, when it returns (review round 1)', async () => {
+    await load('title')
+    tap()
+    await settle()
+    const [ac] = made
+    ac.currentTime = 30
+    rerender({ cue: 'case' })
+    ac.become('suspended')
+    await vi.advanceTimersByTimeAsync(1000)
+    expect(music()).toHaveLength(1)
+    ac.become('running')
+    await settle()
+    expect(started(ac).at(-1)).toEqual(['music/lamentation.m4a', 30])
   })
 
   it('brings the music to the screen on the first tap after the phone interrupted it', async () => {

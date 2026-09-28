@@ -65,14 +65,21 @@ function end(ac: AudioContext) {
 const asked = () => (isOn('music') ? wanted : null)
 /** The second a cue takes to fade out, before the next is fetched. */
 let handover: ReturnType<typeof setTimeout> | undefined
+/** The context whose resumes the music follows (review round 1, #56). */
+let followed: AudioContext | undefined
 
 /**
  * The music brought to what is asked for, while the context runs: the cue playing fades out, and
- * what is asked for then is begun once it has, so two cues are never decoded at once.
+ * what is asked for then is begun once it has, so two cues are never decoded at once. It runs
+ * again whenever the context resumes, so a handover the app was hidden during finishes on return.
  */
 function update() {
   const ac = running()
   const next = asked()
+  if (ac !== undefined && followed !== ac) {
+    followed = ac
+    ac.addEventListener('statechange', update)
+  }
   if (ac === undefined || handover !== undefined || (current?.cue ?? null) === next) return
   if (end(ac))
     handover = setTimeout(() => {
