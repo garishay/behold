@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { CaseEntry } from '../cases/index.ts'
 import type { PassageService } from '../passages/service.ts'
 import { play } from '../sound/engine.ts'
+import { useCue } from '../sound/music.ts'
 import { Switches } from '../sound/Switches.tsx'
 import { strings } from '../strings/en.ts'
 import { Bank } from './Bank.tsx'
@@ -78,6 +79,9 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const [lastSaid, setLastSaid] = useState(false)
   // The bank's head: a refused word's message, or how far off a close was (07c, #24 [3]).
   const [note, setNote] = useState('')
+  // The case's music on Look and Solve; on the reveal it fades under the close, and the passage is
+  // read in quiet (Gate 10 A2).
+  useCue(view === 'reveal' ? null : 'case')
   // Every picture of the case is requested as it opens, so the whole case is cached for offline.
   useEffect(() => prefetch(s), [s])
   // Back from the reveal returns to Solve; forward to the reveal's entry returns to the reveal

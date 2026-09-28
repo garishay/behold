@@ -129,6 +129,18 @@ button:focus-visible {
   color: var(--mist-dim);
 }
 
+/* The music's credit (Gate 10 A1), set as the notice and held close under it. */
+.credit {
+  margin: -18px 0 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--mist-dim);
+}
+
+.credit a {
+  color: var(--gold);
+}
+
 /* The "Update available" toast (Gate 01 A2), over the screen at the bottom. */
 .toast {
   position: fixed;

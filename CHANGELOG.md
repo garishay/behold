@@ -14,6 +14,12 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   the menu, both on, kept on the phone; the effects precached with the shell; world rules §9,
   _Sound_; and the register, `docs/sound.md`, each file's source, author, CC0 licence, and the
   command that cut and levelled it, held by a test.
+- **52b — the music** (#56): Kevin MacLeod's _Desert City_ on the title screen and _Lamentation_
+  on Look and Solve, each played through, rested a minute, and played again on the context's
+  clock; a tap starts the music the screen asks for, a screen change fades the cue out over a
+  second before the next is fetched, and the reveal is read in quiet, the bed fading under the
+  close; each cue's address carries its file's hash and is kept on its first play; the credit line
+  under the notice, the licence linked, with the register's test holding every CC BY file to it.
 
 ## v0.9.0 — Gate 09, the battle (#53)
 

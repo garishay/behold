@@ -6,6 +6,7 @@ import { picture } from './player/pictures.ts'
 import { Player } from './player/Player.tsx'
 import { fresh, type Progress } from './player/state.ts'
 import { load, save, type Saved } from './player/storage.ts'
+import { Music } from './sound/music.ts'
 import { Switches } from './sound/Switches.tsx'
 import { strings } from './strings/en.ts'
 
@@ -121,6 +122,13 @@ export default function App({ passages = fetchedPassages }: AppProps) {
       <Switches />
       <p className="status">{strings.status}</p>
       <p className="notice">{strings.notice}</p>
+      <p className="credit">
+        {strings.credit}{' '}
+        <a href={strings.creditLicence.href} target="_blank" rel="noreferrer">
+          {strings.creditLicence.text}
+        </a>
+      </p>
+      <Music cue="title" />
     </main>
   )
 }

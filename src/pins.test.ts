@@ -100,3 +100,21 @@ describe('the sound effects (Gate 10 A6)', () => {
     expect(config).toMatch(/includeAssets: \[[^\]]*'audio\/\*\.m4a'[^\]]*\]/)
   })
 })
+
+describe('the music (Gate 10 A6)', () => {
+  it('caches a cue on its first play by its hashed address, and nothing else', () => {
+    const rule = /\{\s*urlPattern: (\/[^\n]*\/),\s*handler: '(\w+)',\s*options: (\{[^\n]*\}),/.exec(
+      config.slice(config.indexOf("cacheName: 'passages'")),
+    )
+    expect(rule).not.toBeNull()
+    const [, pattern, handler, options] = rule!
+    const matches = new RegExp(pattern.slice(1, -1))
+    expect(matches.test('/behold/audio/music/lamentation.m4a?v=0123abcd')).toBe(true)
+    expect(matches.test('/audio/music/desert-city.m4a?v=89abcdef')).toBe(true)
+    // An effect is precached, and a cue's bare address is not what the app asks for.
+    expect(matches.test('/audio/found.m4a')).toBe(false)
+    expect(matches.test('/audio/music/lamentation.m4a')).toBe(false)
+    expect(handler).toBe('CacheFirst')
+    expect(options).toMatch(/cacheName: 'music'/)
+  })
+})
