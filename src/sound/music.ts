@@ -61,29 +61,35 @@ function end(ac: AudioContext) {
   return true
 }
 
+/** What the screen and the switch ask for. */
+const asked = () => (isOn('music') ? wanted : null)
+/** The second a cue takes to fade out, before the next is fetched. */
+let handover: ReturnType<typeof setTimeout> | undefined
+
 /**
- * The music brought to what the screen and the switch ask for, once a tap has the context running:
- * the cue playing fades out, and the next begins when it has, so two are never decoded at once.
+ * The music brought to what is asked for, while the context runs: the cue playing fades out, and
+ * what is asked for then is begun once it has, so two cues are never decoded at once.
  */
 function update() {
   const ac = running()
-  const next = isOn('music') ? wanted : null
-  if (ac === undefined || current?.cue === next) return
-  const faded = end(ac)
-  if (next === null) return
-  if (!faded) begin(ac, next)
-  else
-    setTimeout(() => {
-      if (current === undefined && wanted === next && isOn('music')) begin(ac, next)
+  const next = asked()
+  if (ac === undefined || handover !== undefined || (current?.cue ?? null) === next) return
+  if (end(ac))
+    handover = setTimeout(() => {
+      handover = undefined
+      update()
     }, fadeOut * 1000)
+  else if (next !== null) begin(ac, next)
 }
 
 /**
- * Any tap starts the music the screen asks for (A4): a tap is what lets a page make sound. It
- * listens after the app's own handlers, so a card's tap has already asked for the case's cue.
+ * Any tap brings the music to what the screen asks for (A4): a tap is what lets a page make sound,
+ * and what resumes a context the phone interrupted. It listens after the app's own handlers, so a
+ * card's tap has already asked for the case's cue.
  */
 function unlock() {
-  if (wanted === null || !isOn('music') || current !== undefined) return
+  const next = asked()
+  if ((current?.cue ?? null) === next && (next === null || running() !== undefined)) return
   try {
     void wake().resume().then(update)
   } catch {

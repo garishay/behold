@@ -166,7 +166,47 @@ describe('the music (Gate 10 A2, A4)', () => {
     expect(ac.sources).toHaveLength(1)
     turn('music', true)
     await settle()
-    expect(started(ac).at(-1)).toEqual(['music/desert-city.m4a', 10])
+    expect(ac.sources).toHaveLength(1)
+    ac.currentTime = 11
+    await vi.advanceTimersByTimeAsync(1000)
+    expect(started(ac).at(-1)).toEqual(['music/desert-city.m4a', 11])
+  })
+
+  it('holds the next cue until the last has faded, even through a tap', async () => {
+    await load('title')
+    tap()
+    await settle()
+    const [ac] = made
+    ac.currentTime = 30
+    rerender({ cue: 'case' })
+    tap()
+    await settle()
+    expect(music()).toHaveLength(1)
+    ac.currentTime = 31
+    await vi.advanceTimersByTimeAsync(1000)
+    expect(started(ac)).toEqual([
+      ['music/desert-city.m4a', 0],
+      ['music/lamentation.m4a', 31],
+    ])
+  })
+
+  it('brings the music to the screen on the first tap after the phone interrupted it', async () => {
+    await load('title')
+    tap()
+    await settle()
+    const [ac] = made
+    ac.state = 'interrupted'
+    ac.currentTime = 50
+    rerender({ cue: 'case' })
+    await settle()
+    expect(ac.sources[0].stoppedAt).toBeUndefined()
+    tap()
+    await settle()
+    expect(ac.state).toBe('running')
+    expect(ac.sources[0].stoppedAt).toBe(51)
+    ac.currentTime = 51
+    await vi.advanceTimersByTimeAsync(1000)
+    expect(started(ac).at(-1)).toEqual(['music/lamentation.m4a', 51])
   })
 
   it('makes no sound and no context on a tap while Music is off', async () => {
