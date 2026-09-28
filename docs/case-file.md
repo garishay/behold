@@ -131,8 +131,8 @@ reveal shows 17:4 and 17:17–18 before 17:38–51.
 A moment's picture and a face's portrait are JPEGs in `public/cases/<id>/`, named as the
 structure names them. The structure's `size` is the file's pixel size — the registry test reads
 the file's header and holds `size` to it — and boxes are percentages of that picture. Scenes are
-portrait, 4:5 (`docs/world-rules.md` §6); the tutorial's valley is the prototype's 3:4 and stays
-so for testing, per §8. A tappable thing is at most eight to a moment (§6), and nothing that
+portrait, 4:5 (`docs/world-rules.md` §6), the tutorial's valley included since its picture was
+regenerated (#35). A tappable thing is at most eight to a moment (§6), and nothing that
 matters sits in the outer 8% of the width (§7).
 
 A moment's picture is generated from its scene brief (§6, _Describe, then generate_), kept beside

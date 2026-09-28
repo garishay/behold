@@ -48,8 +48,8 @@ describe('the case registry (Gate 02 A1, A5)', () => {
 
   // A moment's picture is generated from its scene brief, written from its spots (world rules §6,
   // #30). Where a case has its briefs, each moment has one, and each spot is named in it with the
-  // box the structure holds, so a re-fitted box re-writes its line. The valley and the vineyard
-  // were drawn before the rule; each brings its briefs when its picture is next generated.
+  // box the structure holds, so a re-fitted box re-writes its line. The vineyard was drawn before
+  // the rule, and brings its briefs when its picture is next generated (#33).
   it.each(each.filter(([id]) => existsSync(`src/cases/${id}/scenes.md`)))(
     '%s: every spot is named in its moment’s scene brief, with its box',
     (id, c) => {

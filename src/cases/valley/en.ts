@@ -14,7 +14,7 @@ export const en = {
     brook:
       'A brook across the valley floor, smooth stones in its shallows. Five were picked from here.',
     giant:
-      'The Philistines’ champion from Gath, face-down in the dust, a sheathed sword across his back and his spear on the ground beside him. Laid out, he is six cubits and a span.',
+      'The Philistines’ champion from Gath, face-down in the dust, a sheathed sword at his side and his spear on the ground beside him. Laid out, he is six cubits and a span.',
     bearer:
       'A shield-bearer with a tall shield, still on his feet, reaching toward the fallen man.',
     boy: 'A shepherd boy in a plain tunic, a sling raised in one hand and a shepherd’s pouch at his hip. His other hand is empty.',

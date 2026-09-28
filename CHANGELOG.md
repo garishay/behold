@@ -3,6 +3,15 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.10.1 — Gate 11, the valley's picture (#35)
+
+- **35a — the valley, regenerated** (#58): the tutorial's one picture generated from its scene
+  brief, at 4:5 like every case: the giant's own sword sheathed at his hip, the clearest sword in
+  the picture; plain cloth headbands and scale armor in the heap, so world rules §8's two valley
+  lines leave; no banners, and a plain bronze cap for the helmet; the six boxes fitted to it under
+  check (l) with the Zoom pill, and d1 and d2 recut; the giant's caption, "a sheathed sword at his
+  side"; and `scenes.md`, the brief with its three prompts as sent.
+
 ## v0.10.0 — Gate 10, sound (#52)
 
 - **52a — the sound effects** (#55): five effects on the player's own moves, in place of the

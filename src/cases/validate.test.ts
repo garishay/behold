@@ -308,10 +308,11 @@ describe('validate (Gate 02 A6)', () => {
   })
 
   // (l) is #27 [1]'s: the fingertip every spot keeps for itself. The basket, smaller than the boy,
-  // laid over all of him but a 6.4 px rim at 320 px wide: drawn on top, it leaves the boy nowhere a
-  // fingertip lands on him alone.
+  // laid over his upper body down to the giant's box, which already covers his legs where he stands
+  // astride the giant's head (#35): drawn on top, the two leave the boy nowhere a fingertip lands on
+  // him alone.
   it('(l) a spot with no fingertip of its own — the boy under the basket', () => {
-    expect(validate(withSpot('basket', { box: [62, 20, 30, 38] }), en)).toEqual([
+    expect(validate(withSpot('basket', { box: [55, 3, 36, 37] }), en)).toEqual([
       'spot "boy" keeps no 44 px square of its own at 320 px wide',
     ])
   })
