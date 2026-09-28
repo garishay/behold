@@ -30,10 +30,12 @@ export default defineConfig({
     // The PWA shell (Gate 01 A2). `prompt`: a new version waits until the player taps the
     // "Update available" toast, never reloading mid-case — `autoUpdate` would reload the app the
     // moment a deploy lands. The manifest's start_url and scope default to `base`; the icons are
-    // the committed placeholders from `npm run icons`, precached with the bundle.
+    // the committed placeholders from `npm run icons`, precached with the bundle. So are the sound
+    // effects (Gate 10 A6), so the first tap sounds offline; a precached file's revision is its
+    // hash, so a changed effect reaches the phone with the next update at the same address.
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['icons/*.png'],
+      includeAssets: ['icons/*.png', 'audio/*.m4a'],
       // The case pictures are fetched when a case opens and kept from then on (Gate 02 A5), so a
       // played case stays offline; they are not precached, so the install stays the shell. The
       // worker claims the page as soon as it first activates, so a case opened on the first visit

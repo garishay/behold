@@ -94,3 +94,9 @@ describe('the case screen fits the phone (07c, #24)', () => {
     expect(app).not.toMatch(/\d+[sdl]?vh/)
   })
 })
+
+describe('the sound effects (Gate 10 A6)', () => {
+  it('are precached with the shell, so the first tap sounds offline', () => {
+    expect(config).toMatch(/includeAssets: \[[^\]]*'audio\/\*\.m4a'[^\]]*\]/)
+  })
+})

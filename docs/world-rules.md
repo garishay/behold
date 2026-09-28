@@ -105,3 +105,7 @@ Run before a picture enters a case.
 - Tutorial: the armor heap is chain mail — regenerate as scale.
 
 Prototype pictures are accepted as-is for testing; each item above becomes an `art` Issue before season one ships.
+
+## 9. Sound
+
+Music and effects are held to the text as pictures are. Instruments are the period's or near it: lyre and harp, reed pipe and flute, frame drum and cymbals, the shofar; an oboe, a lute, or a dulcimer may stand in where a recording needs one. No piano, no synthesizer pad, no drum kit. No voice sings or speaks: sung scripture would ship scripture, and a word would need translating. Sound is never evidence. No sound tells the player whether an answer is right before Close the case does, and a player with sound off loses nothing but the sound. Every file's source, author, licence, and edits are in the register, `docs/sound.md`.

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import type { CaseEntry } from '../cases/index.ts'
 import type { PassageService } from '../passages/service.ts'
+import { play } from '../sound/engine.ts'
+import { Switches } from '../sound/Switches.tsx'
 import { strings } from '../strings/en.ts'
 import { Bank } from './Bank.tsx'
 import { CoachMark } from './CoachMark.tsx'
@@ -19,6 +21,7 @@ import {
   filled,
   nothing,
   opened,
+  placed,
   step,
   submit,
   tap,
@@ -27,7 +30,6 @@ import {
   type Outcome,
   type Progress,
 } from './state.ts'
-import { sting } from './sting.ts'
 import { Think } from './Think.tsx'
 
 type View = 'look' | 'solve' | 'reveal'
@@ -91,11 +93,11 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     return () => removeEventListener('popstate', onPop)
   }, [progress.solved, s.id])
 
-  /** Progress after a move; the case closing on it plays the sting and opens the reveal. */
+  /** Progress after a move; the case closing on it plays the close and opens the reveal. */
   const close = (next: Progress) => {
     onProgress(next)
     if (next.solved && !progress.solved) {
-      sting()
+      play('close')
       history.pushState({ case: s.id, view: 'reveal' }, '')
       setView('reveal')
     }
@@ -103,6 +105,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const apply = (o: Outcome) => {
     setSelection(o.selection)
     setNote(o.wants === undefined ? '' : strings.blankWants(o.wants))
+    if (placed(progress, o.progress)) play('place')
     close(o.progress)
   }
   const onTap = (spotId: string) => {
@@ -111,6 +114,9 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     // The note says "copied to Papers" only when this tap added the paper (review round 3, #20).
     const opened = next.papers.length > progress.papers.length ? spot?.paper : undefined
     setCaption({ spot: spotId, added, paper: opened })
+    // A spot's first tap is found, or paper when it copies one; a spot tapped again is silent.
+    if (opened !== undefined) play('paper')
+    else if (next.tapped.length > progress.tapped.length) play('found')
     setFresh([...fresh, ...added])
     if (spot?.paper !== undefined) setPaper(spot.paper)
     onProgress(next)
@@ -118,6 +124,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const onSubmit = () => {
     const off = wrong(s, progress)
     setNote(off === 0 ? '' : off <= 2 ? strings.oneOrTwoWrong : strings.severalWrong)
+    if (off > 0) play('notYet')
     close(submit(s, progress))
   }
   const show = (v: 'look' | 'solve') => {
@@ -151,6 +158,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
             <button type="button" onClick={onRestart}>
               {strings.restart}
             </button>
+            <Switches />
           </div>
         </div>
       )}

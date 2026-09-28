@@ -90,4 +90,10 @@ export const strings = {
   translations: { ESV: 'ESV' },
   esvLink: { text: 'www.esv.org', href: 'https://www.esv.org' },
   backToCases: 'Back to cases',
+
+  // The sound switches, on the title screen and in the menu (Gate 10 A4).
+  music: 'Music',
+  effects: 'Effects',
+  on: 'On',
+  off: 'Off',
 } as const satisfies Record<string, Copy>
