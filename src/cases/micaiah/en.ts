@@ -14,7 +14,7 @@ export const en = {
   moments: { battle: 'The battle', pool: 'The pool', thrones: 'The thrones' },
   captions: {
     robed:
-      'A man in a deep blue royal robe and a plain gold band stands in his chariot, crying out as enemy chariots close on him.',
+      'A man in a deep blue royal robe and a plain gold band stands in a chariot trimmed in blue and gold, one arm raised, crying out.',
     captains:
       'Chariots of Syria, their captains in tall pointed helmets, pull up and wheel away from the man in blue. Thirty-two captains were sent out, all of them for one man: the king of Israel.',
     rider:
