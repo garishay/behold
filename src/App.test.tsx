@@ -271,7 +271,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     openCase(/The valley/)
     tapSpot('giant')
     expect(screen.getByText(/Found:/)).toHaveTextContent('Found: Goliath, six, spear, sword')
-    expect(screen.getByText(/a sheathed sword across his back/)).toBeInTheDocument()
+    expect(screen.getByText(/a sheathed sword at his side/)).toBeInTheDocument()
     expect(document.querySelector('[data-spot="sheath"]')).toBeNull()
   })
 

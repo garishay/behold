@@ -101,8 +101,7 @@ Run before a picture enters a case.
 
 ## 8. Known deviations to fix before release
 
-- Tutorial: the boy and the shield-bearer wear gold headbands — commoners wear plain cloth.
-- Tutorial: the armor heap is chain mail — regenerate as scale.
+None open. The tutorial's two, the gold headbands and the chain-mail heap, left with its regenerated picture (#35).
 
 Prototype pictures are accepted as-is for testing; each item above becomes an `art` Issue before season one ships.
 
