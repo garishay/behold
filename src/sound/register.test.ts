@@ -1,6 +1,7 @@
 // The test reads the register and the audio folder from disk under Vitest, which runs on Node; the
 // app project declares no Node types, so this file brings them in itself, as the pins test does.
 /// <reference types="node" />
+import { createHash } from 'node:crypto'
 import { readdirSync, readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { strings } from '../strings/en.ts'
@@ -49,6 +50,15 @@ describe('the sound register, docs/sound.md (Gate 10 A7)', () => {
         'm',
       )
       expect(register, file).toMatch(command)
+    }
+  })
+
+  it('records each file’s SHA-256, and every file matches it, so none changes without its entry', () => {
+    for (const file of files) {
+      const name = file.replace('.', '\\.')
+      const recorded = new RegExp(`^### ${name}\\n[^#]*?\\nSHA-256 \`([0-9a-f]{64})\`\\.$`, 'm')
+      const hash = createHash('sha256').update(readFileSync(`public/audio/${file}`))
+      expect(recorded.exec(register)?.[1], file).toBe(hash.digest('hex'))
     }
   })
 

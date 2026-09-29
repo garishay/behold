@@ -2,9 +2,10 @@
 
 Every file in `public/audio/` has a row here: its role, its source, its author, and its licence,
 and below the table the command that made it from its source, the way each picture's brief records
-its prompt as sent (world rules §9). `src/sound/register.test.ts` holds it: every file has a row and
-a command, every row has a file, and every licence is CC0 1.0 or CC BY 4.0 (Gate 10 A1). Every CC BY
-file is also named in the title screen's credit line, `strings.credit`.
+its prompt as sent (world rules §9), and its SHA-256. `src/sound/register.test.ts` holds it: every
+file has a row, a command, and a digest it matches, every row has a file, and every licence is CC0
+1.0 or CC BY 4.0 (Gate 10 A1), so no file changes without its entry. Every CC BY file is also named
+in the title screen's credit line, `strings.credit`.
 
 | file                    | role                                              | source                                                                                                                                                           | author                       | licence   |
 | ----------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- | --------- |
@@ -32,13 +33,14 @@ The effects are AAC in `.m4a`, mono at 64 kbps and 48 kHz (A6). The music is ste
 48 kHz, with the MP3s' cover art dropped. Every file has its metadata stripped and the bit-exact
 flags set, so its command rebuilds it byte for byte.
 
-**Levelling** (A3, as amended on the owner's sound check): the title theme is −18 LUFS integrated,
-heard alone on its screen, and the case bed −22. Every effect's loudest 100 ms, K-weighted as ITU-R
-BS.1770 weights it, is −16, 6 dB over the case bed's average level. The window is 100 ms because the
-knock is over in less than the standard's 400 ms. The gain is measured on the cut before the encode,
-and it is the `volume` in the command. Every file stays under −1 dBTP, measured on the encoded file:
-where the gain would pass it, a limiter follows it, its ceiling stepped down from −2 dBFS until the
-file measures under −1.1. Two effects sit under −16. The find is −20, 4 dB under the rest, the
+**Levelling** (A3, as amended on the owner's sound check): the title theme is −20 LUFS integrated,
+heard alone on its screen, and the case bed −22. The title theme was −18 until the owner's listen on
+the phone found it a little loud; it is 2 dB down, still 2 dB over the case bed. Every effect's
+loudest 100 ms, K-weighted as ITU-R BS.1770 weights it, is −16, 6 dB over the case bed's average
+level. The window is 100 ms because the knock is over in less than the standard's 400 ms. The gain
+is measured on the cut before the encode, and it is the `volume` in the command. Every file stays
+under −1 dBTP, measured on the encoded file: where the gain would pass it, a limiter follows it, its
+ceiling stepped down from −2 dBFS until the file measures under −1.1. Two effects sit under −16. The find is −20, 4 dB under the rest, the
 owner's pick on the third sound check: it sounds more often than any other effect, so it is the
 quietest. The knock is held by the limiter, the only file that needs one, at −5 dBFS: it is one
 sharp tap, so it reaches the ceiling before it reaches the level, and it stays at −21.8 over its
@@ -53,6 +55,8 @@ drone, tuned to A = 440, so the bell's partials, near E5 and B6, are raised by r
 A small brass bell, one strike from its onset, tuned to F5 and C7 and trimmed to 0.5 s. Loudest
 100 ms −5.3 LUFS, so −14.7 dB to −20, the owner's lower level; true peak −11.7 dBTP.
 
+SHA-256 `03bc880d1d7587333bc65cf285b1cb4555318f40b3d5b8850cad03abeb479d78`.
+
 ```
 ffmpeg -i 531031__creeeeak__small-brass-bell.mp3 -af "atrim=0.09:0.637,asetpts=PTS-STARTPTS,aresample=48000,asetrate=50640,aresample=48000,atrim=0:0.5,asetpts=PTS-STARTPTS,afade=t=in:d=0.005,afade=t=out:st=0.380:d=0.12,volume=-14.7dB" -ac 1 -ar 48000 -c:a aac -b:a 64k -map_metadata -1 -fflags +bitexact -flags:a +bitexact found.m4a
 ```
@@ -61,6 +65,8 @@ ffmpeg -i 531031__creeeeak__small-brass-bell.mp3 -af "atrim=0.09:0.637,asetpts=P
 
 The densest 1.5 s of the unrolling, 1.25 s to 2.75 s. Loudest 100 ms −32.5 LUFS, so +16.5 dB; true
 peak −6.2 dBTP.
+
+SHA-256 `8a2a15b17f3d5388e92bc39ad72237200c4adfd792c1b80c223e621ff6fa25b1`.
 
 ```
 ffmpeg -i 202107__spookymodem__unrolling-scroll.wav -af "atrim=1.25:2.75,asetpts=PTS-STARTPTS,afade=t=in:d=0.05,afade=t=out:st=1.20:d=0.3,volume=16.5dB" -ac 1 -ar 48000 -c:a aac -b:a 64k -map_metadata -1 -fflags +bitexact -flags:a +bitexact paper.m4a
@@ -72,6 +78,8 @@ The third of the four knocks, the dullest (its spectral centroid 1.0 kHz), 0.83 
 Loudest 100 ms −37.3 LUFS, so +21.3 dB, then the limiter at −5 dBFS: loudest 100 ms −21.8, true
 peak −1.8 dBTP.
 
+SHA-256 `a264c0acdacd0f8624f8f82dfd438f22789294e1ae86bd026f1ce23c83c978a5`.
+
 ```
 ffmpeg -i 594389__elandre01__knocking-on-wood.wav -af "atrim=0.83:1.18,asetpts=PTS-STARTPTS,afade=t=out:st=0.25:d=0.1,volume=21.3dB,alimiter=limit=0.5623:attack=1:release=40:level=false" -ac 1 -ar 48000 -c:a aac -b:a 64k -map_metadata -1 -fflags +bitexact -flags:a +bitexact place.m4a
 ```
@@ -80,6 +88,8 @@ ffmpeg -i 594389__elandre01__knocking-on-wood.wav -af "atrim=0.83:1.18,asetpts=P
 
 Two notes of one player's B♭ major scale on the flute, as played: C5 falling to a held B♭4, 3.33 s
 to 4.23 s. Loudest 100 ms −18.5 LUFS, so +2.5 dB; true peak −10.4 dBTP.
+
+SHA-256 `94cdaa3d0df90791e977bdebd72fdb56a0d96bd41031f5c901340cfe5a235391`.
 
 ```
 ffmpeg -i 590175__painted-panda__flute-scale.mp3 -af "atrim=3.33:4.23,asetpts=PTS-STARTPTS,afade=t=in:d=0.005,afade=t=out:st=0.60:d=0.3,volume=2.5dB" -ac 1 -ar 48000 -c:a aac -b:a 64k -map_metadata -1 -fflags +bitexact -flags:a +bitexact not-yet.m4a
@@ -92,6 +102,8 @@ on C, F, and A, the case bed's tonic chord, at the sting's offsets, 0, 0.18 s, a
 strike is 0.7 s of the bell from its onset, pitched by resampling to three quarters, one, and five
 quarters of the tuned bell. Under the last strike, a timbrel's shimmer: 0.8 s of a tambourine hit,
 7 dB under the bells. Loudest 100 ms −4.5 LUFS, so −11.5 dB; true peak −6.2 dBTP.
+
+SHA-256 `a1b1b74f8e959af2bd00fd64485941fd2762d2d7aef005e94ecd6a5b0a70b1e6`.
 
 ```
 ffmpeg -i 531031__creeeeak__small-brass-bell.mp3 -i 219266__radiopassiveboy__tambourine.mp3 -filter_complex "[0:a]atrim=0.09:0.664,asetpts=PTS-STARTPTS,aresample=48000,asetrate=37980,aresample=48000,atrim=0:0.7,asetpts=PTS-STARTPTS,afade=t=in:d=0.005,afade=t=out:st=0.450:d=0.25[a];[0:a]atrim=0.09:0.848,asetpts=PTS-STARTPTS,aresample=48000,asetrate=50640,aresample=48000,atrim=0:0.7,asetpts=PTS-STARTPTS,afade=t=in:d=0.005,afade=t=out:st=0.450:d=0.25[b];[0:a]atrim=0.09:1.033,asetpts=PTS-STARTPTS,aresample=48000,asetrate=63300,aresample=48000,atrim=0:0.7,asetpts=PTS-STARTPTS,afade=t=in:d=0.005,afade=t=out:st=0.450:d=0.25[c];[b]adelay=180:all=1[b2];[c]adelay=360:all=1[c2];[a][b2][c2]amix=inputs=3:normalize=0[s];[1:a]atrim=0:0.8,asetpts=PTS-STARTPTS,volume=-7dB,afade=t=out:st=0.5:d=0.3,adelay=360:all=1[t];[s][t]amix=inputs=2:normalize=0,volume=-11.5dB" -ac 1 -ar 48000 -c:a aac -b:a 64k -map_metadata -1 -fflags +bitexact -flags:a +bitexact close.m4a
@@ -108,6 +120,8 @@ The case bed, whole: 89.37 s. It was written to loop, so it ends mid-phrase at f
 2 s fade, which takes nothing out. Integrated −12.4 LUFS, so −9.6 dB, to −22.0; true peak −8.9
 dBTP.
 
+SHA-256 `d8aa5f92e8c306f620c02dc5731d52535feb3ac94c7162e74b4d9a3bda183627`.
+
 ```
 ffmpeg -i "Desert City.mp3" -af "afade=t=out:st=87.36:d=2,volume=-9.6dB" -vn -ac 2 -ar 48000 -c:a aac -b:a 96k -map_metadata -1 -fflags +bitexact -flags:a +bitexact music/desert-city.m4a
 ```
@@ -115,8 +129,10 @@ ffmpeg -i "Desert City.mp3" -af "afade=t=out:st=87.36:d=2,volume=-9.6dB" -vn -ac
 ### music/lamentation.m4a
 
 The title theme: its first long phrase, 84.6 s, which decays to silence at 84.3 s before the next
-begins at 84.75 s. Integrated −20.2 LUFS, so +2.2 dB, to −18.0; true peak −2.0 dBTP.
+begins at 84.75 s. Integrated −20.2 LUFS, so +0.2 dB, to −20.0; true peak −3.9 dBTP.
+
+SHA-256 `12b3474a85da789d732a33c328684a41f64d290462655f53cd0cacae9a475808`.
 
 ```
-ffmpeg -i Lamentation.mp3 -af "atrim=0:84.6,asetpts=PTS-STARTPTS,afade=t=out:st=84.3:d=0.3,volume=2.2dB" -vn -ac 2 -ar 48000 -c:a aac -b:a 96k -map_metadata -1 -fflags +bitexact -flags:a +bitexact music/lamentation.m4a
+ffmpeg -i Lamentation.mp3 -af "atrim=0:84.6,asetpts=PTS-STARTPTS,afade=t=out:st=84.3:d=0.3,volume=0.2dB" -vn -ac 2 -ar 48000 -c:a aac -b:a 96k -map_metadata -1 -fflags +bitexact -flags:a +bitexact music/lamentation.m4a
 ```
