@@ -3,7 +3,7 @@ import { decode, running, wake } from './engine.ts'
 import { isOn, subscribe } from './settings.ts'
 
 /** The season's two cues (Gate 10 A2), each a file in `public/audio/` with its row in `docs/sound.md`. */
-export const cues = { title: 'music/desert-city.m4a', case: 'music/lamentation.m4a' } as const
+export const cues = { title: 'music/lamentation.m4a', case: 'music/desert-city.m4a' } as const
 
 export type Cue = keyof typeof cues
 

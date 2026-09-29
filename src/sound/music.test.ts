@@ -116,10 +116,10 @@ describe('the music (Gate 10 A2, A4)', () => {
     tap()
     await settle()
     expect(music()).toEqual([
-      expect.stringMatching(/^\/audio\/music\/desert-city\.m4a\?v=[0-9a-f]{8}$/),
+      expect.stringMatching(/^\/audio\/music\/lamentation\.m4a\?v=[0-9a-f]{8}$/),
     ])
     const [ac] = made
-    expect(started(ac)).toEqual([['music/desert-city.m4a', 0]])
+    expect(started(ac)).toEqual([['music/lamentation.m4a', 0]])
     expect(ac.sources[0].gain?.ramps).toEqual(['set 0 at 0', 'ramp 1 by 2'])
   })
 
@@ -128,11 +128,11 @@ describe('the music (Gate 10 A2, A4)', () => {
     tap()
     await settle()
     const [ac] = made
-    ac.currentTime = 84.6
+    ac.currentTime = 89.4
     ac.sources[0].onended?.()
     expect(started(ac)).toEqual([
-      ['music/lamentation.m4a', 0],
-      ['music/lamentation.m4a', 144.6],
+      ['music/desert-city.m4a', 0],
+      ['music/desert-city.m4a', 149.4],
     ])
     expect(music()).toHaveLength(1)
   })
@@ -151,7 +151,7 @@ describe('the music (Gate 10 A2, A4)', () => {
     ac.currentTime = 31
     await vi.advanceTimersByTimeAsync(1000)
     expect(music()).toHaveLength(2)
-    expect(started(ac).at(-1)).toEqual(['music/lamentation.m4a', 31])
+    expect(started(ac).at(-1)).toEqual(['music/desert-city.m4a', 31])
     ac.currentTime = 40
     rerender({ cue: null })
     await vi.advanceTimersByTimeAsync(2000)
@@ -175,7 +175,7 @@ describe('the music (Gate 10 A2, A4)', () => {
     expect(ac.sources).toHaveLength(1)
     ac.currentTime = 11
     await vi.advanceTimersByTimeAsync(1000)
-    expect(started(ac).at(-1)).toEqual(['music/desert-city.m4a', 11])
+    expect(started(ac).at(-1)).toEqual(['music/lamentation.m4a', 11])
   })
 
   it('holds the next cue until the last has faded, even through a tap', async () => {
@@ -191,8 +191,8 @@ describe('the music (Gate 10 A2, A4)', () => {
     ac.currentTime = 31
     await vi.advanceTimersByTimeAsync(1000)
     expect(started(ac)).toEqual([
-      ['music/desert-city.m4a', 0],
-      ['music/lamentation.m4a', 31],
+      ['music/lamentation.m4a', 0],
+      ['music/desert-city.m4a', 31],
     ])
   })
 
@@ -208,7 +208,7 @@ describe('the music (Gate 10 A2, A4)', () => {
     expect(music()).toHaveLength(1)
     ac.become('running')
     await settle()
-    expect(started(ac).at(-1)).toEqual(['music/lamentation.m4a', 30])
+    expect(started(ac).at(-1)).toEqual(['music/desert-city.m4a', 30])
   })
 
   it('brings the music to the screen on the first tap after the phone interrupted it', async () => {
@@ -227,7 +227,7 @@ describe('the music (Gate 10 A2, A4)', () => {
     expect(ac.sources[0].stoppedAt).toBe(51)
     ac.currentTime = 51
     await vi.advanceTimersByTimeAsync(1000)
-    expect(started(ac).at(-1)).toEqual(['music/lamentation.m4a', 51])
+    expect(started(ac).at(-1)).toEqual(['music/desert-city.m4a', 51])
   })
 
   it('makes no sound and no context on a tap while Music is off', async () => {
