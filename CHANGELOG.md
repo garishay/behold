@@ -7,7 +7,8 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
 
 - **52d — the title theme, softer** (#60): _Lamentation_, the title theme, goes from −18 to −20
   LUFS integrated, 2 dB down on the owner's listen on the phone and still 2 dB over the case bed;
-  its register entry and command follow.
+  its register entry and command follow. Each file's register entry now records its SHA-256, and
+  the register test holds every file to it, so none changes without its entry ([Q7]).
 
 ## v0.10.2 — Gate 10, the owner's picks (#52)
 
