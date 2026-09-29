@@ -3,6 +3,12 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.10.3 — Gate 10, the owner's listen (#52)
+
+- **52d — the title theme, softer** (#60): _Lamentation_, the title theme, goes from −18 to −20
+  LUFS integrated, 2 dB down on the owner's listen on the phone and still 2 dB over the case bed;
+  its register entry and command follow.
+
 ## v0.10.2 — Gate 10, the owner's picks (#52)
 
 - **52c — the picks, the swap, and the levels** (#59): from the owner's three sound checks, the lyre

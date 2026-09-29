@@ -32,13 +32,14 @@ The effects are AAC in `.m4a`, mono at 64 kbps and 48 kHz (A6). The music is ste
 48 kHz, with the MP3s' cover art dropped. Every file has its metadata stripped and the bit-exact
 flags set, so its command rebuilds it byte for byte.
 
-**Levelling** (A3, as amended on the owner's sound check): the title theme is −18 LUFS integrated,
-heard alone on its screen, and the case bed −22. Every effect's loudest 100 ms, K-weighted as ITU-R
-BS.1770 weights it, is −16, 6 dB over the case bed's average level. The window is 100 ms because the
-knock is over in less than the standard's 400 ms. The gain is measured on the cut before the encode,
-and it is the `volume` in the command. Every file stays under −1 dBTP, measured on the encoded file:
-where the gain would pass it, a limiter follows it, its ceiling stepped down from −2 dBFS until the
-file measures under −1.1. Two effects sit under −16. The find is −20, 4 dB under the rest, the
+**Levelling** (A3, as amended on the owner's sound check): the title theme is −20 LUFS integrated,
+heard alone on its screen, and the case bed −22. The title theme was −18 until the owner's listen on
+the phone found it a little loud; it is 2 dB down, still 2 dB over the case bed. Every effect's
+loudest 100 ms, K-weighted as ITU-R BS.1770 weights it, is −16, 6 dB over the case bed's average
+level. The window is 100 ms because the knock is over in less than the standard's 400 ms. The gain
+is measured on the cut before the encode, and it is the `volume` in the command. Every file stays
+under −1 dBTP, measured on the encoded file: where the gain would pass it, a limiter follows it, its
+ceiling stepped down from −2 dBFS until the file measures under −1.1. Two effects sit under −16. The find is −20, 4 dB under the rest, the
 owner's pick on the third sound check: it sounds more often than any other effect, so it is the
 quietest. The knock is held by the limiter, the only file that needs one, at −5 dBFS: it is one
 sharp tap, so it reaches the ceiling before it reaches the level, and it stays at −21.8 over its
@@ -115,8 +116,8 @@ ffmpeg -i "Desert City.mp3" -af "afade=t=out:st=87.36:d=2,volume=-9.6dB" -vn -ac
 ### music/lamentation.m4a
 
 The title theme: its first long phrase, 84.6 s, which decays to silence at 84.3 s before the next
-begins at 84.75 s. Integrated −20.2 LUFS, so +2.2 dB, to −18.0; true peak −2.0 dBTP.
+begins at 84.75 s. Integrated −20.2 LUFS, so +0.2 dB, to −20.0; true peak −3.9 dBTP.
 
 ```
-ffmpeg -i Lamentation.mp3 -af "atrim=0:84.6,asetpts=PTS-STARTPTS,afade=t=out:st=84.3:d=0.3,volume=2.2dB" -vn -ac 2 -ar 48000 -c:a aac -b:a 96k -map_metadata -1 -fflags +bitexact -flags:a +bitexact music/lamentation.m4a
+ffmpeg -i Lamentation.mp3 -af "atrim=0:84.6,asetpts=PTS-STARTPTS,afade=t=out:st=84.3:d=0.3,volume=0.2dB" -vn -ac 2 -ar 48000 -c:a aac -b:a 96k -map_metadata -1 -fflags +bitexact -flags:a +bitexact music/lamentation.m4a
 ```
