@@ -9,8 +9,9 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   leaves every effect: a small brass bell for the find, two falling notes on a flute for not yet,
   and the brass bell struck three times in the sting's shape for the close; the knock and the
   scroll as they were. _Lamentation_ becomes the title theme at −18 LUFS and _Desert City_ the case
-  bed at −22, with every effect 6 dB over the bed's average and every file under −1 dBTP, the knock
-  limited; the register records each file's source, level, and command.
+  bed at −22, with every effect 6 dB over the bed's average but the knock, one sharp tap that its
+  limiter holds at −21.8 to keep it under −1 dBTP like every file; the register records each file's
+  source, level, and command.
 
 ## v0.10.1 — Gate 11, the valley's picture (#35)
 
