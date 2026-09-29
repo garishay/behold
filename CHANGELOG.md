@@ -3,6 +3,15 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.10.2 — Gate 10, the owner's picks (#52)
+
+- **52c — the picks, the swap, and the levels** (#59): from the owner's two sound checks, the lyre
+  leaves every effect: a small brass bell for the find, two falling notes on a flute for not yet,
+  and the brass bell struck three times in the sting's shape for the close; the knock and the
+  scroll as they were. _Lamentation_ becomes the title theme at −18 LUFS and _Desert City_ the case
+  bed at −22, with every effect 6 dB over the bed's average and every file under −1 dBTP, the knock
+  limited; the register records each file's source, level, and command.
+
 ## v0.10.1 — Gate 11, the valley's picture (#35)
 
 - **35a — the valley, regenerated** (#58): the tutorial's one picture generated from its scene
