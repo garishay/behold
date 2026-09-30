@@ -107,4 +107,16 @@ describe('progress on the device (#6, A6)', () => {
     localStorage.setItem(key, JSON.stringify({ valley: { ...guided, step: 5 } }))
     expect(load(cases)).toEqual({})
   })
+
+  // Progress gained the hints used (#29). An entry kept before them has used none and keeps its
+  // place, where the shape check alone would start it fresh; a tier that is not one is dropped.
+  it('reads an entry kept before hints as none used, and drops a tier that is not one', () => {
+    const played = { ...fresh(vineyard), tapped: ['seal'], bank: ['ahab', 'seal'] }
+    const before: Partial<typeof played> = { ...played }
+    delete before.hints
+    localStorage.setItem(key, JSON.stringify({ vineyard: before }))
+    expect(load(cases)).toEqual({ vineyard: played })
+    localStorage.setItem(key, JSON.stringify({ vineyard: { ...played, hints: [1, 3] } }))
+    expect(load(cases)).toEqual({})
+  })
 })

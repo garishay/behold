@@ -29,7 +29,12 @@ const progress = (v: unknown): v is Progress =>
   byId(v.faces) &&
   byId(v.fills) &&
   typeof v.step === 'number' &&
-  typeof v.solved === 'boolean'
+  typeof v.solved === 'boolean' &&
+  Array.isArray(v.hints) &&
+  v.hints.every((t) => t === 1 || t === 2)
+
+/** An entry kept before hints (#29) has used none, and keeps its place. */
+const withHints = (v: unknown) => (record(v) ? { hints: [], ...v } : v)
 
 /**
  * Whether every id an entry holds is the case's — the moment, the spots tapped, the bank, the
@@ -66,7 +71,8 @@ export function load(registry: readonly CaseEntry[]): Saved {
     const raw = localStorage.getItem(key)
     const parsed: unknown = raw === null ? {} : JSON.parse(raw)
     if (!record(parsed)) return {}
-    const kept = Object.entries(parsed).filter((e): e is [string, Progress] => {
+    const entries = Object.entries(parsed).map(([id, v]) => [id, withHints(v)])
+    const kept = entries.filter((e): e is [string, Progress] => {
       const structure = registry.find((c) => c.structure.id === e[0])?.structure
       return structure !== undefined && progress(e[1]) && fits(structure, e[1])
     })

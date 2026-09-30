@@ -24,6 +24,8 @@ export interface Progress {
   /** The tutorial's current step. */
   readonly step: number
   readonly solved: boolean
+  /** The hints shown, each by its tier, in the order asked for: counted at the close (#29). */
+  readonly hints: readonly (1 | 2)[]
 }
 
 /** What the player has picked up and not yet put down: a word or a moment, and the slot waiting for one. */
@@ -55,6 +57,7 @@ export const fresh = (s: CaseStructure): Progress => ({
   fills: {},
   step: 0,
   solved: false,
+  hints: [],
 })
 
 export const guided = (s: CaseStructure) => (s.steps?.length ?? 0) > 0
