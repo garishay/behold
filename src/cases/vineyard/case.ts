@@ -71,7 +71,7 @@ export const vineyard = {
       size: [900, 1125],
       spots: [
         { id: 'crowd', box: [0, 58, 100, 42], words: ['the-people', 'fast'], cites: '21:12' },
-        { id: 'stones', box: [38, 12, 24, 22], words: ['stoned'], cites: '21:13' },
+        { id: 'stones', box: [38, 12, 24, 18], words: ['stoned'], cites: '21:13' },
         { id: 'seated', box: [36, 30, 26, 28], words: [], person: 'p3', cites: '21:12' },
         { id: 'accusers', box: [3, 18, 33, 44], words: ['cursed'], cites: '21:13' },
         {

@@ -13,7 +13,9 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   (l) with the Zoom pill, the stain's the tightest at 46.4 px; the stain's caption, "Outside the
   town, past the vineyard wall"; and `scenes.md`, the case's three briefs, the vineyard's with its
   two prompts as sent and its two retouches in code, the bedchamber's and the gate's written from
-  their pictures as they stand. The registry test now fails a case without its briefs ([Q9]).
+  their pictures as they stand. The registry test now fails a case without its briefs ([Q9]). At
+  the gate, the stones' box stops where the seated man's hair begins, so a tap at his eyes finds
+  him and not the stones (#63).
 
 ## v0.10.3 — Gate 10, the owner's listen (#52)
 

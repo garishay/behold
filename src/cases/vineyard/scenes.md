@@ -109,10 +109,10 @@ the foreground, seen from behind.
 
 - `crowd` [0, 58, 100, 42], the bottom band: the people of the city gathered at the gate, seen
   from behind, and nobody eating: the fast (21:12).
-- `stones` [38, 12, 24, 22], top center: through the gateway, outside the city, a heap of stones on
-  open ground (21:13), the stones before (§5). The box takes in the lintel and the whole opening.
-  At its foot it runs over the seated man's head down to his nose, and being the smaller box it is
-  drawn over his there.
+- `stones` [38, 12, 24, 18], top center: through the gateway, outside the city, a heap of stones on
+  open ground (21:13), the stones before (§5). The box takes in the lintel and the gateway over the
+  heap, which runs from 23% to 30%, and stops at 30%, where the seated man's hair and his box begin
+  (#63): 76.8 × 72 px at 320.
 - `seated` [36, 30, 26, 28], center: Naboth in the chief seat before the people (21:12), a
   grey-bearded man in grey on a stone dais, one hand at his chin. He does not look honored.
 - `accusers` [3, 18, 33, 44], left: two scoundrels facing him, one pointing at him and one raising
