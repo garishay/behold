@@ -770,6 +770,54 @@ describe('hints (#29)', () => {
     }
   })
 
+  // A caption opened whole with More rises over the picture's foot, so the stay isn't timed while
+  // it lies open: A1 times a stay with nothing over the picture (review round 1).
+  it('does not time the stay while a caption lies open over the picture', () => {
+    const tall = vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get')
+    tall.mockImplementation(function (this: HTMLElement) {
+      return this.textContent?.startsWith('A wild-haired man') ? 90 : 0
+    })
+    vi.useFakeTimers()
+    try {
+      render(<App />)
+      openCase(/The vineyard/)
+      tapSpot('prophet')
+      fireEvent.click(screen.getByRole('button', { name: 'More' }))
+      act(() => vi.advanceTimersByTime(stuck.seconds * 1000))
+      expect(offer()).toBeNull()
+      fireEvent.click(screen.getByRole('button', { name: 'Less' }))
+      act(() => vi.advanceTimersByTime(stuck.seconds * 1000))
+      expect(offer()).toHaveTextContent('Stuck? Where to look')
+    } finally {
+      vi.useRealTimers()
+      tall.mockRestore()
+    }
+  })
+
+  // The dock goes when Solve opens, and its caption closes with it, so back on Look the stay is
+  // timed again.
+  it('times the stay again once a caption left open closes with a trip to Solve', () => {
+    const tall = vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get')
+    tall.mockImplementation(function (this: HTMLElement) {
+      return this.textContent?.startsWith('A wild-haired man') ? 90 : 0
+    })
+    vi.useFakeTimers()
+    try {
+      render(<App />)
+      openCase(/The vineyard/)
+      tapSpot('prophet')
+      fireEvent.click(screen.getByRole('button', { name: 'More' }))
+      tab(/Solve/)
+      tab(/Look/)
+      expect(document.querySelector('.dock')).not.toHaveClass('is-open')
+      act(() => vi.advanceTimersByTime(stuck.seconds * 1000))
+      expect(offer()).toHaveTextContent('Stuck? Where to look')
+    } finally {
+      vi.useRealTimers()
+      tall.mockRestore()
+    }
+  })
+
   // A close's hint is kept from the close: a changed answer can't ask the hints what is right.
   it('offers one beside Close the case after two failed closes, at what the first found wrong', () => {
     render(<App />)

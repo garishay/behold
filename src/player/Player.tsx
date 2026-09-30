@@ -95,6 +95,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   // A mark shown again, dim and all: a guided step's when a signal fires under it, since the
   // step's own mark is the tutorial's hint, or a hint's asked for past its last tier (#29).
   const [nudges, setNudges] = useState(0)
+  // A caption opened whole over the picture's foot; the next caption opens closed (#24).
+  const [reading, setReading] = useState(false)
   // The case's music on Look and Solve; on the reveal it fades under the close, and the passage is
   // read in quiet (Gate 10 A2).
   useCue(view === 'reveal' ? null : 'case')
@@ -122,10 +124,11 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const current = step(s, progress)
   const guided = current?.until !== undefined
   const nudge = () => setNudges(nudges + 1)
-  // The stay is timed on Look with nothing over the picture, on a moment with something left, and
-  // only while the app is in view: the clock starts over on each new find, and on return.
-  const watching =
-    view === 'look' && !card && sheet === null && paper === null && unfound(moment.spots)
+  // The stay is timed on Look with nothing over the picture, an opened caption included (review
+  // round 1), on a moment with something left, and only while the app is in view: the clock starts
+  // over on each new find, and on return.
+  const covered = card || sheet !== null || paper !== null || reading
+  const watching = view === 'look' && !covered && unfound(moment.spots)
   useEffect(() => {
     if (!watching) return
     let timer = 0
@@ -175,6 +178,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     // The note says "copied to Papers" only when this tap added the paper (review round 3, #20).
     const opened = next.papers.length > progress.papers.length ? spot?.paper : undefined
     setCaption({ spot: spotId, added, paper: opened })
+    setReading(false)
     // A spot's first tap is found, or paper when it copies one; a spot tapped again is silent.
     if (opened !== undefined) play('paper')
     else if (next.tapped.length > progress.tapped.length) play('found')
@@ -202,6 +206,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const show = (v: 'look' | 'solve') => {
     // The rings clear when Solve is left, not when its own tab is tapped again (review round 1).
     if (view === 'solve' && v !== 'solve') setFresh([])
+    // Look's caption closes with the dock when Solve opens.
+    if (v !== view) setReading(false)
     setView(v)
     onProgress(opened(s, progress, v))
   }
@@ -358,6 +364,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
             tapped={progress.tapped}
             onMoment={(id) => {
               setCaption(null)
+              setReading(false)
               onProgress({ ...progress, moment: id })
             }}
             onTap={onTap}
@@ -374,7 +381,13 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
               </div>
             )}
           </Stage>
-          <Dock structure={s} text={text} caption={caption} offer={offer || undefined} />
+          <Dock
+            structure={s}
+            text={text}
+            caption={caption}
+            offer={offer || undefined}
+            onMore={setReading}
+          />
         </>
       ) : (
         <>
