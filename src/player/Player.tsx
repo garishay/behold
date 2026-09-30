@@ -8,6 +8,7 @@ import { strings } from '../strings/en.ts'
 import { Bank } from './Bank.tsx'
 import { CoachMark } from './CoachMark.tsx'
 import { Dock, type Caption } from './Dock.tsx'
+import { aim, firstWrong, half, stuck, type Aim, type Tier } from './hints.ts'
 import { PaperModal, PapersSheet } from './Papers.tsx'
 import { prefetch } from './pictures.ts'
 import { Reveal } from './Reveal.tsx'
@@ -79,6 +80,21 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const [lastSaid, setLastSaid] = useState(false)
   // The bank's head: a refused word's message, or how far off a close was (07c, #24 [3]).
   const [note, setNote] = useState('')
+  // The stuck signals (#29): taps on the picture that find nothing new while something is unfound,
+  // a stay on a moment with something left, and failed closes, each keeping the first thing it
+  // found wrong. A new find starts the first two over, and a hint taken starts all three.
+  const [run, setRun] = useState(0)
+  const [stayed, setStayed] = useState(false)
+  const [fails, setFails] = useState(0)
+  const [missed, setMissed] = useState<string | null>(null)
+  // The hint showing, what it points at and its tier; it stays until its thing is tapped (#29).
+  const [hint, setHint] = useState<(Aim & { readonly tier: Tier }) | null>(null)
+  // A hint's words leave on the next tap, as the last step's do (#24 [3]), so they never sit over a
+  // caption being read; they come back as its ring moves on to the next button or the picture.
+  const [saidAt, setSaidAt] = useState<string | null>(null)
+  // A mark shown again, dim and all: a guided step's when a signal fires under it, since the
+  // step's own mark is the tutorial's hint, or a hint's asked for past its last tier (#29).
+  const [nudges, setNudges] = useState(0)
   // The case's music on Look and Solve; on the reveal it fades under the close, and the passage is
   // read in quiet (Gate 10 A2).
   useCue(view === 'reveal' ? null : 'case')
@@ -97,6 +113,38 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     return () => removeEventListener('popstate', onPop)
   }, [progress.solved, s.id])
 
+  const moment = s.moments.find((m) => m.id === progress.moment) ?? s.moments[0]
+  const card = brief && progress.tapped.length === 0
+  const spots = s.moments.flatMap((m) => m.spots)
+  const unfound = (list: typeof moment.spots) => list.some((x) => !progress.tapped.includes(x.id))
+  // Under a guided step the step's own mark is the hint: no hint is offered, and a signal shows the
+  // step again (#29).
+  const current = step(s, progress)
+  const guided = current?.until !== undefined
+  const nudge = () => setNudges(nudges + 1)
+  // The stay is timed on Look with nothing over the picture, on a moment with something left, and
+  // only while the app is in view: the clock starts over on each new find, and on return.
+  const watching =
+    view === 'look' && !card && sheet === null && paper === null && unfound(moment.spots)
+  useEffect(() => {
+    if (!watching) return
+    let timer = 0
+    const start = () => {
+      clearTimeout(timer)
+      if (document.hidden) return
+      timer = window.setTimeout(
+        () => (guided ? setNudges((n) => n + 1) : setStayed(true)),
+        stuck.seconds * 1000,
+      )
+    }
+    start()
+    document.addEventListener('visibilitychange', start)
+    return () => {
+      clearTimeout(timer)
+      document.removeEventListener('visibilitychange', start)
+    }
+  }, [watching, guided, progress.tapped.length, progress.moment, hint])
+
   /** Progress after a move; the case closing on it plays the close and opens the reveal. */
   const close = (next: Progress) => {
     onProgress(next)
@@ -112,15 +160,30 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     if (placed(progress, o.progress)) play('place')
     close(o.progress)
   }
+  // A tap that found nothing new, on a spot found before or on no spot, runs toward a hint while
+  // something is still unfound; under a guided step the run shows the step again.
+  const nothingNew = () => {
+    if (!unfound(spots)) return
+    if (guided && run + 1 >= stuck.taps) {
+      setRun(0)
+      nudge()
+    } else setRun(run + 1)
+  }
   const onTap = (spotId: string) => {
     const { progress: next, added } = tap(s, progress, spotId)
-    const spot = s.moments.flatMap((m) => m.spots).find((x) => x.id === spotId)
+    const spot = spots.find((x) => x.id === spotId)
     // The note says "copied to Papers" only when this tap added the paper (review round 3, #20).
     const opened = next.papers.length > progress.papers.length ? spot?.paper : undefined
     setCaption({ spot: spotId, added, paper: opened })
     // A spot's first tap is found, or paper when it copies one; a spot tapped again is silent.
     if (opened !== undefined) play('paper')
     else if (next.tapped.length > progress.tapped.length) play('found')
+    if (next.tapped.length > progress.tapped.length) {
+      setRun(0)
+      setStayed(false)
+    } else nothingNew()
+    // A hint has done its work once its thing is tapped (#29).
+    if (hint?.spot === spotId) setHint(null)
     setFresh([...fresh, ...added])
     if (spot?.paper !== undefined) setPaper(spot.paper)
     onProgress(next)
@@ -128,7 +191,12 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const onSubmit = () => {
     const off = wrong(s, progress)
     setNote(off === 0 ? '' : off <= 2 ? strings.oneOrTwoWrong : strings.severalWrong)
-    if (off > 0) play('notYet')
+    if (off > 0) {
+      play('notYet')
+      setFails(fails + 1)
+      setMissed(firstWrong(s, progress) ?? null)
+    }
+    if (hint?.why === 'close') setHint(null)
     close(submit(s, progress))
   }
   const show = (v: 'look' | 'solve') => {
@@ -136,6 +204,24 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     if (view === 'solve' && v !== 'solve') setFresh([])
     setView(v)
     onProgress(opened(s, progress, v))
+  }
+  /**
+   * A hint asked for, from the offer or the menu (#29): the second tier of the one showing, or a new
+   * one's first. It starts the signals over, and the tier is kept for the close. Asked for past its
+   * last tier, the hint's mark is shown again, and under a guided step the step's is.
+   */
+  const take = () => {
+    setSaidAt(null)
+    if (guided || hint?.tier === 2 || hint?.why === 'close') return nudge()
+    const next = hint
+      ? { ...hint, tier: 2 as const }
+      : { ...aim(s, progress, missed), tier: 1 as const }
+    setHint(next)
+    setRun(0)
+    setStayed(false)
+    setFails(0)
+    setMissed(null)
+    onProgress({ ...progress, hints: [...progress.hints, next.tier] })
   }
   // The menu: the one piece of chrome on every view, the reveal's included.
   const menu = (
@@ -156,6 +242,18 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
           >
             <h2>{text.title}</h2>
             <p>{text.brief}</p>
+            {/* A quiet Hint for a player who wants one sooner, never lit (#29). */}
+            {!progress.solved && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSheet(null)
+                  take()
+                }}
+              >
+                {strings.hint}
+              </button>
+            )}
             <button type="button" onClick={onCases}>
               {strings.cases}
             </button>
@@ -172,15 +270,18 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     return (
       <div className="app reading">
         {menu}
-        <Reveal structure={s} text={text} passages={passages} onBack={onCases} />
+        <Reveal
+          structure={s}
+          text={text}
+          passages={passages}
+          onBack={onCases}
+          hints={progress.hints.length}
+        />
       </div>
     )
-  const moment = s.moments.find((m) => m.id === progress.moment) ?? s.moments[0]
-  const card = brief && progress.tapped.length === 0
   // Where the tutorial's step is shown (#25): at its target on this view — the spot, Solve's
   // button, the answer's word and then its slot, or Close the case — or at the button of the view
   // that holds it. Nothing is marked under a card, a sheet, or a paper.
-  const current = step(s, progress)
   const markAt = (until = current?.until) => {
     if (current === undefined || card || sheet !== null || paper !== null) return undefined
     if (until?.tapped)
@@ -191,7 +292,20 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     const word = answer(s, filled)
     return selection.word === word ? `[data-slot="${filled}"]` : `[data-word="${word}"]`
   }
-  const at = markAt()
+  // Where a hint's ring sits (#29), reached as a step's is: through Look's button from Solve and the
+  // picker's from another moment, to the half of the picture for the first tier and the thing itself
+  // for the second; or Close the case, through Solve's button. It takes the step's place.
+  const aimed = spots.find((x) => x.id === hint?.spot)
+  const home = s.moments.find((m) => aimed !== undefined && m.spots.includes(aimed))
+  const hintAt = () => {
+    if (hint === null || card || sheet !== null || paper !== null) return undefined
+    if (hint.why === 'close') return view === 'look' ? '[data-view="solve"]' : '[data-close]'
+    if (view !== 'look') return '[data-view="look"]'
+    if (home !== undefined && home !== moment) return `[data-moment="${home.id}"]`
+    return hint.tier === 1 ? '[data-half]' : `[data-spot="${hint.spot}"]`
+  }
+  const hinted = hintAt()
+  const at = hinted ?? markAt()
   // The case's one new idea, marked on Solve where it is first met: while the order is empty, the
   // pictures to place and then, once one is picked, the slots it goes in, as the tutorial marks a
   // word and then its slot (#30); or a face, until a name is placed in it (#53). A tutorial's step
@@ -205,8 +319,17 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     return selection.moment === null ? '.tiles' : '.order'
   }
   const lesson = lessonAt()
+  // A hint on offer once a signal fires, or its second tier once its first shows; never under a
+  // guided step (#29). It sits at the foot of the view: the caption's dock, or beside Close.
+  const signalled = run >= stuck.taps || stayed || fails >= stuck.closes
+  const more = hint?.tier === 1 && hint.why !== 'close'
+  const offer = !guided && !progress.solved && (more || (hint === null && signalled)) && (
+    <button type="button" className="offer" onClick={take}>
+      {view === 'look' && <span>{more ? strings.stillStuck : strings.stuck}</span>}{' '}
+      <b>{more ? strings.showMe : strings.whereToLook}</b>
+    </button>
+  )
   // Look carries the case's found count, as Solve carries what is filled (#24, rulings [1], [5]).
-  const spots = s.moments.flatMap((m) => m.spots)
   const found = `${spots.filter((x) => progress.tapped.includes(x.id)).length}/${spots.length}`
   const tab = (v: 'look' | 'solve') => (
     <button
@@ -238,6 +361,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
               onProgress({ ...progress, moment: id })
             }}
             onTap={onTap}
+            onMiss={nothingNew}
+            half={hint?.tier === 1 && aimed && home === moment ? half(aimed.box) : undefined}
           >
             {card && (
               <div className="card" role="dialog" aria-label={text.title}>
@@ -249,7 +374,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
               </div>
             )}
           </Stage>
-          <Dock structure={s} text={text} caption={caption} />
+          <Dock structure={s} text={text} caption={caption} offer={offer || undefined} />
         </>
       ) : (
         <>
@@ -289,6 +414,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
                   ? strings.closeCaseProgress(filled(s, progress), total(s))
                   : strings.closeCase}
               </button>
+              {offer}
             </div>
           )}
           <Bank
@@ -313,8 +439,23 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
         <PapersSheet text={text} papers={progress.papers} onClose={() => setSheet(null)} />
       )}
       {paper !== null && <PaperModal text={text} paper={paper} onClose={() => setPaper(null)} />}
-      {at && current && (
+      {hinted && hint && (
         <CoachMark
+          key={nudges}
+          at={hinted}
+          label={
+            saidAt === hinted
+              ? ''
+              : hint.tier === 2
+                ? strings.hintThing
+                : strings.hintSays[hint.why]
+          }
+          onTap={() => setSaidAt(hinted)}
+        />
+      )}
+      {!hinted && at && current && (
+        <CoachMark
+          key={nudges}
           at={at}
           label={current.until || !lastSaid ? (text.steps?.[current.id] ?? '') : ''}
           onTap={current.until || lastSaid ? undefined : () => setLastSaid(true)}

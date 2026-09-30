@@ -11,6 +11,8 @@ interface RevealProps {
   text: CaseText<CaseStructure>
   passages: PassageService
   onBack: () => void
+  /** The hints the case took: said once, without judgment, and not at all for none (#29). */
+  hints: number
 }
 
 /**
@@ -19,10 +21,11 @@ interface RevealProps {
  * gives it, and beneath them the translation's notice with its link, as its conditions of use
  * ask of every page that shows its text (#3).
  */
-export function Reveal({ structure, text, passages, onBack }: RevealProps) {
+export function Reveal({ structure, text, passages, onBack, hints }: RevealProps) {
   return (
     <div className="reveal">
       <h2>{strings.caseClosed}</h2>
+      {hints > 0 && <p className="hints-used">{strings.hintsUsed(hints)}</p>}
       {text.reveal.map((para, i) => (
         <p key={i}>{para}</p>
       ))}

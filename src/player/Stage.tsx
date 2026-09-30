@@ -1,6 +1,6 @@
 import { useState, type CSSProperties, type MouseEvent, type ReactNode } from 'react'
 import { drawOrder, nearest, slip } from '../cases/spots.ts'
-import type { CaseStructure, CaseText, Moment } from '../cases/types.ts'
+import type { Box, CaseStructure, CaseText, Moment } from '../cases/types.ts'
 import { strings } from '../strings/en.ts'
 import { picture } from './pictures.ts'
 
@@ -12,6 +12,10 @@ interface StageProps {
   tapped: readonly string[]
   onMoment: (id: string) => void
   onTap: (spotId: string) => void
+  /** A tap that found no spot, which a stuck run counts (#29). */
+  onMiss: () => void
+  /** The half of the picture a hint's first tier rings (#29). */
+  half?: Box
   /** What lies over the picture: the brief's card. */
   children?: ReactNode
 }
@@ -26,10 +30,17 @@ interface StageProps {
  * goes to the nearest within a fingertip's slip, so a box hugs its thing and is never padded
  * (#27 [2]).
  */
-export function Stage({ structure, text, moment, tapped, onMoment, onTap, children }: StageProps) {
+export function Stage(props: StageProps) {
+  const { structure, text, moment, tapped, onMoment, onTap, onMiss, half, children } = props
   const [zoomed, setZoomed] = useState(false)
   const [w, h] = moment.size
   const spots = drawOrder(moment.spots)
+  const place = ([l, t, bw, bh]: Box) => ({
+    x: (l * w) / 100,
+    y: (t * h) / 100,
+    width: (bw * w) / 100,
+    height: (bh * h) / 100,
+  })
   // A tap on a rect is that spot's. The slip is CSS px on the picture as laid out, zoomed or not,
   // read in the picture's pixels.
   const tap = (e: MouseEvent<SVGSVGElement>) => {
@@ -38,7 +49,8 @@ export function Stage({ structure, text, moment, tapped, onMoment, onTap, childr
     const k = w / r.width
     const point = [(e.clientX - r.left) * k, (e.clientY - r.top) * k] as const
     const id = hit ?? nearest(spots, moment.size, point, slip * k)?.id
-    if (id !== undefined) onTap(id)
+    if (id === undefined) onMiss()
+    else onTap(id)
   }
   return (
     <>
@@ -49,6 +61,7 @@ export function Stage({ structure, text, moment, tapped, onMoment, onTap, childr
               key={m.id}
               type="button"
               className={'moment-btn' + (m.id === moment.id ? ' is-on' : '')}
+              data-moment={m.id}
               onClick={() => onMoment(m.id)}
             >
               {text.moments[m.id]}
@@ -71,15 +84,9 @@ export function Stage({ structure, text, moment, tapped, onMoment, onTap, childr
               onClick={tap}
             >
               <image href={picture(structure.id, moment.picture)} width={w} height={h} />
+              {half && <rect className="half" data-half {...place(half)} />}
               {spots.map((s) => (
-                <rect
-                  key={s.id}
-                  data-spot={s.id}
-                  x={(s.box[0] * w) / 100}
-                  y={(s.box[1] * h) / 100}
-                  width={(s.box[2] * w) / 100}
-                  height={(s.box[3] * h) / 100}
-                />
+                <rect key={s.id} data-spot={s.id} {...place(s.box)} />
               ))}
             </svg>
           </div>

@@ -84,8 +84,24 @@ export const strings = {
   oneOrTwoWrong: 'One or two are wrong.',
   severalWrong: 'Several are wrong.',
 
+  // Hints (#29): offered once the game sees a player stuck, in the caption's dock on Look and
+  // beside Close the case on Solve, and quietly in the menu; each tier asked for. A hint's words
+  // sit beside its ring, eight or fewer, and follow it through the buttons that lead there.
+  hint: 'Hint',
+  stuck: 'Stuck?',
+  whereToLook: 'Where to look',
+  stillStuck: 'Still stuck?',
+  showMe: 'Show me',
+  hintSays: {
+    unfound: 'There’s still something to find here.',
+    evidence: 'Something here settles one answer.',
+    close: 'Close the case to check your answers.',
+  },
+  hintThing: 'Here it is. Tap it.',
+
   // The reveal.
   caseClosed: 'The case is closed.',
+  hintsUsed: (n: number) => (n === 1 ? 'You asked for 1 hint.' : `You asked for ${n} hints.`),
   readWhatHappened: 'Read what happened',
   loadingPassage: (label: string) => `Loading ${label}…`,
   passageUnavailable: (label: string) =>
