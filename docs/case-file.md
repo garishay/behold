@@ -142,8 +142,8 @@ sits, and what stays clear of it. The generator can't place by percent, so a gen
 §6's style header followed by the Scene and Spots as prose, without ids or boxes; each section
 records its prompt as sent, with its attachments and edits, verbatim (#30). The registry test
 holds every spot to its moment's brief, box and all, so a box re-fitted to a new picture re-writes
-its line. The valley and the vineyard were drawn before the rule and bring their briefs when their
-pictures are next generated.
+its line. The vineyard's bedchamber and gate were drawn before the rule, and their briefs are
+written from the pictures as they stand (#33).
 
 A picture is requested at its path stamped with a short hash of its file —
 `cases/<id>/<file>?v=<hash>`, the first eight hex digits of the file's SHA-256 — which

@@ -240,6 +240,19 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     expect(screen.getByRole('dialog', { name: 'The seal' })).toBeInTheDocument()
   })
 
+  // The gate's stones stop where the seated man's hair begins (#63): the box ran down over his
+  // head, and being the smaller it took a tap at his eyes. The gate laid out 320 px wide, as on a
+  // 360 phone: at his eyes, 8 px under the stones' box, the tap is his.
+  it('a tap at the seated man’s eyes at the gate finds him, not the stones', () => {
+    render(<App />)
+    openCase(/The vineyard/)
+    moment('The gate')
+    const svg = screen.getByRole('img', { name: 'The gate' })
+    vi.spyOn(svg, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 320, 400))
+    fireEvent.click(svg, { clientX: 161.6, clientY: 128 })
+    expect(screen.getByText(/A grey-bearded man in the chief seat/)).toBeInTheDocument()
+  })
+
   // jsdom lays nothing out, so the caption's overflow is given: taller than the dock for the giant,
   // not for the brook (#24).
   it('a caption longer than the dock shows More, which opens it whole until the next tap', () => {

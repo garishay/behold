@@ -16,17 +16,22 @@ export const vineyard = {
       spots: [
         {
           id: 'man-rows',
-          box: [8, 12, 30, 70],
+          box: [8, 30.8, 31.5, 64],
           words: ['taken-possession'],
           person: 'p1',
           cites: '21:16',
         },
-        { id: 'cord', box: [34, 28, 36, 44], words: ['garden'], cites: '21:2' },
-        { id: 'prophet', box: [72, 20, 26, 36], words: ['elijah', 'killed'], cites: '21:17-19' },
-        { id: 'stain', box: [66, 52, 34, 34], words: ['blood', 'dogs'], cites: '21:19' },
+        { id: 'cord', box: [34.5, 41, 33.6, 25], words: ['garden'], cites: '21:2' },
+        {
+          id: 'prophet',
+          box: [71, 34.2, 21, 45.3],
+          words: ['elijah', 'killed'],
+          cites: '21:17-19',
+        },
+        { id: 'stain', box: [8, 17.1, 22.6, 11.6], words: ['blood', 'dogs'], cites: '21:19' },
         {
           id: 'balcony',
-          box: [66, 1, 24, 15],
+          box: [76, 3.2, 16, 18.5],
           words: ['jezebel'],
           person: 'p2',
           paper: 'note',
@@ -66,7 +71,7 @@ export const vineyard = {
       size: [900, 1125],
       spots: [
         { id: 'crowd', box: [0, 58, 100, 42], words: ['the-people', 'fast'], cites: '21:12' },
-        { id: 'stones', box: [38, 12, 24, 22], words: ['stoned'], cites: '21:13' },
+        { id: 'stones', box: [38, 12, 24, 18], words: ['stoned'], cites: '21:13' },
         { id: 'seated', box: [36, 30, 26, 28], words: [], person: 'p3', cites: '21:12' },
         { id: 'accusers', box: [3, 18, 33, 44], words: ['cursed'], cites: '21:13' },
         {

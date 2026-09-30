@@ -15,7 +15,8 @@ export const en = {
     cord: 'Servants stretching a cord and driving stakes, laying out straight beds where the vines were pulled up.',
     prophet:
       'A wild-haired man in a cloak of hair and a leather belt, a staff in his hand, at the gap in the wall. One hand is raised at the man in the rows.',
-    stain: 'Two dogs at a dark stain in the dust. A sandal, and a torn, stained cloth.',
+    stain:
+      'Outside the town, past the vineyard wall: two lean dogs at a dark stain among scattered stones.',
     balcony:
       'A woman in teal and a gold headdress, on the balcony above the vineyard, a note in her hand.',
     window:
