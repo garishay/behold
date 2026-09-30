@@ -16,17 +16,22 @@ export const vineyard = {
       spots: [
         {
           id: 'man-rows',
-          box: [8, 12, 30, 70],
+          box: [8, 30.8, 31.5, 64],
           words: ['taken-possession'],
           person: 'p1',
           cites: '21:16',
         },
-        { id: 'cord', box: [34, 28, 36, 44], words: ['garden'], cites: '21:2' },
-        { id: 'prophet', box: [72, 20, 26, 36], words: ['elijah', 'killed'], cites: '21:17-19' },
-        { id: 'stain', box: [66, 52, 34, 34], words: ['blood', 'dogs'], cites: '21:19' },
+        { id: 'cord', box: [34.5, 41, 33.6, 25], words: ['garden'], cites: '21:2' },
+        {
+          id: 'prophet',
+          box: [71, 34.2, 21, 45.3],
+          words: ['elijah', 'killed'],
+          cites: '21:17-19',
+        },
+        { id: 'stain', box: [8, 17.1, 22.6, 11.6], words: ['blood', 'dogs'], cites: '21:19' },
         {
           id: 'balcony',
-          box: [66, 1, 24, 15],
+          box: [76, 3.2, 16, 18.5],
           words: ['jezebel'],
           person: 'p2',
           paper: 'note',

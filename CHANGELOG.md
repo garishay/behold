@@ -3,6 +3,17 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.10.4 — Gate 12, the vineyard's picture (#33)
+
+- **33a — the vineyard, regenerated** (#62): case three's first moment generated from its scene
+  brief, the dogs and the stain moved to where Naboth was stoned: past the vineyard's far wall, on
+  a bare slope outside the town, two lean pariah dogs at a dark stain among scattered stones, with
+  the sandal and the torn cloth gone; the palace with no columns and no banner; the five boxes
+  fitted to it under check (l) with the Zoom pill, the stain's the tightest at 46.4 px; the
+  stain's caption, "Outside the town, past the vineyard wall"; and `scenes.md`, the case's three
+  briefs, the vineyard's with its two prompts as sent and the retouch in code, the bedchamber's
+  and the gate's written from their pictures as they stand.
+
 ## v0.10.3 — Gate 10, the owner's listen (#52)
 
 - **52d — the title theme, softer** (#60): _Lamentation_, the title theme, goes from −18 to −20
