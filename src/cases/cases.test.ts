@@ -47,20 +47,19 @@ describe('the case registry (Gate 02 A1, A5)', () => {
   })
 
   // A moment's picture is generated from its scene brief, written from its spots (world rules §6,
-  // #30). Where a case has its briefs, each moment has one, and each spot is named in it with the
-  // box the structure holds, so a re-fitted box re-writes its line. Every case has its briefs since
-  // the vineyard's (#33).
-  it.each(each.filter(([id]) => existsSync(`src/cases/${id}/scenes.md`)))(
-    '%s: every spot is named in its moment’s scene brief, with its box',
-    (id, c) => {
-      const briefs = readFileSync(`src/cases/${id}/scenes.md`, 'utf8').split('\n## ').slice(1)
-      for (const m of c.moments) {
-        const brief = briefs.find((b) => b.startsWith(`${m.id} `))
-        expect(brief, m.id).toBeDefined()
-        for (const s of m.spots) expect(brief, s.id).toContain(`\`${s.id}\` [${s.box.join(', ')}]`)
-      }
-    },
-  )
+  // #30). Every case has its briefs, so a case whose `scenes.md` is missing fails here ([Q9], #33);
+  // each moment has one, and each spot is named in it with the box the structure holds, so a
+  // re-fitted box re-writes its line.
+  it.each(each)('%s: every spot is named in its moment’s scene brief, with its box', (id, c) => {
+    const file = `src/cases/${id}/scenes.md`
+    expect(existsSync(file), file).toBe(true)
+    const briefs = readFileSync(file, 'utf8').split('\n## ').slice(1)
+    for (const m of c.moments) {
+      const brief = briefs.find((b) => b.startsWith(`${m.id} `))
+      expect(brief, m.id).toBeDefined()
+      for (const s of m.spots) expect(brief, s.id).toContain(`\`${s.id}\` [${s.box.join(', ')}]`)
+    }
+  })
 
   // Every passage is one the Worker can serve: its book in the one table, its chapter one the
   // book has (#3, from 02b's closure) — so a reference the reveal could not show fails here, in
