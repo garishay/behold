@@ -128,4 +128,21 @@ export const vineyard = {
     },
     { id: 'verdict', blanks: { v1: 'killed', v2: 'taken-possession' } },
   ],
+  // What settles each face and blank, and what dates each moment, for a hint (#29): the letters
+  // not yet written, the stones still waiting, the dogs at the stain.
+  evidence: {
+    p1: 'seal',
+    p2: 'balcony',
+    p3: 'letter',
+    s1: 'cord',
+    s2: 'window',
+    s3: 'law',
+    s4: 'seal',
+    s5: 'letter',
+    v1: 'prophet',
+    v2: 'man-rows',
+    bedchamber: 'sheets',
+    gate: 'stones',
+    vineyard: 'stain',
+  },
 } as const satisfies CaseStructure

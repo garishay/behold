@@ -363,4 +363,20 @@ describe('validate (Gate 02 A6)', () => {
       'the case teaches face "m3", not a face',
     ])
   })
+
+  // (o) is #29's: a hint points at evidence, so each face and blank names a spot that settles it,
+  // and each moment of an order one of its own spots, the one that tells when it happened.
+  it('(o) a blank with no evidence, a face with a spot the case lacks, a moment with another’s', () => {
+    const evidence = Object.fromEntries(
+      Object.entries(valley.evidence).filter(([id]) => id !== 't5'),
+    )
+    expect(validate({ ...valley, evidence: { ...evidence, d2: 'sky' } }, en)).toEqual([
+      'face "d2" names no spot as its evidence',
+      'blank "t5" names no spot as its evidence',
+    ])
+    const water: CaseStructure = { ...carmel, evidence: { ...carmel.evidence, water: 'praying' } }
+    expect(validate(water, carmelEn)).toEqual([
+      'moment "water" names none of its own spots as its evidence',
+    ])
+  })
 })

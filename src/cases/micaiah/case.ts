@@ -106,4 +106,19 @@ export const micaiah = {
     },
   ],
   teach: { face: 'm1' },
+  // What settles each face and blank, and what dates each moment, for a hint (#29): the question
+  // put to the prophets, the rider in the fight, his armor laid empty.
+  evidence: {
+    m1: 'captains',
+    m2: 'kings',
+    b1: 'prophets',
+    b2: 'plain',
+    b3: 'horns',
+    b4: 'robed',
+    b5: 'captains',
+    b6: 'pool',
+    thrones: 'kings',
+    battle: 'rider',
+    pool: 'armor',
+  },
 } as const satisfies CaseStructure

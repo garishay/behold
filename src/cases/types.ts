@@ -97,6 +97,12 @@ export interface CaseStructure {
    * and the case is not guided by it.
    */
   readonly teach?: Teach
+  /**
+   * Where a hint points (#29): each face and blank names the spot whose caption or paper settles
+   * it, and in a case with an order each moment names one of its own spots, the one that tells
+   * when it happened.
+   */
+  readonly evidence: Readonly<Record<string, string>>
 }
 
 type SpotOf<S extends CaseStructure> = S['moments'][number]['spots'][number]

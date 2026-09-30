@@ -3,8 +3,8 @@
  * a word reachable, a count, a box inside its picture, a string with words in it — over a case
  * and one of its texts. One sentence per problem; an empty list is a valid case. The test job
  * runs it over every registered case (`cases.test.ts`); the checks are A6's list, (a) to (i), and
- * the two of #26 [1], (j) and (k), #27 [1]'s, (l), #25's, (m), and #30's, (n); the reference is
- * `docs/case-file.md`.
+ * the two of #26 [1], (j) and (k), #27 [1]'s, (l), #25's, (m), #30's, (n), and #29's, (o); the
+ * reference is `docs/case-file.md`.
  */
 import { crowded, fingertip, smallestPicture } from './spots.ts'
 import type { CaseStructure, CaseText, Kind, Part, Passage } from './types.ts'
@@ -225,6 +225,18 @@ export function validate(structure: CaseStructure, text: CaseText<CaseStructure>
     fail(`the case teaches face ${q(teach.face)}, not a face`)
   const taught = text.teach?.split(/\s+/).filter(Boolean).length ?? 0
   if (taught > 8) fail(`the case's lesson says ${taught} words, not eight or fewer`)
+
+  // (o) A hint points at evidence, never at the word (#29): every face and blank names a spot of
+  // the case that settles it, and in a case with an order every moment names one of its own.
+  const { evidence } = structure
+  const settles = (kind: string, id: string) => {
+    if (!spotIds.has(evidence[id])) fail(`${kind} ${q(id)} names no spot as its evidence`)
+  }
+  for (const f of faceIds) settles('face', f)
+  for (const b of blanks) settles('blank', b)
+  for (const m of order === undefined ? [] : moments)
+    if (!m.spots.some((s) => s.id === evidence[m.id]))
+      fail(`moment ${q(m.id)} names none of its own spots as its evidence`)
 
   return problems
 }
