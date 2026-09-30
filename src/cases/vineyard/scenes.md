@@ -170,7 +170,9 @@ right with one hand raised at the king, and the queen watches from the balcony.
 **What stays clear.** The top-left corner is open sky, and the dogs and the stain begin at 17% of
 the height, below the Zoom pill's 11%. The parapet is plain stone, with nothing hanging over it.
 The sandal and the torn cloth of the old picture are gone, since the text doesn't give them (Gate
-12's A1). Only Ahab's box and the cord's meet.
+12's A1). Only Ahab's box and the cord's meet. A small window high on the palace's tower has a
+pointed top, about 5 × 9 px at 320, an arch where §3 would have a lintel; it doesn't read at phone
+size.
 
 **The prompts as sent.** Attachments in both chats, in this order: `bedchamber.jpg`, the case's own
 accepted scene, for style and for Jezebel as the case already shows her; `ahab-cast-sheet.png`;
