@@ -63,6 +63,7 @@ export const valley = { … } as const satisfies CaseStructure
 | `blocks`   | the prose with blanks — the account, and the verdict where the case has one: `id`, `blanks` (blank id → the word that fills it)                                                                                                                                                                                                                                                                                                                                                                                    |
 | `steps?`   | the tutorial's steps: `id`, `until?` — `{ tapped: <spot> }`, `{ filled: <face or blank> }`, meaning filled with its answer, or `{ view: 'solve' }`; the last step has no `until`. A case with steps is played guided: each step is shown as a mark at the target its `until` names — the spot, Solve's button, the answer's word and then its slot — and the last at Close the case; a step already met is never shown; a ✓ lands only on the faces and blanks its steps name (`docs/case-design.md`, rule 5; #25) |
 | `teach?`   | the case's one new idea, marked on Solve where the player first meets it: `'order'`, while the order is empty, rings the pictures to place, then the slots once one is picked (#30); `{ face: <face> }` rings that face while it is empty, as the battle rings its disguised man (#53). It is not a step, and the case is not guided by it (`docs/case-design.md`, rule 6)                                                                                                                                         |
+| `evidence` | where a hint points (#29): each face and blank id → the spot whose caption or paper settles it, and in a case with an order each moment id → one of its own spots, the one that tells when it happened. A hint rings the half of the picture that spot is in, then the spot itself, and never gives the word                                                                                                                                                                                                       |
 
 Derived, never stored: a blank's kind is its answer's; a case is the tutorial when it has steps;
 the paper ids are those the spots open; a step whose `until` is `filled` is a Solve step.
@@ -187,7 +188,8 @@ Three layers, from mechanical to read.
    more than it has faces (`docs/case-design.md`, rule 1); every spot keeps its fingertip
    (_Pictures_), which holds its box to a tenth of the width on each side as well; a step's words are eight or fewer;
    a case that teaches the order has one, a face it teaches is one of its faces, and its lesson
-   is eight words or fewer.
+   is eight words or fewer; every face and blank names a spot of the case as its evidence, and in
+   a case with an order every moment names one of its own.
    `src/cases/validate.test.ts` holds one
    broken fixture per check, each failing
    the check it names and no other; the registry test, `src/cases/cases.test.ts`, holds the

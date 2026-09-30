@@ -3,6 +3,22 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.12.0 — Gate 14, hints (#29)
+
+- **29a — hints, offered when a player is stuck** (#65): the game watches for a stall — six taps on
+  the picture that find nothing new while something is unfound, ninety seconds on a moment with
+  something left, or two failed closes — and only then offers a hint, a quiet line in the
+  caption's dock or a button beside Close the case. Each tier is asked for: the first rings the
+  half of the picture that holds the thing, grown to take in the whole of it, reached through
+  Look's button and the moment's picker as a step's mark is; the second rings the thing itself;
+  neither gives the word, and a hint's words leave on the next tap while its ring stays. After a
+  failed close a hint points at the evidence for the first thing that close found wrong, kept from
+  the close, and never says which blank. A quiet Hint sits in the menu. Under the tutorial's
+  guided steps the step's own mark is the hint, and a stall shows it again. A hint costs nothing
+  and makes no sound; the reveal says how many were asked for, and nothing when none were. The
+  thresholds are one table of data, `stuck`; the case format gains `evidence`, held by check (o);
+  and progress kept before hints reads as none used.
+
 ## v0.10.4 — Gate 12, the vineyard's picture (#33)
 
 - **33a — the vineyard, regenerated** (#62): case three's first moment generated from its scene
