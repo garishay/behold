@@ -9,7 +9,7 @@ accepted picture — left, top, width, and height, in percent, the ones `case.ts
 registry test checks — and records the prompt as sent, with its attachments and edits, verbatim.
 
 _The vineyard_ was made on 2026-09-29 in two generations, each in a new ChatGPT Images chat, and
-one retouch in code, and accepted on the owner's review (#33, Gate 12). _Bedchamber_ and _The
+two retouches in code, and accepted on the owner's review (#33, Gate 12). _Bedchamber_ and _The
 gate_ came with the prototype (#16), drawn before the rule: their briefs are written from their
 pictures as they stand, with their boxes as `case.ts` holds them, and neither picture changes
 with the vineyard's. The vineyard's old picture stays the season's style reference, kept as
@@ -159,9 +159,11 @@ right with one hand raised at the king, and the queen watches from the balcony.
 - `stain` [8, 17.1, 22.6, 11.6], upper left: past the vineyard's far wall, on the bare slope outside
   the town, two lean, short-coated, sandy-tan pariah dogs with upright pointed ears nose at a dark
   stain in the dust among scattered stones (21:13, 21:19). The stain is dark like dark earth, not
-  red. The box runs from the 8% line to the right dog's tail, and from the tails' tips to the
-  stain's lowest crumb: 72.3 × 46.4 px at 320, over check (l)'s 44. Only the left dog's rump and
-  tail lie in the left 8%, as a dog's tail does at the pool in case four.
+  red. The box runs from the 8% line to the right dog's tail, and from the left dog's tail tip to
+  the stain's lowest crumb: 72.3 × 46.4 px at 320, over check (l)'s 44. Its top is that tail tip,
+  just left of the 8% line; right of the line the dogs are 41.9 px tall. The box keeps their full
+  height, cut at the line, as the pouch's is (the Gate 06 ruling on #27, [2]). Only the left dog's
+  rump and tail lie in the left 8%, as a dog's tail does at the pool in case four.
 - `balcony` [76, 3.2, 16, 18.5], top right: Queen Jezebel on the palace balcony, as in
   _Bedchamber_, looking down at the vineyard with a small folded note in her hand (21:14). The box
   holds her and the plain stone parapet in front of her, across the balcony's opening, to the 92%
@@ -170,9 +172,9 @@ right with one hand raised at the king, and the queen watches from the balcony.
 **What stays clear.** The top-left corner is open sky, and the dogs and the stain begin at 17% of
 the height, below the Zoom pill's 11%. The parapet is plain stone, with nothing hanging over it.
 The sandal and the torn cloth of the old picture are gone, since the text doesn't give them (Gate
-12's A1). Only Ahab's box and the cord's meet. A small window high on the palace's tower has a
-pointed top, about 5 × 9 px at 320, an arch where §3 would have a lintel; it doesn't read at phone
-size.
+12's A1). Only Ahab's box and the cord's meet. The small window high on the palace's left tower
+ends in a lintel, like the palace's other windows: its pointed top was squared in code (the second
+retouch, below).
 
 **The prompts as sent.** Attachments in both chats, in this order: `bedchamber.jpg`, the case's own
 accepted scene, for style and for Jezebel as the case already shows her; `ahab-cast-sheet.png`;
@@ -235,14 +237,15 @@ Up and back at the center, just past the vineyard's far wall, where the town end
 Composition: every person and thing named here is large, clearly separate from its neighbors, and easy to read on a phone screen. Keep them away from the far left and right edges, and leave the top-left corner as open sky. No text, letters, symbols, or banners anywhere, and none on the note. No blood on anyone.
 ```
 
-What came back passed but for one thing. The dogs and the stain stood past the far wall on an open
-slope outside the town, but at the upper left, not the center: clear of the Zoom pill, with only
-the left dog's rump and tail in the left 8%. One servant kneels to tie the cord and one raises a
-mallet, and the beds have seedlings already in them. Elijah's staff runs into the right 8%, and his
-figure stays inside it. The one thing short: hugged from the tails' tips to the stain's lowest
-crumb, the dogs and the stain came to about 258 × 150 px of the picture, 67 × 43 px at 320 from
-the 8% line, under check (l)'s 44 by a hair. #27 [2] rules out padding a box, so they were enlarged
-in place rather than edited or generated again.
+What came back passed but for the dogs' size. The dogs and the stain stood past the far wall on an
+open slope outside the town, but at the upper left, not the center: clear of the Zoom pill, with
+only the left dog's rump and tail in the left 8%. One servant kneels to tie the cord and one raises
+a mallet, and the beds have seedlings already in them. Elijah's staff runs into the right 8%, and
+his figure stays inside it. A small window high on the palace's left tower came back with a pointed
+top, found at 33a's review and squared in code below ([Q8]). The dogs' size: they stood 150 px
+tall, from the left dog's tail tip to the stain's lowest crumb, and 235 px wide from the 8% line to
+the right dog's tail, 67 × 42.8 px at 320, under check (l)'s 44. #27 [2] rules out padding a box, so
+they were enlarged in place rather than edited or generated again.
 
 **The retouch, in code.** The dogs and the stain were scaled by 1.08 about (90, 402) of the
 1122 × 1402 picture, the 8% line and the stain's lowest crumb, with bicubic sampling, so they grow
@@ -253,9 +256,19 @@ shortening to 7 between x 260 and 300 under the hill's ridge, so the skyline sta
 at the right, clear of the bush there; and 4 px at the bottom, faded out by y 408, above the wall's
 top at 410. 52,351 pixels changed, all inside x 49–351, y 227–407: the wall, the skyline, and every
 figure are v2's own. The blend shows only at 3× on the full-size file. After it, the dogs and the
-stain run from y 240 to 402 and out to x 343.8, 72.5 × 46.2 px at 320 from the 8% line. Accepted
-as `vineyard.png` (SHA-256 `10340f23…`) and fitted to 900 × 1125 at quality 0.88, 0.4 px trimmed
-at the right.
+stain run from y 240, the left dog's tail tip, to 402, and out to x 343.8: 72.5 × 46.2 px at 320
+from the 8% line. Right of the line alone they start at the right dog's tail tip, y 256 (18.2%),
+and are 41.9 px tall.
+
+**The second retouch, in code ([Q8]).** A small window high on the palace's left tower came back
+with a pointed top, about 19 × 36 px of the picture, 5 × 9 px at 320. §3 keeps that shape out and
+asks for lintels, so its top was squared in code, as ruled on #12. Rows 72–78 over the window were
+painted with the lit wall beside it, each row's median of x 713–723, clear of the tower's shaded
+edge and the wall's small marks, feathered 2 px at each side; row 79 took the opening's own top
+row, so the opening ends in a straight lintel, like the palace's other windows. 194 pixels changed,
+all inside x 731–755, y 72–79, and no box moves, since the window lies in none. Accepted as
+`vineyard.png` (SHA-256 `3f465527e8fae3a257d495411d8af866ddd4fcd5992862d583557a8cd0a281a4`) and
+fitted to 900 × 1125 at quality 0.88, 0.4 px trimmed at the right.
 
 ## The portraits
 
