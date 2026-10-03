@@ -104,7 +104,9 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   // over, and a hint taken starts all four.
   const [run, setRun] = useState(0)
   const [stayed, setStayed] = useState(false)
-  const [waited, setWaited] = useState(false)
+  // The placements a fired wait belongs to: a word placed, emptied, or found starts it over, after
+  // it has fired too (review round 2).
+  const [waited, setWaited] = useState<string | null>(null)
   const [fails, setFails] = useState(0)
   const [missed, setMissed] = useState<string | null>(null)
   // The hint showing, what it points at and its tier; it stays until its thing is tapped (#29).
@@ -164,7 +166,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   useEffect(
     () =>
       stalled
-        ? clock(stuck.stranded, () => (guided ? setNudges((n) => n + 1) : setWaited(true)))()
+        ? clock(stuck.stranded, () => (guided ? setNudges((n) => n + 1) : setWaited(placements)))()
         : undefined,
     [stalled, guided, placements, hint],
   )
@@ -206,7 +208,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     if (next.tapped.length > progress.tapped.length) {
       setRun(0)
       setStayed(false)
-      setWaited(false)
+      setWaited(null)
     } else nothingNew()
     // A hint has done its work once its thing is tapped (#29).
     if (hint?.spot === spotId) setHint(null)
@@ -247,7 +249,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     setHint(next)
     setRun(0)
     setStayed(false)
-    setWaited(false)
+    setWaited(null)
     setFails(0)
     setMissed(null)
     onProgress({ ...progress, hints: [...progress.hints, next.tier] })
@@ -350,7 +352,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const lesson = lessonAt()
   // A hint on offer once a signal fires, or its second tier once its first shows; never under a
   // guided step (#29). It sits at the foot of the view: the caption's dock, or beside Close.
-  const signalled = run >= stuck.taps || stayed || (waited && strandedNow) || fails >= stuck.closes
+  const signalled = run >= stuck.taps || stayed || waited === placements || fails >= stuck.closes
   const more = hint?.tier === 1 && hint.why !== 'close'
   const offer = !guided && !progress.solved && (more || (hint === null && signalled)) && (
     <button type="button" className="offer" onClick={take}>

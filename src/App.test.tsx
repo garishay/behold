@@ -864,6 +864,49 @@ describe('hints (#29)', () => {
     }
   })
 
+  // The wait starts over on every word placed, emptied, or found, after it has fired too: a word
+  // placed that leaves the player stranded takes the offer away for another wait (review round 2).
+  it('starts a fired wait over when a word is placed and nothing is left to place still', () => {
+    vi.useFakeTimers()
+    try {
+      render(<App />)
+      openCase(/The mountain/)
+      for (const [name, ids] of [
+        ['The water', ['pourers']],
+        ['The fire', ['fire']],
+        ['Baal’s altar', ['king', 'mocker']],
+      ] as const) {
+        moment(name)
+        for (const id of ids) tapSpot(id)
+      }
+      tab(/Solve/)
+      for (const [word, id] of [
+        ['Elijah', 'c1'],
+        ['Ahab', 'c2'],
+        ['four', 'a2'],
+        ['stones', 'a4'],
+      ]) {
+        chip(word)
+        slot(id)
+      }
+      for (const [i, name] of ['Baal’s altar', 'The water', 'The fire'].entries()) {
+        tile(name)
+        orderSlot(i)
+      }
+      act(() => vi.advanceTimersByTime(stuck.stranded * 1000))
+      expect(offer()).toHaveTextContent('Where to look')
+      // Four again, in the second number's blank: the action's blank is still empty, and nothing
+      // loose fits it.
+      chip('four')
+      slot('a3')
+      expect(offer()).toBeNull()
+      act(() => vi.advanceTimersByTime(stuck.stranded * 1000))
+      expect(offer()).toHaveTextContent('Where to look')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   // A close's hint is kept from the close: a changed answer can't ask the hints what is right.
   it('offers one beside Close the case after two failed closes, at what the first found wrong', () => {
     render(<App />)
