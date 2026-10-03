@@ -172,7 +172,7 @@ describe('the music by screen (Gate 10 A2)', () => {
     expect(cue()).toBe('title')
     openCase(/The valley/)
     expect(cue()).toBe('case')
-    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket']) tapSpot(s)
+    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
     tab(/Solve/)
     expect(cue()).toBe('case')
     for (const [id, word] of [

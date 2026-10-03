@@ -94,8 +94,14 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   // Words found on Look since Solve was last left: the badge on Solve's button, then ringed in the
   // bank while Solve is open (#24).
   const [fresh, setFresh] = useState<readonly string[]>([])
-  // The last step's words leave on the next tap after they show, and its ring stays (#24 [3]).
-  const [lastSaid, setLastSaid] = useState(false)
+  // A step whose words would sit over what the player reads or uses shows them until the next tap,
+  // and keeps its ring: the last step's, over the account (#24 [3]), and the sweep's, over the bank
+  // (#25). `said` is the step whose words have left and the showing they left at, so a step shown
+  // again brings them back.
+  const [said, setSaid] = useState<string | null>(null)
+  // A failed close in the tutorial brings the last step's words back as its retry, which says the
+  // answers were checked (#25).
+  const [retry, setRetry] = useState(false)
   // The bank's head: a refused word's message, or how far off a close was (07c, #24 [3]).
   const [note, setNote] = useState('')
   // The stuck signals (#29): taps on the picture that find nothing new while something is unfound,
@@ -142,10 +148,14 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const spots = s.moments.flatMap((m) => m.spots)
   const unfound = (list: typeof moment.spots) => list.some((x) => !progress.tapped.includes(x.id))
   // Under a guided step the step's own mark is the hint: no hint is offered, and a signal shows the
-  // step again (#29).
+  // step again (#29). The step that waits on every spot found marks nothing on Look, so there the
+  // signals offer hints as in any case (#25).
   const current = step(s, progress)
-  const guided = current?.until !== undefined
+  const sweep = current?.until?.found !== undefined
+  const guided = current?.until !== undefined && !(sweep && view === 'look')
   const nudge = () => setNudges(nudges + 1)
+  const fleeting = current !== undefined && (current.until === undefined || sweep)
+  const showing = `${current?.id}#${nudges}`
   // The stay is timed on Look with nothing over the picture, an opened caption included (review
   // round 1), on a moment with something left, and only while the app is in view: the clock starts
   // over on each new find, and on return.
@@ -223,6 +233,11 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
       play('notYet')
       setFails(fails + 1)
       setMissed(firstWrong(s, progress) ?? null)
+      // In the tutorial the last step's mark comes back, dim and all, with its retry (#25).
+      if (current !== undefined && current.until === undefined) {
+        setRetry(true)
+        nudge()
+      }
     }
     if (hint?.why === 'close') setHint(null)
     close(submit(s, progress))
@@ -232,6 +247,9 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     if (view === 'solve' && v !== 'solve') setFresh([])
     // Look's caption closes with the dock when Solve opens.
     if (v !== view) setReading(false)
+    // Back on Look while the tutorial waits on everything found, the caption gives way to the
+    // prompt, "Tap anything that looks like it matters." (#25).
+    if (v === 'look' && sweep) setCaption(null)
     setView(v)
     onProgress(opened(s, progress, v))
   }
@@ -312,11 +330,13 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     )
   // Where the tutorial's step is shown (#25): at its target on this view — the spot, Solve's
   // button, the answer's word and then its slot, or Close the case — or at the button of the view
-  // that holds it. Nothing is marked under a card, a sheet, or a paper.
+  // that holds it; the step that waits on everything found, at Look's button and nowhere on Look.
+  // Nothing is marked under a card, a sheet, or a paper.
   const markAt = (until = current?.until) => {
     if (current === undefined || card || sheet !== null || paper !== null) return undefined
     if (until?.tapped)
       return view === 'look' ? `[data-spot="${until.tapped}"]` : '[data-view="look"]'
+    if (until?.found) return view === 'look' ? undefined : '[data-view="look"]'
     if (until?.view || view === 'look') return '[data-view="solve"]'
     const filled = until?.filled
     if (filled === undefined) return '[data-close]'
@@ -495,8 +515,12 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
         <CoachMark
           key={nudges}
           at={at}
-          label={current.until || !lastSaid ? (text.steps?.[current.id] ?? '') : ''}
-          onTap={current.until || lastSaid ? undefined : () => setLastSaid(true)}
+          label={
+            fleeting && said === showing
+              ? ''
+              : ((retry && !current.until ? text.retry : text.steps?.[current.id]) ?? '')
+          }
+          onTap={fleeting && said !== showing ? () => setSaid(showing) : undefined}
         />
       )}
       {lesson && <CoachMark at={lesson} label={text.teach ?? ''} />}

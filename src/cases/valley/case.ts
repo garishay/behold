@@ -79,7 +79,8 @@ export const valley = {
     { id: 'step2', until: { view: 'solve' } },
     { id: 'step3', until: { filled: 'd1' } },
     { id: 'step4', until: { filled: 't4' } },
-    { id: 'step5' },
+    { id: 'step5', until: { found: 'all' } },
+    { id: 'step6' },
   ],
   // What settles each face and blank, for a hint to point at (#29).
   evidence: {

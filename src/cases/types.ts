@@ -51,14 +51,20 @@ export interface Block {
   readonly blanks: Readonly<Record<string, string>>
 }
 
+/** The keys an `Until` leaves out: it names one thing, so the others are never there. */
+type Without<K extends string> = { readonly [P in K]?: never }
+
 /**
  * What ends a tutorial step, and so where its mark sits (#25): a spot tapped, a face or blank
- * filled with its answer, or Solve opened — one of the three.
+ * filled with its answer, Solve opened, or every spot of the case found — or everything Solve asks
+ * for filled, whichever comes first — whose mark sits on Look's button and leaves Look itself to
+ * the caption's prompt. One of the four.
  */
 export type Until =
-  | { readonly tapped: string; readonly filled?: never; readonly view?: never }
-  | { readonly filled: string; readonly tapped?: never; readonly view?: never }
-  | { readonly view: 'solve'; readonly tapped?: never; readonly filled?: never }
+  | ({ readonly tapped: string } & Without<'filled' | 'view' | 'found'>)
+  | ({ readonly filled: string } & Without<'tapped' | 'view' | 'found'>)
+  | ({ readonly view: 'solve' } & Without<'tapped' | 'filled' | 'found'>)
+  | ({ readonly found: 'all' } & Without<'tapped' | 'filled' | 'view'>)
 
 /** A tutorial step; the last has no `until`, marks Close the case, and stays until the case closes. */
 export interface Step {
@@ -153,10 +159,11 @@ export type CaseText<S extends CaseStructure> = {
       }
   readonly reveal: readonly string[]
 } & (S extends { readonly steps: infer T extends readonly Step[] }
-  ? { readonly steps: Keyed<T[number]['id'], string> }
+  ? // `retry`: the last step's words after a failed close, which say the answers were checked.
+    { readonly steps: Keyed<T[number]['id'], string>; readonly retry: string }
   : CaseStructure extends S
-    ? { readonly steps?: Readonly<Record<string, string>> }
-    : { readonly steps?: never }) &
+    ? { readonly steps?: Readonly<Record<string, string>>; readonly retry?: string }
+    : { readonly steps?: never; readonly retry?: never }) &
   (S extends { readonly teach: Teach }
     ? { readonly teach: string }
     : CaseStructure extends S

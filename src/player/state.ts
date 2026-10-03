@@ -93,12 +93,16 @@ export const wrong = (s: CaseStructure, p: Progress) =>
 export const step = (s: CaseStructure, p: Progress) =>
   guided(s) && !p.solved ? s.steps?.[p.step] : undefined
 
-// A view opened is met as it opens, by `opened`, never after the fact.
+// A view opened is met as it opens, by `opened`, never after the fact. Everything found is met by
+// everything filled too, whichever comes first: a spot whose words fill nothing can be skipped, and
+// filling every blank has already sent the player back to the picture (Gate 20 A1 as ruled).
 const met = (s: CaseStructure, p: Progress, until: Until) =>
   until.tapped !== undefined
     ? p.tapped.includes(until.tapped)
-    : until.filled !== undefined &&
-      (p.faces[until.filled] ?? p.fills[until.filled]) === answer(s, until.filled)
+    : until.found !== undefined
+      ? spots(s).every((x) => p.tapped.includes(x.id)) || filled(s, p) === total(s)
+      : until.filled !== undefined &&
+        (p.faces[until.filled] ?? p.fills[until.filled]) === answer(s, until.filled)
 
 /**
  * The steps moved past every met `until`. A guided case no longer closes itself: its last step
