@@ -3,6 +3,20 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.13.0 — Gate 20, the hand-off, the words, and the iPhone line (#25, #71, #72, #73)
+
+- **20a — the hand-off, the words, and the iPhone line** (#74): playtest 2's first remote player
+  made every guided move, then was pointed at Close the case with five blanks no word could fill.
+  The tutorial's new fifth step sends the player to the picture, "Find the other words in the
+  picture.", at Look's button until every spot is found or everything Solve asks for is filled,
+  and Look greets them with its prompt again; Close the case comes after it. Its words and the
+  last step's leave on the next tap and come back when the step is shown again. A failed close in
+  the tutorial says the answers were checked: "Some are wrong. Look closer, then try again." A
+  refused word's note adds "Find one in the picture." while no word of the blank's kind is found.
+  The title's line is "Look closer. There's more to every story.", a sentence to a line. On an
+  iPhone, whose silent mode mutes the game, the sound switches say so. The case format gains
+  `{ found: 'all' }` and `retry`, held by check (m).
+
 ## v0.12.0 — Gate 14, hints (#29)
 
 - **29a — hints, offered when a player is stuck** (#65): the game watches for a stall — six taps on

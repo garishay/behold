@@ -227,4 +227,27 @@ describe('the sound switches (Gate 10 A4)', () => {
     fireEvent.click(menu.getByRole('button', { name: 'Music' }))
     expect(menu.getByRole('button', { name: 'Music' })).toHaveTextContent('Music · Off')
   })
+
+  // An iPhone's silent mode mutes the game whatever the switches say (A4 as ruled), and no web page
+  // can read it, so on an iPhone, and only there, the switches say so (#72).
+  it('says under the switches that silent mode mutes the game, on an iPhone only', () => {
+    const line = 'Silent mode mutes the game on iPhone.'
+    const { unmount } = render(<App />)
+    expect(screen.queryByText(line)).toBeNull()
+    unmount()
+    const agent = vi
+      .spyOn(navigator, 'userAgent', 'get')
+      .mockReturnValue(
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 26_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Mobile/15E148 Safari/604.1',
+      )
+    try {
+      render(<App />)
+      expect(screen.getByText(line).closest('.switches')).not.toBeNull()
+      openCase(/The valley/)
+      fireEvent.click(screen.getByRole('button', { name: 'Menu' }))
+      expect(within(screen.getByRole('dialog', { name: 'Menu' })).getByText(line)).toBeVisible()
+    } finally {
+      agent.mockRestore()
+    }
+  })
 })
