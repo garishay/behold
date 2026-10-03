@@ -818,6 +818,52 @@ describe('hints (#29)', () => {
     }
   })
 
+  // Playtest 2's mountain (#23): six of seven filled and nothing left to place, a wait on Solve
+  // that no signal on Look can see (#65). The hint sends him where a word of the missing kind is.
+  it('offers one on Solve after a wait with something empty and nothing left to place', () => {
+    vi.useFakeTimers()
+    try {
+      render(<App />)
+      openCase(/The mountain/)
+      for (const [name, ids] of [
+        ['The water', ['pourers', 'caller']],
+        ['The fire', ['fire']],
+        ['Baal’s altar', ['king']],
+      ] as const) {
+        moment(name)
+        for (const id of ids) tapSpot(id)
+      }
+      tab(/Solve/)
+      for (const [word, id] of [
+        ['Elijah', 'c1'],
+        ['Ahab', 'c2'],
+        ['four', 'a2'],
+        ['three', 'a3'],
+      ]) {
+        chip(word)
+        slot(id)
+      }
+      for (const [i, name] of ['Baal’s altar', 'The water', 'The fire'].entries()) {
+        tile(name)
+        orderSlot(i)
+      }
+      act(() => vi.advanceTimersByTime(stuck.stranded * 1000))
+      expect(offer()).toBeNull()
+      chip('stones')
+      slot('a4')
+      act(() => vi.advanceTimersByTime(stuck.stranded * 1000 - 1))
+      expect(offer()).toBeNull()
+      act(() => vi.advanceTimersByTime(1))
+      fireEvent.click(screen.getByRole('button', { name: 'Where to look' }))
+      expect([at(), said()]).toEqual(['[data-view="look"]', 'Find the other words in the picture.'])
+      tab(/Look/)
+      fireEvent.click(screen.getByRole('button', { name: 'Still stuck? Show me' }))
+      expect(at()).toBe('[data-spot="prophets"]')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   // A close's hint is kept from the close: a changed answer can't ask the hints what is right.
   it('offers one beside Close the case after two failed closes, at what the first found wrong', () => {
     render(<App />)

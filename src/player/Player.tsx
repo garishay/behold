@@ -8,7 +8,7 @@ import { strings } from '../strings/en.ts'
 import { Bank } from './Bank.tsx'
 import { CoachMark } from './CoachMark.tsx'
 import { Dock, type Caption } from './Dock.tsx'
-import { aim, firstWrong, half, stuck, type Aim, type Tier } from './hints.ts'
+import { aim, firstWrong, half, stranded, stuck, type Aim, type Tier } from './hints.ts'
 import { PaperModal, PapersSheet } from './Papers.tsx'
 import { prefetch } from './pictures.ts'
 import { Reveal } from './Reveal.tsx'
@@ -51,6 +51,24 @@ const onReveal = (state: unknown) =>
   typeof state === 'object' && state !== null && 'view' in state && state.view === 'reveal'
 
 /**
+ * A stuck signal's clock, as an effect's body (#29): it fires once, `seconds` after it starts,
+ * timed only while the app is in view, and starts over on return.
+ */
+const clock = (seconds: number, fire: () => void) => () => {
+  let timer = 0
+  const start = () => {
+    clearTimeout(timer)
+    if (!document.hidden) timer = window.setTimeout(fire, seconds * 1000)
+  }
+  start()
+  document.addEventListener('visibilitychange', start)
+  return () => {
+    clearTimeout(timer)
+    document.removeEventListener('visibilitychange', start)
+  }
+}
+
+/**
  * The case screen (#6, #24): one phone screen that never scrolls. Two views, Look and Solve,
  * switched from a bar at the foot, with the menu at its left end — the only chrome on both. Look is
  * the picture and its caption; Solve is who is who, the account, and the word bank. The brief
@@ -81,10 +99,12 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   // The bank's head: a refused word's message, or how far off a close was (07c, #24 [3]).
   const [note, setNote] = useState('')
   // The stuck signals (#29): taps on the picture that find nothing new while something is unfound,
-  // a stay on a moment with something left, and failed closes, each keeping the first thing it
-  // found wrong. A new find starts the first two over, and a hint taken starts all three.
+  // a stay on a moment with something left, a wait on Solve with nothing left to place (#65), and
+  // failed closes, each keeping the first thing it found wrong. A new find starts the first three
+  // over, and a hint taken starts all four.
   const [run, setRun] = useState(0)
   const [stayed, setStayed] = useState(false)
+  const [waited, setWaited] = useState(false)
   const [fails, setFails] = useState(0)
   const [missed, setMissed] = useState<string | null>(null)
   // The hint showing, what it points at and its tier; it stays until its thing is tapped (#29).
@@ -129,24 +149,25 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   // over on each new find, and on return.
   const covered = card || sheet !== null || paper !== null || reading
   const watching = view === 'look' && !covered && unfound(moment.spots)
-  useEffect(() => {
-    if (!watching) return
-    let timer = 0
-    const start = () => {
-      clearTimeout(timer)
-      if (document.hidden) return
-      timer = window.setTimeout(
-        () => (guided ? setNudges((n) => n + 1) : setStayed(true)),
-        stuck.seconds * 1000,
-      )
-    }
-    start()
-    document.addEventListener('visibilitychange', start)
-    return () => {
-      clearTimeout(timer)
-      document.removeEventListener('visibilitychange', start)
-    }
-  }, [watching, guided, progress.tapped.length, progress.moment, hint])
+  useEffect(
+    () =>
+      watching
+        ? clock(stuck.seconds, () => (guided ? setNudges((n) => n + 1) : setStayed(true)))()
+        : undefined,
+    [watching, guided, progress.tapped.length, progress.moment, hint],
+  )
+  // The wait is timed on Solve with nothing over it, while something is empty and nothing is left
+  // to place (#65); its clock starts over on every word placed, emptied, or found.
+  const strandedNow = stranded(s, progress).size > 0
+  const stalled = view === 'solve' && !covered && strandedNow
+  const placements = JSON.stringify([progress.faces, progress.fills, progress.bank])
+  useEffect(
+    () =>
+      stalled
+        ? clock(stuck.stranded, () => (guided ? setNudges((n) => n + 1) : setWaited(true)))()
+        : undefined,
+    [stalled, guided, placements, hint],
+  )
 
   /** Progress after a move; the case closing on it plays the close and opens the reveal. */
   const close = (next: Progress) => {
@@ -185,6 +206,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     if (next.tapped.length > progress.tapped.length) {
       setRun(0)
       setStayed(false)
+      setWaited(false)
     } else nothingNew()
     // A hint has done its work once its thing is tapped (#29).
     if (hint?.spot === spotId) setHint(null)
@@ -225,6 +247,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     setHint(next)
     setRun(0)
     setStayed(false)
+    setWaited(false)
     setFails(0)
     setMissed(null)
     onProgress({ ...progress, hints: [...progress.hints, next.tier] })
@@ -327,7 +350,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const lesson = lessonAt()
   // A hint on offer once a signal fires, or its second tier once its first shows; never under a
   // guided step (#29). It sits at the foot of the view: the caption's dock, or beside Close.
-  const signalled = run >= stuck.taps || stayed || fails >= stuck.closes
+  const signalled = run >= stuck.taps || stayed || (waited && strandedNow) || fails >= stuck.closes
   const more = hint?.tier === 1 && hint.why !== 'close'
   const offer = !guided && !progress.solved && (more || (hint === null && signalled)) && (
     <button type="button" className="offer" onClick={take}>

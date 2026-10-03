@@ -94,6 +94,7 @@ export const strings = {
   showMe: 'Show me',
   hintSays: {
     unfound: 'There’s still something to find here.',
+    stranded: 'Find the other words in the picture.',
     evidence: 'Something here settles one answer.',
     close: 'Close the case to check your answers.',
   },

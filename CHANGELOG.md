@@ -7,8 +7,10 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
 
 - **29a — hints, offered when a player is stuck** (#65): the game watches for a stall — six taps on
   the picture that find nothing new while something is unfound, ninety seconds on a moment with
-  something left, or two failed closes — and only then offers a hint, a quiet line in the
-  caption's dock or a button beside Close the case. Each tier is asked for: the first rings the
+  something left, thirty seconds on Solve with something empty and nothing left to place, or two
+  failed closes — and only then offers a hint, a quiet line in the caption's dock or a button
+  beside Close the case. A player with nothing left to place is sent where a word of the missing
+  kind is: "Find the other words in the picture." Each tier is asked for: the first rings the
   half of the picture that holds the thing, grown to take in the whole of it, reached through
   Look's button and the moment's picker as a step's mark is; the second rings the thing itself;
   neither gives the word, and a hint's words leave on the next tap while its ring stays. After a

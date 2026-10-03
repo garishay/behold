@@ -4,7 +4,7 @@ import { carmel } from '../cases/carmel/case.ts'
 import { valley } from '../cases/valley/case.ts'
 import { vineyard } from '../cases/vineyard/case.ts'
 import type { Box, CaseStructure } from '../cases/types.ts'
-import { aim, firstWrong, half } from './hints.ts'
+import { aim, firstWrong, half, stranded } from './hints.ts'
 import { fresh, tap, type Progress } from './state.ts'
 
 /** A case with every spot tapped. */
@@ -44,6 +44,38 @@ describe('what a hint points at (#29)', () => {
     expect(evidence[firstWrong(carmel, p)!]).toBe('mocker')
     expect(firstWrong(carmel, { ...p, faces: { c1: 'ahab', c2: 'ahab' } })).toBe('c1')
     expect(firstWrong(carmel, { ...p, order: ['baal', 'water', 'fire'] })).toBe('a1')
+  })
+})
+
+describe('a player with nothing left to place (#65)', () => {
+  /** The valley with these spots tapped and these words placed. */
+  const played = (ids: string[], placed: Pick<Progress, 'faces' | 'fills'>) => ({
+    ...ids.reduce((p, id) => tap(valley, p, id).progress, fresh(valley)),
+    ...placed,
+  })
+
+  // Playtest 2's valley (#23): the boy's two words placed, and five slots no word can fill. Before
+  // any word is found the bank says to tap the picture, so nobody is stranded yet.
+  it('is stranded while no empty face or blank has a loose word of its kind, and names the kinds', () => {
+    const p = played(['boy'], { faces: { d1: 'david' }, fills: { t4: 'sling' } })
+    expect(stranded(valley, p)).toEqual(new Set(['name', 'noun', 'number']))
+    expect(stranded(valley, tap(valley, p, 'basket').progress).size).toBe(0)
+    expect(stranded(valley, fresh(valley)).size).toBe(0)
+  })
+
+  // The smallest thing unfound is the shield bearer, whose one word is a thing, and no thing is
+  // empty: the hint passes it for the armor, which yields a name.
+  it('points a stranded player at the smallest unfound thing that yields a word they are missing', () => {
+    const faces = { d1: 'david' }
+    const p = played(['boy', 'basket'], {
+      faces,
+      fills: { t1: 'ten', t2: 'commander', t4: 'sling' },
+    })
+    expect(stranded(valley, p)).toEqual(new Set(['name', 'number']))
+    expect(aim(valley, p, null)).toEqual({ spot: 'armor', why: 'stranded' })
+    // With the commander's blank empty, a loose word fits it, and the hint is the plain one.
+    const q = played(['boy', 'basket'], { faces, fills: { t1: 'ten', t4: 'sling' } })
+    expect(aim(valley, q, null)).toEqual({ spot: 'bearer', why: 'unfound' })
   })
 })
 
