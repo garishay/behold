@@ -342,6 +342,12 @@ describe('validate (Gate 02 A6)', () => {
     expect(validate(valley, long)).toEqual(['step "step3" says 9 words, not eight or fewer'])
   })
 
+  // The last step's retry sits beside its mark too (#25).
+  it('(m) a retry of nine words — "Some answers are wrong" in full', () => {
+    const long: Text = { ...en, retry: 'Some answers are wrong. Look closer, then try again.' }
+    expect(validate(valley, long)).toEqual(['the retry says 9 words, not eight or fewer'])
+  })
+
   // (n) is #30's: a case that teaches the order has one, and the lesson is eight words at most.
   it('(n) a lesson on the order in a case without one — Carmel with its order cut', () => {
     expect(validate({ ...carmel, order: undefined }, carmelEn)).toEqual([

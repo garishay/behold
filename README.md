@@ -8,9 +8,9 @@ Every merge to `main` redeploys it.
 
 Behold is a mystery game set in the stories of the Bible. Each case is a passage: the player
 studies the pictures of its moments, works out who is who and what happened, and fills the blanks
-of the account in the game's own words — then the reveal shows the text itself. You know the
-stories. You don't know the details. The tutorial is the valley of Elah; season one, the house of
-Ahab, is being written.
+of the account in the game's own words — then the reveal shows the text itself. Look closer.
+There's more to every story. The tutorial is the valley of Elah; season one, the house of Ahab,
+is being written.
 
 ## Status
 

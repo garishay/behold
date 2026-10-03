@@ -54,7 +54,7 @@ const valleyAnswers: [string, string][] = [
 
 /** The tutorial played through: every spot with a word tapped, every slot filled right, closed. */
 const solveTheValley = () => {
-  for (const s of ['boy', 'giant', 'brook', 'armor', 'basket']) tapSpot(s)
+  for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
   tab(/Solve/)
   for (const [id, word] of valleyAnswers) {
     chip(word)
@@ -82,9 +82,13 @@ describe('the title screen (Gate 01 A6, #6)', () => {
     expect(
       screen.getByText(/Scripture quotations are from the ESV® Bible .* All rights reserved\./),
     ).toBeInTheDocument()
-    expect(
-      screen.getByText("You know the stories. You don't know the details."),
-    ).toBeInTheDocument()
+    // The line is one string, set a sentence to a line on the title screen alone (Gate 20 A3).
+    const line = document.querySelector('.line')
+    expect(line).toHaveTextContent("Look closer.There's more to every story.")
+    expect([...line!.children].map((s) => [s.tagName, s.textContent])).toEqual([
+      ['SPAN', 'Look closer.'],
+      ['SPAN', "There's more to every story."],
+    ])
     expect(screen.getByText('Season one is being written.')).toBeInTheDocument()
   })
 
@@ -567,9 +571,41 @@ describe('the tutorial’s marks (#25)', () => {
     slot('t4')
     expect(at()).toBe('[data-word="sling"]')
     chip('sling')
-    expect([at(), said()]).toEqual(['[data-close]', 'Fill the rest, then close the case.'])
+    expect([at(), said()]).toEqual(['[data-view="look"]', 'Find the other words in the picture.'])
+    expect(screen.queryByRole('button', { name: /Close the case/ })).not.toBeInTheDocument()
     tab(/Look/)
-    expect(at()).toBe('[data-view="solve"]')
+    expect(coach()).toBeNull()
+    for (const id of ['giant', 'brook', 'bearer', 'armor', 'basket']) tapSpot(id)
+    expect([at(), said()]).toEqual(['[data-view="solve"]', 'Fill the rest, then close the case.'])
+    tab(/Solve/)
+    expect(at()).toBe('[data-close]')
+  })
+
+  // Playtest 2 (#23): the last step pointed at Close the case with five blanks no word could fill,
+  // and nothing said the rest was in the picture. Now the step after the guided moves sends the
+  // player to Look, which greets them with its prompt again, not the boy's caption (#25).
+  it('sends the player back to the picture after the guided moves, until everything is found', () => {
+    render(<App />)
+    openCase(/The valley/)
+    tapSpot('boy')
+    tab(/Solve/)
+    for (const [id, word] of [
+      ['d1', 'David'],
+      ['t4', 'sling'],
+    ] as const) {
+      chip(word)
+      slot(id)
+    }
+    expect(at()).toBe('[data-view="look"]')
+    expect(document.querySelector('.dock')).toBeNull()
+    tab(/Look/)
+    expect(document.querySelector('.dock .said')).toHaveTextContent(
+      'Tap anything that looks like it matters.',
+    )
+    tapSpot('giant')
+    expect(document.querySelector('.dock .said')).toHaveTextContent(/The Philistines’ champion/)
+    tab(/Solve/)
+    expect([at(), said()]).toEqual(['[data-view="look"]', 'Find the other words in the picture.'])
   })
 
   it('marks nothing under the brief’s card or the menu, and nothing in a case without steps', async () => {
@@ -670,7 +706,7 @@ describe('the tutorial’s marks (#25)', () => {
   it('the last step’s words leave on the next tap, and its ring stays', async () => {
     render(<App />)
     openCase(/The valley/)
-    tapSpot('boy')
+    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
     tab(/Solve/)
     for (const [id, word] of [
       ['d1', 'David'],
@@ -689,6 +725,27 @@ describe('the tutorial’s marks (#25)', () => {
     expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
     // The dim left with the words, and a new target doesn't bring it back (#24, addendum (b)).
     expect(document.querySelector('.coach .ring')).not.toHaveClass('dim')
+  })
+
+  // Playtest 2 (#23): the first close the player met said "Several are wrong." in case three, and
+  // he hadn't known his answers were checked. In the tutorial a failed close brings the last step's
+  // mark back, dim and all, with words that say so (#25).
+  it('a failed close in the tutorial brings the last step back with its retry', async () => {
+    render(<App />)
+    openCase(/The valley/)
+    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
+    tab(/Solve/)
+    for (const [id, word] of valleyAnswers) {
+      chip(id === 't5' ? 'David' : word)
+      slot(id)
+    }
+    fireEvent.pointerDown(document.querySelector('[data-close]')!)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(result()).toHaveTextContent('One or two are wrong.')
+    await waitFor(() => expect(document.querySelector('.coach .ring')).toHaveClass('dim'))
+    expect([at(), said()]).toEqual(['[data-close]', 'Some are wrong. Look closer, then try again.'])
+    fireEvent.pointerDown(document.querySelector('[data-slot="t5"]')!)
+    expect([at(), said()]).toEqual(['[data-close]', ''])
   })
 })
 
@@ -907,11 +964,50 @@ describe('hints (#29)', () => {
     }
   })
 
+  // Under the step that sends the player back to the picture, its words, which sit over the bank,
+  // leave on the next tap and its ring stays (#24 [3]); a wait on Solve with nothing left to place
+  // shows the step again, a new mark with its words (A8 as ruled). On Look the step marks nothing,
+  // so the signals there offer hints as in any case (#25, #65).
+  it('under the tutorial’s sweep, a wait on Solve shows the step again, and Look offers hints', () => {
+    vi.useFakeTimers()
+    try {
+      render(<App />)
+      openCase(/The valley/)
+      tapSpot('boy')
+      tab(/Solve/)
+      for (const [id, word] of [
+        ['d1', 'David'],
+        ['t4', 'sling'],
+      ] as const) {
+        chip(word)
+        slot(id)
+      }
+      expect(said()).toBe('Find the other words in the picture.')
+      fireEvent.pointerDown(document.querySelector('[data-word="david"]')!)
+      expect([at(), said()]).toEqual(['[data-view="look"]', ''])
+      const before = coach()
+      act(() => vi.advanceTimersByTime(stuck.stranded * 1000 - 1))
+      expect(coach()).toBe(before)
+      act(() => vi.advanceTimersByTime(1))
+      expect(coach()).not.toBe(before)
+      expect([at(), said(), offer()]).toEqual([
+        '[data-view="look"]',
+        'Find the other words in the picture.',
+        null,
+      ])
+      tab(/Look/)
+      for (let i = 0; i < stuck.taps; i++) tapSpot('boy')
+      expect(offer()).toHaveTextContent('Stuck? Where to look')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   // A close's hint is kept from the close: a changed answer can't ask the hints what is right.
   it('offers one beside Close the case after two failed closes, at what the first found wrong', () => {
     render(<App />)
     openCase(/The valley/)
-    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket']) tapSpot(s)
+    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
     tab(/Solve/)
     for (const [id, word] of valleyAnswers) {
       chip(id === 't2' ? 'brothers' : word)
@@ -941,7 +1037,7 @@ describe('hints (#29)', () => {
   it('the menu’s Hint aims at what a single failed close found wrong', () => {
     render(<App />)
     openCase(/The valley/)
-    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket']) tapSpot(s)
+    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
     tab(/Solve/)
     for (const [id, word] of valleyAnswers) {
       chip(id === 't2' ? 'brothers' : word)
@@ -1018,12 +1114,32 @@ describe('the case solved (#6, 03c; #24)', () => {
     expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('1/7')
   })
 
+  // Playtest 2 (#23): with only David and sling found, "That blank wants a number." read as "type
+  // one in". While no word of the blank's kind is found, the note says where words come from (#71).
+  it('a refusal says where to find a word of the kind while none is found', () => {
+    render(<App />)
+    openCase(/The valley/)
+    tapSpot('boy')
+    tab(/Solve/)
+    slot('t1')
+    chip('David')
+    expect(result()).toHaveTextContent(/^That blank wants a number\. Find one in the picture\.$/)
+    // A refused word stays picked up; tapped again, it is put down.
+    chip('David')
+    tab(/Look/)
+    tapSpot('brook')
+    tab(/Solve/)
+    slot('t1')
+    chip('David')
+    expect(result()).toHaveTextContent(/^That blank wants a number\.$/)
+  })
+
   // The tutorial goes all the way to rule 5 (#26 [4]): a ✓ only on the slots its steps name, Close
   // the case once they are done, and the same coarse check as every case.
   it('the tutorial marks only its guided slots and closes on Close the case, like any case', () => {
     render(<App />)
     openCase(/The valley/)
-    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket']) tapSpot(s)
+    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
     tab(/Solve/)
     for (const [id, word] of valleyAnswers.slice(0, 3)) {
       chip(word)

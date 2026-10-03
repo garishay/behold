@@ -113,7 +113,8 @@ describe('the model (#6)', () => {
   })
 
   // The tutorial goes all the way to rule 5 (#26 [4]): it steps on as each until is met, marks
-  // only the slots its steps name, and — all right — waits for the submit like any other case.
+  // only the slots its steps name, sends the player back to the picture until every spot is found
+  // (#25), and — all right — waits for the submit like any other case.
   it('the guided case steps on as each until is met, then closes only on the submit', () => {
     let p = fresh(valley)
     expect(step(valley, p)?.id).toBe('step1')
@@ -128,7 +129,7 @@ describe('the model (#6)', () => {
     expect(closable(valley, p)).toBe(false)
     p = chooseSlot(valley, p, chooseWord(valley, p, nothing, 'sling').selection, 't4').progress
     expect(step(valley, p)?.id).toBe('step5')
-    expect(closable(valley, p)).toBe(true)
+    expect(closable(valley, p)).toBe(false)
     expect(['d1', 't4', 'd2', 't1'].map((slot) => marked(valley, slot))).toEqual([
       true,
       true,
@@ -136,15 +137,37 @@ describe('the model (#6)', () => {
       false,
     ])
     for (const spot of ['giant', 'brook', 'armor', 'basket']) p = tap(valley, p, spot).progress
+    expect(step(valley, p)?.id).toBe('step5')
+    p = tap(valley, p, 'bearer').progress
+    expect(step(valley, p)?.id).toBe('step6')
+    expect(closable(valley, p)).toBe(true)
     const answers = { d2: 'goliath', t1: 'ten', t2: 'commander', t3: 'six', t5: 'goliath' }
     for (const [slot, word] of Object.entries(answers))
       p = chooseSlot(valley, p, chooseWord(valley, p, nothing, word).selection, slot).progress
     expect(wrong(valley, p)).toBe(0)
     expect(p.solved).toBe(false)
-    expect(step(valley, p)?.id).toBe('step5')
+    expect(step(valley, p)?.id).toBe('step6')
     p = submit(valley, p)
     expect(p.solved).toBe(true)
     expect(step(valley, p)).toBeUndefined()
+  })
+
+  // The step that sends the player to the picture is met by everything filled too, whichever comes
+  // first: the shield bearer's one word fills no blank, so all seven can be filled without him, and
+  // Close the case must not wait on him (Gate 20 A1 as ruled).
+  it('the sweep is met by every spot found or everything filled, whichever comes first', () => {
+    const spots = ['boy', 'giant', 'brook', 'armor', 'basket']
+    let p = opened(
+      valley,
+      spots.reduce((q, id) => tap(valley, q, id).progress, fresh(valley)),
+      'solve',
+    )
+    const fills = { d1: 'david', t4: 'sling', d2: 'goliath', t1: 'ten', t2: 'commander', t3: 'six' }
+    for (const [slot, word] of Object.entries(fills))
+      p = chooseSlot(valley, p, chooseWord(valley, p, nothing, word).selection, slot).progress
+    expect([step(valley, p)?.id, closable(valley, p)]).toEqual(['step5', false])
+    p = chooseSlot(valley, p, chooseWord(valley, p, nothing, 'david').selection, 't5').progress
+    expect([step(valley, p)?.id, closable(valley, p)]).toEqual(['step6', true])
   })
 
   // A step already done never shows (#25): sling in its blank before David is named, and the

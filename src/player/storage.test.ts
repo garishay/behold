@@ -101,10 +101,10 @@ describe('progress on the device (#6, A6)', () => {
       localStorage.setItem(key, JSON.stringify({ vineyard: stale }))
       expect(load(cases), JSON.stringify(stale)).toEqual({})
     }
-    const guided = { ...fresh(valley), step: 4 }
+    const guided = { ...fresh(valley), step: 5 }
     localStorage.setItem(key, JSON.stringify({ valley: guided, ghost: fresh(valley) }))
     expect(load(cases)).toEqual({ valley: guided })
-    localStorage.setItem(key, JSON.stringify({ valley: { ...guided, step: 5 } }))
+    localStorage.setItem(key, JSON.stringify({ valley: { ...guided, step: 6 } }))
     expect(load(cases)).toEqual({})
   })
 

@@ -4,8 +4,8 @@ What makes a case a puzzle. The world rules (`docs/world-rules.md`) are what a c
 to; this page is what a player must do to solve it. Read both before writing a case. The format
 a case is written in is `docs/case-file.md`.
 
-Behold's promise is on the title screen: _You know the stories. You don't know the details._ A
-case works when the cheapest way through it is to look — at the picture, at its captions, at its
+Behold's promise is on the title screen: _Look closer. There's more to every story._ A case
+works when the cheapest way through it is to look — at the picture, at its captions, at its
 papers — and the details a player did not know are what the looking turns up. Playtest 1 (#23)
 found the opposite: players tapped every spot without reading and filled the blanks from the
 words they had collected, because the blanks fell to grammar and to the kind a blank takes. The
