@@ -20,6 +20,18 @@ interface Entry {
   readonly view?: 'reveal'
 }
 
+/**
+ * A line's sentences, so the title screen sets each on its own line at every width while the line
+ * stays one string (#73, Gate 20 A3 as ruled). A browser without the sentence segmenter keeps the
+ * line whole.
+ */
+const sentences = (line: string) =>
+  typeof Intl.Segmenter === 'function'
+    ? [...new Intl.Segmenter('en', { granularity: 'sentence' }).segment(line)].map((s) =>
+        s.segment.trim(),
+      )
+    : [line]
+
 /** The entry a history state carries, or none: the app's own states hold a case id and, on the reveal, its view. */
 const entry = (state: unknown): Entry | null =>
   typeof state === 'object' && state !== null && 'case' in state && typeof state.case === 'string'
@@ -96,7 +108,11 @@ export default function App({ passages = fetchedPassages }: AppProps) {
         <p>{strings.epigraph}</p>
         <footer>{strings.epigraphReference}</footer>
       </blockquote>
-      <p className="line">{strings.line}</p>
+      <p className="line">
+        {sentences(strings.line).map((s) => (
+          <span key={s}>{s}</span>
+        ))}
+      </p>
       <div className="case-list">
         {cases.map(({ structure, text }) => {
           const p = saved[structure.id]

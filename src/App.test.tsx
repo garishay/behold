@@ -82,9 +82,13 @@ describe('the title screen (Gate 01 A6, #6)', () => {
     expect(
       screen.getByText(/Scripture quotations are from the ESV® Bible .* All rights reserved\./),
     ).toBeInTheDocument()
-    expect(
-      screen.getByText("You know the stories. You don't know the details."),
-    ).toBeInTheDocument()
+    // The line is one string, set a sentence to a line on the title screen alone (Gate 20 A3).
+    const line = document.querySelector('.line')
+    expect(line).toHaveTextContent("Look closer.There's more to every story.")
+    expect([...line!.children].map((s) => [s.tagName, s.textContent])).toEqual([
+      ['SPAN', 'Look closer.'],
+      ['SPAN', "There's more to every story."],
+    ])
     expect(screen.getByText('Season one is being written.')).toBeInTheDocument()
   })
 
@@ -1108,6 +1112,26 @@ describe('the case solved (#6, 03c; #24)', () => {
     expect(head).toHaveTextContent(/^namesthingsactionsnumbers$/)
     expect(document.querySelector('[data-slot="t4"]')).toHaveClass('is-right')
     expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('1/7')
+  })
+
+  // Playtest 2 (#23): with only David and sling found, "That blank wants a number." read as "type
+  // one in". While no word of the blank's kind is found, the note says where words come from (#71).
+  it('a refusal says where to find a word of the kind while none is found', () => {
+    render(<App />)
+    openCase(/The valley/)
+    tapSpot('boy')
+    tab(/Solve/)
+    slot('t1')
+    chip('David')
+    expect(result()).toHaveTextContent(/^That blank wants a number\. Find one in the picture\.$/)
+    // A refused word stays picked up; tapped again, it is put down.
+    chip('David')
+    tab(/Look/)
+    tapSpot('brook')
+    tab(/Solve/)
+    slot('t1')
+    chip('David')
+    expect(result()).toHaveTextContent(/^That blank wants a number\.$/)
   })
 
   // The tutorial goes all the way to rule 5 (#26 [4]): a ✓ only on the slots its steps name, Close

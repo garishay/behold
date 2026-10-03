@@ -25,7 +25,7 @@ export const strings = {
   epigraph:
     'It is the glory of God to conceal things, but the glory of kings is to search things out.',
   epigraphReference: 'Proverbs 25:2, ESV',
-  line: "You know the stories. You don't know the details.",
+  line: "Look closer. There's more to every story.",
   status: 'Season one is being written.',
   notice:
     'Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), © 2001 by Crossway, a publishing ministry of Good News Publishers. ESV Text Edition: 2025. The ESV text may not be quoted in any publication made available to the public by a Creative Commons license. The ESV may not be translated in whole or in part into any other language. Used by permission. All rights reserved.',
@@ -80,7 +80,11 @@ export const strings = {
   closeCase: 'Close the case',
   closeCaseProgress: (filled: number, total: number) =>
     `Close the case — ${filled} of ${total} filled`,
-  blankWants: (kind: Kind) => `That blank wants ${wants[kind]}.`,
+  // A blank's refusal names its kind, and while no word of that kind is found, where to look (#71).
+  blankWants: (kind: Kind, found: boolean) =>
+    found
+      ? `That blank wants ${wants[kind]}.`
+      : `That blank wants ${wants[kind]}. Find one in the picture.`,
   oneOrTwoWrong: 'One or two are wrong.',
   severalWrong: 'Several are wrong.',
 

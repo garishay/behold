@@ -192,7 +192,9 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   }
   const apply = (o: Outcome) => {
     setSelection(o.selection)
-    setNote(o.wants === undefined ? '' : strings.blankWants(o.wants))
+    const kind = o.wants
+    const found = progress.bank.some((w) => s.words[w] === kind)
+    setNote(kind === undefined ? '' : strings.blankWants(kind, found))
     if (placed(progress, o.progress)) play('place')
     close(o.progress)
   }

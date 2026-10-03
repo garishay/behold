@@ -115,6 +115,11 @@ button:focus-visible {
   line-height: 1.45;
 }
 
+/* The title's line, a line to each sentence at every width (#73). */
+.line span {
+  display: block;
+}
+
 .status {
   margin: 0;
   font-size: 15px;
