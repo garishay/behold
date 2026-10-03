@@ -87,4 +87,16 @@ export const carmel = {
     { id: 'account', blanks: { a1: 'said-nothing', a2: 'four', a3: 'three', a4: 'stones' } },
   ],
   teach: 'order',
+  // What settles each face and blank, and the sun that dates each moment, for a hint (#29).
+  evidence: {
+    c1: 'caller',
+    c2: 'king',
+    a1: 'crowd',
+    a2: 'pourers',
+    a3: 'caller',
+    a4: 'fire',
+    baal: 'mocker',
+    water: 'spent',
+    fire: 'praying',
+  },
 } as const satisfies CaseStructure

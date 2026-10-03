@@ -81,4 +81,14 @@ export const valley = {
     { id: 'step4', until: { filled: 't4' } },
     { id: 'step5' },
   ],
+  // What settles each face and blank, for a hint to point at (#29).
+  evidence: {
+    d1: 'boy',
+    d2: 'giant',
+    t1: 'basket',
+    t2: 'basket',
+    t3: 'giant',
+    t4: 'boy',
+    t5: 'giant',
+  },
 } as const satisfies CaseStructure

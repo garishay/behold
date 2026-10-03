@@ -74,7 +74,10 @@ reference, with anything the passage does not say marked:
 - that an answer and every rival is named or implied by the case's passages (rule 1);
 - that a caption, a paper, and the brief describe and do not conclude (rule 2);
 - that the blanks are aimed at details, not the parts everyone knows (rule 3);
-- that the case adds one idea, and its brief to the author names it (rule 6).
+- that the case adds one idea, and its brief to the author names it (rule 6);
+- that each face's and blank's evidence, the spot a hint sends a stuck player to, is the one whose
+  caption or paper settles it, and each moment's is the one that tells when it happened (#29). A
+  hint points at evidence and never gives the word, so a wrong evidence spot is a wrong clue.
 
 ## Writing a case to them
 

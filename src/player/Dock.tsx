@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import type { CaseStructure, CaseText } from '../cases/types.ts'
 import { strings } from '../strings/en.ts'
 
@@ -13,6 +13,10 @@ interface DockProps {
   structure: CaseStructure
   text: CaseText<CaseStructure>
   caption: Caption | null
+  /** A hint on offer (#29): it takes the line of finds' place, and the caption gives it room. */
+  offer?: ReactNode
+  /** A caption opened whole over the picture's foot, or closed: no stay is timed while one is open. */
+  onMore: (open: boolean) => void
 }
 
 /**
@@ -21,7 +25,7 @@ interface DockProps {
  * than the dock shows More, which opens it whole, rising over the picture's foot from where the
  * caption ends.
  */
-export function Dock({ structure, text, caption }: DockProps) {
+export function Dock({ structure, text, caption, offer, onMore }: DockProps) {
   // Opened for one caption, from the line where it ends; the next tap's caption opens closed.
   const [openAt, setOpenAt] = useState<{ caption: Caption | null; end: number } | null>(null)
   const [long, setLong] = useState(false)
@@ -33,7 +37,9 @@ export function Dock({ structure, text, caption }: DockProps) {
   }
   const toggle = () => {
     const b = box.current
-    setOpenAt(open || !b ? null : { caption, end: b.offsetTop + b.offsetHeight })
+    const next = open || !b ? null : { caption, end: b.offsetTop + b.offsetHeight }
+    setOpenAt(next)
+    onMore(next !== null)
   }
   const spot = structure.moments.flatMap((m) => m.spots).find((x) => x.id === caption?.spot)
   const words = caption?.added.map((w) => text.words[w]).join(', ')
@@ -60,7 +66,7 @@ export function Dock({ structure, text, caption }: DockProps) {
           {more}
         </div>
       )}
-      <span className="found">{notes.join(' · ')}</span>
+      {offer ?? <span className="found">{notes.join(' · ')}</span>}
     </div>
   )
 }

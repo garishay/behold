@@ -456,6 +456,13 @@ button:focus-visible {
   cursor: pointer;
 }
 
+/* The half of the picture a hint's first tier rings (#29): nothing drawn, and never in a tap's
+   way. */
+.stage rect.half {
+  fill: none;
+  pointer-events: none;
+}
+
 .stage.zoomed {
   overflow: auto;
 }
@@ -592,6 +599,38 @@ button:focus-visible {
   font-size: 12px;
   line-height: 18px;
   color: var(--gold);
+}
+
+/* A hint on offer (#29): a quiet line in the finds' place at the foot of the dock on Look, the
+   caption giving up a line to it, and a button beside Close the case on Solve. */
+.offer {
+  flex: none;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--mist-dim);
+}
+
+.offer b {
+  font-weight: 600;
+  color: var(--gold);
+}
+
+/* The caption keeps two lines' room above an offer, so at 360 × 640 the offer holds the dock's
+   foot, clear of a hint's words, and on a taller phone it follows the caption, as the finds do.
+   The cost, on record (A2 as ruled): while the offer shows at 360, a caption keeps two lines
+   before More, where #24's S2 gives it three. */
+.dock:has(.offer) .said {
+  min-height: 42px;
+}
+
+.submit-row .offer {
+  padding: 0 14px;
+  border-radius: 10px;
+  background: var(--slate);
 }
 
 /* Solve: Papers held in a slim row once a paper is found, then the one part of the case screen
@@ -1082,6 +1121,8 @@ button:focus-visible {
    the bank and the bar: it never moves and never covers the account (07d, #24). */
 .submit-row {
   flex: none;
+  display: flex;
+  gap: 8px;
   padding: 8px var(--inset);
   border-top: 1px solid var(--slate);
   background: var(--night);
@@ -1113,6 +1154,13 @@ button:focus-visible {
   font-size: 17px;
   line-height: 1.6;
   margin: 0 0 12px;
+}
+
+/* How many hints the case took, said plainly under the close, apart from the telling (#29). */
+.reveal .hints-used {
+  font-family: var(--sans);
+  font-size: 14px;
+  color: var(--mist-dim);
 }
 
 .passage {

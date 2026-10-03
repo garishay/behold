@@ -1,7 +1,8 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
 import type { PassageService } from './passages/service.ts'
+import { stuck } from './player/hints.ts'
 
 const tapSpot = (id: string) => {
   const spot = document.querySelector(`[data-spot="${id}"]`)
@@ -119,7 +120,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     expect(coach()).toHaveTextContent('Tap the boy with the sling.')
   })
 
-  it('the brief’s card goes with the first tap, and the menu holds the brief, Cases, Restart, and the switches', () => {
+  it('the brief’s card goes with the first tap, and the menu holds the brief, a hint, Cases, Restart, and the switches', () => {
     render(<App />)
     openCase(/The vineyard/)
     tapSpot('cord')
@@ -131,7 +132,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
       within(sheet)
         .getAllByRole('button')
         .map((b) => b.textContent),
-    ).toEqual(['Cases', 'Restart', 'Music · On', 'Effects · On'])
+    ).toEqual(['Hint', 'Cases', 'Restart', 'Music · On', 'Effects · On'])
   })
 
   it('a tap shows the caption and what it found, and its words wait on Solve, ringed', () => {
@@ -688,6 +689,301 @@ describe('the tutorial’s marks (#25)', () => {
     expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
     // The dim left with the words, and a new target doesn't bring it back (#24, addendum (b)).
     expect(document.querySelector('.coach .ring')).not.toHaveClass('dim')
+  })
+})
+
+describe('hints (#29)', () => {
+  const at = () => coach()?.getAttribute('data-at')
+  const said = () => coach()?.querySelector('[role="status"]')?.textContent
+  const offer = () => document.querySelector('.offer')
+  // The ring is drawn only where jsdom is told its target lies, as for the tutorial's marks.
+  beforeEach(() => {
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue(
+      new DOMRect(10, 10, 100, 40),
+    )
+  })
+  afterEach(() => vi.restoreAllMocks())
+  /** The vineyard's bedchamber with everything found but the seal. */
+  const toSeal = () => {
+    render(<App />)
+    openCase(/The vineyard/)
+    moment('Bedchamber')
+    for (const id of ['window', 'man-bed', 'tray', 'woman', 'sheets', 'purse']) tapSpot(id)
+  }
+
+  it('offers one in the dock after a run of taps that find nothing new, and each tier is asked for', () => {
+    toSeal()
+    for (let i = 1; i < stuck.taps; i++) tapSpot('window')
+    expect(offer()).toBeNull()
+    tapSpot('window')
+    fireEvent.click(screen.getByRole('button', { name: 'Stuck? Where to look' }))
+    expect([at(), said()]).toEqual(['[data-half]', 'There’s still something to find here.'])
+    expect(document.querySelector('[data-half]')).toHaveAttribute('x', '450')
+    // Its words leave on the next tap, as the last step's do, and its ring stays (#24 [3]).
+    fireEvent.pointerDown(document.querySelector('[data-spot="woman"]')!)
+    expect([at(), said()]).toEqual(['[data-half]', ''])
+    fireEvent.click(screen.getByRole('button', { name: 'Still stuck? Show me' }))
+    expect([at(), said()]).toEqual(['[data-spot="seal"]', 'Here it is. Tap it.'])
+    expect(offer()).toBeNull()
+    tapSpot('seal')
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+    expect(coach()).toBeNull()
+  })
+
+  // Looking again once everything is found is the loop's return trip, not a stall.
+  it('offers nothing for taps that find nothing new once everything is found', () => {
+    render(<App />)
+    openCase(/The mountain/)
+    for (const [m, ids] of [
+      ['The water', ['altar', 'pourers', 'caller', 'trench', 'spent']],
+      ['The fire', ['fire', 'dry', 'faces', 'praying']],
+      ['Baal’s altar', ['prophets', 'mocker', 'crowd', 'king', 'ruin']],
+    ] as const) {
+      moment(m)
+      for (const id of ids) tapSpot(id)
+    }
+    for (let i = 0; i < stuck.taps * 2; i++) tapSpot('ruin')
+    expect(offer()).toBeNull()
+  })
+
+  it('offers one after a stay on a moment with something left, timed only while the app is in view', () => {
+    const hide = (hidden: boolean) => {
+      Object.defineProperty(document, 'hidden', { value: hidden, configurable: true })
+      document.dispatchEvent(new Event('visibilitychange'))
+    }
+    vi.useFakeTimers()
+    try {
+      render(<App />)
+      openCase(/The vineyard/)
+      tapSpot('cord')
+      act(() => vi.advanceTimersByTime(stuck.seconds * 1000 - 1))
+      expect(offer()).toBeNull()
+      act(() => hide(true))
+      act(() => vi.advanceTimersByTime(stuck.seconds * 1000))
+      expect(offer()).toBeNull()
+      act(() => hide(false))
+      act(() => vi.advanceTimersByTime(stuck.seconds * 1000))
+      expect(offer()).toHaveTextContent('Stuck? Where to look')
+    } finally {
+      vi.useRealTimers()
+      Reflect.deleteProperty(document, 'hidden')
+    }
+  })
+
+  // A caption opened whole with More rises over the picture's foot, so the stay isn't timed while
+  // it lies open: A1 times a stay with nothing over the picture (review round 1).
+  it('does not time the stay while a caption lies open over the picture', () => {
+    const tall = vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get')
+    tall.mockImplementation(function (this: HTMLElement) {
+      return this.textContent?.startsWith('A wild-haired man') ? 90 : 0
+    })
+    vi.useFakeTimers()
+    try {
+      render(<App />)
+      openCase(/The vineyard/)
+      tapSpot('prophet')
+      fireEvent.click(screen.getByRole('button', { name: 'More' }))
+      act(() => vi.advanceTimersByTime(stuck.seconds * 1000))
+      expect(offer()).toBeNull()
+      fireEvent.click(screen.getByRole('button', { name: 'Less' }))
+      act(() => vi.advanceTimersByTime(stuck.seconds * 1000))
+      expect(offer()).toHaveTextContent('Stuck? Where to look')
+    } finally {
+      vi.useRealTimers()
+      tall.mockRestore()
+    }
+  })
+
+  // The dock goes when Solve opens, and its caption closes with it, so back on Look the stay is
+  // timed again.
+  it('times the stay again once a caption left open closes with a trip to Solve', () => {
+    const tall = vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get')
+    tall.mockImplementation(function (this: HTMLElement) {
+      return this.textContent?.startsWith('A wild-haired man') ? 90 : 0
+    })
+    vi.useFakeTimers()
+    try {
+      render(<App />)
+      openCase(/The vineyard/)
+      tapSpot('prophet')
+      fireEvent.click(screen.getByRole('button', { name: 'More' }))
+      tab(/Solve/)
+      tab(/Look/)
+      expect(document.querySelector('.dock')).not.toHaveClass('is-open')
+      act(() => vi.advanceTimersByTime(stuck.seconds * 1000))
+      expect(offer()).toHaveTextContent('Stuck? Where to look')
+    } finally {
+      vi.useRealTimers()
+      tall.mockRestore()
+    }
+  })
+
+  // Playtest 2's mountain (#23): six of seven filled and nothing left to place, a wait on Solve
+  // that no signal on Look can see (#65). The hint sends him where a word of the missing kind is.
+  it('offers one on Solve after a wait with something empty and nothing left to place', () => {
+    vi.useFakeTimers()
+    try {
+      render(<App />)
+      openCase(/The mountain/)
+      for (const [name, ids] of [
+        ['The water', ['pourers', 'caller']],
+        ['The fire', ['fire']],
+        ['Baal’s altar', ['king']],
+      ] as const) {
+        moment(name)
+        for (const id of ids) tapSpot(id)
+      }
+      tab(/Solve/)
+      for (const [word, id] of [
+        ['Elijah', 'c1'],
+        ['Ahab', 'c2'],
+        ['four', 'a2'],
+        ['three', 'a3'],
+      ]) {
+        chip(word)
+        slot(id)
+      }
+      for (const [i, name] of ['Baal’s altar', 'The water', 'The fire'].entries()) {
+        tile(name)
+        orderSlot(i)
+      }
+      act(() => vi.advanceTimersByTime(stuck.stranded * 1000))
+      expect(offer()).toBeNull()
+      chip('stones')
+      slot('a4')
+      act(() => vi.advanceTimersByTime(stuck.stranded * 1000 - 1))
+      expect(offer()).toBeNull()
+      act(() => vi.advanceTimersByTime(1))
+      fireEvent.click(screen.getByRole('button', { name: 'Where to look' }))
+      expect([at(), said()]).toEqual(['[data-view="look"]', 'Find the other words in the picture.'])
+      tab(/Look/)
+      fireEvent.click(screen.getByRole('button', { name: 'Still stuck? Show me' }))
+      expect(at()).toBe('[data-spot="prophets"]')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  // The wait starts over on every word placed, emptied, or found, after it has fired too: a word
+  // placed that leaves the player stranded takes the offer away for another wait (review round 2).
+  it('starts a fired wait over when a word is placed and nothing is left to place still', () => {
+    vi.useFakeTimers()
+    try {
+      render(<App />)
+      openCase(/The mountain/)
+      for (const [name, ids] of [
+        ['The water', ['pourers']],
+        ['The fire', ['fire']],
+        ['Baal’s altar', ['king', 'mocker']],
+      ] as const) {
+        moment(name)
+        for (const id of ids) tapSpot(id)
+      }
+      tab(/Solve/)
+      for (const [word, id] of [
+        ['Elijah', 'c1'],
+        ['Ahab', 'c2'],
+        ['four', 'a2'],
+        ['stones', 'a4'],
+      ]) {
+        chip(word)
+        slot(id)
+      }
+      for (const [i, name] of ['Baal’s altar', 'The water', 'The fire'].entries()) {
+        tile(name)
+        orderSlot(i)
+      }
+      act(() => vi.advanceTimersByTime(stuck.stranded * 1000))
+      expect(offer()).toHaveTextContent('Where to look')
+      // Four again, in the second number's blank: the action's blank is still empty, and nothing
+      // loose fits it.
+      chip('four')
+      slot('a3')
+      expect(offer()).toBeNull()
+      act(() => vi.advanceTimersByTime(stuck.stranded * 1000))
+      expect(offer()).toHaveTextContent('Where to look')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  // A close's hint is kept from the close: a changed answer can't ask the hints what is right.
+  it('offers one beside Close the case after two failed closes, at what the first found wrong', () => {
+    render(<App />)
+    openCase(/The valley/)
+    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket']) tapSpot(s)
+    tab(/Solve/)
+    for (const [id, word] of valleyAnswers) {
+      chip(id === 't2' ? 'brothers' : word)
+      slot(id)
+    }
+    const close = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    close()
+    expect(offer()).toBeNull()
+    close()
+    chip('commander')
+    slot('t2')
+    fireEvent.click(screen.getByRole('button', { name: 'Where to look' }))
+    expect([at(), said()]).toEqual(['[data-view="look"]', 'Something here settles one answer.'])
+    tab(/Look/)
+    expect(at()).toBe('[data-half]')
+    fireEvent.click(screen.getByRole('button', { name: 'Still stuck? Show me' }))
+    expect(at()).toBe('[data-spot="basket"]')
+    tapSpot('basket')
+    expect(at()).toBe('[data-view="solve"]')
+    tab(/Solve/)
+    close()
+    expect(screen.getByText('You asked for 2 hints.')).toBeInTheDocument()
+  })
+
+  // From the menu, a hint uses a close's result after one failed close, where the offer waits for
+  // two: holding the menu to two would only make the player close again (A4 as ruled).
+  it('the menu’s Hint aims at what a single failed close found wrong', () => {
+    render(<App />)
+    openCase(/The valley/)
+    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket']) tapSpot(s)
+    tab(/Solve/)
+    for (const [id, word] of valleyAnswers) {
+      chip(id === 't2' ? 'brothers' : word)
+      slot(id)
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(offer()).toBeNull()
+    menu('Hint')
+    expect([at(), said()]).toEqual(['[data-view="look"]', 'Something here settles one answer.'])
+    tab(/Look/)
+    fireEvent.click(screen.getByRole('button', { name: 'Still stuck? Show me' }))
+    expect(at()).toBe('[data-spot="basket"]')
+  })
+
+  // Under a guided step the step's own mark is the hint: a run shows it again, dim and all.
+  it('under a guided step, a run shows the step again and nothing is offered', async () => {
+    render(<App />)
+    openCase(/The valley/)
+    fireEvent.click(screen.getByRole('button', { name: 'Start' }))
+    const ring = () => document.querySelector('.coach .ring')
+    await waitFor(() => expect(ring()).toHaveClass('dim'))
+    fireEvent.pointerDown(document.querySelector('[data-spot="giant"]')!)
+    tapSpot('giant')
+    expect(ring()).not.toHaveClass('dim')
+    for (let i = 0; i < stuck.taps; i++) tapSpot('giant')
+    await waitFor(() => expect(ring()).toHaveClass('dim'))
+    expect([at(), offer()]).toEqual(['[data-spot="boy"]', null])
+  })
+
+  it('the menu’s quiet Hint gives one without a signal, and a case closed without one says nothing', async () => {
+    render(<App />)
+    openCase(/The vineyard/)
+    tapSpot('cord')
+    menu('Hint')
+    expect([at(), said()]).toEqual(['[data-half]', 'There’s still something to find here.'])
+    menu('Cases')
+    fireEvent.click(await screen.findByRole('button', { name: /The valley/ }))
+    solveTheValley()
+    expect(document.querySelector('.hints-used')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }))
+    const sheet = screen.getByRole('dialog', { name: 'Menu' })
+    expect(within(sheet).queryByRole('button', { name: 'Hint' })).toBeNull()
   })
 })
 
