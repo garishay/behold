@@ -16,6 +16,9 @@ const wants: Readonly<Record<Kind, string>> = {
   number: 'a number',
 }
 
+/** A case's title inside a sentence: "The mountain" reads "the mountain". */
+const inline = (title: string) => title.charAt(0).toLowerCase() + title.slice(1)
+
 export const strings = {
   title: 'Behold',
   kicker: 'Bible Mystery Game',
@@ -40,9 +43,14 @@ export const strings = {
   updateAvailable: 'Update available',
   update: 'Update',
 
-  // The case cards (#6).
+  // The case cards (#6), and the season in order (#75, Gate 21 A5): a case opens when the one
+  // before it is closed, and a tap on a locked card names the case to play first.
   closed: 'Closed ✓',
   inProgress: 'In progress',
+  startHere: 'Start here',
+  opensAfter: (before: string) => `Opens after ${inline(before)}`,
+  startWithTheValley: 'Start with the valley. It teaches the game.',
+  playFirst: (title: string) => `Play ${inline(title)} first. The story runs in order.`,
 
   // The case screen: the bar at its foot, the menu, and the brief's card (#24).
   look: 'Look',

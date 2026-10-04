@@ -57,6 +57,10 @@ rules below are the answer, ruled on #26.
    them — a seal, a letter, a note, or another person's words — and the player works out whose
    each one is.
 
+   The season plays in order: each case opens when the one before it is closed, and a case the
+   player has already started stays open (#75). The cases are one story as well as a ladder, so a
+   payoff never comes before its setup.
+
 ## What holds a case to them
 
 **The validator** (`src/cases/validate.ts`, run by the test job over every registered case) holds

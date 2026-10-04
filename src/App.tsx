@@ -37,6 +37,8 @@ const leaving = 1600
  * second tap on Begin opens nothing beneath it (#75, Gate 21 A2 as ruled).
  */
 const settling = 500
+/** How long a locked card's tap keeps the way forward lit and says why (#75). */
+const nudging = 3000
 
 interface AppProps {
   /** The passage service the reveal reads through; the proxy (#3), or a test's own. */
@@ -48,7 +50,7 @@ interface AppProps {
  * case cards, each opening its case in the player, then the epigraph and its notice (Gate 01
  * A6). Progress is kept on the device and restored on the next visit. An open case is a history
  * entry — no route, no URL — so back returns to the cards, and leaves the app only from them; the
- * title adds none.
+ * title adds none. The season plays in order: a case waits for the one before it.
  */
 export default function App({ passages = fetchedPassages }: AppProps) {
   const [saved, setSaved] = useState<Saved>(() => load(cases))
@@ -59,6 +61,7 @@ export default function App({ passages = fetchedPassages }: AppProps) {
   const [title, setTitle] = useState<'shown' | 'leaving' | 'settling' | null>(() =>
     open ? null : 'shown',
   )
+  const [nudge, setNudge] = useState(0)
   const [restarts, setRestarts] = useState(0)
   useEffect(() => save(saved), [saved])
   useEffect(() => {
@@ -74,6 +77,11 @@ export default function App({ passages = fetchedPassages }: AppProps) {
     const t = setTimeout(() => setTitle(null), title === 'leaving' ? leaving : settling)
     return () => clearTimeout(t)
   }, [title])
+  useEffect(() => {
+    if (nudge === 0) return
+    const t = setTimeout(() => setNudge(0), nudging)
+    return () => clearTimeout(t)
+  }, [nudge])
 
   const openCase = (id: string, progress: Progress) => {
     setSaved({ ...saved, [id]: progress })
@@ -113,6 +121,12 @@ export default function App({ passages = fetchedPassages }: AppProps) {
       />
     )
   }
+  // The season plays in order (Gate 21 A5 as ruled): a case is open when it is the first, when the
+  // case before it is closed, or when it has progress of its own. A locked card's tap lights the
+  // earliest case not yet closed, which is always open.
+  const closed = (i: number) => saved[cases[i].structure.id]?.solved === true
+  const locked = (i: number) => i > 0 && !closed(i - 1) && !saved[cases[i].structure.id]
+  const next = cases.findIndex((_, i) => !closed(i))
   const begin = () =>
     setTitle(matchMedia('(prefers-reduced-motion: reduce)').matches ? 'settling' : 'leaving')
   if (title === 'shown') return <Title leaving={false} onBegin={begin} />
@@ -127,19 +141,44 @@ export default function App({ passages = fetchedPassages }: AppProps) {
           const p = saved[structure.id]
           const thumb =
             structure.moments.find((m) => m.id === structure.thumb) ?? structure.moments[0]
+          const status = locked(i)
+            ? strings.opensAfter(cases[i - 1].text.en.title)
+            : p
+              ? p.solved
+                ? strings.closed
+                : strings.inProgress
+              : i === 0 && strings.startHere
           return (
             <button
               key={structure.id}
               type="button"
-              className="case-card"
+              className={[
+                'case-card',
+                locked(i) && 'locked',
+                i === 0 && !p && 'first',
+                i === next && nudge > 0 && 'lit',
+              ]
+                .filter(Boolean)
+                .join(' ')}
               style={{ '--i': i } as CSSProperties}
-              onClick={() => openCase(structure.id, p ?? fresh(structure))}
+              aria-disabled={locked(i) || undefined}
+              onClick={() =>
+                locked(i) ? setNudge((n) => n + 1) : openCase(structure.id, p ?? fresh(structure))
+              }
             >
-              <img src={picture(structure.id, thumb.picture)} alt="" />
+              <span className="thumb">
+                <img src={picture(structure.id, thumb.picture)} alt="" />
+                {locked(i) && (
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="5" y="10.5" width="14" height="10" rx="2" />
+                    <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" />
+                  </svg>
+                )}
+              </span>
               <div>
                 <div className="ct">{text.en.title}</div>
                 <div className="cs">{text.en.subtitle}</div>
-                {p && <div className="done">{p.solved ? strings.closed : strings.inProgress}</div>}
+                {status && <div className="done">{status}</div>}
               </div>
             </button>
           )
@@ -157,6 +196,10 @@ export default function App({ passages = fetchedPassages }: AppProps) {
         <a href={strings.creditLicence.href} target="_blank" rel="noreferrer">
           {strings.creditLicence.text}
         </a>
+      </p>
+      <p className={nudge > 0 ? 'nudge toast' : 'nudge'} role="status">
+        {nudge > 0 &&
+          (next > 0 ? strings.playFirst(cases[next].text.en.title) : strings.startWithTheValley)}
       </p>
       <Music cue="title" />
       {/* Leaving, the title rides over the page until its last card has risen. */}

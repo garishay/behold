@@ -2,9 +2,9 @@
 
 **Bible Mystery Game — a deduction game about the stories you thought you knew.**
 
-**Live at <https://garishay.github.io/behold/>** — it opens on its title, then the cases. It
-installs to a phone's home screen and opens offline after one visit. Every merge to `main`
-redeploys it.
+**Live at <https://garishay.github.io/behold/>** — it opens on its title, then the cases, played
+in order. It installs to a phone's home screen and opens offline after one visit. Every merge to
+`main` redeploys it.
 
 Behold is a mystery game set in the stories of the Bible. Each case is a passage: the player
 studies the pictures of its moments, works out who is who and what happened, and fills the blanks
