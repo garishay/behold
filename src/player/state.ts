@@ -93,9 +93,10 @@ export const wrong = (s: CaseStructure, p: Progress) =>
 export const step = (s: CaseStructure, p: Progress) =>
   guided(s) && !p.solved ? s.steps?.[p.step] : undefined
 
-// A view opened is met as it opens, by `opened`, never after the fact. Everything found is met by
-// everything filled too, whichever comes first: a spot whose words fill nothing can be skipped, and
-// filling every blank has already sent the player back to the picture (Gate 20 A1 as ruled).
+// A view opened is met as it opens, by `opened`, and a line read on the tap after it, by `read`,
+// never after the fact. Everything found is met by everything filled too, whichever comes first: a
+// spot whose words fill nothing can be skipped, and filling every blank has already sent the player
+// back to the picture (Gate 20 A1 as ruled).
 const met = (s: CaseStructure, p: Progress, until: Until) =>
   until.tapped !== undefined
     ? p.tapped.includes(until.tapped)
@@ -117,9 +118,19 @@ export function advance(s: CaseStructure, p: Progress): Progress {
   return { ...p, step: at }
 }
 
-/** A view opened: the step waiting on it is met, and any met after it (#25). */
-export const opened = (s: CaseStructure, p: Progress, view: 'look' | 'solve') =>
-  step(s, p)?.until?.view === view ? advance(s, { ...p, step: p.step + 1 }) : p
+/**
+ * A tap after the dock's line of finds was shown: the step waiting on its reading is met, and any
+ * met after it (#77). The next move meets it too, a spot tapped or a view opened, so a player who
+ * opens Solve from the keyboard is never held on it.
+ */
+export const read = (s: CaseStructure, p: Progress) =>
+  step(s, p)?.until?.read !== undefined ? advance(s, { ...p, step: p.step + 1 }) : p
+
+/** A view opened: a line waiting to be read is met, then the step waiting on the view (#25, #77). */
+export const opened = (s: CaseStructure, before: Progress, view: 'look' | 'solve') => {
+  const p = read(s, before)
+  return step(s, p)?.until?.view === view ? advance(s, { ...p, step: p.step + 1 }) : p
+}
 
 /** Whether a slot shows its ✓ when right: only a face or blank a guided step names (#26 [4]). */
 export const marked = (s: CaseStructure, target: string) =>
@@ -129,8 +140,12 @@ export const marked = (s: CaseStructure, target: string) =>
 export const closable = (s: CaseStructure, p: Progress) =>
   !guided(s) || p.step === (s.steps?.length ?? 0) - 1
 
-/** A spot tapped: its words join the bank, its paper the papers; what was new is returned. */
-export function tap(s: CaseStructure, p: Progress, spotId: string) {
+/**
+ * A spot tapped: its words join the bank, its paper the papers; what was new is returned. A line
+ * waiting to be read is met by it first (#77).
+ */
+export function tap(s: CaseStructure, before: Progress, spotId: string) {
+  const p = read(s, before)
   const spot = spots(s).find((x) => x.id === spotId)
   if (!spot) return { progress: p, added: [] as readonly string[] }
   const added = spot.words.filter((w) => !p.bank.includes(w))

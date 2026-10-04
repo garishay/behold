@@ -109,23 +109,20 @@ describe('progress on the device (#6, A6)', () => {
     expect(load(cases)).toEqual({})
   })
 
-  // The tutorial gained its question ahead of the last step (#77), so progress kept at the old last
-  // step's place is on the question now. It loads past it when the sword's blank is already right,
-  // as a move would take it, and stays on it while the blank is still to do.
+  // The tutorial's question moved from a step to the retry, and the dock's line read joined the
+  // steps after the boy's tap (#77). Progress kept at the old question's place is on the sweep now,
+  // which it has met, so it loads on the last step, wrong sword and all.
   it('moves kept progress past every step it has met', () => {
     const tapped = ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']
     const kept = {
       ...fresh(valley),
       tapped,
       faces: { d1: 'david' },
-      fills: { t4: 'sling' },
+      fills: { t4: 'sling', t5: 'david' },
       step: 5,
     }
-    const right = { ...kept, fills: { ...kept.fills, t5: 'goliath' } }
-    localStorage.setItem(key, JSON.stringify({ valley: right }))
-    expect(load(cases).valley.step).toBe(6)
     localStorage.setItem(key, JSON.stringify({ valley: kept }))
-    expect(load(cases).valley.step).toBe(5)
+    expect(load(cases).valley.step).toBe(6)
   })
 
   // Progress gained the hints used (#29). An entry kept before them has used none and keeps its

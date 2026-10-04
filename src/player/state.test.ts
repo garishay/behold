@@ -13,6 +13,7 @@ import {
   marked,
   nothing,
   opened,
+  read,
   step,
   submit,
   tap,
@@ -120,28 +121,31 @@ describe('the model (#6)', () => {
     expect(step(valley, p)?.id).toBe('step1')
     expect(opened(valley, p, 'solve')).toBe(p)
     p = tap(valley, p, 'boy').progress
+    // The boy's tap found two words, and the dock's line says so until the next tap (#77).
     expect(step(valley, p)?.id).toBe('step2')
+    p = read(valley, p)
+    expect(step(valley, p)?.id).toBe('step3')
     expect(opened(valley, p, 'look')).toBe(p)
     p = opened(valley, p, 'solve')
-    expect(step(valley, p)?.id).toBe('step3')
-    p = chooseSlot(valley, p, chooseWord(valley, p, nothing, 'david').selection, 'd1').progress
     expect(step(valley, p)?.id).toBe('step4')
-    expect(closable(valley, p)).toBe(false)
-    p = chooseSlot(valley, p, chooseWord(valley, p, nothing, 'sling').selection, 't4').progress
+    p = chooseSlot(valley, p, chooseWord(valley, p, nothing, 'david').selection, 'd1').progress
     expect(step(valley, p)?.id).toBe('step5')
     expect(closable(valley, p)).toBe(false)
+    p = chooseSlot(valley, p, chooseWord(valley, p, nothing, 'sling').selection, 't4').progress
+    expect(step(valley, p)?.id).toBe('step6')
+    expect(closable(valley, p)).toBe(false)
+    // The sword's blank is asked about only on a miss, so no step names it (#77).
     expect(['d1', 't4', 't5', 'd2', 't1'].map((slot) => marked(valley, slot))).toEqual([
       true,
       true,
-      true,
+      false,
       false,
       false,
     ])
     for (const spot of ['giant', 'brook', 'armor', 'basket']) p = tap(valley, p, spot).progress
-    expect(step(valley, p)?.id).toBe('step5')
+    expect(step(valley, p)?.id).toBe('step6')
     p = tap(valley, p, 'bearer').progress
-    // The sword's blank is asked next, and Close the case waits for it (#77).
-    expect([step(valley, p)?.id, closable(valley, p)]).toEqual(['step6', false])
+    expect([step(valley, p)?.id, closable(valley, p)]).toEqual(['step7', true])
     const answers = { d2: 'goliath', t1: 'ten', t2: 'commander', t3: 'six', t5: 'goliath' }
     for (const [slot, word] of Object.entries(answers))
       p = chooseSlot(valley, p, chooseWord(valley, p, nothing, word).selection, slot).progress
@@ -166,22 +170,24 @@ describe('the model (#6)', () => {
     const fills = { d1: 'david', t4: 'sling', d2: 'goliath', t1: 'ten', t2: 'commander', t3: 'six' }
     for (const [slot, word] of Object.entries(fills))
       p = chooseSlot(valley, p, chooseWord(valley, p, nothing, word).selection, slot).progress
-    expect([step(valley, p)?.id, closable(valley, p)]).toEqual(['step5', false])
-    p = chooseSlot(valley, p, chooseWord(valley, p, nothing, 'david').selection, 't5').progress
-    // Everything filled meets the sweep, and the question waits for the sword's own name (#77).
     expect([step(valley, p)?.id, closable(valley, p)]).toEqual(['step6', false])
-    p = chooseSlot(valley, p, chooseWord(valley, p, nothing, 'goliath').selection, 't5').progress
+    p = chooseSlot(valley, p, chooseWord(valley, p, nothing, 'david').selection, 't5').progress
+    // Everything filled meets the sweep, wrong sword and all: the question waits for a miss (#77).
     expect([step(valley, p)?.id, closable(valley, p)]).toEqual(['step7', true])
   })
 
   // A step already done never shows (#25): sling in its blank before David is named, and the
-  // tutorial goes from David's slot straight to Close the case.
+  // tutorial goes from David's slot straight to Close the case. Opening Solve reads the dock's line
+  // first, as any move does, so a player who opens it from the keyboard is never held there (#77).
   it('skips a step whose until is already met', () => {
     let p = opened(valley, tap(valley, fresh(valley), 'boy').progress, 'solve')
+    expect(step(valley, p)?.id).toBe('step4')
     p = chooseSlot(valley, p, chooseWord(valley, p, nothing, 'sling').selection, 't4').progress
-    expect(step(valley, p)?.id).toBe('step3')
+    expect(step(valley, p)?.id).toBe('step4')
     p = chooseSlot(valley, p, chooseWord(valley, p, nothing, 'david').selection, 'd1').progress
-    expect(step(valley, p)?.id).toBe('step5')
+    expect(step(valley, p)?.id).toBe('step6')
+    const found = tap(valley, tap(valley, fresh(valley), 'boy').progress, 'giant').progress
+    expect(step(valley, found)?.id).toBe('step3')
   })
 
   it('a case without steps closes only on a submit with nothing wrong', () => {

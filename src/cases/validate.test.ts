@@ -334,18 +334,27 @@ describe('validate (Gate 02 A6)', () => {
   })
 
   // (m) is #25's: a step's words sit beside its target, eight at most.
-  it('(m) a step of nine words — step 3 with a second "tap"', () => {
+  it('(m) a step of nine words — step 4 with a second "tap"', () => {
     const long: Text = {
       ...en,
-      steps: { ...en.steps, step3: 'Tap David, then tap the slot under the boy.' },
+      steps: { ...en.steps, step4: 'Tap David, then tap the slot under the boy.' },
     }
-    expect(validate(valley, long)).toEqual(['step "step3" says 9 words, not eight or fewer'])
+    expect(validate(valley, long)).toEqual(['step "step4" says 9 words, not eight or fewer'])
   })
 
   // The last step's retry sits beside its mark too (#25).
   it('(m) a retry of nine words — "Some answers are wrong" in full', () => {
     const long: Text = { ...en, retry: 'Some answers are wrong. Look closer, then try again.' }
     expect(validate(valley, long)).toEqual(['the retry says 9 words, not eight or fewer'])
+  })
+
+  // So does the question the tutorial asks on a miss, and it asks about a face or a blank (#77).
+  it('(m) a question of nine words, and one asked about a spot', () => {
+    const long: Text = { ...en, ask: 'Whose sword was it? Look closer at the picture.' }
+    expect(validate(valley, long)).toEqual(['the question says 9 words, not eight or fewer'])
+    expect(validate({ ...valley, ask: 'boy' }, en)).toEqual([
+      'the case asks about "boy", not a face or a blank of a guided case',
+    ])
   })
 
   // (n) is #30's: a case that teaches the order has one, and the lesson is eight words at most.

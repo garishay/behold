@@ -3,6 +3,23 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.15.1 — Gate 22's amendment, the valley's opening and the question on a miss (#77)
+
+- **77b — the valley's opening and the question on a miss** (#81): asked before the first try,
+  the valley's question singled out the one blank to work out before the player had tried it, so
+  its one deduction came as a prompt, not a find. It now comes on a miss, on the return trip rule
+  4 counts on: Close the case follows the sweep again, and a close that finds the sword's blank
+  wrong rings that blank, never Goliath's word, with "Whose sword? Look closer at the picture."
+  as its retry, and rings only Solve's button from Look ([Q11]). A close wrong elsewhere keeps
+  "Some are wrong. Look closer, then try again." Once asked, the blank takes its ✓ when right; a
+  first-try answer takes none. The case format names the slot a guided case asks about, `ask`,
+  in place of `ask: true`, and check (m) holds the question to eight words and its slot to a face
+  or a blank. The valley's card says how to play under its brief: "Tap the picture to find words.
+  What you see and read tells you where they go." After the boy's tap a step rings the dock
+  whole, the caption with its line of finds, with "That tap found two words: David and sling."
+  above it; the next tap or move reads it, and "Open Solve to name him." follows. Rule 5 names
+  the inference as asked on a miss.
+
 ## v0.15.0 — Gate 22, the sword, the order, and the season (#77)
 
 - **77a — the sword, the order, and the season** (#80): playtest 2's second remote tester put

@@ -58,23 +58,21 @@ type Without<K extends string> = { readonly [P in K]?: never }
  * What ends a tutorial step, and so where its mark sits (#25): a spot tapped, a face or blank
  * filled with its answer, Solve opened, or every spot of the case found — or everything Solve asks
  * for filled, whichever comes first — whose mark sits on Look's button and leaves Look itself to
- * the caption's prompt. One of the four.
+ * the caption's prompt; or the dock's line of finds read, whose mark rings the dock whole, the
+ * caption with its line, and which the next tap meets (#77). One of the five.
  */
 export type Until =
-  | ({ readonly tapped: string } & Without<'filled' | 'view' | 'found'>)
-  | ({ readonly filled: string } & Without<'tapped' | 'view' | 'found'>)
-  | ({ readonly view: 'solve' } & Without<'tapped' | 'filled' | 'found'>)
-  | ({ readonly found: 'all' } & Without<'tapped' | 'filled' | 'view'>)
+  | ({ readonly tapped: string } & Without<'filled' | 'view' | 'found' | 'read'>)
+  | ({ readonly filled: string } & Without<'tapped' | 'view' | 'found' | 'read'>)
+  | ({ readonly view: 'solve' } & Without<'tapped' | 'filled' | 'found' | 'read'>)
+  | ({ readonly found: 'all' } & Without<'tapped' | 'filled' | 'view' | 'read'>)
+  | ({ readonly read: 'found' } & Without<'tapped' | 'filled' | 'view' | 'found'>)
 
-/**
- * A tutorial step; the last has no `until`, marks Close the case, and stays until the case closes.
- * A step that asks waits on a face or a blank and rings it, never its answer's word: the player
- * works the answer out from the picture, so from Look it rings only Solve's button, with no words
- * (#77, [Q11]).
- */
-export type Step =
-  | { readonly id: string; readonly until?: Until; readonly ask?: never }
-  | { readonly id: string; readonly until: Until & { readonly filled: string }; readonly ask: true }
+/** A tutorial step; the last has no `until`, marks Close the case, and stays until the case closes. */
+export interface Step {
+  readonly id: string
+  readonly until?: Until
+}
 
 /**
  * A case's one new idea, marked on Solve where the player first meets it (docs/case-design.md,
@@ -102,6 +100,11 @@ export interface CaseStructure {
   readonly order?: readonly string[]
   readonly blocks: readonly Block[]
   readonly steps?: readonly Step[]
+  /**
+   * The face or blank a guided case asks about on a miss (#77): when a close finds it wrong, the
+   * retry rings it, never its word, with the text's `ask`. Once asked, it takes its ✓ when right.
+   */
+  readonly ask?: string
   /**
    * The case's one new idea, marked where the player first meets it (`Teach`). It is not a step,
    * and the case is not guided by it.
@@ -172,4 +175,10 @@ export type CaseText<S extends CaseStructure> = {
     ? { readonly teach: string }
     : CaseStructure extends S
       ? { readonly teach?: string }
-      : { readonly teach?: never })
+      : { readonly teach?: never }) &
+  // `ask`: the question a guided case asks on a miss, at the face or blank its structure names.
+  (S extends { readonly ask: string }
+    ? { readonly ask: string }
+    : CaseStructure extends S
+      ? { readonly ask?: string }
+      : { readonly ask?: never })

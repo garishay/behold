@@ -211,14 +211,19 @@ export function validate(structure: CaseStructure, text: CaseText<CaseStructure>
         `spot ${q(s.id)} keeps no ${fingertip} px square of its own at ${smallestPicture} px wide`,
       )
 
-  // (m) A step's words sit beside its target, eight at most (#25), and so does the last step's
-  // retry after a failed close.
+  // (m) A step's words sit beside its target, eight at most (#25), and so do the last step's retry
+  // after a failed close and the question a guided case asks on a miss, at a face or a blank (#77).
   for (const [id, words] of Object.entries(text.steps ?? {})) {
     const n = words.split(/\s+/).filter(Boolean).length
     if (n > 8) fail(`step ${q(id)} says ${n} words, not eight or fewer`)
   }
   const retried = text.retry?.split(/\s+/).filter(Boolean).length ?? 0
   if (retried > 8) fail(`the retry says ${retried} words, not eight or fewer`)
+  const asks = text.ask?.split(/\s+/).filter(Boolean).length ?? 0
+  if (asks > 8) fail(`the question says ${asks} words, not eight or fewer`)
+  const { ask } = structure
+  if (ask !== undefined && !(steps.length > 0 && (faceIds.has(ask) || blankIds.has(ask))))
+    fail(`the case asks about ${q(ask)}, not a face or a blank of a guided case`)
 
   // (n) A case that teaches the order has one (#30), a face it teaches is one of its faces (#53),
   // and the mark's words are eight at most.

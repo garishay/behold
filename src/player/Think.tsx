@@ -12,22 +12,25 @@ interface ThinkProps {
   onSlot: (target: string) => void
   onMoment: (id: string) => void
   onOrderSlot: (index: number) => void
+  /** The slot the tutorial's question has asked about, which takes its ✓ from then on (#77). */
+  asked?: string
 }
 
 /**
  * The Solve view (#6; Think until #24), scrolling as one so the account has room on the smallest
  * phone (#24, ruling [4]): who is who, what happened first when the case asks, and the blocks with
- * their blanks. A ✓ lands only on the slots a guided step names; everything else is checked on
- * Close the case, docked below the account (07d).
+ * their blanks. A ✓ lands only on the slots a guided step names, and on the one the question has
+ * asked about; everything else is checked on Close the case, docked below the account (07d).
  */
 export function Think(props: ThinkProps) {
   const { structure: s, text, progress: p, selection } = props
   const slot = (target: string, value: string | undefined, placeholder: string) => {
     const kind = kindOf(s, target)
+    const right = (marked(s, target) || target === props.asked) && value === answer(s, target)
     const state =
       (value ? ' is-filled' : '') +
       (selection.target === target ? ' is-target' : '') +
-      (marked(s, target) && value === answer(s, target) ? ' is-right' : '') +
+      (right ? ' is-right' : '') +
       (selection.word !== null && s.words[selection.word] !== kind ? ' is-dim' : '')
     return (
       <button
