@@ -76,8 +76,9 @@ as on a reload or a return to the case, the step is passed (#77).
 
 A step that waits on a face or a blank may lead with it, `slotFirst: true` (#77): its mark rings
 the slot until the slot waits, then the answer's word, with the words of other kinds dimmed in the
-bank. Either order meets it. The valley's David goes word-first and its sling blank-first, so the
-tutorial shows the fill both ways.
+bank. Either order meets it. Both of the valley's guided fills lead with the slot, so the tutorial
+practises twice the fill that narrows the bank: the slot under the boy dims sling for a name, and
+sling's blank dims David for a thing.
 
 A guided case may name, as `ask`, the face or blank it asks about on a miss (#77): when a close
 finds it wrong, the retry is the question, the text's `ask`. It rings that slot and never its

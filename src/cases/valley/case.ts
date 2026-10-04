@@ -79,9 +79,9 @@ export const valley = {
     // The boy's tap found two words, and the dock's line says so (#77).
     { id: 'step2', until: { read: 'found' } },
     { id: 'step3', until: { view: 'solve' } },
-    { id: 'step4', until: { filled: 'd1' } },
-    // David goes word-first, straight from his find, and sling blank-first, so the valley shows
-    // the fill both ways and the kind filter that the blank-first way brings (#77).
+    // Both fills lead with the slot, so the valley practises twice the way that narrows the bank:
+    // the slot under the boy dims sling for a name, and sling's blank dims David for a thing (#77).
+    { id: 'step4', until: { filled: 'd1' }, slotFirst: true },
     { id: 'step5', until: { filled: 't4' }, slotFirst: true },
     { id: 'step6', until: { found: 'all' } },
     { id: 'step7' },
