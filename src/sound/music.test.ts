@@ -10,6 +10,7 @@ interface Source {
   buffer: { decoded: string } | null
   at?: number
   stoppedAt?: number
+  loop?: boolean
   onended: (() => void) | null
   gain?: Gain
 }
@@ -123,16 +124,32 @@ describe('the music (Gate 10 A2, A4)', () => {
     expect(ac.sources[0].gain?.ramps).toEqual(['set 0 at 0', 'ramp 1 by 2'])
   })
 
-  it('plays a cue through, rests a minute, and plays it again', async () => {
+  // The case bed came round only after a minute's silence, which on the phone read as the music
+  // ending (#84). It was written to loop and is cut to its music's edges, so it loops in place: one
+  // source, faded in on arrival and never again, with nothing waiting on its end.
+  it('loops the case bed in place, with no rest and no fade on the way round', async () => {
     await load('case')
     tap()
     await settle()
     const [ac] = made
-    ac.currentTime = 89.4
+    expect(started(ac)).toEqual([['music/desert-city.m4a', 0]])
+    expect(ac.sources[0].loop).toBe(true)
+    expect(ac.sources[0].onended).toBeNull()
+    expect(ac.sources[0].gain?.ramps).toEqual(['set 0 at 0', 'ramp 1 by 2'])
+    expect(music()).toHaveLength(1)
+  })
+
+  // The title theme's phrase decays to silence on its own, so it comes round after a breath (#84).
+  it('plays the title theme through, takes a breath of 3 s, and plays it again', async () => {
+    await load('title')
+    tap()
+    await settle()
+    const [ac] = made
+    ac.currentTime = 84.6
     ac.sources[0].onended?.()
     expect(started(ac)).toEqual([
-      ['music/desert-city.m4a', 0],
-      ['music/desert-city.m4a', 149.4],
+      ['music/lamentation.m4a', 0],
+      ['music/lamentation.m4a', 87.6],
     ])
     expect(music()).toHaveLength(1)
   })

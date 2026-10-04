@@ -7,8 +7,12 @@ export const cues = { title: 'music/lamentation.m4a', case: 'music/desert-city.m
 
 export type Cue = keyof typeof cues
 
-/** A cue plays through, rests a minute, and plays again, so it never comes round without a pause. */
-const rest = 60
+/**
+ * How a cue comes round (#84). The case bed was written to loop and is cut to its music's edges, so
+ * it loops in place, in time, with no rest and no fade on the way round. The title theme's phrase
+ * decays to silence on its own, so it plays again after a breath, in seconds.
+ */
+const round: Readonly<Record<Cue, number | 'loop'>> = { title: 3, case: 'loop' }
 const fadeIn = 2
 const fadeOut = 1
 
@@ -17,12 +21,13 @@ const address = (cue: Cue) => `${cues[cue]}?v=${__AUDIO_HASHES__[cues[cue]]}`
 
 /** The cue the screen on show asks for; none on the reveal, where the passage is read in quiet. */
 let wanted: Cue | null = null
-/** The cue playing or resting: the only one decoded (A6). */
+/** The cue playing or between its plays: the only one decoded (A6). */
 let current: { cue: Cue; gain: GainNode; source?: AudioBufferSourceNode } | undefined
 
 /**
- * A cue decoded and played, fading in, and each time it ends played again after the rest. It runs
- * on the context's clock, so it pauses, rest and all, while the app is hidden.
+ * A cue decoded and played, fading in, then coming round as `round` says: looping in place, or
+ * played again after its breath each time it ends. It runs on the context's clock, so it pauses,
+ * breath and all, while the app is hidden.
  */
 function begin(ac: AudioContext, cue: Cue) {
   const gain = ac.createGain()
@@ -36,7 +41,9 @@ function begin(ac: AudioContext, cue: Cue) {
     source.connect(gain)
     gain.gain.setValueAtTime(0, at)
     gain.gain.linearRampToValueAtTime(1, at + fadeIn)
-    source.onended = () => play(buffer, ac.currentTime + rest)
+    const again = round[cue]
+    if (again === 'loop') source.loop = true
+    else source.onended = () => play(buffer, ac.currentTime + again)
     source.start(at)
     playing.source = source
   }

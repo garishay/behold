@@ -3,6 +3,17 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.16.0 — Gate 23, the music comes round (#84)
+
+- **84a — the music comes round** (#88): each cue played through, rested a minute, and faded
+  back in, and on Look and Solve that minute read as the music ending. The case bed now loops in
+  place, with no rest and no fade on the way round; its fade-in on arrival and fade-out on
+  leaving stay. It is cut to its music's own edges: the source MP3 carries no gapless tag, so its
+  decode held 62 ms of the codec's priming and padding, which a loop would carry round as a dip
+  and a late beat. The cut keeps the 128 beats between them, so the loop keeps time. The title
+  theme comes round after a 3 s breath in place of the minute. The sound register records the
+  new cut, its command, and how each cue comes round.
+
 ## v0.15.4 — Gate 22's fourth amendment, both guided fills lead with the slot (#77)
 
 - **77e — both guided fills lead with the slot** (#86): with step 4 word-first, the valley

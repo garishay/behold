@@ -111,19 +111,26 @@ ffmpeg -i 531031__creeeeak__small-brass-bell.mp3 -i 219266__radiopassiveboy__tam
 
 ## The music
 
-The credit's "edited" covers the cut, the fade, and the level. The two cues swapped roles on the
-owner's sound check: _Lamentation_ is the title theme and _Desert City_ the case bed.
+The credit's "edited" covers each cue's cut, the title theme's fade, and both cues' levels. The two
+cues swapped roles on the owner's sound check: _Lamentation_ is the title theme and _Desert City_
+the case bed. The case bed loops in place, and the title theme comes round after a 3 s breath
+(`src/sound/music.ts`, #84).
 
 ### music/desert-city.m4a
 
-The case bed, whole: 89.37 s. It was written to loop, so it ends mid-phrase at full level; its last
-2 s fade, which takes nothing out. Integrated −12.4 LUFS, so −9.6 dB, to −22.0; true peak −8.9
-dBTP.
+The case bed, cut to its music's own edges: 89.302 s, 4,286,512 samples at 48 kHz. It was written
+to loop: it stops mid-phrase at full level, its end running into its start. The MP3 carries no
+gapless tag, so its decode holds 1,058 samples of the codec's priming before the music and 1,702 of
+its padding after it, 62 ms in all. The cut keeps samples 1,058 to 3,939,290 of the 44.1 kHz decode,
+the music between them: 89.3023 s, which is 128 beats at 86 BPM to within a sample, so the game
+loops it in place and the loop keeps time. It has no fade. The container's edit list trims the
+encoder's own priming and padding, so Chrome decodes the cut to its length with no silence at
+either end. Integrated −12.4 LUFS, so −9.6 dB, to −22.0; true peak −7.6 dBTP.
 
-SHA-256 `d8aa5f92e8c306f620c02dc5731d52535feb3ac94c7162e74b4d9a3bda183627`.
+SHA-256 `0c33cb163b0bc2efa6c1c8ead8f0913a057baac6232093d63da42f38b56260ee`.
 
 ```
-ffmpeg -i "Desert City.mp3" -af "afade=t=out:st=87.36:d=2,volume=-9.6dB" -vn -ac 2 -ar 48000 -c:a aac -b:a 96k -map_metadata -1 -fflags +bitexact -flags:a +bitexact music/desert-city.m4a
+ffmpeg -i "Desert City.mp3" -af "atrim=start_sample=1058:end_sample=3939290,asetpts=PTS-STARTPTS,volume=-9.6dB" -vn -ac 2 -ar 48000 -c:a aac -b:a 96k -map_metadata -1 -fflags +bitexact -flags:a +bitexact music/desert-city.m4a
 ```
 
 ### music/lamentation.m4a
