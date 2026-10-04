@@ -100,8 +100,10 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   // have left and the showing they left at, so a step shown again brings them back.
   const [said, setSaid] = useState<string | null>(null)
   // A failed close in the tutorial brings the last step's words back as its retry, which says the
-  // answers were checked (#25).
+  // answers were checked (#25). One that finds wrong the slot the case asks about asks its question
+  // instead, at that slot, and from then on the slot takes its ✓ when right (#77).
   const [retry, setRetry] = useState(false)
+  const [asking, setAsking] = useState(false)
   // The bank's head: a refused word's message, or how far off a close was (07c, #24 [3]).
   const [note, setNote] = useState('')
   // The stuck signals (#29): taps on the picture that find nothing new while something is unfound,
@@ -148,12 +150,14 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const spots = s.moments.flatMap((m) => m.spots)
   const unfound = (list: typeof moment.spots) => list.some((x) => !progress.tapped.includes(x.id))
   // Under a guided step the step's own mark is the hint: no hint is offered, and a signal shows the
-  // step again (#29). On Look the step that waits on every spot found marks nothing, and a step that
-  // asks rings only Solve's button, so there the signals offer hints as in any case (#25), a
-  // question's at the evidence for the slot it asks about (#77).
+  // step again (#29). On Look the step that waits on every spot found marks nothing, so there the
+  // signals offer hints as in any case (#25); a question's point at the evidence for its slot (#77).
   const current = step(s, progress)
   const sweep = current?.until?.found !== undefined
-  const asked = current?.ask ? current.until.filled : undefined
+  // The slot the question asks about, while it is asked and still wrong (#77).
+  const put = (p: Progress, id: string) => p.faces[id] ?? p.fills[id]
+  const wrongAt = (id?: string) => id !== undefined && put(progress, id) !== answer(s, id)
+  const asked = asking && wrongAt(s.ask) ? s.ask : undefined
   const looks = sweep || asked !== undefined
   // From Look, a question's ring on Solve's button carries no words, and so no dim ([Q11]).
   const silent = asked !== undefined && view === 'look'
@@ -202,9 +206,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     setNote(kind === undefined ? '' : strings.blankWants(kind, found))
     if (placed(progress, o.progress)) play('place')
     // A wrong word set in the slot a question asks about asks again, words, dim, and all (#77).
-    const put = asked && (o.progress.faces[asked] ?? o.progress.fills[asked])
-    if (put && put !== (progress.faces[asked] ?? progress.fills[asked]) && put !== answer(s, asked))
-      nudge()
+    const word = asked && put(o.progress, asked)
+    if (word && word !== put(progress, asked) && word !== answer(s, asked)) nudge()
     close(o.progress)
   }
   // A tap that found nothing new, on a spot found before or on no spot, runs toward a hint while
@@ -244,9 +247,11 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
       play('notYet')
       setFails(fails + 1)
       setMissed(firstWrong(s, progress) ?? null)
-      // In the tutorial the last step's mark comes back, dim and all, with its retry (#25).
+      // In the tutorial the last step's mark comes back, dim and all, with its retry (#25), or as
+      // the question at the slot the case asks about when this close found it wrong (#77).
       if (current !== undefined && current.until === undefined) {
-        setRetry(true)
+        if (wrongAt(s.ask)) setAsking(true)
+        else setRetry(true)
         nudge()
       }
     }
@@ -342,7 +347,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   // Where the tutorial's step is shown (#25): at its target on this view — the spot, Solve's
   // button, the answer's word and then its slot, or Close the case — or at the button of the view
   // that holds it; the step that waits on everything found, at Look's button and nowhere on Look;
-  // a step that asks, at its slot, never its word, and from Look at Solve's button (#77, [Q11]).
+  // and the question, at its slot, never its word, and from Look at Solve's button (#77, [Q11]).
   // Nothing is marked under a card, a sheet, or a paper.
   const markAt = (until = current?.until) => {
     if (current === undefined || card || sheet !== null || paper !== null) return undefined
@@ -467,6 +472,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
               onSlot={(t) => apply(chooseSlot(s, progress, selection, t))}
               onMoment={(id) => apply(chooseMoment(s, progress, selection, id))}
               onOrderSlot={(i) => apply(chooseOrderSlot(s, progress, selection, i))}
+              asked={asking ? s.ask : undefined}
             />
           </div>
           {/* Close the case docks as its own row below the account, outside the scroll, so it never
@@ -531,7 +537,11 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
           label={
             (fleeting && said === showing) || silent
               ? ''
-              : ((retry && !current.until ? text.retry : text.steps?.[current.id]) ?? '')
+              : ((asked !== undefined
+                  ? text.ask
+                  : retry && !current.until
+                    ? text.retry
+                    : text.steps?.[current.id]) ?? '')
           }
           onTap={fleeting && said !== showing && !silent ? () => setSaid(showing) : undefined}
         />

@@ -348,6 +348,15 @@ describe('validate (Gate 02 A6)', () => {
     expect(validate(valley, long)).toEqual(['the retry says 9 words, not eight or fewer'])
   })
 
+  // So does the question the tutorial asks on a miss, and it asks about a face or a blank (#77).
+  it('(m) a question of nine words, and one asked about a spot', () => {
+    const long: Text = { ...en, ask: 'Whose sword was it? Look closer at the picture.' }
+    expect(validate(valley, long)).toEqual(['the question says 9 words, not eight or fewer'])
+    expect(validate({ ...valley, ask: 'boy' }, en)).toEqual([
+      'the case asks about "boy", not a face or a blank of a guided case',
+    ])
+  })
+
   // (n) is #30's: a case that teaches the order has one, and the lesson is eight words at most.
   it('(n) a lesson on the order in a case without one — Carmel with its order cut', () => {
     expect(validate({ ...carmel, order: undefined }, carmelEn)).toEqual([

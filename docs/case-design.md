@@ -38,9 +38,11 @@ rules below are the answer, ruled on #26.
 5. **The check is coarse.** Close the case says how many are wrong — one or two, or several —
    never which. The tutorial marks an answer right only on the slots its guided steps name; when
    those steps are done, Close the case appears, the last step points at it, and the tutorial
-   closes on the same check as every case. The first case teaches the real check. One guided step
-   is an inference: it rings the sword's blank, not its word, and asks whose sword it was, so the
-   tutorial shows an answer worked out from what is seen, the way rule 2 leaves every other (#77).
+   closes on the same check as every case. The first case teaches the real check. Its one
+   inference is asked on a miss: when a close finds the sword's blank wrong, the retry rings that
+   blank, not its word, and asks whose sword it was, so the answer is worked out from what is seen
+   on the return trip rule 4 counts on, the way rule 2 leaves every other. Once asked, the blank
+   takes its ✓ when right (#77).
 
 6. **One new idea per case.** A case adds one thing the player has not done before, and names it
    in its brief to the author. The valley, then season one's first rungs:

@@ -68,9 +68,10 @@ export const valley = { … } as const satisfies CaseStructure
 Derived, never stored: a blank's kind is its answer's; a case is the tutorial when it has steps;
 the paper ids are those the spots open; a step whose `until` is `filled` is a Solve step.
 
-A `filled` step may ask, `ask: true`: its mark rings the face or blank and never the answer's
-word, and from Look it rings only Solve's button, with no words, leaving the picture clear for the
-player to work the answer out. Its slot takes its ✓ as any slot a step names (#77, [Q11]).
+A guided case may name, as `ask`, the face or blank it asks about on a miss (#77): when a close
+finds it wrong, the retry is the question, the text's `ask`. It rings that slot and never its
+word, and from Look only Solve's button, with no words, leaving the picture clear ([Q11]). Once
+asked, the slot takes its ✓ when right. A close wrong elsewhere keeps the retry.
 
 Every string in the structure is an id, a file name, a book code, or a cite. There is no field
 that can hold a sentence, so the structure cannot carry player text and cannot carry scripture.
@@ -97,6 +98,7 @@ The type is computed from the structure, so the keys below are exactly the struc
 | `blocks`   | block id → `heading` and `parts`: runs of text, `{ t: '…' }`, and the block's blanks, `{ b: 't1' }`, in this language's own word order |
 | `steps`    | step id → the step's words, eight or fewer, beside its mark; only when the structure has steps                                         |
 | `retry`    | the last step's words after a failed close, eight or fewer, which say the answers were checked; only when the structure has steps      |
+| `ask`      | the question asked on a miss, eight or fewer, beside its mark; only when the structure names `ask`                                     |
 | `teach`    | the lesson's words, eight or fewer, beside its mark; only when the structure teaches                                                   |
 | `reveal`   | the paragraphs in the game's words, shown before the passage                                                                           |
 
@@ -191,7 +193,8 @@ Three layers, from mechanical to read.
    whitespace alone is empty, but for a run of text between two blanks, which may be the space
    between them; a blank's kind has at least three words in the case, and the case has one name
    more than it has faces (`docs/case-design.md`, rule 1); every spot keeps its fingertip
-   (_Pictures_), which holds its box to a tenth of the width on each side as well; a step's words, and the retry's, are eight or fewer;
+   (_Pictures_), which holds its box to a tenth of the width on each side as well; a step's words, and the retry's, are eight or fewer,
+   and so are the question's, which a guided case asks about a face or a blank;
    a case that teaches the order has one, a face it teaches is one of its faces, and its lesson
    is eight words or fewer; every face and blank names a spot of the case as its evidence, and in
    a case with an order every moment names one of its own; and the moments are never listed in

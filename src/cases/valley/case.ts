@@ -80,10 +80,10 @@ export const valley = {
     { id: 'step3', until: { filled: 'd1' } },
     { id: 'step4', until: { filled: 't4' } },
     { id: 'step5', until: { found: 'all' } },
-    // The one answer the tutorial asks the player to work out: whose sword it was (#77).
-    { id: 'step6', until: { filled: 't5' }, ask: true },
-    { id: 'step7' },
+    { id: 'step6' },
   ],
+  // The one answer the tutorial asks the player to work out, on a miss: whose sword it was (#77).
+  ask: 't5',
   // What settles each face and blank, for a hint to point at (#29).
   evidence: {
     d1: 'boy',
