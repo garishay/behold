@@ -39,7 +39,7 @@ describe('progress on the device (#6, A6)', () => {
   })
 
   // A store that parses but is not progress is unreadable as progress: it starts empty rather
-  // than crashing the title screen (review round 1, #20).
+  // than crashing the cases page (review round 1, #20).
   it('starts empty with a store that is JSON but not a record of progress', () => {
     localStorage.setItem(key, 'null')
     expect(load(cases)).toEqual({})

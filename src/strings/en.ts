@@ -120,7 +120,7 @@ export const strings = {
   esvLink: { text: 'www.esv.org', href: 'https://www.esv.org' },
   backToCases: 'Back to cases',
 
-  // The sound switches, on the title screen and in the menu (Gate 10 A4), and under them on an
+  // The sound switches, on the cases page and in the menu (Gate 10 A4), and under them on an
   // iPhone only, whose silent mode mutes the game (#72).
   music: 'Music',
   effects: 'Effects',

@@ -116,7 +116,7 @@ export function useCue(cue: Cue | null) {
   }, [cue])
 }
 
-/** The title screen's cue, as an element of the screen the app draws inline. */
+/** A screen's cue as an element, for the title and the cases page, which the app draws inline. */
 export function Music({ cue }: { cue: Cue | null }) {
   useCue(cue)
   return null

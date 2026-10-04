@@ -1353,7 +1353,7 @@ button:focus-visible {
 }
 
 /* The attribution (#3): the translation's mark at the right of each passage's label, and the
-   notice with its link under the passages, set like the title screen's notice. */
+   notice with its link under the passages, set like the cases page's notice. */
 .passage h3 .tr {
   float: right;
   font-family: var(--sans);

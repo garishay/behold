@@ -219,7 +219,7 @@ describe('the music by screen (Gate 10 A2)', () => {
 })
 
 describe('the sound switches (Gate 10 A4)', () => {
-  it('shows Music and Effects on the title screen and in the menu, both on, each its own', () => {
+  it('shows Music and Effects on the cases page and in the menu, both on, each its own', () => {
     start()
     const music = screen.getByRole('button', { name: 'Music' })
     const effects = screen.getByRole('button', { name: 'Effects' })

@@ -15,7 +15,7 @@ function Toggle({ which }: { which: Switch }) {
 }
 
 /**
- * The two sound switches (Gate 10 A4), the same on the title screen and in the case's menu. On an
+ * The two sound switches (Gate 10 A4), the same on the cases page and in the case's menu. On an
  * iPhone the phone's silent mode mutes the game whatever they say, and no web page can read that
  * mode, so there they say so (#72). The phone is known by its user agent, read on the phone.
  */

@@ -5,7 +5,7 @@ and below the table the command that made it from its source, the way each pictu
 its prompt as sent (world rules §9), and its SHA-256. `src/sound/register.test.ts` holds it: every
 file has a row, a command, and a digest it matches, every row has a file, and every licence is CC0
 1.0 or CC BY 4.0 (Gate 10 A1), so no file changes without its entry. Every CC BY file is also named
-in the title screen's credit line, `strings.credit`.
+in the cases page's credit line, `strings.credit`.
 
 | file                    | role                                              | source                                                                                                                                                           | author                       | licence   |
 | ----------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- | --------- |
@@ -15,7 +15,7 @@ in the title screen's credit line, `strings.credit`.
 | `not-yet.m4a`           | not yet: Close the case, answered wrong           | [Full Scale on the Flute](https://freesound.org/people/painted-panda/sounds/590175/)                                                                             | painted-panda                | CC0 1.0   |
 | `close.m4a`             | the close: Close the case, answered right         | [bell8.wav](https://freesound.org/people/creeeeak/sounds/531031/) and [Tambourine_Single_Hit_1.wav](https://freesound.org/people/radiopassiveboy/sounds/219266/) | creeeeak and radiopassiveboy | CC0 1.0   |
 | `music/desert-city.m4a` | the case bed, on Look and Solve                   | [Desert City](https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100564)                                                                           | Kevin MacLeod                | CC BY 4.0 |
-| `music/lamentation.m4a` | the title theme, on the title screen              | [Lamentation](https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100607)                                                                           | Kevin MacLeod                | CC BY 4.0 |
+| `music/lamentation.m4a` | the title theme, on the title and the cases page  | [Lamentation](https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100607)                                                                           | Kevin MacLeod                | CC BY 4.0 |
 
 ## The edits
 
