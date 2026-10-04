@@ -3,6 +3,16 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.15.4 — Gate 22's fourth amendment, both guided fills lead with the slot (#77)
+
+- **77e — both guided fills lead with the slot** (#86): with step 4 word-first, the valley
+  practised each way of filling once, and a tester stumbled on its words, "Tap David, then the
+  slot under the boy." Step 4 now leads with the slot, as step 5 does: it rings the slot under
+  the boy, then David once the slot waits, with sling dimmed, and its words read "Tap the slot
+  under the boy, then David." Either order still meets it. So the valley practises twice the fill
+  that narrows the bank: step 4 dims sling for a name, and step 5 dims David for a thing. The
+  docs say both guided fills lead with the slot.
+
 ## v0.15.3 — Gate 22's third amendment, the blank-first fill (#77)
 
 - **77d — the blank-first fill** (#83): the tutorial taught the fill one way, since steps 4 and 5
