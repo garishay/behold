@@ -764,12 +764,14 @@ button:focus-visible {
   line-height: 1.45;
 }
 
-/* How to play, under a guided case's brief (#77). */
+/* A line under the brief: how to play on a guided case's card, or a case's note, wrapped so no
+   word is left alone on its last line (#77). */
 .card .how {
   font-family: var(--sans);
   font-style: normal;
   font-size: 14px;
   color: var(--papyrus-ink-dim);
+  text-wrap: pretty;
 }
 
 .card button {

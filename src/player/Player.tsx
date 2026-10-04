@@ -446,8 +446,10 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
               <div className="card" role="dialog" aria-label={text.title}>
                 <h2>{text.title}</h2>
                 <p>{text.brief}</p>
-                {/* The tutorial says how to play under its brief (#77). */}
+                {/* The tutorial says how to play under its brief, and a case with a note says
+                    what its screen adds (#77). */}
                 {s.steps && <p className="how">{strings.howTo}</p>}
+                {text.note && <p className="how">{text.note}</p>}
                 <button type="button" onClick={() => setBrief(false)}>
                   {strings.start}
                 </button>

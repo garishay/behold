@@ -95,6 +95,7 @@ The type is computed from the structure, so the keys below are exactly the struc
 | `title`    | the case card's title                                                                                                                  |
 | `subtitle` | the card's second line                                                                                                                 |
 | `brief`    | the case's opening question: its card over the picture when a fresh case opens, and the menu's sheet after (#24)                       |
+| `note`     | optional: a line under the brief, on its card only, for what the screen adds that the brief doesn't say — the mountain's dots (#77)    |
 | `passages` | one label per passage, in the language's own book names — `1 Samuel 17:38–51`                                                          |
 | `moments`  | moment id → its name                                                                                                                   |
 | `captions` | spot id → what the player reads on a tap                                                                                               |

@@ -374,6 +374,19 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     expect(screen.getByRole('dialog', { name: 'The mountain' })).not.toHaveTextContent(how)
   })
 
+  // The mountain is the first case with more than one picture, and a picker's dot says more waits
+  // there: its card says so under the brief, in the case's own words, and the valley's doesn't
+  // (#77).
+  it('the mountain’s card says what a dot means under its brief, and the valley’s does not', async () => {
+    start(<App />, laterStarted)
+    openCase(/The valley/)
+    const note = 'Three pictures this time. A dot means more to find there.'
+    expect(screen.getByRole('dialog', { name: 'The valley' })).not.toHaveTextContent(note)
+    menu('Cases')
+    fireEvent.click(await screen.findByRole('button', { name: /The mountain/ }))
+    expect(screen.getByRole('dialog', { name: 'The mountain' })).toHaveTextContent(note)
+  })
+
   it('the brief’s card goes with the first tap, and the menu holds the brief, a hint, Cases, Restart, and the switches', () => {
     start(<App />, laterStarted)
     openCase(/The vineyard/)

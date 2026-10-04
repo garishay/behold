@@ -24,7 +24,8 @@ rules below are the answer, ruled on #26.
    to the player: the seal is under the woman's hand, and the caption does not say whose hand
    used it. A paper is a document in the scene: it may show part of the document, but it marks
    what it leaves out. The same holds for the brief: it poses the case's questions and answers
-   none of them.
+   none of them. A note on the card says only how the case's screen is played, never what the
+   case holds.
 
 3. **A blank aims at the detail people get wrong, not the part they know.** Everyone knows the
    giant fell; few remember whose sword took his head (1 Samuel 17:51). A blank on the part
