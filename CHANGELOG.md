@@ -3,6 +3,18 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.15.3 — Gate 22's third amendment, the blank-first fill (#77)
+
+- **77d — the blank-first fill** (#83): the tutorial taught the fill one way, since steps 4 and 5
+  both led with the word, and a first-time player who placed every word that way never met the
+  kind filter: an empty blank tapped first dims the words that can't go there. Step 5 now leads
+  with sling's blank, then sling once the blank waits, with "Tap the blank first. Fitting words
+  stay bright."; either order still meets it, and step 4 stays word-first, so the valley shows
+  the fill both ways. Rule 1's rivals keep the filter from deciding a blank. A step that waits on
+  a face or a blank may lead with it in the case format (`slotFirst: true`). A mark's words now
+  wrap balanced, so step 5's two sentences take a line each and no label leaves a word alone on
+  its last line.
+
 ## v0.15.2 — Gate 22's second amendment, Next and the mountain's dots (#77)
 
 - **77c — Next and the mountain's dots** (#82): the found line's step tells and asks for nothing,

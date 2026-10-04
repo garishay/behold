@@ -68,11 +68,17 @@ export type Until =
   | ({ readonly found: 'all' } & Without<'tapped' | 'filled' | 'view' | 'read'>)
   | ({ readonly read: 'found' } & Without<'tapped' | 'filled' | 'view' | 'found'>)
 
-/** A tutorial step; the last has no `until`, marks Close the case, and stays until the case closes. */
-export interface Step {
-  readonly id: string
-  readonly until?: Until
-}
+/** An `until` that waits on a face or a blank filled with its answer. */
+type Fill = Until & { readonly filled: string }
+
+/**
+ * A tutorial step; the last has no `until`, marks Close the case, and stays until the case closes.
+ * One that waits on a face or a blank may lead with it, `slotFirst`: its mark rings the slot until
+ * the slot waits, then the answer's word, so the tutorial shows the fill both ways (#77).
+ */
+export type Step =
+  | { readonly id: string; readonly until?: Until; readonly slotFirst?: never }
+  | { readonly id: string; readonly until: Fill; readonly slotFirst: true }
 
 /**
  * A case's one new idea, marked on Solve where the player first meets it (docs/case-design.md,

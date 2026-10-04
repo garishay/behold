@@ -80,7 +80,9 @@ export const valley = {
     { id: 'step2', until: { read: 'found' } },
     { id: 'step3', until: { view: 'solve' } },
     { id: 'step4', until: { filled: 'd1' } },
-    { id: 'step5', until: { filled: 't4' } },
+    // David goes word-first, straight from his find, and sling blank-first, so the valley shows
+    // the fill both ways and the kind filter that the blank-first way brings (#77).
+    { id: 'step5', until: { filled: 't4' }, slotFirst: true },
     { id: 'step6', until: { found: 'all' } },
     { id: 'step7' },
   ],

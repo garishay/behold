@@ -84,6 +84,20 @@ describe('the Zoom pill (#24, ruling [1])', () => {
   })
 })
 
+// jsdom lays nothing out, so the two wraps are pinned as text, against removal: the browser's
+// reading of every label and the phone are their evidence (#77, review round 1 on #83).
+describe('the words that wrap to a shape (#77)', () => {
+  it('a mark’s words wrap balanced, so step 5’s two sentences take a line each', () => {
+    const label = /\n\.coach \.label \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    expect(label).toMatch(/text-wrap: balance;/)
+  })
+
+  it('a card’s line under the brief wraps pretty, so the mountain’s note leaves no word alone', () => {
+    const how = /\n\.card \.how \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    expect(how).toMatch(/text-wrap: pretty;/)
+  })
+})
+
 // jsdom lays nothing out, so 07c's fixed case screen (#24) is pinned as text; the phone is its
 // evidence.
 describe('the case screen fits the phone (07c, #24)', () => {

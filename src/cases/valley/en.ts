@@ -68,7 +68,7 @@ export const en = {
     step2: 'That tap found two words: David and sling.',
     step3: 'Open Solve to name him.',
     step4: 'Tap David, then the slot under the boy.',
-    step5: 'Now tap sling, then its blank.',
+    step5: 'Tap the blank first. Fitting words stay bright.',
     step6: 'Find the other words in the picture.',
     step7: 'Fill the rest, then close the case.',
   },

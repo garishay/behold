@@ -60,6 +60,13 @@ export const both = {
   steps: [{ id: 'step1', until: { tapped: 'boy', filled: 'd1' } }],
 } as const satisfies CaseStructure
 
+// A step that leads with its slot waits on a face or a blank (#77).
+export const slotless = {
+  ...valley,
+  // @ts-expect-error: only a step that waits on a face or a blank leads with its slot
+  steps: [{ id: 'step1', until: { tapped: 'boy' }, slotFirst: true }],
+} as const satisfies CaseStructure
+
 // A part that is a run of text and a blank at once.
 export const partBoth = {
   ...en,

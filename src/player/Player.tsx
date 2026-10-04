@@ -351,8 +351,9 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
       </div>
     )
   // Where the tutorial's step is shown (#25): at its target on this view — the spot, Solve's
-  // button, the answer's word and then its slot, or Close the case — or at the button of the view
-  // that holds it; the step that waits on everything found, at Look's button and nowhere on Look;
+  // button, the answer's word and then its slot, or for a step that leads with its slot the slot
+  // and then the word (#77), or Close the case — or at the button of the view that holds it; the
+  // step that waits on everything found, at Look's button and nowhere on Look;
   // the step that waits on the dock's line of finds read, at the dock whole, the caption with its
   // line, so its words sit above it (#77); and the question, at its slot, never its word, and from
   // Look at Solve's button (#77, [Q11]). Nothing is marked under a card, a sheet, or a paper.
@@ -367,6 +368,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     const filled = until?.filled
     if (filled === undefined) return '[data-close]'
     const word = answer(s, filled)
+    if (current.slotFirst)
+      return selection.target === filled ? `[data-word="${word}"]` : `[data-slot="${filled}"]`
     return selection.word === word ? `[data-slot="${filled}"]` : `[data-word="${word}"]`
   }
   // Where a hint's ring sits (#29), reached as a step's is: through Look's button from Solve and the
