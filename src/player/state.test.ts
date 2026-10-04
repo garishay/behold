@@ -130,7 +130,8 @@ describe('the model (#6)', () => {
     p = chooseSlot(valley, p, chooseWord(valley, p, nothing, 'sling').selection, 't4').progress
     expect(step(valley, p)?.id).toBe('step5')
     expect(closable(valley, p)).toBe(false)
-    expect(['d1', 't4', 'd2', 't1'].map((slot) => marked(valley, slot))).toEqual([
+    expect(['d1', 't4', 't5', 'd2', 't1'].map((slot) => marked(valley, slot))).toEqual([
+      true,
       true,
       true,
       false,
@@ -139,14 +140,14 @@ describe('the model (#6)', () => {
     for (const spot of ['giant', 'brook', 'armor', 'basket']) p = tap(valley, p, spot).progress
     expect(step(valley, p)?.id).toBe('step5')
     p = tap(valley, p, 'bearer').progress
-    expect(step(valley, p)?.id).toBe('step6')
-    expect(closable(valley, p)).toBe(true)
+    // The sword's blank is asked next, and Close the case waits for it (#77).
+    expect([step(valley, p)?.id, closable(valley, p)]).toEqual(['step6', false])
     const answers = { d2: 'goliath', t1: 'ten', t2: 'commander', t3: 'six', t5: 'goliath' }
     for (const [slot, word] of Object.entries(answers))
       p = chooseSlot(valley, p, chooseWord(valley, p, nothing, word).selection, slot).progress
     expect(wrong(valley, p)).toBe(0)
     expect(p.solved).toBe(false)
-    expect(step(valley, p)?.id).toBe('step6')
+    expect([step(valley, p)?.id, closable(valley, p)]).toEqual(['step7', true])
     p = submit(valley, p)
     expect(p.solved).toBe(true)
     expect(step(valley, p)).toBeUndefined()
@@ -167,7 +168,10 @@ describe('the model (#6)', () => {
       p = chooseSlot(valley, p, chooseWord(valley, p, nothing, word).selection, slot).progress
     expect([step(valley, p)?.id, closable(valley, p)]).toEqual(['step5', false])
     p = chooseSlot(valley, p, chooseWord(valley, p, nothing, 'david').selection, 't5').progress
-    expect([step(valley, p)?.id, closable(valley, p)]).toEqual(['step6', true])
+    // Everything filled meets the sweep, and the question waits for the sword's own name (#77).
+    expect([step(valley, p)?.id, closable(valley, p)]).toEqual(['step6', false])
+    p = chooseSlot(valley, p, chooseWord(valley, p, nothing, 'goliath').selection, 't5').progress
+    expect([step(valley, p)?.id, closable(valley, p)]).toEqual(['step7', true])
   })
 
   // A step already done never shows (#25): sling in its blank before David is named, and the

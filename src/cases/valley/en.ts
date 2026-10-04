@@ -69,7 +69,8 @@ export const en = {
     step3: 'Tap David, then the slot under the boy.',
     step4: 'Now tap sling, then its blank.',
     step5: 'Find the other words in the picture.',
-    step6: 'Fill the rest, then close the case.',
+    step6: 'Whose sword? Look closer at the picture.',
+    step7: 'Fill the rest, then close the case.',
   },
   retry: 'Some are wrong. Look closer, then try again.',
   reveal: [

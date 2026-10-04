@@ -68,6 +68,10 @@ export const valley = { … } as const satisfies CaseStructure
 Derived, never stored: a blank's kind is its answer's; a case is the tutorial when it has steps;
 the paper ids are those the spots open; a step whose `until` is `filled` is a Solve step.
 
+A `filled` step may ask, `ask: true`: its mark rings the face or blank and never the answer's
+word, and on Look it marks nothing, since the player works the answer out from the picture. Its
+slot takes its ✓ as any slot a step names (#77).
+
 Every string in the structure is an id, a file name, a book code, or a cite. There is no field
 that can hold a sentence, so the structure cannot carry player text and cannot carry scripture.
 

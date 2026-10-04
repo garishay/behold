@@ -38,14 +38,16 @@ rules below are the answer, ruled on #26.
 5. **The check is coarse.** Close the case says how many are wrong — one or two, or several —
    never which. The tutorial marks an answer right only on the slots its guided steps name; when
    those steps are done, Close the case appears, the last step points at it, and the tutorial
-   closes on the same check as every case. The first case teaches the real check.
+   closes on the same check as every case. The first case teaches the real check. One guided step
+   is an inference: it rings the sword's blank, not its word, and asks whose sword it was, so the
+   tutorial shows an answer worked out from what is seen, the way rule 2 leaves every other (#77).
 
 6. **One new idea per case.** A case adds one thing the player has not done before, and names it
    in its brief to the author. Season one's first rungs:
 
    | case         | what it adds                                                 |
    | ------------ | ------------------------------------------------------------ |
-   | the valley   | tap, name, fill, close — the whole loop, guided              |
+   | the valley   | tap, name, fill, work one answer out, close — guided         |
    | the mountain | several moments, and the order they happened in              |
    | the vineyard | papers, and names worked out by cross-reference              |
    | the battle   | a disguise: a face without its marker, named by what happens |
