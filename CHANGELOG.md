@@ -8,10 +8,11 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
 - **77a — the sword, the order, and the season** (#80): playtest 2's second remote tester put
   David in the sword's blank, since every guided move in the valley was a direct match and none
   showed an answer worked out from the picture. After the sweep the valley now asks: it rings the
-  sword's blank, never Goliath's word, with "Whose sword? Look closer at the picture.", marks
-  nothing on Look, and asks again on a wrong name; the right one takes its ✓, and Close the case
-  follows. A step may ask in the case format (`ask: true`), and progress kept from before moves
-  past every step it has met. Both remote testers read the mountain's order as it was shown, so
+  sword's blank, never Goliath's word, with "Whose sword? Look closer at the picture.", rings
+  only Solve's button from Look, with no words ([Q11]), and asks again on a wrong name; the
+  right one takes its ✓, and Close the case follows. A step may ask in the case format
+  (`ask: true`), and progress kept from before moves past every step it has met. Both remote
+  testers read the mountain's order as it was shown, so
   its lesson reads "These are out of order. Which happened first?", and the order's pictures lie
   loose in a tray, two to a row, none under a slot; check (p) fails a case whose pictures are
   listed in the order they happened. A time on a card read as a par to beat, so the cards drop
