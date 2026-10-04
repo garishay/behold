@@ -58,13 +58,15 @@ type Without<K extends string> = { readonly [P in K]?: never }
  * What ends a tutorial step, and so where its mark sits (#25): a spot tapped, a face or blank
  * filled with its answer, Solve opened, or every spot of the case found — or everything Solve asks
  * for filled, whichever comes first — whose mark sits on Look's button and leaves Look itself to
- * the caption's prompt. One of the four.
+ * the caption's prompt; or the dock's line of finds read, whose mark rings the dock whole, the
+ * caption with its line, and which the next tap meets (#77). One of the five.
  */
 export type Until =
-  | ({ readonly tapped: string } & Without<'filled' | 'view' | 'found'>)
-  | ({ readonly filled: string } & Without<'tapped' | 'view' | 'found'>)
-  | ({ readonly view: 'solve' } & Without<'tapped' | 'filled' | 'found'>)
-  | ({ readonly found: 'all' } & Without<'tapped' | 'filled' | 'view'>)
+  | ({ readonly tapped: string } & Without<'filled' | 'view' | 'found' | 'read'>)
+  | ({ readonly filled: string } & Without<'tapped' | 'view' | 'found' | 'read'>)
+  | ({ readonly view: 'solve' } & Without<'tapped' | 'filled' | 'found' | 'read'>)
+  | ({ readonly found: 'all' } & Without<'tapped' | 'filled' | 'view' | 'read'>)
+  | ({ readonly read: 'found' } & Without<'tapped' | 'filled' | 'view' | 'found'>)
 
 /** A tutorial step; the last has no `until`, marks Close the case, and stays until the case closes. */
 export interface Step {

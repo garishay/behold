@@ -747,6 +747,14 @@ button:focus-visible {
   line-height: 1.45;
 }
 
+/* How to play, under a guided case's brief (#77). */
+.card .how {
+  font-family: var(--sans);
+  font-style: normal;
+  font-size: 14px;
+  color: var(--papyrus-ink-dim);
+}
+
 .card button {
   min-height: 44px;
   padding: 0 22px;

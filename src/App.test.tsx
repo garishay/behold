@@ -362,6 +362,18 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     expect(coach()).toHaveTextContent('Tap the boy with the sling.')
   })
 
+  // How to play, up front (#77): the tutorial's card carries one line under its brief, and a case
+  // without steps carries none.
+  it('the tutorial’s card says how to play under its brief, and no other card does', async () => {
+    start(<App />, laterStarted)
+    openCase(/The valley/)
+    const how = 'Tap the picture to find words. What you see and read tells you where they go.'
+    expect(screen.getByRole('dialog', { name: 'The valley' })).toHaveTextContent(how)
+    menu('Cases')
+    fireEvent.click(await screen.findByRole('button', { name: /The mountain/ }))
+    expect(screen.getByRole('dialog', { name: 'The mountain' })).not.toHaveTextContent(how)
+  })
+
   it('the brief’s card goes with the first tap, and the menu holds the brief, a hint, Cases, Restart, and the switches', () => {
     start(<App />, laterStarted)
     openCase(/The vineyard/)
@@ -386,7 +398,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
       'Found: David, sling · one of the faces in Solve',
     )
     expect(screen.getByRole('tab', { name: /Look/ })).toHaveTextContent('Look1/6')
-    expect(coach()).toHaveTextContent('Open Solve to name him.')
+    expect(coach()).toHaveTextContent('That tap found two words: David and sling.')
     expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('Solve0/7+2')
     tapSpot('giant')
     expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('Solve0/7+6')
@@ -799,6 +811,10 @@ describe('the tutorial’s marks (#25)', () => {
     expect(at()).toBe('[data-view="look"]')
     tab(/Look/)
     tapSpot('boy')
+    // The boy's tap found two words, and the dock says so: it is ringed whole, the caption with
+    // its line of finds, and the next tap reads it (#77).
+    expect([at(), said()]).toEqual(['.dock', 'That tap found two words: David and sling.'])
+    fireEvent.pointerDown(document.querySelector('.dock .found')!)
     expect([at(), said()]).toEqual(['[data-view="solve"]', 'Open Solve to name him.'])
     tab(/Solve/)
     expect([at(), said()]).toEqual([
@@ -821,6 +837,20 @@ describe('the tutorial’s marks (#25)', () => {
     expect([at(), said()]).toEqual(['[data-view="solve"]', 'Fill the rest, then close the case.'])
     tab(/Solve/)
     expect(at()).toBe('[data-close]')
+  })
+
+  // The dock's line of finds is gone once the case opens again, so the step waiting on it is passed
+  // there, on a return to the case as on a reload, and the next move meets it (#77).
+  it('passes the found line’s step when the case opens again without the line', async () => {
+    start()
+    openCase(/The valley/)
+    tapSpot('boy')
+    expect(at()).toBe('.dock')
+    menu('Cases')
+    fireEvent.click(await screen.findByRole('button', { name: /The valley/ }))
+    expect([at(), said()]).toEqual(['[data-view="solve"]', 'Open Solve to name him.'])
+    tab(/Solve/)
+    expect(at()).toBe('[data-word="david"]')
   })
 
   // Playtest 2's second session (#77): the player put David in the sword's blank, and every guided

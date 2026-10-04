@@ -24,6 +24,7 @@ import {
   nothing,
   opened,
   placed,
+  read,
   step,
   submit,
   tap,
@@ -152,7 +153,9 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   // Under a guided step the step's own mark is the hint: no hint is offered, and a signal shows the
   // step again (#29). On Look the step that waits on every spot found marks nothing, so there the
   // signals offer hints as in any case (#25); a question's point at the evidence for its slot (#77).
-  const current = step(s, progress)
+  // A step waiting on the dock's line of finds is passed while the dock shows none, as on a reload
+  // or a return to the case; the next move meets it (#77).
+  const current = step(s, caption ? progress : read(s, progress))
   const sweep = current?.until?.found !== undefined
   // The slot the question asks about, while it is asked and still wrong (#77).
   const put = (p: Progress, id: string) => p.faces[id] ?? p.fills[id]
@@ -347,13 +350,15 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   // Where the tutorial's step is shown (#25): at its target on this view — the spot, Solve's
   // button, the answer's word and then its slot, or Close the case — or at the button of the view
   // that holds it; the step that waits on everything found, at Look's button and nowhere on Look;
-  // and the question, at its slot, never its word, and from Look at Solve's button (#77, [Q11]).
-  // Nothing is marked under a card, a sheet, or a paper.
+  // the step that waits on the dock's line of finds read, at the dock whole, the caption with its
+  // line, so its words sit above it (#77); and the question, at its slot, never its word, and from
+  // Look at Solve's button (#77, [Q11]). Nothing is marked under a card, a sheet, or a paper.
   const markAt = (until = current?.until) => {
     if (current === undefined || card || sheet !== null || paper !== null) return undefined
     if (until?.tapped)
       return view === 'look' ? `[data-spot="${until.tapped}"]` : '[data-view="look"]'
     if (until?.found) return view === 'look' ? undefined : '[data-view="look"]'
+    if (until?.read) return view === 'look' ? '.dock' : undefined
     if (asked !== undefined && view !== 'look') return `[data-slot="${asked}"]`
     if (until?.view || view === 'look') return '[data-view="solve"]'
     const filled = until?.filled
@@ -438,6 +443,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
               <div className="card" role="dialog" aria-label={text.title}>
                 <h2>{text.title}</h2>
                 <p>{text.brief}</p>
+                {/* The tutorial says how to play under its brief (#77). */}
+                {s.steps && <p className="how">{strings.howTo}</p>}
                 <button type="button" onClick={() => setBrief(false)}>
                   {strings.start}
                 </button>
@@ -543,7 +550,14 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
                     ? text.retry
                     : text.steps?.[current.id]) ?? '')
           }
-          onTap={fleeting && said !== showing && !silent ? () => setSaid(showing) : undefined}
+          // A step that waits on its line being read is met on the next tap (#77).
+          onTap={
+            current.until?.read !== undefined
+              ? () => onProgress(read(s, progress))
+              : fleeting && said !== showing && !silent
+                ? () => setSaid(showing)
+                : undefined
+          }
         />
       )}
       {lesson && <CoachMark at={lesson} label={text.teach ?? ''} />}

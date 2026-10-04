@@ -109,9 +109,9 @@ describe('progress on the device (#6, A6)', () => {
     expect(load(cases)).toEqual({})
   })
 
-  // The tutorial's question moved from a step to the retry (#77), so the last step follows the
-  // sweep again: progress kept on the sweep with every spot found loads on the last step, wrong
-  // sword and all, as a move would take it.
+  // The tutorial's question moved from a step to the retry, and the dock's line read joined the
+  // steps after the boy's tap (#77). Progress kept at the old question's place is on the sweep now,
+  // which it has met, so it loads on the last step, wrong sword and all.
   it('moves kept progress past every step it has met', () => {
     const tapped = ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']
     const kept = {
@@ -119,10 +119,10 @@ describe('progress on the device (#6, A6)', () => {
       tapped,
       faces: { d1: 'david' },
       fills: { t4: 'sling', t5: 'david' },
-      step: 4,
+      step: 5,
     }
     localStorage.setItem(key, JSON.stringify({ valley: kept }))
-    expect(load(cases).valley.step).toBe(5)
+    expect(load(cases).valley.step).toBe(6)
   })
 
   // Progress gained the hints used (#29). An entry kept before them has used none and keeps its

@@ -334,12 +334,12 @@ describe('validate (Gate 02 A6)', () => {
   })
 
   // (m) is #25's: a step's words sit beside its target, eight at most.
-  it('(m) a step of nine words — step 3 with a second "tap"', () => {
+  it('(m) a step of nine words — step 4 with a second "tap"', () => {
     const long: Text = {
       ...en,
-      steps: { ...en.steps, step3: 'Tap David, then tap the slot under the boy.' },
+      steps: { ...en.steps, step4: 'Tap David, then tap the slot under the boy.' },
     }
-    expect(validate(valley, long)).toEqual(['step "step3" says 9 words, not eight or fewer'])
+    expect(validate(valley, long)).toEqual(['step "step4" says 9 words, not eight or fewer'])
   })
 
   // The last step's retry sits beside its mark too (#25).

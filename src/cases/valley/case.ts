@@ -76,11 +76,13 @@ export const valley = {
   ],
   steps: [
     { id: 'step1', until: { tapped: 'boy' } },
-    { id: 'step2', until: { view: 'solve' } },
-    { id: 'step3', until: { filled: 'd1' } },
-    { id: 'step4', until: { filled: 't4' } },
-    { id: 'step5', until: { found: 'all' } },
-    { id: 'step6' },
+    // The boy's tap found two words, and the dock's line says so (#77).
+    { id: 'step2', until: { read: 'found' } },
+    { id: 'step3', until: { view: 'solve' } },
+    { id: 'step4', until: { filled: 'd1' } },
+    { id: 'step5', until: { filled: 't4' } },
+    { id: 'step6', until: { found: 'all' } },
+    { id: 'step7' },
   ],
   // The one answer the tutorial asks the player to work out, on a miss: whose sword it was (#77).
   ask: 't5',
