@@ -12,11 +12,12 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   on." under it and, on an iPhone, the silent-mode sentence. Begin is the first tap, so it starts
   the title theme. The words fade, the picture darkens and pushes in, Behold and the kicker glide
   up into the cases page's header, and the cards rise one by one; under reduced motion Begin cuts
-  straight to the page. For half a second after Begin the page takes no tap, so a second tap on
-  Begin opens nothing. The title adds no history entry, and never shows inside a case or on the way
-  back from one. The cases page has a compact header, the cases first, and the Proverbs card under
-  them. The picture is `public/title.jpg`, stamped with its hash and kept like the case pictures,
-  with its record and its retouch script in `docs/`.
+  straight to the page. The page takes no tap until the way out ends, or for half a second after a
+  cut, so a second tap on Begin opens nothing and no card takes a tap before it can be seen. The
+  title adds no history entry, and never shows inside a case or on the way back from one. The cases
+  page has a compact header, the cases first, and the Proverbs card under them. The picture is
+  `public/title.jpg`, stamped with its hash and kept like the case pictures, with its record and its
+  retouch script in `docs/`.
 
 ## v0.13.0 — Gate 20, the hand-off, the words, and the iPhone line (#25, #71, #72, #73)
 

@@ -27,11 +27,14 @@ const entry = (state: unknown): Entry | null =>
     ? (state as Entry)
     : null
 
-/** How long the title takes to give way to the cases page, its last card risen (#75). */
+/**
+ * How long the title takes to give way to the cases page, its last card risen. The page takes no
+ * tap until then, so no card takes one before it can be seen (#75, Gate 21 A2 as amended).
+ */
 const leaving = 1600
 /**
- * How long after Begin the cases page takes no tap, so a quick second tap on Begin opens nothing
- * beneath it (#75, Gate 21 A2 as ruled), whether the title glides away or cuts.
+ * Under reduced motion the cases page shows at once, and takes no tap for half a second, so a quick
+ * second tap on Begin opens nothing beneath it (#75, Gate 21 A2 as ruled).
  */
 const settling = 500
 
@@ -51,8 +54,11 @@ export default function App({ passages = fetchedPassages }: AppProps) {
   const [saved, setSaved] = useState<Saved>(() => load(cases))
   const [open, setOpen] = useState<string | null>(() => entry(history.state)?.case ?? null)
   // The title shows only when the app opens on the cases page, never on the way back from a case.
-  const [title, setTitle] = useState<'shown' | 'leaving' | null>(() => (open ? null : 'shown'))
-  const [settled, setSettled] = useState(true)
+  // After Begin it is leaving, or settling under reduced motion; either way the page takes no tap
+  // until that ends.
+  const [title, setTitle] = useState<'shown' | 'leaving' | 'settling' | null>(() =>
+    open ? null : 'shown',
+  )
   const [restarts, setRestarts] = useState(0)
   useEffect(() => save(saved), [saved])
   useEffect(() => {
@@ -64,15 +70,10 @@ export default function App({ passages = fetchedPassages }: AppProps) {
     return () => removeEventListener('popstate', onPop)
   }, [])
   useEffect(() => {
-    if (title !== 'leaving') return
-    const t = setTimeout(() => setTitle(null), leaving)
+    if (title !== 'leaving' && title !== 'settling') return
+    const t = setTimeout(() => setTitle(null), title === 'leaving' ? leaving : settling)
     return () => clearTimeout(t)
   }, [title])
-  useEffect(() => {
-    if (settled) return
-    const t = setTimeout(() => setSettled(true), settling)
-    return () => clearTimeout(t)
-  }, [settled])
 
   const openCase = (id: string, progress: Progress) => {
     setSaved({ ...saved, [id]: progress })
@@ -112,13 +113,11 @@ export default function App({ passages = fetchedPassages }: AppProps) {
       />
     )
   }
-  const begin = () => {
-    setSettled(false)
-    setTitle(matchMedia('(prefers-reduced-motion: reduce)').matches ? null : 'leaving')
-  }
+  const begin = () =>
+    setTitle(matchMedia('(prefers-reduced-motion: reduce)').matches ? 'settling' : 'leaving')
   if (title === 'shown') return <Title leaving={false} onBegin={begin} />
   return (
-    <main className={title === 'leaving' ? 'screen arriving' : 'screen'} inert={!settled}>
+    <main className={title === 'leaving' ? 'screen arriving' : 'screen'} inert={title !== null}>
       <header className="masthead">
         <h1>{strings.title}</h1>
         <p className="kicker">{strings.kicker}</p>

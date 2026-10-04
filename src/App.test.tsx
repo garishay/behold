@@ -126,19 +126,24 @@ describe('the title (#75)', () => {
     }
   })
 
-  // A quick second tap on Begin lands where the cases page now is, so for half a second the page
-  // takes no tap, whether the title glides away or cuts (Gate 21 A2 as ruled). jsdom has no hit
-  // testing, so the test holds the page inert for that time; a browser lets no tap through it.
-  it('takes no tap on the cases page until half a second after Begin', () => {
+  // A quick second tap on Begin lands where the cases page now is. While the way out plays, the
+  // page takes no tap until it ends, so no card takes one before it can be seen; under reduced
+  // motion, where the page shows at once, it takes none for half a second (Gate 21 A2 as amended).
+  // jsdom has no hit testing, so the test holds the page inert for that time; a browser lets no tap
+  // through it.
+  it('takes no tap on the cases page until the way out ends, or for half a second after a cut', () => {
     vi.useFakeTimers()
     try {
-      for (const reduce of [true, false]) {
+      for (const [reduce, ms] of [
+        [true, 500],
+        [false, 1600],
+      ] as const) {
         vi.stubGlobal('matchMedia', () => ({ matches: reduce }))
         const { unmount } = render(<App />)
         fireEvent.click(screen.getByRole('button', { name: 'Begin' }))
         const page = document.querySelector('.screen')
         expect(page, `reduce ${reduce}`).toHaveAttribute('inert')
-        act(() => vi.advanceTimersByTime(499))
+        act(() => vi.advanceTimersByTime(ms - 1))
         expect(page, `reduce ${reduce}`).toHaveAttribute('inert')
         act(() => vi.advanceTimersByTime(1))
         expect(page, `reduce ${reduce}`).not.toHaveAttribute('inert')
