@@ -233,6 +233,35 @@ describe('the cases page (Gate 01 A6, #6, #75)', () => {
     expect(screen.queryByText('In progress')).not.toBeInTheDocument()
     expect(screen.getAllByRole('link').map((l) => l.textContent)).toEqual(['CC BY 4.0'])
   })
+
+  // Playtest 2's second session (#77): the valley teaches the game and the cases after it are one
+  // story, the house of Ahab, so the season is named over them and they count within it. The cards
+  // give no time, and what is still being written sits under the season's last case.
+  it('names the season over the cases after the valley, counted within it, and no times', () => {
+    start()
+    const list = document.querySelector('.case-list')!
+    expect([...list.children].map((e) => e.querySelector('.ct, h2')?.textContent)).toEqual([
+      'The valley',
+      'Season one',
+      'The mountain',
+      'The vineyard',
+      'The battle',
+    ])
+    const head = list.querySelector('.season-head')!
+    expect(within(head as HTMLElement).getByRole('heading', { level: 2 })).toHaveTextContent(
+      'Season one',
+    )
+    expect(head).toHaveTextContent('The house of Ahab')
+    // The season's name rises with its first case as Begin gives way (#75 A2).
+    expect(head).toHaveStyle({ '--i': '1' })
+    expect(cards().map((c) => c.querySelector('.cs')?.textContent)).toEqual([
+      'Learn to play · take your time',
+      'Case one',
+      'Case two',
+      'Case three',
+    ])
+    expect(list.nextElementSibling).toHaveTextContent('Season one is being written.')
+  })
 })
 
 describe('the season in order (#75)', () => {

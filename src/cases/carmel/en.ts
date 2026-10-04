@@ -5,7 +5,7 @@ import type { carmel } from './case.ts'
 // passage's detail; every sentence is the game's own voice, never the translation's.
 export const en = {
   title: 'The mountain',
-  subtitle: 'Case two · about ten minutes',
+  subtitle: 'Case one',
   brief:
     'Two altars on a mountain, a bull on each, and all Israel watching. What did the people answer, what was poured out, and what did the fire burn?',
   passages: ['1 Kings 18:17–40'],

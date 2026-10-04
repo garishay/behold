@@ -180,7 +180,8 @@ button:focus-visible {
   visibility: hidden;
 }
 
-.arriving .case-card {
+.arriving .case-card,
+.arriving .season-head {
   animation: rise 0.45s ease-out calc(0.75s + var(--i) * 0.12s) both;
 }
 
@@ -320,6 +321,28 @@ button:focus-visible {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+/* The season's name over the cases after the way in, set as the header's kicker and name (#77). */
+.season-head {
+  margin-top: 8px;
+  text-align: center;
+}
+
+.season-head h2 {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.season-head p {
+  margin: 4px 0 0;
+  font-family: var(--serif);
+  font-size: 20px;
+  line-height: 1.2;
 }
 
 .case-card {

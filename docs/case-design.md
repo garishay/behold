@@ -43,7 +43,7 @@ rules below are the answer, ruled on #26.
    tutorial shows an answer worked out from what is seen, the way rule 2 leaves every other (#77).
 
 6. **One new idea per case.** A case adds one thing the player has not done before, and names it
-   in its brief to the author. Season one's first rungs:
+   in its brief to the author. The valley, then season one's first rungs:
 
    | case         | what it adds                                                 |
    | ------------ | ------------------------------------------------------------ |

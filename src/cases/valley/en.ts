@@ -5,7 +5,7 @@ import type { valley } from './case.ts'
 // in this language's word order; every sentence is the game's own voice, never the translation's.
 export const en = {
   title: 'The valley',
-  subtitle: 'Learn to play · about five minutes',
+  subtitle: 'Learn to play · take your time',
   brief:
     'A giant lies face-down in a valley, and a boy with a sling stands near him. Who are they, and how does it end?',
   passages: ['1 Samuel 17:4', '1 Samuel 17:17–18', '1 Samuel 17:38–51'],

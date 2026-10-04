@@ -4,7 +4,7 @@ import type { vineyard } from './case.ts'
 // Case three's English text, keyed by the ids in case.ts.
 export const en = {
   title: 'The vineyard',
-  subtitle: 'Case three · ten to fifteen minutes',
+  subtitle: 'Case two',
   brief:
     'A man walks a vineyard as if it were his, and a prophet has come to meet him. Whose vineyard was it, and what became of its owner?',
   passages: ['1 Kings 21'],

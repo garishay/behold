@@ -7,7 +7,7 @@ import type { micaiah } from './case.ts'
 // the king's naming Micaiah and Micaiah's vision naming Ahab.
 export const en = {
   title: 'The battle',
-  subtitle: 'Case four · ten to fifteen minutes',
+  subtitle: 'Case three',
   brief:
     'A crowd of prophets tells a king to go to war, and one plain man is sent to prison. Then two kings ride into battle, and only one of them is dressed as a king. Who is the man in plain armor, and what became of his chariot?',
   passages: ['1 Kings 22:1–40'],
