@@ -50,8 +50,8 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
-/* The title screen: one portrait column, the masthead and the notice pushed to the ends, the
-   cases between the line and the status. */
+/* The cases page: one portrait column, the header at the top and the notice pushed to the foot,
+   the cases first and the epigraph under them (#75). */
 .screen {
   display: flex;
   flex-direction: column;
@@ -65,15 +65,15 @@ button:focus-visible {
 }
 
 .masthead {
-  margin-top: auto;
   text-align: center;
 }
 
-.screen h1 {
+.screen h1,
+.title h1 {
   margin: 0;
   font-family: var(--serif);
   font-weight: 400;
-  font-size: 44px;
+  font-size: 32px;
   line-height: 1.1;
 }
 
@@ -83,6 +83,141 @@ button:focus-visible {
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--gold);
+}
+
+.masthead .kicker {
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+/* The title (#75): over everything until Begin. The picture fills the column's width with a few
+   pixels' bleed, top-aligned so its sides are never cropped, and fades into the night by 70% of
+   the screen; the name, the line, and Begin sit over the fade. */
+.title {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  max-width: 430px;
+  margin: 0 auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 var(--inset) calc(24px + env(safe-area-inset-bottom));
+  background: var(--night);
+  text-align: center;
+}
+
+.title-picture {
+  position: absolute;
+  top: 0;
+  left: -4px;
+  width: calc(100% + 8px);
+  mask-image: linear-gradient(#000 42dvh, transparent 70dvh);
+  transform-origin: 50% 30%;
+}
+
+.title-body {
+  position: relative;
+}
+
+.title h1 {
+  font-size: 60px;
+}
+
+.title .line {
+  margin: 18px 0 28px;
+}
+
+.sound-line {
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--mist-dim);
+}
+
+/* On an iPhone the silent-mode sentence takes the second line (#72). */
+.sound-line span {
+  display: block;
+}
+
+.sound-line svg {
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+  vertical-align: -3px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Begin (#75): the words go, the picture darkens and pushes in, the name and the kicker glide up
+   into the header, then the cards rise one by one and the rest fades in. Under reduced motion
+   Begin cuts straight to the cases page, so none of this runs. */
+.title.leaving {
+  background: none;
+}
+
+.leaving .title-picture {
+  animation: push 0.9s ease-out forwards;
+}
+
+.leaving .line,
+.leaving .begin,
+.leaving .sound-line {
+  animation: fade-out 0.25s ease-out forwards;
+}
+
+.leaving h1,
+.leaving .kicker {
+  transform-origin: 50% 0;
+  animation: glide 0.8s ease-in-out forwards;
+}
+
+.arriving .masthead {
+  visibility: hidden;
+}
+
+.arriving .case-card {
+  animation: rise 0.45s ease-out calc(0.75s + var(--i) * 0.12s) both;
+}
+
+.arriving > :not(.masthead, .case-list, .title) {
+  animation: fade-in 0.4s ease-out 1.2s both;
+}
+
+@keyframes push {
+  to {
+    transform: scale(1.08);
+    opacity: 0;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes glide {
+  to {
+    transform: translateY(var(--dy)) scale(var(--s));
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
 }
 
 .epigraph {
@@ -109,7 +244,6 @@ button:focus-visible {
 }
 
 .line {
-  margin: 0;
   font-family: var(--serif);
   font-size: 19px;
   line-height: 1.45;
@@ -1146,7 +1280,9 @@ button:focus-visible {
   background: var(--night);
 }
 
-.submit {
+/* Begin, on the title, takes Close the case's wine (#75). */
+.submit,
+.begin {
   width: 100%;
   min-height: 50px;
   border-radius: 10px;
@@ -1217,7 +1353,7 @@ button:focus-visible {
 }
 
 /* The attribution (#3): the translation's mark at the right of each passage's label, and the
-   notice with its link under the passages, set like the title screen's notice. */
+   notice with its link under the passages, set like the cases page's notice. */
 .passage h3 .tr {
   float: right;
   font-family: var(--sans);

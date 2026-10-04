@@ -3,6 +3,22 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.14.0 — Gate 21, the title and the cases page (#75)
+
+- **75a — the title, Begin, and the cases page** (#76): sound starts on a tap, and a new player's
+  first tap landed on a case card, so the title theme was rarely the first music heard. The app now
+  opens on its title: a view of the land with a moment from each of the first four cases, fading
+  into the night under "Behold", the line a sentence to a line, and Begin, with "Best with sound
+  on." under it and, on an iPhone, the silent-mode sentence. Begin is the first tap, so it starts
+  the title theme. The words fade, the picture darkens and pushes in, Behold and the kicker glide
+  up into the cases page's header, and the cards rise one by one; under reduced motion Begin cuts
+  straight to the page. The page takes no tap until the way out ends, or for half a second after a
+  cut, so a second tap on Begin opens nothing and no card takes a tap before it can be seen. The
+  title adds no history entry, and never shows inside a case or on the way back from one. The cases
+  page has a compact header, the cases first, and the Proverbs card under them. The picture is
+  `public/title.jpg`, stamped with its hash and kept like the case pictures, with its record and its
+  retouch script in `docs/`.
+
 ## v0.13.0 — Gate 20, the hand-off, the words, and the iPhone line (#25, #71, #72, #73)
 
 - **20a — the hand-off, the words, and the iPhone line** (#74): playtest 2's first remote player

@@ -34,6 +34,13 @@ const moment = (name: string) =>
 const closeTheCase = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
 const result = () => document.querySelector('.bank-head')
 
+/** The app opened on its title, and past it with Begin (#75). */
+const start = (app = <App />) => {
+  const rendered = render(app)
+  fireEvent.click(screen.getByRole('button', { name: 'Begin' }))
+  return rendered
+}
+
 beforeEach(() => {
   localStorage.clear()
   history.replaceState(null, '')
@@ -49,7 +56,7 @@ afterEach(() => {
 // can't hear, loses nothing but the sound (Gate 10 A5, #8).
 describe('the effects, each beside what the screen shows (Gate 10 A3, A5)', () => {
   it('found on a spot’s first tap, beside its caption; a spot tapped again is silent', () => {
-    render(<App />)
+    start()
     openCase(/The valley/)
     tapSpot('boy')
     expect(heard()).toEqual(['found'])
@@ -60,7 +67,7 @@ describe('the effects, each beside what the screen shows (Gate 10 A3, A5)', () =
   })
 
   it('paper, not found, on the tap that copies a paper, beside the paper; again, silent', () => {
-    render(<App />)
+    start()
     openCase(/The vineyard/)
     moment('Bedchamber')
     expect(heard()).toEqual([])
@@ -74,7 +81,7 @@ describe('the effects, each beside what the screen shows (Gate 10 A3, A5)', () =
   })
 
   it('place when a word lands in its slot; picking up, emptying, and a refused word are silent', () => {
-    render(<App />)
+    start()
     openCase(/The valley/)
     for (const s of ['boy', 'giant']) tapSpot(s)
     heard()
@@ -94,7 +101,7 @@ describe('the effects, each beside what the screen shows (Gate 10 A3, A5)', () =
   })
 
   it('place for a picture set in the order, the same sound wherever it goes', () => {
-    render(<App />)
+    start()
     openCase(/The vineyard/)
     tab(/Solve/)
     tile('The gate')
@@ -104,7 +111,7 @@ describe('the effects, each beside what the screen shows (Gate 10 A3, A5)', () =
   })
 
   it('not yet on a wrong close, beside how far off; the close on the right one, beside the reveal', () => {
-    render(<App />)
+    start()
     openCase(/The vineyard/)
     for (const s of ['man-rows', 'cord', 'prophet', 'balcony']) tapSpot(s)
     moment('Bedchamber')
@@ -154,7 +161,7 @@ describe('the effects, each beside what the screen shows (Gate 10 A3, A5)', () =
   })
 
   it('is silent on the brief’s Start, the picker, Zoom, Look and Solve, and the menu', () => {
-    render(<App />)
+    start()
     openCase(/The vineyard/)
     fireEvent.click(screen.getByRole('button', { name: 'Start' }))
     moment('Bedchamber')
@@ -168,7 +175,10 @@ describe('the effects, each beside what the screen shows (Gate 10 A3, A5)', () =
 
 describe('the music by screen (Gate 10 A2)', () => {
   it('asks for the title theme, the case bed on Look and Solve, quiet on the reveal, and the theme again', async () => {
+    // The title asks for its theme, so Begin, the first tap, is the one that starts it (#75).
     render(<App />)
+    expect(cue()).toBe('title')
+    fireEvent.click(screen.getByRole('button', { name: 'Begin' }))
     expect(cue()).toBe('title')
     openCase(/The valley/)
     expect(cue()).toBe('case')
@@ -196,7 +206,7 @@ describe('the music by screen (Gate 10 A2)', () => {
   })
 
   it('credits the music under the notice, each piece by name, with the licence linked', () => {
-    render(<App />)
+    start()
     const credit = document.querySelector('.notice + .credit')
     expect(credit).toHaveTextContent(
       'Music: “Desert City” and “Lamentation” by Kevin MacLeod (incompetech.com), edited, CC BY 4.0',
@@ -209,8 +219,8 @@ describe('the music by screen (Gate 10 A2)', () => {
 })
 
 describe('the sound switches (Gate 10 A4)', () => {
-  it('shows Music and Effects on the title screen and in the menu, both on, each its own', () => {
-    render(<App />)
+  it('shows Music and Effects on the cases page and in the menu, both on, each its own', () => {
+    start()
     const music = screen.getByRole('button', { name: 'Music' })
     const effects = screen.getByRole('button', { name: 'Effects' })
     expect(music).toHaveAttribute('aria-pressed', 'true')
@@ -232,7 +242,7 @@ describe('the sound switches (Gate 10 A4)', () => {
   // can read it, so on an iPhone, and only there, the switches say so (#72).
   it('says under the switches that silent mode mutes the game, on an iPhone only', () => {
     const line = 'Silent mode mutes the game on iPhone.'
-    const { unmount } = render(<App />)
+    const { unmount } = start()
     expect(screen.queryByText(line)).toBeNull()
     unmount()
     const agent = vi
@@ -241,7 +251,7 @@ describe('the sound switches (Gate 10 A4)', () => {
         'Mozilla/5.0 (iPhone; CPU iPhone OS 26_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Mobile/15E148 Safari/604.1',
       )
     try {
-      render(<App />)
+      start()
       expect(screen.getByText(line).closest('.switches')).not.toBeNull()
       openCase(/The valley/)
       fireEvent.click(screen.getByRole('button', { name: 'Menu' }))

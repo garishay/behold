@@ -4,6 +4,13 @@ import App from './App'
 import type { PassageService } from './passages/service.ts'
 import { stuck } from './player/hints.ts'
 
+/** The app opened on its title, and past it with Begin (#75). */
+const start = (app = <App />) => {
+  const rendered = render(app)
+  fireEvent.click(screen.getByRole('button', { name: 'Begin' }))
+  return rendered
+}
+
 const tapSpot = (id: string) => {
   const spot = document.querySelector(`[data-spot="${id}"]`)
   expect(spot, id).not.toBeNull()
@@ -69,10 +76,120 @@ beforeEach(() => {
   history.replaceState(null, '')
 })
 
-describe('the title screen (Gate 01 A6, #6)', () => {
-  it('keeps the title, the epigraph with its notice, and the two lines', () => {
+const cards = () => screen.getAllByRole('button').filter((b) => b.classList.contains('case-card'))
+
+describe('the title (#75)', () => {
+  it('shows first when the app opens on the cases page: the picture, the name, the line, and Begin', () => {
     render(<App />)
     expect(screen.getByRole('heading', { level: 1, name: 'Behold' })).toBeInTheDocument()
+    expect(screen.getByText('Bible Mystery Game')).toBeInTheDocument()
+    expect(document.querySelector('.title-picture')).toHaveAttribute(
+      'src',
+      expect.stringMatching(/^\/title\.jpg\?v=[0-9a-f]{8}$/),
+    )
+    // The line is one string, set a sentence to a line on the title alone (Gate 20 A3).
+    const line = document.querySelector('.line')
+    expect(line).toHaveTextContent("Look closer.There's more to every story.")
+    expect([...line!.children].map((s) => [s.tagName, s.textContent])).toEqual([
+      ['SPAN', 'Look closer.'],
+      ['SPAN', "There's more to every story."],
+    ])
+    expect(screen.getByRole('button', { name: 'Begin' })).toBeInTheDocument()
+    expect(screen.getByText('Best with sound on.')).toBeInTheDocument()
+    expect(document.querySelector('.case-card')).toBeNull()
+  })
+
+  it('gives way to the cases page on Begin, adding no history entry', () => {
+    render(<App />)
+    const entries = history.length
+    fireEvent.click(screen.getByRole('button', { name: 'Begin' }))
+    expect(screen.queryByRole('button', { name: 'Begin' })).not.toBeInTheDocument()
+    expect(cards()).toHaveLength(4)
+    expect([history.length, history.state]).toEqual([entries, null])
+  })
+
+  it('takes its time leaving, then goes, unless the player asks for reduced motion', () => {
+    vi.useFakeTimers()
+    vi.stubGlobal('matchMedia', () => ({ matches: false }))
+    try {
+      render(<App />)
+      fireEvent.click(screen.getByRole('button', { name: 'Begin' }))
+      const title = document.querySelector('.title')
+      expect(title).toHaveClass('leaving')
+      expect(title).toHaveAttribute('inert')
+      expect(document.querySelector('.screen')).toHaveClass('arriving')
+      act(() => vi.advanceTimersByTime(1600))
+      expect(document.querySelector('.title')).toBeNull()
+      expect(document.querySelector('.screen')).not.toHaveClass('arriving')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  // A quick second tap on Begin lands where the cases page now is. While the way out plays, the
+  // page takes no tap until it ends, so no card takes one before it can be seen; under reduced
+  // motion, where the page shows at once, it takes none for half a second (Gate 21 A2 as amended).
+  // jsdom has no hit testing, so the test holds the page inert for that time; a browser lets no tap
+  // through it.
+  it('takes no tap on the cases page until the way out ends, or for half a second after a cut', () => {
+    vi.useFakeTimers()
+    try {
+      for (const [reduce, ms] of [
+        [true, 500],
+        [false, 1600],
+      ] as const) {
+        vi.stubGlobal('matchMedia', () => ({ matches: reduce }))
+        const { unmount } = render(<App />)
+        fireEvent.click(screen.getByRole('button', { name: 'Begin' }))
+        const page = document.querySelector('.screen')
+        expect(page, `reduce ${reduce}`).toHaveAttribute('inert')
+        act(() => vi.advanceTimersByTime(ms - 1))
+        expect(page, `reduce ${reduce}`).toHaveAttribute('inert')
+        act(() => vi.advanceTimersByTime(1))
+        expect(page, `reduce ${reduce}`).not.toHaveAttribute('inert')
+        unmount()
+      }
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('never shows on a reload inside a case, nor on the way back from one', async () => {
+    const { unmount } = start()
+    openCase(/The valley/)
+    unmount()
+    render(<App />)
+    expect(screen.getByRole('dialog', { name: 'The valley' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Begin' })).not.toBeInTheDocument()
+    menu('Cases')
+    await waitFor(() => expect(cards()).toHaveLength(4))
+    expect(screen.queryByRole('button', { name: 'Begin' })).not.toBeInTheDocument()
+  })
+
+  it('follows “Best with sound on.” with the silent-mode sentence on an iPhone only', () => {
+    const lines = () =>
+      [...document.querySelector('.sound-line')!.children].map((s) => s.textContent)
+    const { unmount } = render(<App />)
+    expect(lines()).toEqual(['Best with sound on.'])
+    unmount()
+    const agent = vi
+      .spyOn(navigator, 'userAgent', 'get')
+      .mockReturnValue('Mozilla/5.0 (iPhone; CPU iPhone OS 26_0 like Mac OS X) Mobile/15E148')
+    try {
+      render(<App />)
+      expect(lines()).toEqual(['Best with sound on.', 'Silent mode mutes the game on iPhone.'])
+    } finally {
+      agent.mockRestore()
+    }
+  })
+})
+
+describe('the cases page (Gate 01 A6, #6, #75)', () => {
+  it('keeps the name in its header, then the cases, then the epigraph with its notice', () => {
+    start()
+    expect(screen.getByRole('heading', { level: 1, name: 'Behold' })).toBeInTheDocument()
+    const order = [...document.querySelectorAll('.screen > *')].map((e) => e.className)
+    expect(order.indexOf('case-list')).toBeLessThan(order.indexOf('epigraph'))
     expect(
       screen.getByText(
         'It is the glory of God to conceal things, but the glory of kings is to search things out.',
@@ -82,26 +199,20 @@ describe('the title screen (Gate 01 A6, #6)', () => {
     expect(
       screen.getByText(/Scripture quotations are from the ESV® Bible .* All rights reserved\./),
     ).toBeInTheDocument()
-    // The line is one string, set a sentence to a line on the title screen alone (Gate 20 A3).
-    const line = document.querySelector('.line')
-    expect(line).toHaveTextContent("Look closer.There's more to every story.")
-    expect([...line!.children].map((s) => [s.tagName, s.textContent])).toEqual([
-      ['SPAN', 'Look closer.'],
-      ['SPAN', "There's more to every story."],
-    ])
+    // The line lives on the title now.
+    expect(document.querySelector('.line')).toBeNull()
     expect(screen.getByText('Season one is being written.')).toBeInTheDocument()
   })
 
-  it('lists every registered case as a card, the tutorial first, with no status before a visit', () => {
-    render(<App />)
-    const cards = screen.getAllByRole('button').filter((b) => b.classList.contains('case-card'))
-    expect(cards.map((c) => c.querySelector('.ct')?.textContent)).toEqual([
+  it('lists every registered case as a card, the tutorial first', () => {
+    start()
+    expect(cards().map((c) => c.querySelector('.ct')?.textContent)).toEqual([
       'The valley',
       'The mountain',
       'The vineyard',
       'The battle',
     ])
-    expect(cards[0]).toHaveTextContent('Learn to play')
+    expect(cards()[0]).toHaveTextContent('Learn to play')
     expect(screen.queryByText('In progress')).not.toBeInTheDocument()
     expect(screen.getAllByRole('link').map((l) => l.textContent)).toEqual(['CC BY 4.0'])
   })
@@ -109,7 +220,7 @@ describe('the title screen (Gate 01 A6, #6)', () => {
 
 describe('the case screen explored (#6, 03b; #24)', () => {
   it('opens a fresh case on Look, the brief’s card over the picture, Look and Solve at the foot', () => {
-    render(<App />)
+    start()
     openCase(/The valley/)
     expect(screen.getByRole('dialog', { name: 'The valley' })).toHaveTextContent(
       /A giant lies face-down/,
@@ -125,7 +236,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
   })
 
   it('the brief’s card goes with the first tap, and the menu holds the brief, a hint, Cases, Restart, and the switches', () => {
-    render(<App />)
+    start()
     openCase(/The vineyard/)
     tapSpot('cord')
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -140,7 +251,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
   })
 
   it('a tap shows the caption and what it found, and its words wait on Solve, ringed', () => {
-    render(<App />)
+    start()
     openCase(/The valley/)
     tapSpot('boy')
     expect(screen.getByText(/A shepherd boy in a plain tunic/)).toBeInTheDocument()
@@ -175,7 +286,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
   })
 
   it('a chip picked up is marked, and put down on a second tap', () => {
-    render(<App />)
+    start()
     openCase(/The valley/)
     tapSpot('brook')
     tab(/Solve/)
@@ -186,7 +297,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
   })
 
   it('the picker switches the moment and clears the caption; Zoom toggles', () => {
-    render(<App />)
+    start()
     openCase(/The vineyard/)
     expect(screen.getByRole('tab', { name: /Look/ })).toHaveTextContent('Look0/18')
     tapSpot('cord')
@@ -208,7 +319,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
       screen
         .getAllByRole('button', { name: /something left to find/ })
         .map((b) => b.textContent?.replace('something left to find', ''))
-    render(<App />)
+    start()
     openCase(/The vineyard/)
     expect(left()).toEqual(['The vineyard', 'Bedchamber', 'The gate'])
     for (const s of ['man-rows', 'cord', 'prophet', 'stain', 'balcony']) tapSpot(s)
@@ -220,7 +331,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
   // Spots are drawn largest first, so the smaller of two overlapping boxes is on top and takes the
   // tap: the seal over the woman and the papyrus it overlaps, the pouch over the papyrus (#26 [7]).
   it('draws a moment’s spots largest first, whatever the file’s order', () => {
-    render(<App />)
+    start()
     openCase(/The vineyard/)
     moment('Bedchamber')
     const drawn = [...document.querySelectorAll<SVGElement>('[data-spot]')].map(
@@ -234,7 +345,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
   // the seal's box it takes the seal, though the woman's box is 10 px above and the papyrus's 14 px
   // below; on the empty rug it takes nothing.
   it('a tap just off a spot takes the nearest within a fingertip’s slip', () => {
-    render(<App />)
+    start()
     openCase(/The vineyard/)
     moment('Bedchamber')
     const svg = screen.getByRole('img', { name: 'Bedchamber' })
@@ -249,7 +360,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
   // head, and being the smaller it took a tap at his eyes. The gate laid out 320 px wide, as on a
   // 360 phone: at his eyes, 8 px under the stones' box, the tap is his.
   it('a tap at the seated man’s eyes at the gate finds him, not the stones', () => {
-    render(<App />)
+    start()
     openCase(/The vineyard/)
     moment('The gate')
     const svg = screen.getByRole('img', { name: 'The gate' })
@@ -266,7 +377,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
       return this.textContent?.startsWith('The Philistines') ? 90 : 0
     })
     try {
-      render(<App />)
+      start()
       openCase(/The valley/)
       tapSpot('giant')
       const more = screen.getByRole('button', { name: 'More' })
@@ -285,7 +396,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
   // The giant's sheathed sword is his own tap's: no spot inside his box, which at phone size read
   // as one thing already found (#37).
   it('the giant’s tap finds his sword, and no spot lies inside his box', () => {
-    render(<App />)
+    start()
     openCase(/The valley/)
     tapSpot('giant')
     expect(screen.getByText(/Found:/)).toHaveTextContent('Found: Goliath, six, spear, sword')
@@ -294,7 +405,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
   })
 
   it('a paper opens over the screen on the tap, and its copy lands in Papers', () => {
-    render(<App />)
+    start()
     openCase(/The vineyard/)
     moment('Bedchamber')
     tapSpot('seal')
@@ -320,7 +431,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
   // A second tap on the seal opens the paper again but copies nothing, and the console says so by
   // saying nothing (review round 3, #20).
   it('a repeat tap on a paper reopens it and reports no copy', () => {
-    render(<App />)
+    start()
     openCase(/The vineyard/)
     moment('Bedchamber')
     tapSpot('seal')
@@ -335,19 +446,19 @@ describe('the case screen explored (#6, 03b; #24)', () => {
   })
 
   it('Solve offers Papers only once a paper has been opened', () => {
-    render(<App />)
+    start()
     openCase(/The vineyard/)
     tab(/Solve/)
     expect(screen.queryByRole('button', { name: /Papers/ })).not.toBeInTheDocument()
   })
 
   it('progress is kept on the device, and Restart clears the open case after a confirm', () => {
-    const { unmount } = render(<App />)
+    const { unmount } = start()
     openCase(/The valley/)
     tapSpot('boy')
     unmount()
     history.replaceState(null, '')
-    render(<App />)
+    start()
     expect(screen.getByText('In progress')).toBeInTheDocument()
     openCase(/The valley/)
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -367,7 +478,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
   })
 
   it('an open case is a history entry: back returns to the cards, and Cases pops it (Gate 03 [1])', async () => {
-    render(<App />)
+    start()
     expect(history.state).toBeNull()
     openCase(/The valley/)
     expect(history.state).toEqual({ case: 'valley' })
@@ -408,7 +519,9 @@ describe('the case screen explored (#6, 03b; #24)', () => {
       },
     )
     try {
-      render(<App />)
+      start()
+      // The title's own picture was asked for as it showed (#75); the case's are what follow.
+      requested.length = 0
       openCase(/The vineyard/)
       // Each address carries its picture's hash (#45).
       expect(requested.sort()).toEqual(
@@ -443,11 +556,13 @@ describe('the case screen explored (#6, 03b; #24)', () => {
       },
     })
     try {
-      render(<App />)
+      start()
       openCase(/The valley/)
       expect(requested).toEqual([])
       ready()
-      await waitFor(() => expect(requested).toHaveLength(3))
+      // The valley's three, and the title's picture, which waited for the worker too (#75).
+      await waitFor(() => expect(requested).toHaveLength(4))
+      expect(requested[0]).toMatch(/^\/title\.jpg\?v=[0-9a-f]{8}$/)
     } finally {
       Reflect.deleteProperty(navigator, 'serviceWorker')
       vi.unstubAllGlobals()
@@ -478,7 +593,7 @@ describe('the tutorial’s marks (#25)', () => {
   /** The valley played to its fourth step: David named, sling picked up for its blank. */
   /** The valley played to its third step's end: David under the boy, the word sling marked next. */
   const toDavid = () => {
-    render(<App />)
+    start()
     openCase(/The valley/)
     tapSpot('boy')
     tab(/Solve/)
@@ -539,7 +654,7 @@ describe('the tutorial’s marks (#25)', () => {
   // it never moves and never covers the account; its result shows in the bank's head below it
   // (07d, #24).
   it('docks Close the case between the account and the bank, outside the scroll', () => {
-    render(<App />)
+    start()
     openCase(/The vineyard/)
     tab(/Solve/)
     const row = screen.getByRole('button', { name: /Close the case/ }).parentElement!
@@ -550,7 +665,7 @@ describe('the tutorial’s marks (#25)', () => {
   })
 
   it('shows each step at its target, or at the button of the view that holds it', () => {
-    render(<App />)
+    start()
     openCase(/The valley/)
     fireEvent.click(screen.getByRole('button', { name: 'Start' }))
     expect([at(), said()]).toEqual(['[data-spot="boy"]', 'Tap the boy with the sling.'])
@@ -585,7 +700,7 @@ describe('the tutorial’s marks (#25)', () => {
   // and nothing said the rest was in the picture. Now the step after the guided moves sends the
   // player to Look, which greets them with its prompt again, not the boy's caption (#25).
   it('sends the player back to the picture after the guided moves, until everything is found', () => {
-    render(<App />)
+    start()
     openCase(/The valley/)
     tapSpot('boy')
     tab(/Solve/)
@@ -609,7 +724,7 @@ describe('the tutorial’s marks (#25)', () => {
   })
 
   it('marks nothing under the brief’s card or the menu, and nothing in a case without steps', async () => {
-    render(<App />)
+    start()
     openCase(/The valley/)
     expect(coach()).toBeNull()
     tapSpot('brook')
@@ -625,7 +740,7 @@ describe('the tutorial’s marks (#25)', () => {
   // Carmel's one new idea is the order, marked where it is first met (#30): on Solve while the order
   // is empty, the pictures to place and then the slots. The vineyard has an order and no lesson.
   it('marks the pictures and then the slots in the case that teaches the order, until one is placed', async () => {
-    render(<App />)
+    start()
     openCase(/The mountain/)
     expect(coach()).toBeNull()
     tab(/Solve/)
@@ -646,7 +761,7 @@ describe('the tutorial’s marks (#25)', () => {
   // empty, it is ringed with the lesson's words. A name placed takes the mark away, and emptying the
   // face brings it back. The battle asks the order too, and marks nothing on it.
   it('marks the disguised man’s face in the case that teaches it, until a name is placed', async () => {
-    render(<App />)
+    start()
     openCase(/The battle/)
     moment('The thrones')
     tapSpot('plain')
@@ -663,7 +778,7 @@ describe('the tutorial’s marks (#25)', () => {
   // Persistent, not blocking (#25): the ring stays until the step is done, a tap elsewhere is
   // still play, and the first one lifts the dim.
   it('blocks nothing: a tap elsewhere plays, lifts the dim, and leaves the ring', async () => {
-    render(<App />)
+    start()
     openCase(/The valley/)
     fireEvent.click(screen.getByRole('button', { name: 'Start' }))
     const ring = () => document.querySelector('.coach .ring')
@@ -686,7 +801,7 @@ describe('the tutorial’s marks (#25)', () => {
     const frames = vi.spyOn(window, 'requestAnimationFrame')
     const pause = (ms: number) => new Promise((r) => setTimeout(r, ms))
     try {
-      render(<App />)
+      start()
       openCase(/The valley/)
       fireEvent.click(screen.getByRole('button', { name: 'Start' }))
       await pause(1000)
@@ -704,7 +819,7 @@ describe('the tutorial’s marks (#25)', () => {
   // The last step's words cover the account's end on Solve and the caption from Look, so they
   // leave on the next tap after they show; its ring stays until the case closes (#24, ruling [3]).
   it('the last step’s words leave on the next tap, and its ring stays', async () => {
-    render(<App />)
+    start()
     openCase(/The valley/)
     for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
     tab(/Solve/)
@@ -731,7 +846,7 @@ describe('the tutorial’s marks (#25)', () => {
   // he hadn't known his answers were checked. In the tutorial a failed close brings the last step's
   // mark back, dim and all, with words that say so (#25).
   it('a failed close in the tutorial brings the last step back with its retry', async () => {
-    render(<App />)
+    start()
     openCase(/The valley/)
     for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
     tab(/Solve/)
@@ -762,7 +877,7 @@ describe('hints (#29)', () => {
   afterEach(() => vi.restoreAllMocks())
   /** The vineyard's bedchamber with everything found but the seal. */
   const toSeal = () => {
-    render(<App />)
+    start()
     openCase(/The vineyard/)
     moment('Bedchamber')
     for (const id of ['window', 'man-bed', 'tray', 'woman', 'sheets', 'purse']) tapSpot(id)
@@ -789,7 +904,7 @@ describe('hints (#29)', () => {
 
   // Looking again once everything is found is the loop's return trip, not a stall.
   it('offers nothing for taps that find nothing new once everything is found', () => {
-    render(<App />)
+    start()
     openCase(/The mountain/)
     for (const [m, ids] of [
       ['The water', ['altar', 'pourers', 'caller', 'trench', 'spent']],
@@ -810,7 +925,7 @@ describe('hints (#29)', () => {
     }
     vi.useFakeTimers()
     try {
-      render(<App />)
+      start()
       openCase(/The vineyard/)
       tapSpot('cord')
       act(() => vi.advanceTimersByTime(stuck.seconds * 1000 - 1))
@@ -836,7 +951,7 @@ describe('hints (#29)', () => {
     })
     vi.useFakeTimers()
     try {
-      render(<App />)
+      start()
       openCase(/The vineyard/)
       tapSpot('prophet')
       fireEvent.click(screen.getByRole('button', { name: 'More' }))
@@ -860,7 +975,7 @@ describe('hints (#29)', () => {
     })
     vi.useFakeTimers()
     try {
-      render(<App />)
+      start()
       openCase(/The vineyard/)
       tapSpot('prophet')
       fireEvent.click(screen.getByRole('button', { name: 'More' }))
@@ -880,7 +995,7 @@ describe('hints (#29)', () => {
   it('offers one on Solve after a wait with something empty and nothing left to place', () => {
     vi.useFakeTimers()
     try {
-      render(<App />)
+      start()
       openCase(/The mountain/)
       for (const [name, ids] of [
         ['The water', ['pourers', 'caller']],
@@ -926,7 +1041,7 @@ describe('hints (#29)', () => {
   it('starts a fired wait over when a word is placed and nothing is left to place still', () => {
     vi.useFakeTimers()
     try {
-      render(<App />)
+      start()
       openCase(/The mountain/)
       for (const [name, ids] of [
         ['The water', ['pourers']],
@@ -971,7 +1086,7 @@ describe('hints (#29)', () => {
   it('under the tutorial’s sweep, a wait on Solve shows the step again, and Look offers hints', () => {
     vi.useFakeTimers()
     try {
-      render(<App />)
+      start()
       openCase(/The valley/)
       tapSpot('boy')
       tab(/Solve/)
@@ -1005,7 +1120,7 @@ describe('hints (#29)', () => {
 
   // A close's hint is kept from the close: a changed answer can't ask the hints what is right.
   it('offers one beside Close the case after two failed closes, at what the first found wrong', () => {
-    render(<App />)
+    start()
     openCase(/The valley/)
     for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
     tab(/Solve/)
@@ -1035,7 +1150,7 @@ describe('hints (#29)', () => {
   // From the menu, a hint uses a close's result after one failed close, where the offer waits for
   // two: holding the menu to two would only make the player close again (A4 as ruled).
   it('the menu’s Hint aims at what a single failed close found wrong', () => {
-    render(<App />)
+    start()
     openCase(/The valley/)
     for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
     tab(/Solve/)
@@ -1054,7 +1169,7 @@ describe('hints (#29)', () => {
 
   // Under a guided step the step's own mark is the hint: a run shows it again, dim and all.
   it('under a guided step, a run shows the step again and nothing is offered', async () => {
-    render(<App />)
+    start()
     openCase(/The valley/)
     fireEvent.click(screen.getByRole('button', { name: 'Start' }))
     const ring = () => document.querySelector('.coach .ring')
@@ -1068,7 +1183,7 @@ describe('hints (#29)', () => {
   })
 
   it('the menu’s quiet Hint gives one without a signal, and a case closed without one says nothing', async () => {
-    render(<App />)
+    start()
     openCase(/The vineyard/)
     tapSpot('cord')
     menu('Hint')
@@ -1085,7 +1200,7 @@ describe('hints (#29)', () => {
 
 describe('the case solved (#6, 03c; #24)', () => {
   it('Solve counts what is filled and holds who is who, the account, and the bank', () => {
-    render(<App />)
+    start()
     openCase(/The valley/)
     tapSpot('boy')
     tab(/Solve/)
@@ -1098,7 +1213,7 @@ describe('the case solved (#6, 03c; #24)', () => {
   })
 
   it('a blank refuses a word of another kind by name, in the bank’s head', () => {
-    render(<App />)
+    start()
     openCase(/The valley/)
     tapSpot('boy')
     tapSpot('brook')
@@ -1117,7 +1232,7 @@ describe('the case solved (#6, 03c; #24)', () => {
   // Playtest 2 (#23): with only David and sling found, "That blank wants a number." read as "type
   // one in". While no word of the blank's kind is found, the note says where words come from (#71).
   it('a refusal says where to find a word of the kind while none is found', () => {
-    render(<App />)
+    start()
     openCase(/The valley/)
     tapSpot('boy')
     tab(/Solve/)
@@ -1137,7 +1252,7 @@ describe('the case solved (#6, 03c; #24)', () => {
   // The tutorial goes all the way to rule 5 (#26 [4]): a ✓ only on the slots its steps name, Close
   // the case once they are done, and the same coarse check as every case.
   it('the tutorial marks only its guided slots and closes on Close the case, like any case', () => {
-    render(<App />)
+    start()
     openCase(/The valley/)
     for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
     tab(/Solve/)
@@ -1173,7 +1288,7 @@ describe('the case solved (#6, 03c; #24)', () => {
   })
 
   it('the tutorial closed, the reveal reads the passages as verses', async () => {
-    render(<App passages={numbered} />)
+    start(<App passages={numbered} />)
     openCase(/The valley/)
     solveTheValley()
     expect(screen.getByRole('heading', { name: 'The case is closed.' })).toBeInTheDocument()
@@ -1200,7 +1315,7 @@ describe('the case solved (#6, 03c; #24)', () => {
   })
 
   it('a case without steps closes on the submit, and says how far off it was', () => {
-    render(<App />)
+    start()
     openCase(/The vineyard/)
     for (const s of ['man-rows', 'cord', 'prophet', 'balcony']) tapSpot(s)
     moment('Bedchamber')
@@ -1263,7 +1378,7 @@ describe('the case solved (#6, 03c; #24)', () => {
 
   it('the reveal shows the failure line under each passage when the proxy cannot be reached, or refuses', async () => {
     // The default service asks the proxy, and no test reaches the network (src/test/setup.ts).
-    const { unmount } = render(<App />)
+    const { unmount } = start()
     openCase(/The valley/)
     solveTheValley()
     expect(
@@ -1297,7 +1412,7 @@ describe('the case solved (#6, 03c; #24)', () => {
         },
       }),
     )
-    render(<App passages={() => Promise.reject(new Error('down'))} />)
+    start(<App passages={() => Promise.reject(new Error('down'))} />)
     expect(screen.getByText('Closed ✓')).toBeInTheDocument()
     openCase(/The vineyard/)
     expect(
@@ -1308,7 +1423,7 @@ describe('the case solved (#6, 03c; #24)', () => {
   })
 
   it('the reveal is a history entry: back returns to the case, and Back to cases pops both (Gate 03 [1])', async () => {
-    render(<App />)
+    start()
     openCase(/The valley/)
     solveTheValley()
     expect(history.state).toEqual({ case: 'valley', view: 'reveal' })
@@ -1330,7 +1445,7 @@ describe('the case solved (#6, 03c; #24)', () => {
   })
 
   it('a closed case opens on its reveal with both entries, and Restart from the reveal starts it over', async () => {
-    render(<App />)
+    start()
     openCase(/The valley/)
     solveTheValley()
     fireEvent.click(screen.getByRole('button', { name: 'Back to cases' }))
@@ -1358,7 +1473,7 @@ describe('the case solved (#6, 03c; #24)', () => {
   // Restart from the reveal steps back and leaves the reveal's entry ahead; forward must not show
   // a fresh case's solution, so the entry becomes a case entry instead (review round 1, #21).
   it('a reveal entry left ahead by a restart shows no solution, and becomes a case entry', async () => {
-    render(<App />)
+    start()
     openCase(/The valley/)
     solveTheValley()
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
@@ -1380,7 +1495,7 @@ describe('the case solved (#6, 03c; #24)', () => {
   // The case entry beneath the reveal is the case with its answers: forward from the cards, or a
   // reload on that entry, shows Solve, not Look (review round 1, #21).
   it('a solved case’s own entry mounts on Solve: forward from the cards, and a reload on it', async () => {
-    const { unmount } = render(<App />)
+    const { unmount } = start()
     openCase(/The valley/)
     solveTheValley()
     fireEvent.click(screen.getByRole('button', { name: 'Back to cases' }))

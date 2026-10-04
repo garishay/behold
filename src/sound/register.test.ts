@@ -31,7 +31,7 @@ describe('the sound register, docs/sound.md (Gate 10 A7)', () => {
     for (const [file, cells] of rows) expect(['CC0 1.0', 'CC BY 4.0'], file).toContain(cells.at(-1))
   })
 
-  it('names every CC BY piece and its author in the title screen’s credit line (A1)', () => {
+  it('names every CC BY piece and its author in the cases page’s credit line (A1)', () => {
     const credited = [...rows].filter(([, cells]) => cells.at(-1) === 'CC BY 4.0')
     expect(credited.length).toBeGreaterThan(0)
     for (const [file, cells] of credited) {
