@@ -3,6 +3,20 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.14.1 — Gate 21, the season in order (#75)
+
+- **75b — the season in order** (#78): playtest 2's first remote player left the valley unclosed
+  for the mountain and the vineyard, and the cases after the valley are one story as well as a
+  ladder, so out of order a payoff comes before its setup. The season now plays in order: a case
+  opens when it is the first, when the case before it is closed, or when the player has already
+  started it. A locked card's picture is greyed under a lock and its words dimmed, and it names
+  the case it waits for: "Opens after the valley". A tap on one opens nothing. For three seconds
+  it lights the earliest case not yet closed and says why: "Start with the valley. It teaches the
+  game." while that is the valley, and past it the case by name, as in "Play the mountain first.
+  The story runs in order." While an update waits, the note sits above its toast ([Q10]). The
+  valley, unstarted, has a gold edge and "Start here". Restarting a closed case locks again only
+  the cases after it that were never opened. Rule 6 says the season plays in order.
+
 ## v0.14.0 — Gate 21, the title and the cases page (#75)
 
 - **75a — the title, Begin, and the cases page** (#76): sound starts on a tap, and a new player's

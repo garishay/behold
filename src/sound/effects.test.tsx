@@ -1,6 +1,8 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../App'
+import { cases } from '../cases/index.ts'
+import { fresh } from '../player/state.ts'
 import { play } from './engine.ts'
 import { useCue } from './music.ts'
 import { turn } from './settings.ts'
@@ -34,8 +36,14 @@ const moment = (name: string) =>
 const closeTheCase = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
 const result = () => document.querySelector('.bank-head')
 
-/** The app opened on its title, and past it with Begin (#75). */
-const start = (app = <App />) => {
+/** Every case after the valley already started, so each opens whatever comes before it (#75). */
+const laterStarted = Object.fromEntries(
+  cases.slice(1).map(({ structure }) => [structure.id, fresh(structure)]),
+)
+
+/** The app opened on its title, and past it with Begin (#75), over the progress the device holds. */
+const start = (app = <App />, kept?: object) => {
+  if (kept) localStorage.setItem('behold.progress', JSON.stringify(kept))
   const rendered = render(app)
   fireEvent.click(screen.getByRole('button', { name: 'Begin' }))
   return rendered
@@ -67,7 +75,7 @@ describe('the effects, each beside what the screen shows (Gate 10 A3, A5)', () =
   })
 
   it('paper, not found, on the tap that copies a paper, beside the paper; again, silent', () => {
-    start()
+    start(<App />, laterStarted)
     openCase(/The vineyard/)
     moment('Bedchamber')
     expect(heard()).toEqual([])
@@ -101,7 +109,7 @@ describe('the effects, each beside what the screen shows (Gate 10 A3, A5)', () =
   })
 
   it('place for a picture set in the order, the same sound wherever it goes', () => {
-    start()
+    start(<App />, laterStarted)
     openCase(/The vineyard/)
     tab(/Solve/)
     tile('The gate')
@@ -111,7 +119,7 @@ describe('the effects, each beside what the screen shows (Gate 10 A3, A5)', () =
   })
 
   it('not yet on a wrong close, beside how far off; the close on the right one, beside the reveal', () => {
-    start()
+    start(<App />, laterStarted)
     openCase(/The vineyard/)
     for (const s of ['man-rows', 'cord', 'prophet', 'balcony']) tapSpot(s)
     moment('Bedchamber')
@@ -161,7 +169,7 @@ describe('the effects, each beside what the screen shows (Gate 10 A3, A5)', () =
   })
 
   it('is silent on the brief’s Start, the picker, Zoom, Look and Solve, and the menu', () => {
-    start()
+    start(<App />, laterStarted)
     openCase(/The vineyard/)
     fireEvent.click(screen.getByRole('button', { name: 'Start' }))
     moment('Bedchamber')

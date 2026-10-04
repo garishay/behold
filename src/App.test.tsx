@@ -1,11 +1,28 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
+import { carmel } from './cases/carmel/case.ts'
+import { cases } from './cases/index.ts'
+import { micaiah } from './cases/micaiah/case.ts'
+import { valley } from './cases/valley/case.ts'
+import { vineyard } from './cases/vineyard/case.ts'
 import type { PassageService } from './passages/service.ts'
 import { stuck } from './player/hints.ts'
+import { fresh } from './player/state.ts'
 
-/** The app opened on its title, and past it with Begin (#75). */
-const start = (app = <App />) => {
+/**
+ * Every case after the valley already started, so each opens whatever comes before it (#75, Gate
+ * 21 A5): a started case stays open, and fresh progress plays as a first visit does.
+ */
+const laterStarted = Object.fromEntries(
+  cases.slice(1).map(({ structure }) => [structure.id, fresh(structure)]),
+)
+/** The vineyard started before the valley was closed, which keeps it open (#75). */
+const vineyardStarted = { vineyard: fresh(vineyard) }
+
+/** The app opened on its title, and past it with Begin (#75), over the progress the device holds. */
+const start = (app = <App />, kept?: object) => {
+  if (kept) localStorage.setItem('behold.progress', JSON.stringify(kept))
   const rendered = render(app)
   fireEvent.click(screen.getByRole('button', { name: 'Begin' }))
   return rendered
@@ -218,6 +235,87 @@ describe('the cases page (Gate 01 A6, #6, #75)', () => {
   })
 })
 
+describe('the season in order (#75)', () => {
+  const statuses = () => cards().map((c) => c.querySelector('.done')?.textContent ?? '')
+  const locked = () => cards().map((c) => c.getAttribute('aria-disabled') === 'true')
+  /** The first `n` cases closed, as the device keeps them. */
+  const closedTo = (n: number) =>
+    Object.fromEntries(
+      cases
+        .slice(0, n)
+        .map(({ structure }) => [structure.id, { ...fresh(structure), solved: true }]),
+    )
+
+  it('locks each case until the one before it is closed, each naming that case', () => {
+    start()
+    expect(statuses()).toEqual([
+      'Start here',
+      'Opens after the valley',
+      'Opens after the mountain',
+      'Opens after the vineyard',
+    ])
+    expect(locked()).toEqual([false, true, true, true])
+    expect(cards()[0]).toHaveClass('first')
+  })
+
+  it('a locked card opens nothing: it lights the valley and says why, for a few seconds', () => {
+    vi.useFakeTimers()
+    try {
+      start()
+      openCase(/The battle/)
+      expect(document.querySelector('.app')).toBeNull()
+      expect(history.state).toBeNull()
+      expect(cards()[0]).toHaveClass('lit')
+      expect(screen.getByRole('status')).toHaveTextContent(
+        'Start with the valley. It teaches the game.',
+      )
+      act(() => vi.advanceTimersByTime(3000))
+      expect(cards()[0]).not.toHaveClass('lit')
+      expect(screen.getByRole('status')).toBeEmptyDOMElement()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('past the valley, a locked card lights the case to play first and names it', () => {
+    start(<App />, closedTo(1))
+    openCase(/The battle/)
+    expect(document.querySelector('.app')).toBeNull()
+    expect(cards().map((c) => c.classList.contains('lit'))).toEqual([false, true, false, false])
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Play the mountain first. The story runs in order.',
+    )
+    // The gold edge and "Start here" are the valley's alone.
+    expect(cards()[1]).not.toHaveClass('first')
+    expect(statuses()[1]).toBe('')
+  })
+
+  it('keeps open a case already started, and the valley in progress loses its edge', () => {
+    start(<App />, { vineyard: fresh(vineyard), valley: fresh(valley) })
+    expect(statuses()).toEqual([
+      'In progress',
+      'Opens after the valley',
+      'In progress',
+      'Opens after the vineyard',
+    ])
+    expect(locked()).toEqual([false, true, false, true])
+    expect(cards()[0]).not.toHaveClass('first')
+  })
+
+  it('closing each case opens the next; a restart locks again what follows it, unless started', () => {
+    for (const n of [1, 2, 3]) {
+      const { unmount } = start(<App />, closedTo(n))
+      expect(locked(), `${n} closed`).toEqual(cases.map((_, i) => i > n))
+      unmount()
+    }
+    // The mountain restarted, so no longer closed: the vineyard, never opened, waits for it again,
+    // and the battle, started, stays open.
+    start(<App />, { ...closedTo(1), carmel: fresh(carmel), micaiah: fresh(micaiah) })
+    expect(locked()).toEqual([false, false, true, false])
+    expect(statuses()[2]).toBe('Opens after the mountain')
+  })
+})
+
 describe('the case screen explored (#6, 03b; #24)', () => {
   it('opens a fresh case on Look, the brief’s card over the picture, Look and Solve at the foot', () => {
     start()
@@ -236,7 +334,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
   })
 
   it('the brief’s card goes with the first tap, and the menu holds the brief, a hint, Cases, Restart, and the switches', () => {
-    start()
+    start(<App />, laterStarted)
     openCase(/The vineyard/)
     tapSpot('cord')
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -297,7 +395,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
   })
 
   it('the picker switches the moment and clears the caption; Zoom toggles', () => {
-    start()
+    start(<App />, laterStarted)
     openCase(/The vineyard/)
     expect(screen.getByRole('tab', { name: /Look/ })).toHaveTextContent('Look0/18')
     tapSpot('cord')
@@ -319,7 +417,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
       screen
         .getAllByRole('button', { name: /something left to find/ })
         .map((b) => b.textContent?.replace('something left to find', ''))
-    start()
+    start(<App />, laterStarted)
     openCase(/The vineyard/)
     expect(left()).toEqual(['The vineyard', 'Bedchamber', 'The gate'])
     for (const s of ['man-rows', 'cord', 'prophet', 'stain', 'balcony']) tapSpot(s)
@@ -331,7 +429,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
   // Spots are drawn largest first, so the smaller of two overlapping boxes is on top and takes the
   // tap: the seal over the woman and the papyrus it overlaps, the pouch over the papyrus (#26 [7]).
   it('draws a moment’s spots largest first, whatever the file’s order', () => {
-    start()
+    start(<App />, laterStarted)
     openCase(/The vineyard/)
     moment('Bedchamber')
     const drawn = [...document.querySelectorAll<SVGElement>('[data-spot]')].map(
@@ -345,7 +443,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
   // the seal's box it takes the seal, though the woman's box is 10 px above and the papyrus's 14 px
   // below; on the empty rug it takes nothing.
   it('a tap just off a spot takes the nearest within a fingertip’s slip', () => {
-    start()
+    start(<App />, laterStarted)
     openCase(/The vineyard/)
     moment('Bedchamber')
     const svg = screen.getByRole('img', { name: 'Bedchamber' })
@@ -360,7 +458,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
   // head, and being the smaller it took a tap at his eyes. The gate laid out 320 px wide, as on a
   // 360 phone: at his eyes, 8 px under the stones' box, the tap is his.
   it('a tap at the seated man’s eyes at the gate finds him, not the stones', () => {
-    start()
+    start(<App />, laterStarted)
     openCase(/The vineyard/)
     moment('The gate')
     const svg = screen.getByRole('img', { name: 'The gate' })
@@ -405,7 +503,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
   })
 
   it('a paper opens over the screen on the tap, and its copy lands in Papers', () => {
-    start()
+    start(<App />, laterStarted)
     openCase(/The vineyard/)
     moment('Bedchamber')
     tapSpot('seal')
@@ -431,7 +529,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
   // A second tap on the seal opens the paper again but copies nothing, and the console says so by
   // saying nothing (review round 3, #20).
   it('a repeat tap on a paper reopens it and reports no copy', () => {
-    start()
+    start(<App />, laterStarted)
     openCase(/The vineyard/)
     moment('Bedchamber')
     tapSpot('seal')
@@ -446,7 +544,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
   })
 
   it('Solve offers Papers only once a paper has been opened', () => {
-    start()
+    start(<App />, laterStarted)
     openCase(/The vineyard/)
     tab(/Solve/)
     expect(screen.queryByRole('button', { name: /Papers/ })).not.toBeInTheDocument()
@@ -478,7 +576,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
   })
 
   it('an open case is a history entry: back returns to the cards, and Cases pops it (Gate 03 [1])', async () => {
-    start()
+    start(<App />, vineyardStarted)
     expect(history.state).toBeNull()
     openCase(/The valley/)
     expect(history.state).toEqual({ case: 'valley' })
@@ -519,7 +617,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
       },
     )
     try {
-      start()
+      start(<App />, laterStarted)
       // The title's own picture was asked for as it showed (#75); the case's are what follow.
       requested.length = 0
       openCase(/The vineyard/)
@@ -654,7 +752,7 @@ describe('the tutorial’s marks (#25)', () => {
   // it never moves and never covers the account; its result shows in the bank's head below it
   // (07d, #24).
   it('docks Close the case between the account and the bank, outside the scroll', () => {
-    start()
+    start(<App />, laterStarted)
     openCase(/The vineyard/)
     tab(/Solve/)
     const row = screen.getByRole('button', { name: /Close the case/ }).parentElement!
@@ -724,7 +822,7 @@ describe('the tutorial’s marks (#25)', () => {
   })
 
   it('marks nothing under the brief’s card or the menu, and nothing in a case without steps', async () => {
-    start()
+    start(<App />, vineyardStarted)
     openCase(/The valley/)
     expect(coach()).toBeNull()
     tapSpot('brook')
@@ -740,7 +838,7 @@ describe('the tutorial’s marks (#25)', () => {
   // Carmel's one new idea is the order, marked where it is first met (#30): on Solve while the order
   // is empty, the pictures to place and then the slots. The vineyard has an order and no lesson.
   it('marks the pictures and then the slots in the case that teaches the order, until one is placed', async () => {
-    start()
+    start(<App />, laterStarted)
     openCase(/The mountain/)
     expect(coach()).toBeNull()
     tab(/Solve/)
@@ -761,7 +859,7 @@ describe('the tutorial’s marks (#25)', () => {
   // empty, it is ringed with the lesson's words. A name placed takes the mark away, and emptying the
   // face brings it back. The battle asks the order too, and marks nothing on it.
   it('marks the disguised man’s face in the case that teaches it, until a name is placed', async () => {
-    start()
+    start(<App />, laterStarted)
     openCase(/The battle/)
     moment('The thrones')
     tapSpot('plain')
@@ -877,7 +975,7 @@ describe('hints (#29)', () => {
   afterEach(() => vi.restoreAllMocks())
   /** The vineyard's bedchamber with everything found but the seal. */
   const toSeal = () => {
-    start()
+    start(<App />, laterStarted)
     openCase(/The vineyard/)
     moment('Bedchamber')
     for (const id of ['window', 'man-bed', 'tray', 'woman', 'sheets', 'purse']) tapSpot(id)
@@ -904,7 +1002,7 @@ describe('hints (#29)', () => {
 
   // Looking again once everything is found is the loop's return trip, not a stall.
   it('offers nothing for taps that find nothing new once everything is found', () => {
-    start()
+    start(<App />, laterStarted)
     openCase(/The mountain/)
     for (const [m, ids] of [
       ['The water', ['altar', 'pourers', 'caller', 'trench', 'spent']],
@@ -925,7 +1023,7 @@ describe('hints (#29)', () => {
     }
     vi.useFakeTimers()
     try {
-      start()
+      start(<App />, laterStarted)
       openCase(/The vineyard/)
       tapSpot('cord')
       act(() => vi.advanceTimersByTime(stuck.seconds * 1000 - 1))
@@ -951,7 +1049,7 @@ describe('hints (#29)', () => {
     })
     vi.useFakeTimers()
     try {
-      start()
+      start(<App />, laterStarted)
       openCase(/The vineyard/)
       tapSpot('prophet')
       fireEvent.click(screen.getByRole('button', { name: 'More' }))
@@ -975,7 +1073,7 @@ describe('hints (#29)', () => {
     })
     vi.useFakeTimers()
     try {
-      start()
+      start(<App />, laterStarted)
       openCase(/The vineyard/)
       tapSpot('prophet')
       fireEvent.click(screen.getByRole('button', { name: 'More' }))
@@ -995,7 +1093,7 @@ describe('hints (#29)', () => {
   it('offers one on Solve after a wait with something empty and nothing left to place', () => {
     vi.useFakeTimers()
     try {
-      start()
+      start(<App />, laterStarted)
       openCase(/The mountain/)
       for (const [name, ids] of [
         ['The water', ['pourers', 'caller']],
@@ -1041,7 +1139,7 @@ describe('hints (#29)', () => {
   it('starts a fired wait over when a word is placed and nothing is left to place still', () => {
     vi.useFakeTimers()
     try {
-      start()
+      start(<App />, laterStarted)
       openCase(/The mountain/)
       for (const [name, ids] of [
         ['The water', ['pourers']],
@@ -1183,7 +1281,7 @@ describe('hints (#29)', () => {
   })
 
   it('the menu’s quiet Hint gives one without a signal, and a case closed without one says nothing', async () => {
-    start()
+    start(<App />, vineyardStarted)
     openCase(/The vineyard/)
     tapSpot('cord')
     menu('Hint')
@@ -1315,7 +1413,7 @@ describe('the case solved (#6, 03c; #24)', () => {
   })
 
   it('a case without steps closes on the submit, and says how far off it was', () => {
-    start()
+    start(<App />, laterStarted)
     openCase(/The vineyard/)
     for (const s of ['man-rows', 'cord', 'prophet', 'balcony']) tapSpot(s)
     moment('Bedchamber')
