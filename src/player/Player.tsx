@@ -148,13 +148,15 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const spots = s.moments.flatMap((m) => m.spots)
   const unfound = (list: typeof moment.spots) => list.some((x) => !progress.tapped.includes(x.id))
   // Under a guided step the step's own mark is the hint: no hint is offered, and a signal shows the
-  // step again (#29). The step that waits on every spot found marks nothing on Look, and nor does a
-  // step that asks, so there the signals offer hints as in any case (#25), a question's at the
-  // evidence for the slot it asks about (#77).
+  // step again (#29). On Look the step that waits on every spot found marks nothing, and a step that
+  // asks rings only Solve's button, so there the signals offer hints as in any case (#25), a
+  // question's at the evidence for the slot it asks about (#77).
   const current = step(s, progress)
   const sweep = current?.until?.found !== undefined
   const asked = current?.ask ? current.until.filled : undefined
   const looks = sweep || asked !== undefined
+  // From Look, a question's ring on Solve's button carries no words, and so no dim ([Q11]).
+  const silent = asked !== undefined && view === 'look'
   const guided = current?.until !== undefined && !(looks && view === 'look')
   const nudge = () => setNudges(nudges + 1)
   const fleeting = current !== undefined && (current.until === undefined || looks)
@@ -340,14 +342,14 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   // Where the tutorial's step is shown (#25): at its target on this view — the spot, Solve's
   // button, the answer's word and then its slot, or Close the case — or at the button of the view
   // that holds it; the step that waits on everything found, at Look's button and nowhere on Look;
-  // a step that asks, at its slot and nowhere on Look, so it never shows the word (#77). Nothing
-  // is marked under a card, a sheet, or a paper.
+  // a step that asks, at its slot, never its word, and from Look at Solve's button (#77, [Q11]).
+  // Nothing is marked under a card, a sheet, or a paper.
   const markAt = (until = current?.until) => {
     if (current === undefined || card || sheet !== null || paper !== null) return undefined
     if (until?.tapped)
       return view === 'look' ? `[data-spot="${until.tapped}"]` : '[data-view="look"]'
     if (until?.found) return view === 'look' ? undefined : '[data-view="look"]'
-    if (asked !== undefined) return view === 'look' ? undefined : `[data-slot="${asked}"]`
+    if (asked !== undefined && view !== 'look') return `[data-slot="${asked}"]`
     if (until?.view || view === 'look') return '[data-view="solve"]'
     const filled = until?.filled
     if (filled === undefined) return '[data-close]'
@@ -527,11 +529,11 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
           key={nudges}
           at={at}
           label={
-            fleeting && said === showing
+            (fleeting && said === showing) || silent
               ? ''
               : ((retry && !current.until ? text.retry : text.steps?.[current.id]) ?? '')
           }
-          onTap={fleeting && said !== showing ? () => setSaid(showing) : undefined}
+          onTap={fleeting && said !== showing && !silent ? () => setSaid(showing) : undefined}
         />
       )}
       {lesson && <CoachMark at={lesson} label={text.teach ?? ''} />}

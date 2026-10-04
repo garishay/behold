@@ -818,9 +818,12 @@ describe('the tutorial’s marks (#25)', () => {
     tab(/Look/)
     expect(coach()).toBeNull()
     for (const id of ['giant', 'brook', 'bearer', 'armor', 'basket']) tapSpot(id)
-    // The question marks nothing on Look, where its answer is worked out, and on Solve rings its
-    // blank, never the word (#77).
-    expect(coach()).toBeNull()
+    // The last find starts the question on Look: it rings Solve's button with no words, and the dock
+    // keeps the find's caption ([Q11]). A tap there leaves the question's words for Solve, where
+    // they sit at its blank, never the word (#77).
+    expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
+    expect(document.querySelector('.dock .said')).toHaveTextContent(/A basket from home/)
+    fireEvent.pointerDown(document.querySelector('[data-view="solve"]')!)
     tab(/Solve/)
     expect([at(), said()]).toEqual(['[data-slot="t5"]', 'Whose sword? Look closer at the picture.'])
     chip('Goliath')
@@ -834,8 +837,8 @@ describe('the tutorial’s marks (#25)', () => {
   // Playtest 2's second session (#77): every guided move was a direct match, so the tutorial never
   // showed an answer worked out from what is seen, and the player put David in the sword's blank.
   // The blank is asked. Its words sit over the account's last lines, so they leave on the next tap,
-  // as the last step's do (#24 [3]); Look greets the player with its prompt; a wrong name asks
-  // again, and the right one takes its ✓, as a guided slot does.
+  // as the last step's do (#24 [3]); Look greets the player with its prompt and rings only Solve's
+  // button ([Q11]); a wrong name asks again, and the right one takes its ✓, as a guided slot does.
   it('asks whose sword it was, asks again on a wrong name, and ✓s the right one', () => {
     start()
     openCase(/The valley/)
@@ -852,7 +855,7 @@ describe('the tutorial’s marks (#25)', () => {
     fireEvent.pointerDown(document.querySelector('[data-slot="t1"]')!)
     expect([at(), said()]).toEqual(['[data-slot="t5"]', ''])
     tab(/Look/)
-    expect(coach()).toBeNull()
+    expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
     expect(document.querySelector('.dock .said')).toHaveTextContent(
       'Tap anything that looks like it matters.',
     )
@@ -868,9 +871,10 @@ describe('the tutorial’s marks (#25)', () => {
     expect(at()).toBe('[data-close]')
   })
 
-  // The question marks nothing on Look, so a hint is offered there as in any case (#29). With every
-  // blank filled and the sword's wrong, it points at the evidence for the blank asked about, the
-  // giant, and never at Close the case, which isn't offered until the question is met (#77).
+  // On Look the question rings only Solve's button, so a hint is offered there as in any case (#29),
+  // and takes the ring's place. With every blank filled and the sword's wrong, it points at the
+  // evidence for the blank asked about, the giant, never at Close the case, which isn't offered
+  // until the question is met (#77).
   it('a hint asked for on Look during the question points at the giant', () => {
     start()
     openCase(/The valley/)

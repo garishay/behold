@@ -69,7 +69,8 @@ export type Until =
 /**
  * A tutorial step; the last has no `until`, marks Close the case, and stays until the case closes.
  * A step that asks waits on a face or a blank and rings it, never its answer's word: the player
- * works the answer out from the picture, so on Look it marks nothing (#77).
+ * works the answer out from the picture, so from Look it rings only Solve's button, with no words
+ * (#77, [Q11]).
  */
 export type Step =
   | { readonly id: string; readonly until?: Until; readonly ask?: never }
