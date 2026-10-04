@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { strings } from '../strings/en.ts'
 
 interface CoachMarkProps {
   /** The target's selector: a spot, a view's button, a word, a slot, or Close the case. */
@@ -7,6 +8,8 @@ interface CoachMarkProps {
   label: string
   /** Any tap while the mark shows: the last step's words leave on it (#24, ruling [3]). */
   onTap?: () => void
+  /** A step that only tells carries Next under its words, and Next meets it (#77). */
+  onNext?: () => void
 }
 
 interface Box {
@@ -80,11 +83,13 @@ function bring(el: Element | null) {
  * reaches the game, and one anywhere but the target lifts the dim while the ring stays until the
  * step is done. Where a step's words have gone, its dim goes with them (#24, addendum (b)). The
  * mark shows only where its target can be seen (07c). A screen reader hears the words from a
- * live region; the ring takes no focus and never pulses.
+ * live region; the ring takes no focus and never pulses. Next, where a step carries it, is the
+ * one part of a mark that takes a tap, and a button a keyboard reaches (#77).
  */
-export function CoachMark({ at, label, onTap }: CoachMarkProps) {
+export function CoachMark({ at, label, onTap, onNext }: CoachMarkProps) {
   const [ring, setRing] = useState<Box | null>(null)
   const [dim, setDim] = useState({ at, on: true })
+  const next = useRef<HTMLButtonElement>(null)
   // A new target dims again.
   if (dim.at !== at) setDim({ at, on: true })
   useEffect(() => {
@@ -115,6 +120,9 @@ export function CoachMark({ at, label, onTap }: CoachMarkProps) {
   }, [at])
   useEffect(() => {
     const tap = (e: Event) => {
+      // Next takes its own tap: met on the press, the step would take Next away before its click,
+      // and the click would fall to the picture under it (#77).
+      if (next.current?.contains(e.target as Node)) return
       if (!document.querySelector(at)?.contains(e.target as Node)) setDim({ at, on: false })
       onTap?.()
     }
@@ -128,8 +136,9 @@ export function CoachMark({ at, label, onTap }: CoachMarkProps) {
   return (
     <div className="coach" data-at={at}>
       {ring && (
-        <div aria-hidden>
+        <>
           <div
+            aria-hidden
             className={'ring' + (dim.on && label ? ' dim' : '')}
             style={{
               left: ring.left,
@@ -139,17 +148,22 @@ export function CoachMark({ at, label, onTap }: CoachMarkProps) {
             }}
           />
           {label && (
-            <p
+            <div
               className="label"
               style={{
                 left: centre ?? 0,
                 ...(below ? { top: ring.bottom + 8 } : { bottom: innerHeight - ring.top + 8 }),
               }}
             >
-              {label}
-            </p>
+              <span aria-hidden>{label}</span>
+              {onNext && (
+                <button ref={next} type="button" className="next" onClick={onNext}>
+                  {strings.next}
+                </button>
+              )}
+            </div>
           )}
-        </div>
+        </>
       )}
       <p className="sr" role="status">
         {label}

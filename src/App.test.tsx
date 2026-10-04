@@ -374,6 +374,19 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     expect(screen.getByRole('dialog', { name: 'The mountain' })).not.toHaveTextContent(how)
   })
 
+  // The mountain is the first case with more than one picture, and a picker's dot says more waits
+  // there: its card says so under the brief, in the case's own words, and the valley's doesn't
+  // (#77).
+  it('the mountain’s card says what a dot means under its brief, and the valley’s does not', async () => {
+    start(<App />, laterStarted)
+    openCase(/The valley/)
+    const note = 'Three pictures this time. A dot means more to find there.'
+    expect(screen.getByRole('dialog', { name: 'The valley' })).not.toHaveTextContent(note)
+    menu('Cases')
+    fireEvent.click(await screen.findByRole('button', { name: /The mountain/ }))
+    expect(screen.getByRole('dialog', { name: 'The mountain' })).toHaveTextContent(note)
+  })
+
   it('the brief’s card goes with the first tap, and the menu holds the brief, a hint, Cases, Restart, and the switches', () => {
     start(<App />, laterStarted)
     openCase(/The vineyard/)
@@ -851,6 +864,22 @@ describe('the tutorial’s marks (#25)', () => {
     expect([at(), said()]).toEqual(['[data-view="solve"]', 'Open Solve to name him.'])
     tab(/Solve/)
     expect(at()).toBe('[data-word="david"]')
+  })
+
+  // The found line's step only tells, so its words carry Next, and Next meets it (#77). A press on
+  // Next is Next's own: met on the press, the step would take Next away before its click, and the
+  // click would fall to the picture under it. A step that asks for a move carries none.
+  it('the found line’s step carries Next, and Next meets it', async () => {
+    start()
+    openCase(/The valley/)
+    tapSpot('boy')
+    const next = await screen.findByRole('button', { name: 'Next' })
+    fireEvent.pointerDown(next)
+    expect(at()).toBe('.dock')
+    fireEvent.click(next)
+    expect([at(), said()]).toEqual(['[data-view="solve"]', 'Open Solve to name him.'])
+    await waitFor(() => expect(document.querySelector('.coach .label')).not.toBeNull())
+    expect(screen.queryByRole('button', { name: 'Next' })).not.toBeInTheDocument()
   })
 
   // Playtest 2's second session (#77): the player put David in the sword's blank, and every guided

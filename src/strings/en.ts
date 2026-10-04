@@ -62,6 +62,8 @@ export const strings = {
   start: 'Start',
   // How to play, under the tutorial's brief on its card (#77).
   howTo: 'Tap the picture to find words. What you see and read tells you where they go.',
+  // Next, under the words of a tutorial step that only tells (#77).
+  next: 'Next',
   cases: 'Cases',
   restart: 'Restart',
   restartConfirm: 'Start this case over? Its progress is cleared.',

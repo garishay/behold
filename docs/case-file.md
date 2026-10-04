@@ -70,9 +70,9 @@ Derived, never stored: a blank's kind is its answer's; a case is the tutorial wh
 the paper ids are those the spots open; a step whose `until` is `filled` is a Solve step.
 
 A step may wait on the dock's line of finds read, `{ read: 'found' }`: its mark rings the dock
-whole, the caption with its line, its words above the dock, and the player's next tap, or any
-move, meets it. While the dock shows no line, as on a reload or a return to the case, the step is
-passed (#77).
+whole, the caption with its line, its words above the dock. It only tells, so its words carry
+Next, and Next meets it, as do the player's next tap and any move. While the dock shows no line,
+as on a reload or a return to the case, the step is passed (#77).
 
 A guided case may name, as `ask`, the face or blank it asks about on a miss (#77): when a close
 finds it wrong, the retry is the question, the text's `ask`. It rings that slot and never its
@@ -95,6 +95,7 @@ The type is computed from the structure, so the keys below are exactly the struc
 | `title`    | the case card's title                                                                                                                  |
 | `subtitle` | the card's second line                                                                                                                 |
 | `brief`    | the case's opening question: its card over the picture when a fresh case opens, and the menu's sheet after (#24)                       |
+| `note`     | optional: a line under the brief, on its card only, for what the screen adds that the brief doesn't say — the mountain's dots (#77)    |
 | `passages` | one label per passage, in the language's own book names — `1 Samuel 17:38–51`                                                          |
 | `moments`  | moment id → its name                                                                                                                   |
 | `captions` | spot id → what the player reads on a tap                                                                                               |

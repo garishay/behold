@@ -150,6 +150,11 @@ export type CaseText<S extends CaseStructure> = {
   readonly title: string
   readonly subtitle: string
   readonly brief: string
+  /**
+   * A line under the brief, on its card only, for what the case's screen adds that the brief
+   * doesn't say: the mountain's dots (#77).
+   */
+  readonly note?: string
   readonly passages: Labels<S['passages']>
   readonly moments: Keyed<S['moments'][number]['id'], string>
   readonly captions: Keyed<SpotOf<S>['id'], string>

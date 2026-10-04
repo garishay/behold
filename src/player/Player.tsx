@@ -168,6 +168,9 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const nudge = () => setNudges(nudges + 1)
   const fleeting = current !== undefined && (current.until === undefined || looks)
   const showing = `${current?.id}#${nudges}`
+  // A step that only tells, the dock's line of finds read, is met on the next tap or move, or on
+  // the Next its words carry (#77).
+  const meet = current?.until?.read !== undefined ? () => onProgress(read(s, progress)) : undefined
   // The stay is timed on Look with nothing over the picture, an opened caption included (review
   // round 1), on a moment with something left, and only while the app is in view: the clock starts
   // over on each new find, and on return.
@@ -443,8 +446,10 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
               <div className="card" role="dialog" aria-label={text.title}>
                 <h2>{text.title}</h2>
                 <p>{text.brief}</p>
-                {/* The tutorial says how to play under its brief (#77). */}
+                {/* The tutorial says how to play under its brief, and a case with a note says
+                    what its screen adds (#77). */}
                 {s.steps && <p className="how">{strings.howTo}</p>}
+                {text.note && <p className="how">{text.note}</p>}
                 <button type="button" onClick={() => setBrief(false)}>
                   {strings.start}
                 </button>
@@ -550,14 +555,10 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
                     ? text.retry
                     : text.steps?.[current.id]) ?? '')
           }
-          // A step that waits on its line being read is met on the next tap (#77).
           onTap={
-            current.until?.read !== undefined
-              ? () => onProgress(read(s, progress))
-              : fleeting && said !== showing && !silent
-                ? () => setSaid(showing)
-                : undefined
+            meet ?? (fleeting && said !== showing && !silent ? () => setSaid(showing) : undefined)
           }
+          onNext={meet}
         />
       )}
       {lesson && <CoachMark at={lesson} label={text.teach ?? ''} />}

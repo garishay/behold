@@ -8,6 +8,8 @@ export const en = {
   subtitle: 'Case one',
   brief:
     'Two altars on a mountain, a bull on each, and all Israel watching. What did the people answer, what was poured out, and what did the fire burn?',
+  // The first case with more than one picture says what a picker's dot means (#77).
+  note: 'Three pictures this time. A dot means more to find there.',
   passages: ['1 Kings 18:17–40'],
   moments: { water: 'The water', fire: 'The fire', baal: 'Baal’s altar' },
   captions: {

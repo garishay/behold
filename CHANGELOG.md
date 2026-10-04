@@ -3,6 +3,18 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.15.2 — Gate 22's second amendment, Next and the mountain's dots (#77)
+
+- **77c — Next and the mountain's dots** (#82): the found line's step tells and asks for nothing,
+  so a player waited on it, or tapped the picture and found more than it meant. Its words now
+  carry Next, a real button a keyboard reaches, and Next meets the step; the next tap or move
+  still does. The mark leaves a press on Next to Next's own click, since met on the press the
+  step would take Next away and the click would fall to the picture under it. The mountain is
+  the first case with more than one picture, and its order is told by spots that give no word,
+  so its card carries one line under the brief: "Three pictures this time. A dot means more to
+  find there." A case's text may carry such a note, on its card only, and rule 2 keeps it from
+  answering: it says only how the case's screen is played, never what the case holds.
+
 ## v0.15.1 — Gate 22's amendment, the valley's opening and the question on a miss (#77)
 
 - **77b — the valley's opening and the question on a miss** (#81): asked before the first try,
