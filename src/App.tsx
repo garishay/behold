@@ -29,6 +29,11 @@ const entry = (state: unknown): Entry | null =>
 
 /** How long the title takes to give way to the cases page, its last card risen (#75). */
 const leaving = 1600
+/**
+ * How long after Begin the cases page takes no tap, so a quick second tap on Begin opens nothing
+ * beneath it (#75, Gate 21 A2 as ruled), whether the title glides away or cuts.
+ */
+const settling = 500
 
 interface AppProps {
   /** The passage service the reveal reads through; the proxy (#3), or a test's own. */
@@ -47,6 +52,7 @@ export default function App({ passages = fetchedPassages }: AppProps) {
   const [open, setOpen] = useState<string | null>(() => entry(history.state)?.case ?? null)
   // The title shows only when the app opens on the cases page, never on the way back from a case.
   const [title, setTitle] = useState<'shown' | 'leaving' | null>(() => (open ? null : 'shown'))
+  const [settled, setSettled] = useState(true)
   const [restarts, setRestarts] = useState(0)
   useEffect(() => save(saved), [saved])
   useEffect(() => {
@@ -62,6 +68,11 @@ export default function App({ passages = fetchedPassages }: AppProps) {
     const t = setTimeout(() => setTitle(null), leaving)
     return () => clearTimeout(t)
   }, [title])
+  useEffect(() => {
+    if (settled) return
+    const t = setTimeout(() => setSettled(true), settling)
+    return () => clearTimeout(t)
+  }, [settled])
 
   const openCase = (id: string, progress: Progress) => {
     setSaved({ ...saved, [id]: progress })
@@ -101,11 +112,13 @@ export default function App({ passages = fetchedPassages }: AppProps) {
       />
     )
   }
-  const begin = () =>
+  const begin = () => {
+    setSettled(false)
     setTitle(matchMedia('(prefers-reduced-motion: reduce)').matches ? null : 'leaving')
+  }
   if (title === 'shown') return <Title leaving={false} onBegin={begin} />
   return (
-    <main className={title === 'leaving' ? 'screen arriving' : 'screen'}>
+    <main className={title === 'leaving' ? 'screen arriving' : 'screen'} inert={!settled}>
       <header className="masthead">
         <h1>{strings.title}</h1>
         <p className="kicker">{strings.kicker}</p>

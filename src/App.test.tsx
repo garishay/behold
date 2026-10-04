@@ -126,6 +126,29 @@ describe('the title (#75)', () => {
     }
   })
 
+  // A quick second tap on Begin lands where the cases page now is, so for half a second the page
+  // takes no tap, whether the title glides away or cuts (Gate 21 A2 as ruled). jsdom has no hit
+  // testing, so the test holds the page inert for that time; a browser lets no tap through it.
+  it('takes no tap on the cases page until half a second after Begin', () => {
+    vi.useFakeTimers()
+    try {
+      for (const reduce of [true, false]) {
+        vi.stubGlobal('matchMedia', () => ({ matches: reduce }))
+        const { unmount } = render(<App />)
+        fireEvent.click(screen.getByRole('button', { name: 'Begin' }))
+        const page = document.querySelector('.screen')
+        expect(page, `reduce ${reduce}`).toHaveAttribute('inert')
+        act(() => vi.advanceTimersByTime(499))
+        expect(page, `reduce ${reduce}`).toHaveAttribute('inert')
+        act(() => vi.advanceTimersByTime(1))
+        expect(page, `reduce ${reduce}`).not.toHaveAttribute('inert')
+        unmount()
+      }
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   it('never shows on a reload inside a case, nor on the way back from one', async () => {
     const { unmount } = start()
     openCase(/The valley/)
