@@ -846,15 +846,15 @@ describe('the tutorial’s marks (#25)', () => {
     fireEvent.pointerDown(document.querySelector('.dock .found')!)
     expect([at(), said()]).toEqual(['[data-view="solve"]', 'Open Solve to name him.'])
     tab(/Solve/)
-    expect([at(), said()]).toEqual([
-      '[data-word="david"]',
-      'Tap David, then the slot under the boy.',
-    ])
-    chip('David')
-    expect(at()).toBe('[data-slot="d1"]')
+    // Both guided fills lead with the slot (#77). The slot under the boy is ringed, and once it
+    // waits, sling dims, since a thing can't name him, and the mark moves to David.
+    expect([at(), said()]).toEqual(['[data-slot="d1"]', 'Tap the slot under the boy, then David.'])
     slot('d1')
-    // Sling goes blank-first: its blank is ringed, and once the blank waits, the words that can't
-    // go there dim and the mark moves to sling (#77).
+    expect(at()).toBe('[data-word="david"]')
+    expect(document.querySelector('[data-word="sling"]')).toHaveClass('is-dim')
+    expect(document.querySelector('[data-word="david"]')).not.toHaveClass('is-dim')
+    chip('David')
+    // Sling's blank leads the same way, and once it waits, David dims.
     expect([at(), said()]).toEqual([
       '[data-slot="t4"]',
       'Tap the blank first. Fitting words stay bright.',
@@ -886,7 +886,7 @@ describe('the tutorial’s marks (#25)', () => {
     fireEvent.click(await screen.findByRole('button', { name: /The valley/ }))
     expect([at(), said()]).toEqual(['[data-view="solve"]', 'Open Solve to name him.'])
     tab(/Solve/)
-    expect(at()).toBe('[data-word="david"]')
+    expect(at()).toBe('[data-slot="d1"]')
   })
 
   // The found line's step only tells, so its words carry Next, and Next meets it (#77). A press on

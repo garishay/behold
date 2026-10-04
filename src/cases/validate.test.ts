@@ -337,7 +337,7 @@ describe('validate (Gate 02 A6)', () => {
   it('(m) a step of nine words — step 4 with a second "tap"', () => {
     const long: Text = {
       ...en,
-      steps: { ...en.steps, step4: 'Tap David, then tap the slot under the boy.' },
+      steps: { ...en.steps, step4: 'Tap the slot under the boy, then tap David.' },
     }
     expect(validate(valley, long)).toEqual(['step "step4" says 9 words, not eight or fewer'])
   })

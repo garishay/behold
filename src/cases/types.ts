@@ -74,7 +74,8 @@ type Fill = Until & { readonly filled: string }
 /**
  * A tutorial step; the last has no `until`, marks Close the case, and stays until the case closes.
  * One that waits on a face or a blank may lead with it, `slotFirst`: its mark rings the slot until
- * the slot waits, then the answer's word, so the tutorial shows the fill both ways (#77).
+ * the slot waits, then the answer's word, so the tutorial practises the fill that narrows the bank
+ * to the slot's kind (#77).
  */
 export type Step =
   | { readonly id: string; readonly until?: Until; readonly slotFirst?: never }
