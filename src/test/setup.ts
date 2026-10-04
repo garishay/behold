@@ -11,6 +11,14 @@ afterEach(cleanup)
 beforeEach(() => vi.stubGlobal('fetch', () => Promise.reject(new Error('no network in tests'))))
 afterEach(() => vi.unstubAllGlobals())
 
+// jsdom has no matchMedia. Here every test asks for reduced motion, so Begin cuts straight to the
+// cases page (#75); a test of the title's way out stubs its own.
+beforeEach(() =>
+  vi.stubGlobal('matchMedia', (query: string) => ({
+    matches: query === '(prefers-reduced-motion: reduce)',
+  })),
+)
+
 // jsdom has no Element.scrollBy, which a mark brings its target with (#47); here it moves at once,
 // as jsdom's scrollTop does. The Worker's tests run on Node, with no DOM at all.
 if (typeof Element !== 'undefined')

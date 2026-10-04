@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import { cases } from './cases/index.ts'
 import { fetchedPassages } from './passages/proxy.ts'
 import type { PassageService } from './passages/service.ts'
@@ -9,6 +9,7 @@ import { load, save, type Saved } from './player/storage.ts'
 import { Music } from './sound/music.ts'
 import { Switches } from './sound/Switches.tsx'
 import { strings } from './strings/en.ts'
+import { Title } from './Title.tsx'
 
 /**
  * The history entries the app pushes (Gate 03 [1]): one for an open case, and one on top of it
@@ -20,23 +21,14 @@ interface Entry {
   readonly view?: 'reveal'
 }
 
-/**
- * A line's sentences, so the title screen sets each on its own line at every width while the line
- * stays one string (#73, Gate 20 A3 as ruled). A browser without the sentence segmenter keeps the
- * line whole.
- */
-const sentences = (line: string) =>
-  typeof Intl.Segmenter === 'function'
-    ? [...new Intl.Segmenter('en', { granularity: 'sentence' }).segment(line)].map((s) =>
-        s.segment.trim(),
-      )
-    : [line]
-
 /** The entry a history state carries, or none: the app's own states hold a case id and, on the reveal, its view. */
 const entry = (state: unknown): Entry | null =>
   typeof state === 'object' && state !== null && 'case' in state && typeof state.case === 'string'
     ? (state as Entry)
     : null
+
+/** How long the title takes to give way to the cases page, its last card risen (#75). */
+const leaving = 1600
 
 interface AppProps {
   /** The passage service the reveal reads through; the proxy (#3), or a test's own. */
@@ -44,21 +36,32 @@ interface AppProps {
 }
 
 /**
- * The title screen with the cases on it (#6): the masthead, the epigraph and its notice (Gate 01
- * A6), and between them the case cards, each opening its case in the player. Progress is kept on
- * the device and restored on the next visit. An open case is a history entry — no route, no URL —
- * so back returns to the cards, and leaves the app only from them.
+ * The cases page (#6), with the title over it when the app opens there (#75): the header, the
+ * case cards, each opening its case in the player, then the epigraph and its notice (Gate 01
+ * A6). Progress is kept on the device and restored on the next visit. An open case is a history
+ * entry — no route, no URL — so back returns to the cards, and leaves the app only from them; the
+ * title adds none.
  */
 export default function App({ passages = fetchedPassages }: AppProps) {
   const [saved, setSaved] = useState<Saved>(() => load(cases))
   const [open, setOpen] = useState<string | null>(() => entry(history.state)?.case ?? null)
+  // The title shows only when the app opens on the cases page, never on the way back from a case.
+  const [title, setTitle] = useState<'shown' | 'leaving' | null>(() => (open ? null : 'shown'))
   const [restarts, setRestarts] = useState(0)
   useEffect(() => save(saved), [saved])
   useEffect(() => {
-    const onPop = (e: PopStateEvent) => setOpen(entry(e.state)?.case ?? null)
+    const onPop = (e: PopStateEvent) => {
+      setOpen(entry(e.state)?.case ?? null)
+      setTitle(null)
+    }
     addEventListener('popstate', onPop)
     return () => removeEventListener('popstate', onPop)
   }, [])
+  useEffect(() => {
+    if (title !== 'leaving') return
+    const t = setTimeout(() => setTitle(null), leaving)
+    return () => clearTimeout(t)
+  }, [title])
 
   const openCase = (id: string, progress: Progress) => {
     setSaved({ ...saved, [id]: progress })
@@ -98,23 +101,17 @@ export default function App({ passages = fetchedPassages }: AppProps) {
       />
     )
   }
+  const begin = () =>
+    setTitle(matchMedia('(prefers-reduced-motion: reduce)').matches ? null : 'leaving')
+  if (title === 'shown') return <Title leaving={false} onBegin={begin} />
   return (
-    <main className="screen">
+    <main className={title === 'leaving' ? 'screen arriving' : 'screen'}>
       <header className="masthead">
         <h1>{strings.title}</h1>
         <p className="kicker">{strings.kicker}</p>
       </header>
-      <blockquote className="epigraph">
-        <p>{strings.epigraph}</p>
-        <footer>{strings.epigraphReference}</footer>
-      </blockquote>
-      <p className="line">
-        {sentences(strings.line).map((s) => (
-          <span key={s}>{s}</span>
-        ))}
-      </p>
       <div className="case-list">
-        {cases.map(({ structure, text }) => {
+        {cases.map(({ structure, text }, i) => {
           const p = saved[structure.id]
           const thumb =
             structure.moments.find((m) => m.id === structure.thumb) ?? structure.moments[0]
@@ -123,6 +120,7 @@ export default function App({ passages = fetchedPassages }: AppProps) {
               key={structure.id}
               type="button"
               className="case-card"
+              style={{ '--i': i } as CSSProperties}
               onClick={() => openCase(structure.id, p ?? fresh(structure))}
             >
               <img src={picture(structure.id, thumb.picture)} alt="" />
@@ -135,6 +133,10 @@ export default function App({ passages = fetchedPassages }: AppProps) {
           )
         })}
       </div>
+      <blockquote className="epigraph">
+        <p>{strings.epigraph}</p>
+        <footer>{strings.epigraphReference}</footer>
+      </blockquote>
       <Switches />
       <p className="status">{strings.status}</p>
       <p className="notice">{strings.notice}</p>
@@ -145,6 +147,8 @@ export default function App({ passages = fetchedPassages }: AppProps) {
         </a>
       </p>
       <Music cue="title" />
+      {/* Leaving, the title rides over the page until its last card has risen. */}
+      {title === 'leaving' && <Title leaving onBegin={begin} />}
     </main>
   )
 }

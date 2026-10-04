@@ -19,9 +19,12 @@ const wants: Readonly<Record<Kind, string>> = {
 export const strings = {
   title: 'Behold',
   kicker: 'Bible Mystery Game',
-  // The title screen's epigraph ships in the bundle by Gate 01 A6's exception; it is app copy, not
-  // a component's sentence, and its notice is Crossway's, verbatim. The reveal shows the notice
-  // again under the passages (#3).
+  // The title (#75): its line, then Begin, the player's first tap, which starts the title theme.
+  begin: 'Begin',
+  bestWithSound: 'Best with sound on.',
+  // The epigraph ships in the bundle by Gate 01 A6's exception, on the cases page under the cases
+  // (#75); it is app copy, not a component's sentence, and its notice is Crossway's, verbatim. The
+  // reveal shows the notice again under the passages (#3).
   epigraph:
     'It is the glory of God to conceal things, but the glory of kings is to search things out.',
   epigraphReference: 'Proverbs 25:2, ESV',
