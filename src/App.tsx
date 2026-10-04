@@ -127,6 +127,14 @@ export default function App({ passages = fetchedPassages }: AppProps) {
   const closed = (i: number) => saved[cases[i].structure.id]?.solved === true
   const locked = (i: number) => i > 0 && !closed(i - 1) && !saved[cases[i].structure.id]
   const next = cases.findIndex((_, i) => !closed(i))
+  // The first case is the way in; the cases after it are the season, named over them, and its name
+  // rises with the first of them (#77).
+  const season = (
+    <header key="season" className="season-head" style={{ '--i': 1 } as CSSProperties}>
+      <h2>{strings.season}</h2>
+      <p>{strings.seasonName}</p>
+    </header>
+  )
   const begin = () =>
     setTitle(matchMedia('(prefers-reduced-motion: reduce)').matches ? 'settling' : 'leaving')
   if (title === 'shown') return <Title leaving={false} onBegin={begin} />
@@ -137,7 +145,7 @@ export default function App({ passages = fetchedPassages }: AppProps) {
         <p className="kicker">{strings.kicker}</p>
       </header>
       <div className="case-list">
-        {cases.map(({ structure, text }, i) => {
+        {cases.flatMap(({ structure, text }, i) => {
           const p = saved[structure.id]
           const thumb =
             structure.moments.find((m) => m.id === structure.thumb) ?? structure.moments[0]
@@ -148,7 +156,7 @@ export default function App({ passages = fetchedPassages }: AppProps) {
                 ? strings.closed
                 : strings.inProgress
               : i === 0 && strings.startHere
-          return (
+          const card = (
             <button
               key={structure.id}
               type="button"
@@ -182,14 +190,15 @@ export default function App({ passages = fetchedPassages }: AppProps) {
               </div>
             </button>
           )
+          return i === 1 ? [season, card] : [card]
         })}
       </div>
+      <p className="status">{strings.status}</p>
       <blockquote className="epigraph">
         <p>{strings.epigraph}</p>
         <footer>{strings.epigraphReference}</footer>
       </blockquote>
       <Switches />
-      <p className="status">{strings.status}</p>
       <p className="notice">{strings.notice}</p>
       <p className="credit">
         {strings.credit}{' '}

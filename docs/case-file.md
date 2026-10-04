@@ -68,6 +68,10 @@ export const valley = { … } as const satisfies CaseStructure
 Derived, never stored: a blank's kind is its answer's; a case is the tutorial when it has steps;
 the paper ids are those the spots open; a step whose `until` is `filled` is a Solve step.
 
+A `filled` step may ask, `ask: true`: its mark rings the face or blank and never the answer's
+word, and from Look it rings only Solve's button, with no words, leaving the picture clear for the
+player to work the answer out. Its slot takes its ✓ as any slot a step names (#77, [Q11]).
+
 Every string in the structure is an id, a file name, a book code, or a cite. There is no field
 that can hold a sentence, so the structure cannot carry player text and cannot carry scripture.
 
@@ -190,7 +194,8 @@ Three layers, from mechanical to read.
    (_Pictures_), which holds its box to a tenth of the width on each side as well; a step's words, and the retry's, are eight or fewer;
    a case that teaches the order has one, a face it teaches is one of its faces, and its lesson
    is eight words or fewer; every face and blank names a spot of the case as its evidence, and in
-   a case with an order every moment names one of its own.
+   a case with an order every moment names one of its own; and the moments are never listed in
+   the order they happened, so the order as shown is never the answer (#77).
    `src/cases/validate.test.ts` holds one
    broken fixture per check, each failing
    the check it names and no other; the registry test, `src/cases/cases.test.ts`, holds the

@@ -106,9 +106,10 @@ const met = (s: CaseStructure, p: Progress, until: Until) =>
 
 /**
  * The steps moved past every met `until`. A guided case no longer closes itself: its last step
- * points at Close the case, and it closes on the same check as every case (#26 [4]).
+ * points at Close the case, and it closes on the same check as every case (#26 [4]). The store
+ * moves kept progress the same way as it loads (#77).
  */
-function advance(s: CaseStructure, p: Progress): Progress {
+export function advance(s: CaseStructure, p: Progress): Progress {
   if (!guided(s)) return p
   const steps = s.steps ?? []
   let at = p.step

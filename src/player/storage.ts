@@ -1,6 +1,6 @@
 import type { CaseEntry } from '../cases/index.ts'
 import type { CaseStructure } from '../cases/types.ts'
-import type { Progress } from './state.ts'
+import { advance, type Progress } from './state.ts'
 
 /**
  * Progress kept on the device (#6): one key in localStorage, every case's progress by id, so a
@@ -71,10 +71,12 @@ export function load(registry: readonly CaseEntry[]): Saved {
     const raw = localStorage.getItem(key)
     const parsed: unknown = raw === null ? {} : JSON.parse(raw)
     if (!record(parsed)) return {}
-    const entries = Object.entries(parsed).map(([id, v]) => [id, withHints(v)])
-    const kept = entries.filter((e): e is [string, Progress] => {
-      const structure = registry.find((c) => c.structure.id === e[0])?.structure
-      return structure !== undefined && progress(e[1]) && fits(structure, e[1])
+    const entries = Object.entries(parsed).map(([id, v]) => [id, withHints(v)] as const)
+    // Kept progress moves past every step it has met, as a move would, so a step the tutorial gains
+    // ahead of the stored one shows only while it is still to do (#77).
+    const kept = entries.flatMap(([id, v]) => {
+      const structure = registry.find((c) => c.structure.id === id)?.structure
+      return structure && progress(v) && fits(structure, v) ? [[id, advance(structure, v)]] : []
     })
     return Object.fromEntries(kept)
   } catch {

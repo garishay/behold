@@ -3,6 +3,23 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.15.0 — Gate 22, the sword, the order, and the season (#77)
+
+- **77a — the sword, the order, and the season** (#80): playtest 2's second remote tester put
+  David in the sword's blank, since every guided move in the valley was a direct match and none
+  showed an answer worked out from the picture. After the sweep the valley now asks: it rings the
+  sword's blank, never Goliath's word, with "Whose sword? Look closer at the picture.", rings
+  only Solve's button from Look, with no words ([Q11]), and asks again on a wrong name; the
+  right one takes its ✓, and Close the case follows. A step may ask in the case format
+  (`ask: true`), and progress kept from before moves past every step it has met. Both remote
+  testers read the mountain's order as it was shown, so
+  its lesson reads "These are out of order. Which happened first?", and the order's pictures lie
+  loose in a tray, two to a row, none under a slot; check (p) fails a case whose pictures are
+  listed in the order they happened. A time on a card read as a par to beat, so the cards drop
+  their times. The valley stands apart as the way in, "Learn to play · take your time", and
+  "Season one" over "The house of Ahab" names the season above the cases after it, which count
+  within it, "Case one" to "Case three".
+
 ## v0.14.1 — Gate 21, the season in order (#75)
 
 - **75b — the season in order** (#78): playtest 2's first remote player left the valley unclosed

@@ -101,11 +101,31 @@ describe('progress on the device (#6, A6)', () => {
       localStorage.setItem(key, JSON.stringify({ vineyard: stale }))
       expect(load(cases), JSON.stringify(stale)).toEqual({})
     }
-    const guided = { ...fresh(valley), step: 5 }
+    // The last step is kept, and a step past it is not, however many steps the tutorial has (#77).
+    const guided = { ...fresh(valley), step: valley.steps.length - 1 }
     localStorage.setItem(key, JSON.stringify({ valley: guided, ghost: fresh(valley) }))
     expect(load(cases)).toEqual({ valley: guided })
-    localStorage.setItem(key, JSON.stringify({ valley: { ...guided, step: 6 } }))
+    localStorage.setItem(key, JSON.stringify({ valley: { ...guided, step: valley.steps.length } }))
     expect(load(cases)).toEqual({})
+  })
+
+  // The tutorial gained its question ahead of the last step (#77), so progress kept at the old last
+  // step's place is on the question now. It loads past it when the sword's blank is already right,
+  // as a move would take it, and stays on it while the blank is still to do.
+  it('moves kept progress past every step it has met', () => {
+    const tapped = ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']
+    const kept = {
+      ...fresh(valley),
+      tapped,
+      faces: { d1: 'david' },
+      fills: { t4: 'sling' },
+      step: 5,
+    }
+    const right = { ...kept, fills: { ...kept.fills, t5: 'goliath' } }
+    localStorage.setItem(key, JSON.stringify({ valley: right }))
+    expect(load(cases).valley.step).toBe(6)
+    localStorage.setItem(key, JSON.stringify({ valley: kept }))
+    expect(load(cases).valley.step).toBe(5)
   })
 
   // Progress gained the hints used (#29). An entry kept before them has used none and keeps its

@@ -95,9 +95,9 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   // bank while Solve is open (#24).
   const [fresh, setFresh] = useState<readonly string[]>([])
   // A step whose words would sit over what the player reads or uses shows them until the next tap,
-  // and keeps its ring: the last step's, over the account (#24 [3]), and the sweep's, over the bank
-  // (#25). `said` is the step whose words have left and the showing they left at, so a step shown
-  // again brings them back.
+  // and keeps its ring: the last step's, over the account (#24 [3]), the sweep's, over the bank
+  // (#25), and a question's, over the account's last lines (#77). `said` is the step whose words
+  // have left and the showing they left at, so a step shown again brings them back.
   const [said, setSaid] = useState<string | null>(null)
   // A failed close in the tutorial brings the last step's words back as its retry, which says the
   // answers were checked (#25).
@@ -148,13 +148,18 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const spots = s.moments.flatMap((m) => m.spots)
   const unfound = (list: typeof moment.spots) => list.some((x) => !progress.tapped.includes(x.id))
   // Under a guided step the step's own mark is the hint: no hint is offered, and a signal shows the
-  // step again (#29). The step that waits on every spot found marks nothing on Look, so there the
-  // signals offer hints as in any case (#25).
+  // step again (#29). On Look the step that waits on every spot found marks nothing, and a step that
+  // asks rings only Solve's button, so there the signals offer hints as in any case (#25), a
+  // question's at the evidence for the slot it asks about (#77).
   const current = step(s, progress)
   const sweep = current?.until?.found !== undefined
-  const guided = current?.until !== undefined && !(sweep && view === 'look')
+  const asked = current?.ask ? current.until.filled : undefined
+  const looks = sweep || asked !== undefined
+  // From Look, a question's ring on Solve's button carries no words, and so no dim ([Q11]).
+  const silent = asked !== undefined && view === 'look'
+  const guided = current?.until !== undefined && !(looks && view === 'look')
   const nudge = () => setNudges(nudges + 1)
-  const fleeting = current !== undefined && (current.until === undefined || sweep)
+  const fleeting = current !== undefined && (current.until === undefined || looks)
   const showing = `${current?.id}#${nudges}`
   // The stay is timed on Look with nothing over the picture, an opened caption included (review
   // round 1), on a moment with something left, and only while the app is in view: the clock starts
@@ -196,6 +201,10 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     const found = progress.bank.some((w) => s.words[w] === kind)
     setNote(kind === undefined ? '' : strings.blankWants(kind, found))
     if (placed(progress, o.progress)) play('place')
+    // A wrong word set in the slot a question asks about asks again, words, dim, and all (#77).
+    const put = asked && (o.progress.faces[asked] ?? o.progress.fills[asked])
+    if (put && put !== (progress.faces[asked] ?? progress.fills[asked]) && put !== answer(s, asked))
+      nudge()
     close(o.progress)
   }
   // A tap that found nothing new, on a spot found before or on no spot, runs toward a hint while
@@ -249,9 +258,9 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     if (view === 'solve' && v !== 'solve') setFresh([])
     // Look's caption closes with the dock when Solve opens.
     if (v !== view) setReading(false)
-    // Back on Look while the tutorial waits on everything found, the caption gives way to the
-    // prompt, "Tap anything that looks like it matters." (#25).
-    if (v === 'look' && sweep) setCaption(null)
+    // Back on Look while the tutorial waits on everything found, or on an answer worked out there,
+    // the caption gives way to the prompt, "Tap anything that looks like it matters." (#25, #77).
+    if (v === 'look' && looks) setCaption(null)
     setView(v)
     onProgress(opened(s, progress, v))
   }
@@ -265,7 +274,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     if (guided || hint?.tier === 2 || hint?.why === 'close') return nudge()
     const next = hint
       ? { ...hint, tier: 2 as const }
-      : { ...aim(s, progress, missed), tier: 1 as const }
+      : { ...aim(s, progress, missed ?? asked ?? null), tier: 1 as const }
     setHint(next)
     setRun(0)
     setStayed(false)
@@ -332,13 +341,15 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     )
   // Where the tutorial's step is shown (#25): at its target on this view — the spot, Solve's
   // button, the answer's word and then its slot, or Close the case — or at the button of the view
-  // that holds it; the step that waits on everything found, at Look's button and nowhere on Look.
+  // that holds it; the step that waits on everything found, at Look's button and nowhere on Look;
+  // a step that asks, at its slot, never its word, and from Look at Solve's button (#77, [Q11]).
   // Nothing is marked under a card, a sheet, or a paper.
   const markAt = (until = current?.until) => {
     if (current === undefined || card || sheet !== null || paper !== null) return undefined
     if (until?.tapped)
       return view === 'look' ? `[data-spot="${until.tapped}"]` : '[data-view="look"]'
     if (until?.found) return view === 'look' ? undefined : '[data-view="look"]'
+    if (asked !== undefined && view !== 'look') return `[data-slot="${asked}"]`
     if (until?.view || view === 'look') return '[data-view="solve"]'
     const filled = until?.filled
     if (filled === undefined) return '[data-close]'
@@ -518,11 +529,11 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
           key={nudges}
           at={at}
           label={
-            fleeting && said === showing
+            (fleeting && said === showing) || silent
               ? ''
               : ((retry && !current.until ? text.retry : text.steps?.[current.id]) ?? '')
           }
-          onTap={fleeting && said !== showing ? () => setSaid(showing) : undefined}
+          onTap={fleeting && said !== showing && !silent ? () => setSaid(showing) : undefined}
         />
       )}
       {lesson && <CoachMark at={lesson} label={text.teach ?? ''} />}

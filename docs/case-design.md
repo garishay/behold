@@ -38,14 +38,16 @@ rules below are the answer, ruled on #26.
 5. **The check is coarse.** Close the case says how many are wrong — one or two, or several —
    never which. The tutorial marks an answer right only on the slots its guided steps name; when
    those steps are done, Close the case appears, the last step points at it, and the tutorial
-   closes on the same check as every case. The first case teaches the real check.
+   closes on the same check as every case. The first case teaches the real check. One guided step
+   is an inference: it rings the sword's blank, not its word, and asks whose sword it was, so the
+   tutorial shows an answer worked out from what is seen, the way rule 2 leaves every other (#77).
 
 6. **One new idea per case.** A case adds one thing the player has not done before, and names it
-   in its brief to the author. Season one's first rungs:
+   in its brief to the author. The valley, then season one's first rungs:
 
    | case         | what it adds                                                 |
    | ------------ | ------------------------------------------------------------ |
-   | the valley   | tap, name, fill, close — the whole loop, guided              |
+   | the valley   | tap, name, fill, work one answer out, close — guided         |
    | the mountain | several moments, and the order they happened in              |
    | the vineyard | papers, and names worked out by cross-reference              |
    | the battle   | a disguise: a face without its marker, named by what happens |
@@ -66,8 +68,9 @@ rules below are the answer, ruled on #26.
 **The validator** (`src/cases/validate.ts`, run by the test job over every registered case) holds
 the counts of rule 1: a blank's kind has at least three words in the case — its answer and two
 rivals — and the case has one name more than it has faces. Each fails in CI with one sentence,
-`blank "t3" takes a "number" word, and the case has 2, not three`. The authoring tool (#5)
-inherits both.
+`blank "t3" takes a "number" word, and the case has 2, not three`. It holds too that a case's
+pictures are never shown in the order they happened, so the order as shown is never the answer
+(#77). The authoring tool (#5) inherits them.
 
 **Review, by reading**, holds the rest, with the accuracy table as its handle — every sentence of
 the account and the reveal, every caption, and every paper against its verse, citing by

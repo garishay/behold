@@ -5,7 +5,7 @@ import type { carmel } from './case.ts'
 // passage's detail; every sentence is the game's own voice, never the translation's.
 export const en = {
   title: 'The mountain',
-  subtitle: 'Case two · about ten minutes',
+  subtitle: 'Case one',
   brief:
     'Two altars on a mountain, a bull on each, and all Israel watching. What did the people answer, what was poured out, and what did the fire burn?',
   passages: ['1 Kings 18:17–40'],
@@ -73,7 +73,7 @@ export const en = {
       ],
     },
   },
-  teach: 'Put the pictures in the order they happened.',
+  teach: 'These are out of order. Which happened first?',
   reveal: [
     'The man in the hair cloak was Elijah, the LORD’s prophet, who stood alone against Baal’s four hundred and fifty. The man under the awning was Ahab, king of Israel, who met him as the troubler of Israel and gathered the people and the prophets to Mount Carmel at his word.',
     'Asked how long they would waver, the people said not a word. Baal’s prophets called from morning past noon, and no one answered. Elijah rebuilt the LORD’s altar with twelve stones, one for each tribe, and had it soaked, four jars three times over, until the trench ran full. At the hour of the offering he prayed, and the fire of the LORD fell. It consumed the offering, the wood, the stones, and the dust, and dried up the water in the trench. The people fell on their faces and confessed that the LORD is God, and at Elijah’s word Baal’s prophets were seized and taken down to the brook Kishon.',

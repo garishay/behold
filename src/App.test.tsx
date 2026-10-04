@@ -233,6 +233,35 @@ describe('the cases page (Gate 01 A6, #6, #75)', () => {
     expect(screen.queryByText('In progress')).not.toBeInTheDocument()
     expect(screen.getAllByRole('link').map((l) => l.textContent)).toEqual(['CC BY 4.0'])
   })
+
+  // Playtest 2's second session (#77): the valley teaches the game and the cases after it are one
+  // story, the house of Ahab, so the season is named over them and they count within it. The cards
+  // give no time, and what is still being written sits under the season's last case.
+  it('names the season over the cases after the valley, counted within it, and no times', () => {
+    start()
+    const list = document.querySelector('.case-list')!
+    expect([...list.children].map((e) => e.querySelector('.ct, h2')?.textContent)).toEqual([
+      'The valley',
+      'Season one',
+      'The mountain',
+      'The vineyard',
+      'The battle',
+    ])
+    const head = list.querySelector('.season-head')!
+    expect(within(head as HTMLElement).getByRole('heading', { level: 2 })).toHaveTextContent(
+      'Season one',
+    )
+    expect(head).toHaveTextContent('The house of Ahab')
+    // The season's name rises with its first case as Begin gives way (#75 A2).
+    expect(head).toHaveStyle({ '--i': '1' })
+    expect(cards().map((c) => c.querySelector('.cs')?.textContent)).toEqual([
+      'Learn to play · take your time',
+      'Case one',
+      'Case two',
+      'Case three',
+    ])
+    expect(list.nextElementSibling).toHaveTextContent('Season one is being written.')
+  })
 })
 
 describe('the season in order (#75)', () => {
@@ -789,9 +818,75 @@ describe('the tutorial’s marks (#25)', () => {
     tab(/Look/)
     expect(coach()).toBeNull()
     for (const id of ['giant', 'brook', 'bearer', 'armor', 'basket']) tapSpot(id)
-    expect([at(), said()]).toEqual(['[data-view="solve"]', 'Fill the rest, then close the case.'])
+    // The last find starts the question on Look: it rings Solve's button with no words, and the dock
+    // keeps the find's caption ([Q11]). A tap there leaves the question's words for Solve, where
+    // they sit at its blank, never the word (#77).
+    expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
+    expect(document.querySelector('.dock .said')).toHaveTextContent(/A basket from home/)
+    fireEvent.pointerDown(document.querySelector('[data-view="solve"]')!)
     tab(/Solve/)
+    expect([at(), said()]).toEqual(['[data-slot="t5"]', 'Whose sword? Look closer at the picture.'])
+    chip('Goliath')
+    expect(at()).toBe('[data-slot="t5"]')
+    slot('t5')
+    expect([at(), said()]).toEqual(['[data-close]', 'Fill the rest, then close the case.'])
+    tab(/Look/)
+    expect(at()).toBe('[data-view="solve"]')
+  })
+
+  // Playtest 2's second session (#77): every guided move was a direct match, so the tutorial never
+  // showed an answer worked out from what is seen, and the player put David in the sword's blank.
+  // The blank is asked. Its words sit over the account's last lines, so they leave on the next tap,
+  // as the last step's do (#24 [3]); Look greets the player with its prompt and rings only Solve's
+  // button ([Q11]); a wrong name asks again, and the right one takes its ✓, as a guided slot does.
+  it('asks whose sword it was, asks again on a wrong name, and ✓s the right one', () => {
+    start()
+    openCase(/The valley/)
+    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
+    tab(/Solve/)
+    for (const [id, word] of [
+      ['d1', 'David'],
+      ['t4', 'sling'],
+    ] as const) {
+      chip(word)
+      slot(id)
+    }
+    expect([at(), said()]).toEqual(['[data-slot="t5"]', 'Whose sword? Look closer at the picture.'])
+    fireEvent.pointerDown(document.querySelector('[data-slot="t1"]')!)
+    expect([at(), said()]).toEqual(['[data-slot="t5"]', ''])
+    tab(/Look/)
+    expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
+    expect(document.querySelector('.dock .said')).toHaveTextContent(
+      'Tap anything that looks like it matters.',
+    )
+    tab(/Solve/)
+    expect([at(), said()]).toEqual(['[data-slot="t5"]', ''])
+    chip('David')
+    slot('t5')
+    expect(document.querySelector('[data-slot="t5"]')).not.toHaveClass('is-right')
+    expect([at(), said()]).toEqual(['[data-slot="t5"]', 'Whose sword? Look closer at the picture.'])
+    chip('Goliath')
+    slot('t5')
+    expect(document.querySelector('[data-slot="t5"]')).toHaveClass('is-right')
     expect(at()).toBe('[data-close]')
+  })
+
+  // On Look the question rings only Solve's button, so a hint is offered there as in any case (#29),
+  // and takes the ring's place. With every blank filled and the sword's wrong, it points at the
+  // evidence for the blank asked about, the giant, never at Close the case, which isn't offered
+  // until the question is met (#77).
+  it('a hint asked for on Look during the question points at the giant', () => {
+    start()
+    openCase(/The valley/)
+    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
+    tab(/Solve/)
+    for (const [id, word] of valleyAnswers) {
+      chip(id === 't5' ? 'David' : word)
+      slot(id)
+    }
+    tab(/Look/)
+    menu('Hint')
+    expect([at(), said()]).toEqual(['[data-half]', 'Something here settles one answer.'])
   })
 
   // Playtest 2 (#23): the last step pointed at Close the case with five blanks no word could fill,
@@ -843,10 +938,10 @@ describe('the tutorial’s marks (#25)', () => {
     expect(coach()).toBeNull()
     tab(/Solve/)
     await waitFor(() => expect(at()).toBe('.tiles'))
-    expect(said()).toBe('Put the pictures in the order they happened.')
+    expect(said()).toBe('These are out of order. Which happened first?')
     tile('Baal’s altar')
     expect(at()).toBe('.order')
-    expect(said()).toBe('Put the pictures in the order they happened.')
+    expect(said()).toBe('These are out of order. Which happened first?')
     orderSlot(0)
     expect(coach()).toBeNull()
     menu('Cases')
@@ -924,6 +1019,7 @@ describe('the tutorial’s marks (#25)', () => {
     for (const [id, word] of [
       ['d1', 'David'],
       ['t4', 'sling'],
+      ['t5', 'Goliath'],
     ] as const) {
       chip(word)
       slot(id)
@@ -948,8 +1044,10 @@ describe('the tutorial’s marks (#25)', () => {
     openCase(/The valley/)
     for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
     tab(/Solve/)
+    // The sword's blank is asked and ✓d before Close the case is offered (#77), so the close fails
+    // on a number.
     for (const [id, word] of valleyAnswers) {
-      chip(id === 't5' ? 'David' : word)
+      chip(id === 't3' ? 'five' : word)
       slot(id)
     }
     fireEvent.pointerDown(document.querySelector('[data-close]')!)
@@ -957,7 +1055,7 @@ describe('the tutorial’s marks (#25)', () => {
     expect(result()).toHaveTextContent('One or two are wrong.')
     await waitFor(() => expect(document.querySelector('.coach .ring')).toHaveClass('dim'))
     expect([at(), said()]).toEqual(['[data-close]', 'Some are wrong. Look closer, then try again.'])
-    fireEvent.pointerDown(document.querySelector('[data-slot="t5"]')!)
+    fireEvent.pointerDown(document.querySelector('[data-slot="t3"]')!)
     expect([at(), said()]).toEqual(['[data-close]', ''])
   })
 })
@@ -1365,7 +1463,9 @@ describe('the case solved (#6, 03c; #24)', () => {
     chip('sling')
     slot('t4')
     expect(document.querySelector('[data-slot="t4"]')).toHaveClass('is-right')
-    expect(coach()).toHaveAttribute('data-at', '[data-close]')
+    // The sword's blank is asked before Close the case is offered, and takes its ✓ (#77).
+    expect(coach()).toHaveAttribute('data-at', '[data-slot="t5"]')
+    expect(screen.queryByRole('button', { name: /Close the case/ })).not.toBeInTheDocument()
     for (const [id, word] of [
       ['t2', 'brothers'],
       ['t3', 'six'],
@@ -1374,6 +1474,8 @@ describe('the case solved (#6, 03c; #24)', () => {
       chip(word)
       slot(id)
     }
+    expect(document.querySelector('[data-slot="t5"]')).toHaveClass('is-right')
+    expect(coach()).toHaveAttribute('data-at', '[data-close]')
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     expect(result()).toHaveTextContent('One or two are wrong.')
     expect(screen.queryByRole('heading', { name: 'The case is closed.' })).not.toBeInTheDocument()

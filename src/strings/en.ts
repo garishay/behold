@@ -51,6 +51,9 @@ export const strings = {
   opensAfter: (before: string) => `Opens after ${inline(before)}`,
   startWithTheValley: 'Start with the valley. It teaches the game.',
   playFirst: (title: string) => `Play ${inline(title)} first. The story runs in order.`,
+  // The season, named over the cases after the valley, the way in (#77).
+  season: 'Season one',
+  seasonName: 'The house of Ahab',
 
   // The case screen: the bar at its foot, the menu, and the brief's card (#24).
   look: 'Look',

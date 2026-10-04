@@ -5,7 +5,7 @@ import type { valley } from './case.ts'
 // in this language's word order; every sentence is the game's own voice, never the translation's.
 export const en = {
   title: 'The valley',
-  subtitle: 'Learn to play · about five minutes',
+  subtitle: 'Learn to play · take your time',
   brief:
     'A giant lies face-down in a valley, and a boy with a sling stands near him. Who are they, and how does it end?',
   passages: ['1 Samuel 17:4', '1 Samuel 17:17–18', '1 Samuel 17:38–51'],
@@ -69,7 +69,8 @@ export const en = {
     step3: 'Tap David, then the slot under the boy.',
     step4: 'Now tap sling, then its blank.',
     step5: 'Find the other words in the picture.',
-    step6: 'Fill the rest, then close the case.',
+    step6: 'Whose sword? Look closer at the picture.',
+    step7: 'Fill the rest, then close the case.',
   },
   retry: 'Some are wrong. Look closer, then try again.',
   reveal: [
