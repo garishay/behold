@@ -58,8 +58,8 @@ rules below are the answer, ruled on #26.
    each one is.
 
    The season plays in order: each case opens when the one before it is closed, and a case the
-   player has already started stays open (#75). The cases are one story as well as a ladder, so a
-   payoff never comes before its setup.
+   player has already started stays open (#75). The valley teaches the game; the cases after it
+   are one story as well as a ladder, so a payoff never comes before its setup.
 
 ## What holds a case to them
 

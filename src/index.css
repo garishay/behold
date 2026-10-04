@@ -309,6 +309,12 @@ button:focus-visible {
   max-width: calc(100% - 2 * var(--inset));
 }
 
+/* While an update waits, its toast holds the foot, so the note sits above it: the toast's 16 px
+   from the foot, its 64 px, and 8 px between ([Q10]). */
+:root:has(.toast:not(.nudge)) .nudge.toast {
+  bottom: calc(88px + env(safe-area-inset-bottom));
+}
+
 /* The case cards (#6). */
 .case-list {
   display: flex;
