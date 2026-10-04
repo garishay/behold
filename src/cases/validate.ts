@@ -3,8 +3,8 @@
  * a word reachable, a count, a box inside its picture, a string with words in it — over a case
  * and one of its texts. One sentence per problem; an empty list is a valid case. The test job
  * runs it over every registered case (`cases.test.ts`); the checks are A6's list, (a) to (i), and
- * the two of #26 [1], (j) and (k), #27 [1]'s, (l), #25's, (m), #30's, (n), and #29's, (o); the
- * reference is `docs/case-file.md`.
+ * the two of #26 [1], (j) and (k), #27 [1]'s, (l), #25's, (m), #30's, (n), #29's, (o), and #77's,
+ * (p); the reference is `docs/case-file.md`.
  */
 import { crowded, fingertip, smallestPicture } from './spots.ts'
 import type { CaseStructure, CaseText, Kind, Part, Passage } from './types.ts'
@@ -240,6 +240,11 @@ export function validate(structure: CaseStructure, text: CaseText<CaseStructure>
   for (const m of order === undefined ? [] : moments)
     if (!m.spots.some((s) => s.id === evidence[m.id]))
       fail(`moment ${q(m.id)} names none of its own spots as its evidence`)
+
+  // (p) The pictures are never shown in the order they happened (#77): a player who reads the
+  // order as shown, straight down, has it wrong and has to look.
+  if (permutes && order?.every((id, i) => moments[i].id === id))
+    fail(`the moments are shown in the order they happened, [${order.join(', ')}]`)
 
   return problems
 }

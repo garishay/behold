@@ -194,7 +194,8 @@ Three layers, from mechanical to read.
    (_Pictures_), which holds its box to a tenth of the width on each side as well; a step's words, and the retry's, are eight or fewer;
    a case that teaches the order has one, a face it teaches is one of its faces, and its lesson
    is eight words or fewer; every face and blank names a spot of the case as its evidence, and in
-   a case with an order every moment names one of its own.
+   a case with an order every moment names one of its own; and the moments are never listed in
+   the order they happened, so the order as shown is never the answer (#77).
    `src/cases/validate.test.ts` holds one
    broken fixture per check, each failing
    the check it names and no other; the registry test, `src/cases/cases.test.ts`, holds the

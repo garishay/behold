@@ -355,10 +355,10 @@ describe('validate (Gate 02 A6)', () => {
     ])
   })
 
-  it('(n) a lesson of nine words — Carmel’s with a "that"', () => {
+  it('(n) a lesson of nine words — Carmel’s with a "one"', () => {
     const long: Text = {
       ...carmelEn,
-      teach: 'Put the pictures in the order that they happened.',
+      teach: 'These are out of order. Which one happened first?',
     }
     expect(validate(carmel, long)).toEqual(["the case's lesson says 9 words, not eight or fewer"])
   })
@@ -383,6 +383,15 @@ describe('validate (Gate 02 A6)', () => {
     const water: CaseStructure = { ...carmel, evidence: { ...carmel.evidence, water: 'praying' } }
     expect(validate(water, carmelEn)).toEqual([
       'moment "water" names none of its own spots as its evidence',
+    ])
+  })
+
+  // (p) is #77's: playtest 2's testers read the order as shown, straight down, and a case whose
+  // pictures came in the order they happened would mark that reading right.
+  it('(p) pictures shown in the order they happened — Carmel with Baal’s altar first', () => {
+    const [water, fire, baal] = carmel.moments
+    expect(validate({ ...carmel, moments: [baal, water, fire] }, carmelEn)).toEqual([
+      'the moments are shown in the order they happened, [baal, water, fire]',
     ])
   })
 })

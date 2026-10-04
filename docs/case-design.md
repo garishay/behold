@@ -68,8 +68,9 @@ rules below are the answer, ruled on #26.
 **The validator** (`src/cases/validate.ts`, run by the test job over every registered case) holds
 the counts of rule 1: a blank's kind has at least three words in the case — its answer and two
 rivals — and the case has one name more than it has faces. Each fails in CI with one sentence,
-`blank "t3" takes a "number" word, and the case has 2, not three`. The authoring tool (#5)
-inherits both.
+`blank "t3" takes a "number" word, and the case has 2, not three`. It holds too that a case's
+pictures are never shown in the order they happened, so the order as shown is never the answer
+(#77). The authoring tool (#5) inherits them.
 
 **Review, by reading**, holds the rest, with the accuracy table as its handle — every sentence of
 the account and the reveal, every caption, and every paper against its verse, citing by

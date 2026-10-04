@@ -1242,23 +1242,33 @@ button:focus-visible {
   border-color: var(--right);
 }
 
+/* The order's pictures lie loose in a tray, two to a row, so none sits under a slot and the order
+   they are shown in never reads as the answer (#77). */
 .tiles {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
-  margin-top: 10px;
+  margin-top: 14px;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--slate-deep);
 }
 
 .tile {
-  flex: 1;
   border-radius: 8px;
   padding: 6px;
   background: var(--slate);
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   font-size: 12px;
   color: var(--mist);
+  text-align: left;
+}
+
+.tile img {
+  width: 48px;
+  height: 60px;
 }
 
 .tile.is-on {
