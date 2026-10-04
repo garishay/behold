@@ -70,9 +70,9 @@ Derived, never stored: a blank's kind is its answer's; a case is the tutorial wh
 the paper ids are those the spots open; a step whose `until` is `filled` is a Solve step.
 
 A step may wait on the dock's line of finds read, `{ read: 'found' }`: its mark rings the dock
-whole, the caption with its line, its words above the dock, and the player's next tap, or any
-move, meets it. While the dock shows no line, as on a reload or a return to the case, the step is
-passed (#77).
+whole, the caption with its line, its words above the dock. It only tells, so its words carry
+Next, and Next meets it, as do the player's next tap and any move. While the dock shows no line,
+as on a reload or a return to the case, the step is passed (#77).
 
 A guided case may name, as `ask`, the face or blank it asks about on a miss (#77): when a close
 finds it wrong, the retry is the question, the text's `ask`. It rings that slot and never its

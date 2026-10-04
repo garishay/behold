@@ -853,6 +853,22 @@ describe('the tutorial’s marks (#25)', () => {
     expect(at()).toBe('[data-word="david"]')
   })
 
+  // The found line's step only tells, so its words carry Next, and Next meets it (#77). A press on
+  // Next is Next's own: met on the press, the step would take Next away before its click, and the
+  // click would fall to the picture under it. A step that asks for a move carries none.
+  it('the found line’s step carries Next, and Next meets it', async () => {
+    start()
+    openCase(/The valley/)
+    tapSpot('boy')
+    const next = await screen.findByRole('button', { name: 'Next' })
+    fireEvent.pointerDown(next)
+    expect(at()).toBe('.dock')
+    fireEvent.click(next)
+    expect([at(), said()]).toEqual(['[data-view="solve"]', 'Open Solve to name him.'])
+    await waitFor(() => expect(document.querySelector('.coach .label')).not.toBeNull())
+    expect(screen.queryByRole('button', { name: 'Next' })).not.toBeInTheDocument()
+  })
+
   // Playtest 2's second session (#77): the player put David in the sword's blank, and every guided
   // move was a direct match. Asked only once a close finds it wrong, the question comes on the
   // return trip rule 4 counts on. It rings the blank, never the word, and its words leave on the
