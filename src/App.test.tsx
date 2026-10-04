@@ -742,16 +742,20 @@ describe('the tutorial’s marks (#25)', () => {
     })
   })
   afterEach(() => vi.restoreAllMocks())
-  /** The valley played past David's slot: David under the boy, the word sling marked next. */
-  const toDavid = () => {
+  /** The valley played to David's slot, with David picked up and the slot under the boy next. */
+  const toSlot = () => {
     start()
     openCase(/The valley/)
     tapSpot('boy')
     tab(/Solve/)
     chip('David')
+  }
+  /** The valley played past David's slot: David under the boy, sling's blank marked next. */
+  const toDavid = () => {
+    toSlot()
     slot('d1')
   }
-  /** The sling's blank, in the account: step 4's target once sling is picked up. */
+  /** The sling's blank, in the account: step 5's first target, since it leads with the blank. */
   const blank = '[data-slot="t4"]'
 
   // The case screen never scrolls, so a mark brings its target to the middle of the target's own
@@ -764,7 +768,7 @@ describe('the tutorial’s marks (#25)', () => {
     Element.prototype.scrollIntoView = intoView
     try {
       boxes = { [blank]: new DOMRect(0, 500, 60, 30), '.solve': new DOMRect(0, 0, 360, 400) }
-      toDavid()
+      toSlot()
       const solve = document.querySelector<HTMLElement>('.solve')!
       let top = 0
       let landing: number | null = null
@@ -774,7 +778,8 @@ describe('the tutorial’s marks (#25)', () => {
       })
       solve.scrollBy = ((o: ScrollToOptions) =>
         (landing = top + (o.top ?? 0))) as Element['scrollBy']
-      chip('sling')
+      // David set under the boy: the next step leads with sling's blank, low in the account.
+      slot('d1')
       if (landing !== null) top = landing
       expect(at()).toBe(blank)
       expect(top).toBe(315)
@@ -783,6 +788,17 @@ describe('the tutorial’s marks (#25)', () => {
     } finally {
       Reflect.deleteProperty(Element.prototype, 'scrollIntoView')
     }
+  })
+
+  // Either order meets a step that leads with its slot (#77): sling picked up first keeps the
+  // ring on its blank, and setting it there moves on, as the blank-first way does.
+  it('meets the blank-first step the word-first way too', () => {
+    toDavid()
+    expect(at()).toBe(blank)
+    chip('sling')
+    expect(at()).toBe(blank)
+    slot('t4')
+    expect([at(), said()]).toEqual(['[data-view="look"]', 'Find the other words in the picture.'])
   })
 
   // A mark is drawn only where its target can be seen: out of the account's view it shows no ring
@@ -837,9 +853,16 @@ describe('the tutorial’s marks (#25)', () => {
     chip('David')
     expect(at()).toBe('[data-slot="d1"]')
     slot('d1')
-    expect([at(), said()]).toEqual(['[data-word="sling"]', 'Now tap sling, then its blank.'])
+    // Sling goes blank-first: its blank is ringed, and once the blank waits, the words that can't
+    // go there dim and the mark moves to sling (#77).
+    expect([at(), said()]).toEqual([
+      '[data-slot="t4"]',
+      'Tap the blank first. Fitting words stay bright.',
+    ])
     slot('t4')
     expect(at()).toBe('[data-word="sling"]')
+    expect(document.querySelector('[data-word="david"]')).toHaveClass('is-dim')
+    expect(document.querySelector('[data-word="sling"]')).not.toHaveClass('is-dim')
     chip('sling')
     expect([at(), said()]).toEqual(['[data-view="look"]', 'Find the other words in the picture.'])
     expect(screen.queryByRole('button', { name: /Close the case/ })).not.toBeInTheDocument()
