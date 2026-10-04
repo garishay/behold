@@ -2,12 +2,30 @@
 // runs on Node; the app project declares no Node types, so this file brings them in itself, as the
 // registry test does.
 /// <reference types="node" />
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { pictureHashes } from '../../vite.config.ts'
-import { picture } from './pictures.ts'
+import { pictureHashes, stamp } from '../../vite.config.ts'
+import { picture, titlePicture } from './pictures.ts'
+
+describe('the title’s picture (#75)', () => {
+  it('is its path stamped with the hash of its file, as a case picture’s is', () => {
+    expect(titlePicture).toBe(`/title.jpg?v=${stamp('public/title.jpg')}`)
+  })
+
+  // [Q7]'s way: a file's SHA-256 in its record, so neither changes without the other.
+  it('is the file its record names, and so is the retouch script beside the record', () => {
+    const record = readFileSync('docs/title.md', 'utf8')
+    for (const file of ['public/title.jpg', 'docs/title-retouch.py']) {
+      const named = new RegExp(`\`${file.replaceAll('.', '\\.')}\`.*SHA-256 \`([0-9a-f]{64})\``)
+      expect(named.exec(record)?.[1], file).toBe(
+        createHash('sha256').update(readFileSync(file)).digest('hex'),
+      )
+    }
+  })
+})
 
 describe('a picture’s address (#45)', () => {
   // The phone keeps a picture by its address, so the address is what must move when the picture

@@ -4,16 +4,19 @@ import { readdirSync, readFileSync } from 'node:fs'
 import { VitePWA } from 'vite-plugin-pwa'
 import { defineConfig } from 'vitest/config'
 
+/** A file's hash, the first eight hex digits of its SHA-256: the stamp on its address. */
+export const stamp = (path: string) => hash('sha256', readFileSync(path)).slice(0, 8)
+
 /**
- * Each case picture's hash, the first eight hex digits of its file's SHA-256, by `<case>/<file>`
- * under `root` (#45). A picture's address carries it, so a changed file is an address no phone has
- * cached, and an unchanged one keeps its address and its cached copy.
+ * Each case picture's hash by `<case>/<file>` under `root` (#45). A picture's address carries it,
+ * so a changed file is an address no phone has cached, and an unchanged one keeps its address and
+ * its cached copy.
  */
 export function pictureHashes(root: string) {
   const hashes: Record<string, string> = {}
   for (const id of readdirSync(root))
     for (const file of readdirSync(`${root}/${id}`))
-      hashes[`${id}/${file}`] = hash('sha256', readFileSync(`${root}/${id}/${file}`)).slice(0, 8)
+      hashes[`${id}/${file}`] = stamp(`${root}/${id}/${file}`)
   return hashes
 }
 
@@ -24,11 +27,7 @@ export function pictureHashes(root: string) {
 export function audioHashes(root: string) {
   const hashes: Record<string, string> = {}
   for (const file of readdirSync(root, { recursive: true, encoding: 'utf8' }))
-    if (file.endsWith('.m4a'))
-      hashes[file.replaceAll('\\', '/')] = hash('sha256', readFileSync(`${root}/${file}`)).slice(
-        0,
-        8,
-      )
+    if (file.endsWith('.m4a')) hashes[file.replaceAll('\\', '/')] = stamp(`${root}/${file}`)
   return hashes
 }
 
@@ -38,9 +37,10 @@ export default defineConfig({
   // path. Dev, tests, and a bare build stay at `/`, so nothing that pins a URL moves.
   base: process.env.PAGES_BASE ?? '/',
   // The pictures' and the sound files' hashes, read from the files when the config loads, so the build, the dev
-  // server, and the tests stamp each address from the picture as it is (#45).
+  // server, and the tests stamp each address from the picture as it is (#45); the title's too (#75).
   define: {
     __PICTURE_HASHES__: JSON.stringify(pictureHashes('public/cases')),
+    __TITLE_HASH__: JSON.stringify(stamp('public/title.jpg')),
     __AUDIO_HASHES__: JSON.stringify(audioHashes('public/audio')),
   },
   plugins: [
@@ -61,12 +61,13 @@ export default defineConfig({
       // tap, since skipWaiting stays off. A picture is kept by its address, which carries its
       // file's hash (#45): a changed picture is a new address, fetched once and kept, and the copy
       // it supersedes stays until the 200-entry limit evicts it. The pattern still takes a bare
-      // address, which a page left open on an older version asks for.
+      // address, which a page left open on an older version asks for. The title's picture is kept
+      // by the same rule, stamped the same way (#75).
       workbox: {
         clientsClaim: true,
         runtimeCaching: [
           {
-            urlPattern: /\/cases\/[^/]+\/[^/]+\.jpg(\?v=[0-9a-f]+)?$/,
+            urlPattern: /\/(cases\/[^/]+\/[^/]+|title)\.jpg(\?v=[0-9a-f]+)?$/,
             handler: 'CacheFirst',
             options: { cacheName: 'cases', expiration: { maxEntries: 200 } },
           },

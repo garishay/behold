@@ -1,6 +1,6 @@
 # World rules
 
-The accuracy and art constraints every picture and every case in Behold is checked against. Read before writing a case or generating a picture. Checked at two points: when a picture is accepted into a case, and when a case is reviewed against its passage. What makes a case a puzzle — the rules a case is designed to — is `docs/case-design.md`.
+The accuracy and art constraints every picture and every case in Behold is checked against. Read before writing a case or generating a picture. Checked at two points: when a picture is accepted into a case, and when a case is reviewed against its passage. What makes a case a puzzle — the rules a case is designed to — is `docs/case-design.md`. The title screen's picture is not a scene: a view of the land with a moment from each of the first four cases in it, held to §2–§6 as a scene is but for its shape, a tall portrait. Its record is `docs/title.md`.
 
 Two principles sit above everything here.
 
