@@ -288,8 +288,12 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
    * a tab does but its step in the history.
    */
   const land = (v: 'look' | 'solve') => {
-    // The rings clear when Solve is left, not when its own tab is tapped again (review round 1).
-    if (view === 'solve' && v !== 'solve') setFresh([])
+    // The rings clear when Solve is left, not when its own tab is tapped again (review round 1),
+    // and what was picked up or waiting is let go (#24, Solve's room).
+    if (view === 'solve' && v !== 'solve') {
+      setFresh([])
+      setSelection(nothing)
+    }
     // Look's caption closes with the dock when Solve opens.
     if (v !== view) setReading(false)
     // Back on Look while the tutorial waits on everything found, or on an answer worked out there,

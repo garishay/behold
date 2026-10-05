@@ -1920,6 +1920,28 @@ describe('Solve’s room (#24)', () => {
     slot('t2')
     expect(scrolled).toHaveBeenCalledWith({ top: 62 })
   })
+
+  // The next round's first tester (#23): Goliath, tapped, was still picked up when he came back
+  // from Look, so his tap on the cubits' blank was refused. Leaving Solve lets go of a word picked
+  // up, and of a slot waiting.
+  it('lets go of a picked word, and of a waiting slot, when Solve is left', async () => {
+    start()
+    openCase(/The valley/)
+    await sweep()
+    const away = async () => {
+      tab(/Look/)
+      await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
+      tab(/Solve/)
+    }
+    chip('Goliath')
+    await away()
+    expect(document.querySelector('[data-word="goliath"]')).not.toHaveClass('is-on')
+    slot('t3')
+    expect(result()).not.toHaveTextContent('That blank wants a number.')
+    expect(document.querySelector('[data-slot="t3"]')).toHaveClass('is-target')
+    await away()
+    expect(document.querySelector('[data-slot="t3"]')).not.toHaveClass('is-target')
+  })
 })
 
 describe('the case solved (#6, 03c; #24)', () => {
