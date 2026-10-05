@@ -22,7 +22,10 @@ interface Entry {
   readonly view?: 'solve' | 'reveal'
 }
 
-/** The entry a history state carries, or none: the app's own states hold a case id and, on the reveal, its view. */
+/**
+ * The entry a history state carries, or none: the app's own states hold a case id and, on Solve
+ * (#77) or the reveal, its view.
+ */
 const entry = (state: unknown): Entry | null =>
   typeof state === 'object' && state !== null && 'case' in state && typeof state.case === 'string'
     ? (state as Entry)

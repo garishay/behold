@@ -9,8 +9,10 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   tester from Solve to the cases page, and he opened the valley again each time. While a case is
   open, Solve is now a history entry over the case's own, so back from Solve goes to Look and back
   from Look to the cases page, as before; forward returns to Solve, and Look's button from Solve
-  steps back. A closed case keeps the two entries it had: the close turns Solve's entry into the
-  reveal's.
+  steps back. Back and forward land a view as its tab does: back from Solve clears the count of
+  new words and, after the guided moves, greets the player with Look's prompt, and forward to Solve
+  meets the steps Solve's tab would. A closed case keeps the two entries it had: the close turns
+  Solve's entry into the reveal's.
 
 ## v0.16.2 — Gate 22's fifth amendment, a close that teaches (#77)
 
