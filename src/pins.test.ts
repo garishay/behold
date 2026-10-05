@@ -158,6 +158,19 @@ describe('the case screen fits the phone (07c, #24)', () => {
   })
 })
 
+// The bank shows three rows of words and the top of a fourth, so the eight things of the valley,
+// leading it while a blank waits, are in view whole, and two under the row above it, Close the
+// case or a hint on offer, which takes the third row's room; jsdom lays nothing out, so the
+// heights are pinned as text, and the measured screens are their evidence (#24, Solve's room).
+describe('the bank’s rows (#24)', () => {
+  it('shows three rows of words and the top of a fourth, and two under the row above it', () => {
+    const chips = /\n\.chips \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    const under = /\n\.submit-row \+ \.bank \.chips \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    expect(chips).toMatch(/max-height: 156px;/)
+    expect(under).toMatch(/max-height: 108px;/)
+  })
+})
+
 describe('the sound effects (Gate 10 A6)', () => {
   it('are precached with the shell, so the first tap sounds offline', () => {
     expect(config).toMatch(/includeAssets: \[[^\]]*'audio\/\*\.m4a'[^\]]*\]/)
