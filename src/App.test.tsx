@@ -1902,6 +1902,24 @@ describe('Solve’s room (#24)', () => {
     slot('t2')
     expect(words()).toEqual(found)
   })
+
+  // A blank tapped on the account's last line under the faces left the rest of its sentence below
+  // the account's foot (#23). The account is set as its sentences, and a blank that starts waiting
+  // scrolls it the least it takes to show its sentence whole.
+  it('brings a waiting blank’s whole sentence into view', async () => {
+    start()
+    openCase(/The valley/)
+    await sweep()
+    const solve = document.querySelector('.solve')!
+    const sentence = document.querySelector('[data-slot="t2"]')!.closest('.sentence')!
+    expect(sentence.querySelector('[data-slot="t1"]')).not.toBeNull()
+    expect(sentence.nextElementSibling).toHaveTextContent(/^Against Israel stood a champion of/)
+    vi.spyOn(solve, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 360, 300))
+    vi.spyOn(sentence, 'getBoundingClientRect').mockReturnValue(new DOMRect(20, 270, 320, 92))
+    const scrolled = vi.spyOn(solve, 'scrollBy')
+    slot('t2')
+    expect(scrolled).toHaveBeenCalledWith({ top: 62 })
+  })
 })
 
 describe('the case solved (#6, 03c; #24)', () => {

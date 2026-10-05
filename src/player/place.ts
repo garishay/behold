@@ -43,6 +43,20 @@ const scrollers = '.solve, .stage, .chips'
 export const scroller = (el: Element) => el.parentElement?.closest<HTMLElement>(scrollers) ?? null
 
 /**
+ * Scrolls a target's scroll box the least it takes to show the target whole, or from its top when
+ * it is taller than the box: a waiting blank's sentence (#24, Solve's room).
+ */
+export function show(el: Element | null | undefined) {
+  const box = el && scroller(el)
+  if (!el || !box) return
+  const r = el.getBoundingClientRect()
+  const b = box.getBoundingClientRect()
+  const off =
+    r.top < b.top || r.height > b.height ? r.top - b.top : Math.max(0, r.bottom - b.bottom)
+  if (off !== 0) box.scrollBy({ top: off })
+}
+
+/**
  * Brings a target to the middle of its own scroll box, and never scrolls the page: the case
  * screen does not scroll, and a target outside a scroll box is always in view (07c, #24 [1]).
  * The scroll box's `scroll-behavior` is the stylesheet's, so reduced motion jumps. Both axes move

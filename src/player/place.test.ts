@@ -1,5 +1,30 @@
-import { describe, expect, it } from 'vitest'
-import { labelAt } from './place.ts'
+import { describe, expect, it, vi } from 'vitest'
+import { labelAt, show } from './place.ts'
+
+// A waiting blank's sentence, shown whole in the account (#24, Solve's room): the account here is
+// the valley's at the tester's 360 × 645, 301 px from 0, and the sentence three lines, 92 px.
+describe('a target shown whole in its scroll box (#24)', () => {
+  const at = (top: number, height: number) => {
+    const box = document.createElement('div')
+    box.className = 'solve'
+    const el = box.appendChild(document.createElement('span'))
+    vi.spyOn(box, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 360, 301))
+    vi.spyOn(el, 'getBoundingClientRect').mockReturnValue(new DOMRect(20, top, 320, height))
+    const scroll = vi.spyOn(box, 'scrollBy')
+    show(el)
+    return scroll.mock.calls.map(([o]) => (o as ScrollToOptions).top)
+  }
+
+  it('scrolls the least it takes: down past the foot, up past the top, or not at all', () => {
+    expect(at(270, 92)).toEqual([61])
+    expect(at(-40, 92)).toEqual([-40])
+    expect(at(100, 92)).toEqual([])
+  })
+
+  it('shows one taller than the box from its top', () => {
+    expect(at(150, 320)).toEqual([150])
+  })
+})
 
 // jsdom lays nothing out, so where a mark's words go is held here on the floor's numbers, 360 ×
 // 548: on Look the dock's top is at 365, with the bar under it; on Solve there is no dock (#77).
