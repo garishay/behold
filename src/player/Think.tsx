@@ -1,7 +1,7 @@
 import type { CaseStructure, CaseText } from '../cases/types.ts'
 import { strings } from '../strings/en.ts'
 import { picture } from './pictures.ts'
-import { answer, kindOf, marked } from './state.ts'
+import { checked, kindOf } from './state.ts'
 import type { Progress, Selection } from './state.ts'
 
 interface ThinkProps {
@@ -14,23 +14,27 @@ interface ThinkProps {
   onOrderSlot: (index: number) => void
   /** The slot the tutorial's question has asked about, which takes its ✓ from then on (#77). */
   asked?: string
+  /** The slots a failed close in the valley found wrong, ringed until each is changed (#77). */
+  ringed?: readonly string[]
 }
 
 /**
  * The Solve view (#6; Think until #24), scrolling as one so the account has room on the smallest
  * phone (#24, ruling [4]): who is who, what happened first when the case asks, and the blocks with
  * their blanks. A ✓ lands only on the slots a guided step names, and on the one the question has
- * asked about; everything else is checked on Close the case, docked below the account (07d).
+ * asked about; everything else is checked on Close the case, docked below the account (07d). In
+ * the valley a failed close rings what it found wrong, and a screen reader hears the ring (#77).
  */
 export function Think(props: ThinkProps) {
   const { structure: s, text, progress: p, selection } = props
   const slot = (target: string, value: string | undefined, placeholder: string) => {
     const kind = kindOf(s, target)
-    const right = (marked(s, target) || target === props.asked) && value === answer(s, target)
+    const wrong = props.ringed?.includes(target) ?? false
     const state =
       (value ? ' is-filled' : '') +
       (selection.target === target ? ' is-target' : '') +
-      (right ? ' is-right' : '') +
+      (checked(s, p, target, props.asked) ? ' is-right' : '') +
+      (wrong ? ' is-wrong' : '') +
       (selection.word !== null && s.words[selection.word] !== kind ? ' is-dim' : '')
     return (
       <button
@@ -40,6 +44,7 @@ export function Think(props: ThinkProps) {
         onClick={() => props.onSlot(target)}
       >
         {value ? text.words[value] : placeholder}
+        {wrong && <span className="sr">{strings.ringedWrong}</span>}
       </button>
     )
   }

@@ -111,6 +111,17 @@ describe('the room a mark’s words are given (#77)', () => {
   })
 })
 
+// The valley's failed close rings what it found wrong; the class is tested, and the ring it draws
+// is the stylesheet's, pinned as text against removal: the screens are its evidence (#77).
+describe('the ring on a slot a failed close found wrong (#77)', () => {
+  it('is drawn on the account’s blanks and on the faces', () => {
+    const blank = /\n\.scroll \.slot\.is-wrong \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    const face = /\n\.face \.slot\.is-wrong \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    expect(blank).toMatch(/box-shadow: 0 0 0 2px var\(--wine\);/)
+    expect(face).toMatch(/border-color: var\(--t-action\);/)
+  })
+})
+
 // The brief's card is placed in the picture's row, which the row's own position makes its
 // containing block; the card's parent is tested, and this keeps the row positioned (#77).
 describe('the picture’s row holds the brief’s card (#77)', () => {

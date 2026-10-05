@@ -89,6 +89,12 @@ export const wrong = (s: CaseStructure, p: Progress) =>
   (s.order && s.order.some((m, i) => p.order[i] !== m) ? 1 : 0) +
   blanks(s).filter(([id, a]) => p.fills[id] !== a).length
 
+/** The faces and blanks not holding their answer, the ones a failed close in the valley rings (#77). */
+export const wrongs = (s: CaseStructure, p: Progress) =>
+  [...s.faces.map((f) => f.id), ...blanks(s).map(([id]) => id)].filter(
+    (id) => (p.faces[id] ?? p.fills[id]) !== answer(s, id),
+  )
+
 /** The tutorial's current step, or none when the case has no steps or is solved. */
 export const step = (s: CaseStructure, p: Progress) =>
   guided(s) && !p.solved ? s.steps?.[p.step] : undefined
@@ -136,6 +142,11 @@ export const opened = (s: CaseStructure, before: Progress, view: 'look' | 'solve
 export const marked = (s: CaseStructure, target: string) =>
   s.steps?.some((x) => x.until?.filled === target) ?? false
 
+/** Whether a slot shows its ✓: right, and marked, or the one the question has asked about (#77). */
+export const checked = (s: CaseStructure, p: Progress, target: string, asked?: string) =>
+  (marked(s, target) || target === asked) &&
+  (p.faces[target] ?? p.fills[target]) === answer(s, target)
+
 /** Whether Close the case is offered: in a guided case, once its guided steps are done. */
 export const closable = (s: CaseStructure, p: Progress) =>
   !guided(s) || p.step === (s.steps?.length ?? 0) - 1
@@ -171,8 +182,18 @@ export function chooseWord(s: CaseStructure, p: Progress, sel: Selection, word: 
   return { progress: p, selection: { ...nothing, word: sel.word === word ? null : word } }
 }
 
-/** A face or blank tapped: takes the selected word if the kind fits, empties itself, or waits. */
-export function chooseSlot(s: CaseStructure, p: Progress, sel: Selection, target: string): Outcome {
+/**
+ * A face or blank tapped: takes the selected word if the kind fits, empties itself, or waits. One
+ * showing its ✓ keeps its word, and a word picked up stays picked up (#77).
+ */
+export function chooseSlot(
+  s: CaseStructure,
+  p: Progress,
+  sel: Selection,
+  target: string,
+  asked?: string,
+): Outcome {
+  if (checked(s, p, target, asked)) return { progress: p, selection: sel }
   const kind = kindOf(s, target)
   if (sel.word !== null && s.words[sel.word] !== kind)
     return { progress: p, selection: sel, wants: kind }
