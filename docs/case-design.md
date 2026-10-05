@@ -38,10 +38,12 @@ rules below are the answer, ruled on #26.
 
 5. **The check is coarse.** Close the case says how many answers don't match what the pictures
    show — one or two, or several — never which, in every case after the valley. A miss is the
-   picture's, never the player's: no close calls an answer wrong (#77). The tutorial marks an
-   answer right only on the slots its guided steps name; when those steps are done, or once every
-   slot is filled whatever step waits, Close the case appears, the last step points at it, and the
-   tutorial closes on the same check as every case, so a full account is never a dead end (#77).
+   picture's, never the player's: no close calls an answer wrong (#77). Close the case appears
+   once every slot is filled, in every case (#24). The tutorial marks an answer right only on the
+   slots its guided steps name; once those steps are done, its last step points at Solve's count,
+   and once every slot is filled, whatever step waits, Close the case appears and the last step
+   points at it, so the tutorial closes on the same check as every case, and a full account is
+   never a dead end (#77).
    The first case teaches the real check, and since it teaches, it says where: its failed close
    rings each answer that doesn't match, until that answer is changed (#77). Its one inference is
    asked on a miss: when a close finds that the sword's blank doesn't match, the retry rings that
