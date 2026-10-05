@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { valley } from '../cases/valley/case.ts'
 import { vineyard } from '../cases/vineyard/case.ts'
 import {
+  advance,
   chooseMoment,
   chooseOrderSlot,
   chooseSlot,
@@ -207,6 +208,25 @@ describe('the model (#6)', () => {
     p = chooseSlot(valley, p, chooseWord(valley, p, nothing, 'david').selection, 't5').progress
     // Everything filled meets the sweep, wrong sword and all: the question waits for a miss (#77).
     expect([step(valley, p)?.id, closable(valley, p)]).toEqual(['step7', true])
+  })
+
+  // The paid round's second session (#23, 2026-10-05): sword went into sling's blank at step 5, so
+  // the step was never met, and with every slot filled there was no close and no word. Everything
+  // filled meets every step, so a full account reaches the last, which offers the close (#77).
+  it('a full account reaches the last step from any step, and is offered the close', () => {
+    const kept = {
+      ...fresh(valley),
+      tapped: ['armor', 'giant', 'boy'],
+      bank: ['saul', 'king', 'sword', 'goliath', 'six', 'spear', 'david', 'sling'],
+      faces: { d1: 'david', d2: 'goliath' },
+      fills: { t4: 'sword', t1: 'six', t2: 'king', t3: 'six', t5: 'saul' },
+      step: 4,
+    }
+    expect([step(valley, kept)?.id, closable(valley, kept)]).toEqual(['step5', false])
+    const moved = advance(valley, kept)
+    expect([step(valley, moved)?.id, closable(valley, moved)]).toEqual(['step7', true])
+    const emptied = chooseSlot(valley, moved, nothing, 't4').progress
+    expect([step(valley, emptied)?.id, closable(valley, emptied)]).toEqual(['step7', true])
   })
 
   // A step already done never shows (#25): sling in its blank before David is named, and the

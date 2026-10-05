@@ -555,6 +555,23 @@ button:focus-visible {
   box-shadow: 0 0 0 200vmax rgba(10, 12, 20, 0.6);
 }
 
+/* A tap a guided step's hold refuses pulses its ring once: a second ring grows out of it and
+   fades, so the tap still answers with where to tap (#77). Under reduced motion it only fades. */
+.coach .pulse {
+  position: absolute;
+  inset: -6px;
+  border: 2px solid var(--gold);
+  border-radius: 18px;
+  animation: pulse 0.6s ease-out forwards;
+}
+
+@keyframes pulse {
+  to {
+    opacity: 0;
+    transform: scale(1.15);
+  }
+}
+
 /* A mark's words, wrapped balanced, so a word never sits alone on the last line and step 5's two
    sentences break between them (#77). */
 .coach .label {
@@ -607,6 +624,11 @@ button:focus-visible {
   .coach .label {
     animation: none;
     transition: none;
+  }
+
+  .coach .pulse {
+    animation-name: arrive;
+    animation-direction: reverse;
   }
 }
 

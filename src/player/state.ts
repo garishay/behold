@@ -100,27 +100,29 @@ export const step = (s: CaseStructure, p: Progress) =>
   guided(s) && !p.solved ? s.steps?.[p.step] : undefined
 
 // A view opened is met as it opens, by `opened`, and a line read on the tap after it, by `read`,
-// never after the fact. Everything found is met by everything filled too, whichever comes first: a
-// spot whose words fill nothing can be skipped, and filling every blank has already sent the player
-// back to the picture (Gate 20 A1 as ruled).
+// never after the fact.
 const met = (s: CaseStructure, p: Progress, until: Until) =>
   until.tapped !== undefined
     ? p.tapped.includes(until.tapped)
     : until.found !== undefined
-      ? spots(s).every((x) => p.tapped.includes(x.id)) || filled(s, p) === total(s)
+      ? spots(s).every((x) => p.tapped.includes(x.id))
       : until.filled !== undefined &&
         (p.faces[until.filled] ?? p.fills[until.filled]) === answer(s, until.filled)
 
 /**
  * The steps moved past every met `until`. A guided case no longer closes itself: its last step
- * points at Close the case, and it closes on the same check as every case (#26 [4]). The store
+ * points at Close the case, and it closes on the same check as every case (#26 [4]). Everything
+ * filled meets every step, so a full account always reaches the last and is offered the close,
+ * which finds what is wrong (#77): a spot whose words fill nothing can be skipped, and filling
+ * every blank has already sent the player back to the picture (Gate 20 A1 as ruled). The store
  * moves kept progress the same way as it loads (#77).
  */
 export function advance(s: CaseStructure, p: Progress): Progress {
   if (!guided(s)) return p
   const steps = s.steps ?? []
+  const full = filled(s, p) === total(s)
   let at = p.step
-  while (at < steps.length - 1 && met(s, p, steps[at].until as Until)) at++
+  while (at < steps.length - 1 && (full || met(s, p, steps[at].until as Until))) at++
   return { ...p, step: at }
 }
 

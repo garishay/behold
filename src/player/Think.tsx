@@ -44,7 +44,7 @@ export function Think(props: ThinkProps) {
         onClick={() => props.onSlot(target)}
       >
         {value ? text.words[value] : placeholder}
-        {wrong && <span className="sr">{strings.ringedWrong}</span>}
+        {wrong && <span className="sr">{strings.ringedNoMatch}</span>}
       </button>
     )
   }

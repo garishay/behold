@@ -35,6 +35,21 @@ const moment = (name: string) =>
   fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${name}`) }))
 const closeTheCase = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
 const result = () => document.querySelector('.bank-head')
+/** The valley's guided steps, as they hold the screen, and Look again once they are done (#77). */
+const guided = async () => {
+  tapSpot('boy')
+  fireEvent.click(document.querySelector('.dock')!)
+  tab(/Solve/)
+  for (const [id, word] of [
+    ['d1', 'David'],
+    ['t4', 'sling'],
+  ]) {
+    slot(id)
+    chip(word)
+  }
+  tab(/Look/)
+  await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
+}
 
 /** Every case after the valley already started, so each opens whatever comes before it (#75). */
 const laterStarted = Object.fromEntries(
@@ -88,10 +103,11 @@ describe('the effects, each beside what the screen shows (Gate 10 A3, A5)', () =
     expect(heard()).toEqual([])
   })
 
-  it('place when a word lands in its slot; picking up, emptying, and a refused word are silent', () => {
+  it('place when a word lands in its slot; picking up, emptying, and a refused word are silent', async () => {
     start()
     openCase(/The valley/)
-    for (const s of ['boy', 'giant']) tapSpot(s)
+    await guided()
+    tapSpot('giant')
     heard()
     tab(/Solve/)
     chip('Goliath')
@@ -153,7 +169,7 @@ describe('the effects, each beside what the screen shows (Gate 10 A3, A5)', () =
     heard()
     closeTheCase()
     expect(heard()).toEqual(['notYet'])
-    expect(result()).toHaveTextContent('One or two are wrong.')
+    expect(result()).toHaveTextContent('One or two don’t match what the pictures show.')
     for (const [id, word] of [
       ['s1', 'garden'],
       ['s2', 'vineyard'],
@@ -190,7 +206,8 @@ describe('the music by screen (Gate 10 A2)', () => {
     expect(cue()).toBe('title')
     openCase(/The valley/)
     expect(cue()).toBe('case')
-    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
+    await guided()
+    for (const s of ['giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
     tab(/Solve/)
     expect(cue()).toBe('case')
     for (const [id, word] of [

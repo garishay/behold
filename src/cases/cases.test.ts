@@ -4,6 +4,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { books } from '../../worker/src/books.ts'
+import { strings } from '../strings/en.ts'
 import { cases } from './index.ts'
 import { validate } from './validate.ts'
 
@@ -76,6 +77,17 @@ describe('the case registry (Gate 02 A1, A5)', () => {
   it.each(cases.map((c) => [c.structure.id, c] as const))('%s: validates', (_, c) => {
     for (const [language, text] of Object.entries(c.text))
       expect(validate(c.structure, text), language).toEqual([])
+  })
+
+  // The paid round's second session (#23, 2026-10-05): she spoke of knowledge, not clues. A failed
+  // close's miss is the picture's, never the player's (#77): no word a player reads calls an answer
+  // wrong, in any case's text or in the app's copy, the close's count included in all its forms.
+  it('no text the player reads calls an answer wrong', () => {
+    const counts = [false, true].flatMap((several) =>
+      [1, 3].map((n) => strings.noMatch(several, n)),
+    )
+    const read = [...cases.flatMap((c) => Object.values(c.text)), strings, counts]
+    expect(JSON.stringify(read)).not.toMatch(/\bwrong\b/i)
   })
 
   // The vineyard turns on the seal: it must be the smallest box it overlaps, so it is drawn on top

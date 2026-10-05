@@ -3,6 +3,21 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.16.4 — Gate 22's sixth amendment, the guided steps held (#77)
+
+- **77i — the guided steps held, the account clear, and a miss that is the picture's** (#93): the
+  paid round's second tester tapped the foot of step 1's words and found the armor under them, then
+  the boy's feet and found the giant, whose box lies over his; she set sword in sling's blank, and
+  with every slot filled and step 5 never met, nothing offered her a close or said a word, while
+  step 5's words lay over the account. Steps 1 to 5 now hold the screen: a tap anywhere in the
+  step's ring is its target's, even on a spot drawn over it, and a tap outside it, the step's words
+  included, plays nothing and pulses the ring once, so it still answers with where to tap. A guided
+  fill takes its slot, then its word, and step 5's words name sling: "Tap the blank, then sling.
+  Bright words fit." Everything filled meets every step, so a full account is always offered the
+  close. On Solve no mark's words sit over the account's lines, and every failed close words a miss
+  as the picture's: "One or two don't match what the picture shows.", and the valley's retry reads
+  "Ringed answers don't match the picture. Look closer."
+
 ## v0.16.3 — Gate 22's fifth amendment, back steps down (#77)
 
 - **77h — back steps down** (#92): three times the browser's back took the paid round's first

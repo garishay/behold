@@ -103,10 +103,14 @@ export const strings = {
     found
       ? `That blank wants ${wants[kind]}.`
       : `That blank wants ${wants[kind]}. Find one in the picture.`,
-  oneOrTwoWrong: 'One or two are wrong.',
-  severalWrong: 'Several are wrong.',
+  // A failed close's count, one or two or several, never which (rule 5), and worded as the
+  // picture's, never the player's: answers that don't match what the case's pictures show (#77).
+  noMatch: (several: boolean, pictures: number) => {
+    const shown = pictures > 1 ? 'what the pictures show' : 'what the picture shows'
+    return several ? `Several don’t match ${shown}.` : `One or two don’t match ${shown}.`
+  },
   // What a screen reader hears after a slot a failed close in the valley ringed (#77).
-  ringedWrong: ', ringed: wrong',
+  ringedNoMatch: ', ringed: doesn’t match the picture',
 
   // Hints (#29): offered once the game sees a player stuck, in the caption's dock on Look and
   // beside Close the case on Solve, and quietly in the menu; each tier asked for. A hint's words

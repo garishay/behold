@@ -76,10 +76,43 @@ const valleyAnswers: [string, string][] = [
   ['t5', 'Goliath'],
 ]
 
-/** The tutorial played through: every spot with a word tapped, every slot filled right, closed. */
-const solveTheValley = () => {
-  for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
+/**
+ * The valley's guided steps after the boy's tap, as they hold the screen (#77): the dock's line
+ * read, Solve opened, the slot under the boy and then David, sling's blank and then sling. The
+ * player is left on Solve, where free play starts.
+ */
+const guideOn = () => {
+  fireEvent.click(document.querySelector('.dock')!)
   tab(/Solve/)
+  for (const [id, word] of [
+    ['d1', 'David'],
+    ['t4', 'sling'],
+  ] as const) {
+    slot(id)
+    chip(word)
+  }
+}
+/** The valley's guided steps, from the boy's tap (#77). */
+const guide = () => {
+  tapSpot('boy')
+  guideOn()
+}
+/**
+ * The valley's guided steps, then every other spot found, and back on Solve with the bank full.
+ * Look's button from Solve steps back in the history, and jsdom lands the step on a later task,
+ * so the sweep waits for it before Solve is opened again (#77).
+ */
+const sweep = async () => {
+  guide()
+  tab(/Look/)
+  await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
+  for (const s of ['giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
+  tab(/Solve/)
+}
+
+/** The tutorial played through: its guided steps, every spot found, every slot right, closed. */
+const solveTheValley = async () => {
+  await sweep()
   for (const [id, word] of valleyAnswers) {
     chip(word)
     slot(id)
@@ -424,10 +457,15 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     expect(screen.getByRole('tab', { name: /Look/ })).toHaveTextContent('Look1/6')
     expect(coach()).toHaveTextContent('That tap found two words: David and sling.')
     expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('Solve0/7+2')
+    // The guided steps hold the screen until sling is in its blank (#77), and Solve opened by them
+    // rings the two words its first time.
+    guideOn()
+    expect(chips().every((c) => c.classList.contains('is-new'))).toBe(true)
+    tab(/Look/)
     tapSpot('giant')
-    expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('Solve0/7+6')
+    expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('Solve2/7+4')
     tab(/Solve/)
-    expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent(/^Solve0\/7$/)
+    expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent(/^Solve2\/7$/)
     expect(chips().map((c) => c.textContent)).toEqual([
       'David',
       'sling',
@@ -436,7 +474,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
       'spear',
       'sword',
     ])
-    expect(chips().every((c) => c.classList.contains('is-new'))).toBe(true)
+    expect(chips().filter((c) => c.classList.contains('is-new'))).toHaveLength(4)
     tab(/Look/)
     tapSpot('brook')
     tapSpot('boy')
@@ -451,8 +489,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
   it('a chip picked up is marked, and put down on a second tap', () => {
     start()
     openCase(/The valley/)
-    tapSpot('brook')
-    tab(/Solve/)
+    guide()
     fireEvent.click(chips()[0])
     expect(chips()[0]).toHaveClass('is-on')
     fireEvent.click(chips()[0])
@@ -542,6 +579,8 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     try {
       start()
       openCase(/The valley/)
+      guide()
+      tab(/Look/)
       tapSpot('giant')
       const more = screen.getByRole('button', { name: 'More' })
       expect(more).toHaveAttribute('aria-expanded', 'false')
@@ -813,18 +852,19 @@ describe('the tutorial’s marks (#25)', () => {
     })
   })
   afterEach(() => vi.restoreAllMocks())
-  /** The valley played to David's slot, with David picked up and the slot under the boy next. */
+  /** The valley played to David's slot: the slot under the boy waiting, and David next (#77). */
   const toSlot = () => {
     start()
     openCase(/The valley/)
     tapSpot('boy')
+    fireEvent.click(document.querySelector('.dock')!)
     tab(/Solve/)
-    chip('David')
+    slot('d1')
   }
   /** The valley played past David's slot: David under the boy, sling's blank marked next. */
   const toDavid = () => {
     toSlot()
-    slot('d1')
+    chip('David')
   }
   /** The sling's blank, in the account: step 5's first target, since it leads with the blank. */
   const blank = '[data-slot="t4"]'
@@ -850,7 +890,7 @@ describe('the tutorial’s marks (#25)', () => {
       solve.scrollBy = ((o: ScrollToOptions) =>
         (landing = top + (o.top ?? 0))) as Element['scrollBy']
       // David set under the boy: the next step leads with sling's blank, low in the account.
-      slot('d1')
+      chip('David')
       if (landing !== null) top = landing
       expect(at()).toBe(blank)
       expect(top).toBe(315)
@@ -861,31 +901,66 @@ describe('the tutorial’s marks (#25)', () => {
     }
   })
 
-  // Either order meets a step that leads with its slot (#77): sling picked up first keeps the
-  // ring on its blank, and setting it there moves on, as the blank-first way does.
-  it('meets the blank-first step the word-first way too', () => {
-    toDavid()
+  // The paid round's second session (#23, 2026-10-05): at step 5 she tapped sword, then sling's
+  // blank, and sword went in, so the step was never met. A guided fill's ring holds the screen
+  // while it waits, so a word tapped before its slot, or another word after it, does nothing, and
+  // the slot and then its word meet the step (#77). Her bank, kept, has sword in it.
+  it('a guided fill takes only its slot, then its word: sword does nothing at sling’s blank', () => {
+    start(<App />, {
+      valley: {
+        ...fresh(valley),
+        tapped: ['armor', 'giant', 'boy'],
+        bank: ['saul', 'king', 'sword', 'goliath', 'six', 'spear', 'david', 'sling'],
+        faces: { d1: 'david' },
+        step: 4,
+      },
+    })
+    openCase(/The valley/)
+    tab(/Solve/)
     expect(at()).toBe(blank)
-    chip('sling')
-    expect(at()).toBe(blank)
+    chip('sword')
+    expect(document.querySelector('[data-word="sword"]')).not.toHaveClass('is-on')
     slot('t4')
+    expect(at()).toBe('[data-word="sling"]')
+    chip('sword')
+    expect(document.querySelector(blank)).not.toHaveClass('is-filled')
+    chip('sling')
+    expect(document.querySelector(blank)).toHaveTextContent('sling')
     expect([at(), said()]).toEqual(['[data-view="look"]', 'Find the other words in the picture.'])
   })
 
   // A mark is drawn only where its target can be seen: out of the account's view it shows no ring
-  // and no words, and part in view its ring is cut at the account's edge (07c, #24 [2]).
+  // and no words, and part in view its ring is cut at the account's edge (07c, #24 [2]). A guided
+  // step still holds the screen, and a tap there brings its target back into view (#77).
   it('shows nothing while its target is out of view, and cuts its ring at the scroll box', async () => {
     boxes = { [blank]: new DOMRect(0, 500, 60, 30), '.solve': new DOMRect(0, 0, 360, 400) }
     toDavid()
-    chip('sling')
     await new Promise((r) => setTimeout(r, 100))
     expect(at()).toBe(blank)
     expect(ring()).toBeNull()
     expect(document.querySelector('.coach .label')).toBeNull()
+    const scrolled = vi.spyOn(document.querySelector('.solve')!, 'scrollBy')
+    slot('t1')
+    expect(document.querySelector('[data-slot="t1"]')).not.toHaveClass('is-target')
+    expect(scrolled).toHaveBeenCalledWith({ top: 315, left: -150 })
     boxes[blank] = new DOMRect(0, 380, 60, 30)
     fireEvent.scroll(document.querySelector('.solve')!)
     await waitFor(() => expect(ring()).not.toBeNull())
     expect([ring()!.style.top, ring()!.style.height]).toEqual(['376px', '24px'])
+  })
+
+  // The paid round's second session (#23, 2026-10-05): step 5's words sat under sling's blank,
+  // over the account's lines around it, the whole time she was stuck there. No mark covers the
+  // account: the words of a target among its lines sit just under the lines on show (#77).
+  it('puts no mark’s words over the account’s lines', async () => {
+    boxes = {
+      [blank]: new DOMRect(34, 148.5, 72, 30),
+      '.solve': new DOMRect(0, 0, 360, 319),
+      '.scroll': new DOMRect(16, 100, 328, 420),
+    }
+    toDavid()
+    await waitFor(() => expect(document.querySelector('.coach .label')).not.toBeNull())
+    expect(document.querySelector<HTMLElement>('.coach .label')!.style.top).toBe('327px')
   })
 
   // Close the case docks as its own row between the account and the bank, outside the scroll, so
@@ -902,19 +977,26 @@ describe('the tutorial’s marks (#25)', () => {
     expect(row.nextElementSibling).toHaveClass('bank')
   })
 
-  it('shows each step at its target, or at the button of the view that holds it', () => {
+  it('shows each step at its target, or at the button of the view that holds it', async () => {
     start()
     openCase(/The valley/)
+    // Solve, opened under the brief's card, which marks nothing, is left ahead: a guided step holds
+    // the screen, so only the system's forward reaches it from step 1 (#77).
+    tab(/Solve/)
+    tab(/Look/)
+    await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
     fireEvent.click(screen.getByRole('button', { name: 'Start' }))
     expect([at(), said()]).toEqual(['[data-spot="boy"]', 'Tap the boy with the sling.'])
-    tab(/Solve/)
+    history.forward()
+    await onTab(/Solve/)
     expect(at()).toBe('[data-view="look"]')
     tab(/Look/)
+    await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
     tapSpot('boy')
     // The boy's tap found two words, and the dock says so: it is ringed whole, the caption with
-    // its line of finds, and the next tap reads it (#77).
+    // its line of finds, and a tap on it reads it (#77).
     expect([at(), said()]).toEqual(['.dock', 'That tap found two words: David and sling.'])
-    fireEvent.pointerDown(document.querySelector('.dock .found')!)
+    fireEvent.click(document.querySelector('.dock .found')!)
     expect([at(), said()]).toEqual(['[data-view="solve"]', 'Open Solve to name him.'])
     tab(/Solve/)
     // Both guided fills lead with the slot (#77). The slot under the boy is ringed, and once it
@@ -928,7 +1010,7 @@ describe('the tutorial’s marks (#25)', () => {
     // Sling's blank leads the same way, and once it waits, David dims.
     expect([at(), said()]).toEqual([
       '[data-slot="t4"]',
-      'Tap the blank first. Fitting words stay bright.',
+      'Tap the blank, then\u00a0sling. Bright words fit.',
     ])
     slot('t4')
     expect(at()).toBe('[data-word="sling"]')
@@ -949,26 +1031,29 @@ describe('the tutorial’s marks (#25)', () => {
 
   // The paid round's first session (#77): on a short screen the words above Solve's button sat on
   // the caption, and hid the basket's evidence. From Look a step done on Solve rings Solve's button
-  // with no words, and so no dim; only the step that waits on Solve opening speaks there.
+  // with no words, and so no dim; only the step that waits on Solve opening speaks there. A guided
+  // fill holds the screen to Solve, so the system's back is the way to Look from it (#77).
   it('from Look, a step done on Solve rings Solve’s button with no words', async () => {
     start()
     openCase(/The valley/)
     tapSpot('boy')
-    fireEvent.pointerDown(document.querySelector('.dock .found')!)
+    fireEvent.click(document.querySelector('.dock .found')!)
     expect([at(), said()]).toEqual(['[data-view="solve"]', 'Open Solve to name him.'])
     tab(/Solve/)
     expect(said()).toBe('Tap the slot under the boy, then David.')
-    tab(/Look/)
+    history.back()
+    await onTab(/Look/)
     expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
     await waitFor(() => expect(ring()).not.toBeNull())
     expect(ring()).not.toHaveClass('dim')
     tab(/Solve/)
     slot('d1')
     chip('David')
-    tab(/Look/)
+    history.back()
+    await onTab(/Look/)
     expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
     tab(/Solve/)
-    expect(said()).toBe('Tap the blank first. Fitting words stay bright.')
+    expect(said()).toBe('Tap the blank, then\u00a0sling. Bright words fit.')
   })
 
   // The dock's line of finds is gone once the case opens again, so the step waiting on it is passed
@@ -989,7 +1074,7 @@ describe('the tutorial’s marks (#25)', () => {
   // meeting it and the step after (#77): after the found line the paid round's first tester tapped
   // round Look for about 50 s first. A press on the button is its own: met on the press, the step
   // would take the button away before its click, and the click would fall to the picture under it.
-  // A tap anywhere else still moves on to the step after, as the step-targets test shows.
+  // A tap on the dock it rings moves on to the step after, as the step-targets test shows.
   it('the found line’s step carries Open Solve, which opens Solve past the step after', async () => {
     start()
     openCase(/The valley/)
@@ -1009,18 +1094,17 @@ describe('the tutorial’s marks (#25)', () => {
   // return trip rule 4 counts on. It rings the blank, never the word, and its words leave on the
   // next tap (#24 [3]); Look rings only Solve's button ([Q11]) and greets the player with its
   // prompt; a wrong name asks again, and the right one takes its ✓.
-  it('asks whose sword it was when a close finds it wrong, and ✓s the right name', () => {
+  it('asks whose sword it was when a close finds it wrong, and ✓s the right name', async () => {
     start()
     openCase(/The valley/)
-    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
-    tab(/Solve/)
+    await sweep()
     for (const [id, word] of valleyAnswers) {
       chip(id === 't5' ? 'David' : word)
       slot(id)
     }
     expect(document.querySelector('[data-slot="t5"]')).not.toHaveClass('is-right')
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
-    expect(result()).toHaveTextContent('One or two are wrong.')
+    expect(result()).toHaveTextContent('One or two don’t match what the picture shows.')
     expect([at(), said()]).toEqual(['[data-slot="t5"]', 'Whose sword? Look closer at the picture.'])
     fireEvent.pointerDown(document.querySelector('[data-slot="t1"]')!)
     expect([at(), said()]).toEqual(['[data-slot="t5"]', ''])
@@ -1044,11 +1128,10 @@ describe('the tutorial’s marks (#25)', () => {
   // On Look the question rings only Solve's button, so a hint is offered there as in any case (#29),
   // and takes the ring's place: it points at the evidence for the blank asked about, the giant
   // (#77).
-  it('a hint asked for on Look during the question points at the giant', () => {
+  it('a hint asked for on Look during the question points at the giant', async () => {
     start()
     openCase(/The valley/)
-    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
-    tab(/Solve/)
+    await sweep()
     for (const [id, word] of valleyAnswers) {
       chip(id === 't5' ? 'David' : word)
       slot(id)
@@ -1065,15 +1148,7 @@ describe('the tutorial’s marks (#25)', () => {
   it('sends the player back to the picture after the guided moves, until everything is found', () => {
     start()
     openCase(/The valley/)
-    tapSpot('boy')
-    tab(/Solve/)
-    for (const [id, word] of [
-      ['d1', 'David'],
-      ['t4', 'sling'],
-    ] as const) {
-      chip(word)
-      slot(id)
-    }
+    guide()
     expect(at()).toBe('[data-view="look"]')
     expect(document.querySelector('.dock')).toBeNull()
     tab(/Look/)
@@ -1100,7 +1175,7 @@ describe('the tutorial’s marks (#25)', () => {
     openCase(/The valley/)
     tapSpot('boy')
     expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('Solve0/7+2')
-    tab(/Solve/)
+    fireEvent.click(await screen.findByRole('button', { name: 'Open Solve' }))
     history.back()
     await onTab(/Look/)
     expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent(/^Solve0\/7$/)
@@ -1111,15 +1186,7 @@ describe('the tutorial’s marks (#25)', () => {
   it('back from Solve after the guided moves shows the prompt, as Look’s tab does', async () => {
     start()
     openCase(/The valley/)
-    tapSpot('boy')
-    tab(/Solve/)
-    for (const [id, word] of [
-      ['d1', 'David'],
-      ['t4', 'sling'],
-    ] as const) {
-      chip(word)
-      slot(id)
-    }
+    guide()
     expect(at()).toBe('[data-view="look"]')
     history.back()
     await onTab(/Look/)
@@ -1195,23 +1262,72 @@ describe('the tutorial’s marks (#25)', () => {
     expect(at()).toBe('[data-face="m1"]')
   })
 
-  // Persistent, not blocking (#25): the ring stays until the step is done, a tap elsewhere is
-  // still play, and the first one lifts the dim.
-  it('blocks nothing: a tap elsewhere plays, lifts the dim, and leaves the ring', async () => {
+  // The paid round's second session (#23, 2026-10-05): her first tap at step 1 landed on the foot
+  // of the step's own words and fell through to the armor, and her second, inside the boy's ring
+  // at his feet, opened the giant, whose smaller box is drawn over the boy's. A guided step holds
+  // the screen: a tap outside its ring, its words included, plays nothing and keeps the dim, and a
+  // tap anywhere inside it is the target's. The menu still opens (#77). Boxes as at 360 × 548.
+  it('a guided step holds the screen: outside its ring nothing plays, inside it the target does', async () => {
+    boxes = {
+      '.stage': new DOMRect(0, 0, 360, 365),
+      '[data-spot="boy"]': new DOMRect(196.1, 14.6, 99.2, 191.6),
+      '[data-spot="giant"]': new DOMRect(35.5, 146, 233.6, 71.2),
+      '[data-spot="armor"]': new DOMRect(171.2, 235.4, 149, 63.9),
+    }
     start()
     openCase(/The valley/)
     fireEvent.click(screen.getByRole('button', { name: 'Start' }))
-    const ring = () => document.querySelector('.coach .ring')
     await waitFor(() => expect(ring()).toHaveClass('dim'))
-    fireEvent.pointerDown(document.querySelector('[data-spot="boy"]')!)
+    const look = screen.getByRole('tab', { name: /Look/ })
+    // The foot of the words, over the armor.
+    const armor = document.querySelector('[data-spot="armor"]')!
+    fireEvent.pointerDown(armor, { clientX: 194, clientY: 250.7 })
+    fireEvent.click(armor, { detail: 1, clientX: 194, clientY: 250.7 })
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Zoom' }))
+    expect(look).toHaveTextContent('Look0/6')
+    expect(look).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('button', { name: 'Zoom' })).toHaveAttribute('aria-pressed', 'false')
     expect(ring()).toHaveClass('dim')
-    fireEvent.pointerDown(document.querySelector('[data-spot="giant"]')!)
-    tapSpot('giant')
-    expect(screen.getByText(/The Philistines’ champion/)).toBeInTheDocument()
-    expect(ring()).not.toHaveClass('dim')
-    expect([at(), said()]).toEqual(['[data-spot="boy"]', 'Tap the boy with the sling.'])
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }))
+    expect(screen.getByRole('dialog', { name: 'Menu' })).toBeInTheDocument()
+    fireEvent.click(document.querySelector('.modal.sheet')!)
+    await waitFor(() => expect(ring()).not.toBeNull())
+    // At his feet, on the giant's box inside the boy's ring.
+    fireEvent.click(document.querySelector('[data-spot="giant"]')!, {
+      detail: 1,
+      clientX: 225.8,
+      clientY: 176.1,
+    })
+    expect(screen.getByText(/A shepherd boy in a plain tunic/)).toBeInTheDocument()
+    expect(look).toHaveTextContent('Look1/6')
+    // The found line's step holds the screen to the dock: the armor, pressed and tapped, is not
+    // found, and the step waits.
+    fireEvent.pointerDown(armor)
+    fireEvent.click(armor, { detail: 1, clientX: 194, clientY: 250.7 })
+    expect([at(), look.textContent]).toEqual(['.dock', 'Look1/6'])
+  })
+
+  // The ruling on the sixth amendment (#77): a tap that does nothing at all reads as a frozen game,
+  // so a tap the hold refuses pulses the ring once, and the pulse leaves when its animation ends. A
+  // second refused tap starts it over, and a tap the hold takes, on the target, pulses nothing.
+  it('a tap the hold refuses pulses the ring once', async () => {
+    start()
+    openCase(/The valley/)
+    fireEvent.click(screen.getByRole('button', { name: 'Start' }))
+    await waitFor(() => expect(ring()).not.toBeNull())
+    const pulses = () => document.querySelectorAll('.coach .ring .pulse')
+    expect(pulses()).toHaveLength(0)
+    tab(/Solve/)
+    expect(pulses()).toHaveLength(1)
+    const first = pulses()[0]
+    fireEvent.click(screen.getByRole('button', { name: 'Zoom' }))
+    expect(pulses()).toHaveLength(1)
+    expect(pulses()[0]).not.toBe(first)
+    fireEvent.animationEnd(pulses()[0])
+    expect(pulses()).toHaveLength(0)
     tapSpot('boy')
-    await waitFor(() => expect(ring()).toHaveClass('dim'))
+    expect([at(), pulses().length]).toEqual(['.dock', 0])
   })
 
   // A step can sit on a phone for minutes, so the mark stops reading its target's place once it
@@ -1241,8 +1357,7 @@ describe('the tutorial’s marks (#25)', () => {
   it('the last step’s words leave on the next tap, and its ring stays', async () => {
     start()
     openCase(/The valley/)
-    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
-    tab(/Solve/)
+    await sweep()
     for (const [id, word] of [
       ['d1', 'David'],
       ['t4', 'sling'],
@@ -1269,8 +1384,7 @@ describe('the tutorial’s marks (#25)', () => {
   it('a failed close in the tutorial brings the last step back with its retry', async () => {
     start()
     openCase(/The valley/)
-    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
-    tab(/Solve/)
+    await sweep()
     // With the sword's blank right, a close that fails on a number brings the retry, not the
     // question (#77).
     for (const [id, word] of valleyAnswers) {
@@ -1279,9 +1393,12 @@ describe('the tutorial’s marks (#25)', () => {
     }
     fireEvent.pointerDown(document.querySelector('[data-close]')!)
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
-    expect(result()).toHaveTextContent('One or two are wrong.')
+    expect(result()).toHaveTextContent('One or two don’t match what the picture shows.')
     await waitFor(() => expect(document.querySelector('.coach .ring')).toHaveClass('dim'))
-    expect([at(), said()]).toEqual(['[data-close]', 'The ringed answers are wrong. Look closer.'])
+    expect([at(), said()]).toEqual([
+      '[data-close]',
+      'Ringed answers don’t match the picture. Look closer.',
+    ])
     fireEvent.pointerDown(document.querySelector('[data-slot="t3"]')!)
     expect([at(), said()]).toEqual(['[data-close]', ''])
   })
@@ -1290,11 +1407,10 @@ describe('the tutorial’s marks (#25)', () => {
   // question settled the sword the tester took Goliath back out three times. The valley teaches, so
   // its failed close rings what it found wrong, but the slot its question asks about, each until it
   // is changed, and a screen reader hears the ring; and a slot showing its ✓ keeps its word.
-  it('a failed close in the valley rings what it found wrong, and a ✓ stays', () => {
+  it('a failed close in the valley rings what it found wrong, and a ✓ stays', async () => {
     start()
     openCase(/The valley/)
-    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
-    tab(/Solve/)
+    await sweep()
     const missed: Record<string, string> = { t1: 'five', t3: 'ten', t5: 'Saul' }
     for (const [id, word] of valleyAnswers) {
       chip(missed[id] ?? word)
@@ -1306,7 +1422,9 @@ describe('the tutorial’s marks (#25)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     expect(ringed()).toEqual(['t1', 't3'])
     expect(at()).toBe('[data-slot="t5"]')
-    expect(document.querySelector('[data-slot="t1"]')).toHaveTextContent('five, ringed: wrong')
+    expect(document.querySelector('[data-slot="t1"]')).toHaveTextContent(
+      'five, ringed: doesn’t match the picture',
+    )
     chip('ten')
     slot('t1')
     expect(ringed()).toEqual(['t3'])
@@ -1320,11 +1438,10 @@ describe('the tutorial’s marks (#25)', () => {
 
   // Review round 1 on #91: a ring lasts until its slot is changed, so it leaves for good on the
   // first change. Putting back the answer it held doesn't bring it back; only a close checks again.
-  it('a ring leaves for good once its slot is changed (review round 1)', () => {
+  it('a ring leaves for good once its slot is changed (review round 1)', async () => {
     start()
     openCase(/The valley/)
-    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
-    tab(/Solve/)
+    await sweep()
     for (const [id, word] of valleyAnswers) {
       chip(id === 't1' ? 'five' : word)
       slot(id)
@@ -1340,6 +1457,32 @@ describe('the tutorial’s marks (#25)', () => {
     slot('t1')
     expect(document.querySelector('[data-slot="t1"]')).toHaveTextContent('five')
     expect(ringed()).toEqual([])
+  })
+
+  // The paid round's second session (#23, 2026-10-05): with sword in sling's blank, step 5 was
+  // never met, and at 7/7 there was no close and no word; she reloaded, and it reopened so. Kept
+  // so, the valley now opens past every step: Close the case is offered, and the failed close
+  // teaches as any in the valley does, with rings and the sword's question (#77).
+  it('a full account kept at step 5 is offered the close, and the close teaches', () => {
+    start(<App />, {
+      valley: {
+        ...fresh(valley),
+        tapped: ['armor', 'giant', 'boy'],
+        bank: ['saul', 'king', 'sword', 'goliath', 'six', 'spear', 'david', 'sling'],
+        faces: { d1: 'david', d2: 'goliath' },
+        fills: { t4: 'sword', t1: 'six', t2: 'king', t3: 'six', t5: 'saul' },
+        step: 4,
+      },
+    })
+    openCase(/The valley/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(result()).toHaveTextContent('Several don’t match what the picture shows.')
+    const ringed = [...document.querySelectorAll('.is-wrong')].map((e) =>
+      e.getAttribute('data-slot'),
+    )
+    expect(ringed).toEqual(['t1', 't2', 't4'])
+    expect([at(), said()]).toEqual(['[data-slot="t5"]', 'Whose sword? Look closer at the picture.'])
   })
 })
 
@@ -1567,15 +1710,7 @@ describe('hints (#29)', () => {
     try {
       start()
       openCase(/The valley/)
-      tapSpot('boy')
-      tab(/Solve/)
-      for (const [id, word] of [
-        ['d1', 'David'],
-        ['t4', 'sling'],
-      ] as const) {
-        chip(word)
-        slot(id)
-      }
+      guide()
       expect(said()).toBe('Find the other words in the picture.')
       fireEvent.pointerDown(document.querySelector('[data-word="david"]')!)
       expect([at(), said()]).toEqual(['[data-view="look"]', ''])
@@ -1598,11 +1733,10 @@ describe('hints (#29)', () => {
   })
 
   // A close's hint is kept from the close: a changed answer can't ask the hints what is right.
-  it('offers one beside Close the case after two failed closes, at what the first found wrong', () => {
+  it('offers one beside Close the case after two failed closes, at what the first found wrong', async () => {
     start()
     openCase(/The valley/)
-    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
-    tab(/Solve/)
+    await sweep()
     for (const [id, word] of valleyAnswers) {
       chip(id === 't2' ? 'brothers' : word)
       slot(id)
@@ -1628,11 +1762,10 @@ describe('hints (#29)', () => {
 
   // From the menu, a hint uses a close's result after one failed close, where the offer waits for
   // two: holding the menu to two would only make the player close again (A4 as ruled).
-  it('the menu’s Hint aims at what a single failed close found wrong', () => {
+  it('the menu’s Hint aims at what a single failed close found wrong', async () => {
     start()
     openCase(/The valley/)
-    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
-    tab(/Solve/)
+    await sweep()
     for (const [id, word] of valleyAnswers) {
       chip(id === 't2' ? 'brothers' : word)
       slot(id)
@@ -1646,19 +1779,19 @@ describe('hints (#29)', () => {
     expect(at()).toBe('[data-spot="basket"]')
   })
 
-  // Under a guided step the step's own mark is the hint: a run shows it again, dim and all.
-  it('under a guided step, a run shows the step again and nothing is offered', async () => {
+  // Under a guided step the step's own mark is the hint, and the step holds the screen (#77): a run
+  // of taps outside its ring finds nothing and runs nothing, so nothing is offered, and the step
+  // keeps its dim.
+  it('under a guided step, taps outside its ring run nothing and nothing is offered', async () => {
     start()
     openCase(/The valley/)
     fireEvent.click(screen.getByRole('button', { name: 'Start' }))
     const ring = () => document.querySelector('.coach .ring')
     await waitFor(() => expect(ring()).toHaveClass('dim'))
-    fireEvent.pointerDown(document.querySelector('[data-spot="giant"]')!)
-    tapSpot('giant')
-    expect(ring()).not.toHaveClass('dim')
-    for (let i = 0; i < stuck.taps; i++) tapSpot('giant')
-    await waitFor(() => expect(ring()).toHaveClass('dim'))
+    for (let i = 0; i <= stuck.taps; i++) tapSpot('giant')
+    expect(screen.getByRole('tab', { name: /Look/ })).toHaveTextContent('Look0/6')
     expect([at(), offer()]).toEqual(['[data-spot="boy"]', null])
+    expect(ring()).toHaveClass('dim')
   })
 
   it('the menu’s quiet Hint gives one without a signal, and a case closed without one says nothing', async () => {
@@ -1669,7 +1802,7 @@ describe('hints (#29)', () => {
     expect([at(), said()]).toEqual(['[data-half]', 'There’s still something to find here.'])
     menu('Cases')
     fireEvent.click(await screen.findByRole('button', { name: /The valley/ }))
-    solveTheValley()
+    await solveTheValley()
     expect(document.querySelector('.hints-used')).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Menu' }))
     const sheet = screen.getByRole('dialog', { name: 'Menu' })
@@ -1682,6 +1815,7 @@ describe('the case solved (#6, 03c; #24)', () => {
     start()
     openCase(/The valley/)
     tapSpot('boy')
+    fireEvent.click(document.querySelector('.dock')!)
     tab(/Solve/)
     expect(screen.getByRole('heading', { name: 'Who is who' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'The account' })).toBeInTheDocument()
@@ -1691,36 +1825,39 @@ describe('the case solved (#6, 03c; #24)', () => {
     expect(screen.queryByRole('button', { name: /Close the case/ })).not.toBeInTheDocument()
   })
 
-  it('a blank refuses a word of another kind by name, in the bank’s head', () => {
+  // The guided steps hold the screen, so a word of another kind is refused once they are done (#77).
+  it('a blank refuses a word of another kind by name, in the bank’s head', async () => {
     start()
     openCase(/The valley/)
-    tapSpot('boy')
+    guide()
+    tab(/Look/)
+    await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
     tapSpot('brook')
     tab(/Solve/)
-    slot('t4')
+    slot('t2')
     chip('five')
     const head = document.querySelector('.bank-head')
     expect(head).toHaveTextContent(/^That blank wants a thing\.$/)
-    chip('sling')
-    slot('t4')
+    chip('stones')
+    slot('t2')
     expect(head).toHaveTextContent(/^namesthingsactionsnumbers$/)
-    expect(document.querySelector('[data-slot="t4"]')).toHaveClass('is-right')
-    expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('1/7')
+    expect(document.querySelector('[data-slot="t2"]')).toHaveTextContent('stones')
+    expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('3/7')
   })
 
   // Playtest 2 (#23): with only David and sling found, "That blank wants a number." read as "type
   // one in". While no word of the blank's kind is found, the note says where words come from (#71).
-  it('a refusal says where to find a word of the kind while none is found', () => {
+  it('a refusal says where to find a word of the kind while none is found', async () => {
     start()
     openCase(/The valley/)
-    tapSpot('boy')
-    tab(/Solve/)
+    guide()
     slot('t1')
     chip('David')
     expect(result()).toHaveTextContent(/^That blank wants a number\. Find one in the picture\.$/)
     // A refused word stays picked up; tapped again, it is put down.
     chip('David')
     tab(/Look/)
+    await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
     tapSpot('brook')
     tab(/Solve/)
     slot('t1')
@@ -1730,23 +1867,20 @@ describe('the case solved (#6, 03c; #24)', () => {
 
   // The tutorial goes all the way to rule 5 (#26 [4]): a ✓ only on the slots its steps name, Close
   // the case once they are done, and the same coarse check as every case.
-  it('the tutorial marks only its guided slots and closes on Close the case, like any case', () => {
+  it('the tutorial marks only its guided slots and closes on Close the case, like any case', async () => {
     start()
     openCase(/The valley/)
-    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
-    tab(/Solve/)
-    for (const [id, word] of valleyAnswers.slice(0, 3)) {
+    await sweep()
+    expect(coach()).toHaveAttribute('data-at', '[data-close]')
+    expect(screen.getByRole('button', { name: /Close the case/ })).toBeDisabled()
+    for (const [id, word] of valleyAnswers.slice(1, 3)) {
       chip(word)
       slot(id)
     }
-    expect(screen.queryByRole('button', { name: /Close the case/ })).not.toBeInTheDocument()
     expect(document.querySelector('[data-slot="d1"]')).toHaveClass('is-right')
+    expect(document.querySelector('[data-slot="t4"]')).toHaveClass('is-right')
     expect(document.querySelector('[data-slot="d2"]')).not.toHaveClass('is-right')
     expect(document.querySelector('[data-slot="t1"]')).not.toHaveClass('is-right')
-    chip('sling')
-    slot('t4')
-    expect(document.querySelector('[data-slot="t4"]')).toHaveClass('is-right')
-    expect(coach()).toHaveAttribute('data-at', '[data-close]')
     for (const [id, word] of [
       ['t2', 'brothers'],
       ['t3', 'six'],
@@ -1758,7 +1892,7 @@ describe('the case solved (#6, 03c; #24)', () => {
     // The sword's blank is asked about only on a miss, so until then it takes no ✓ (#77).
     expect(document.querySelector('[data-slot="t5"]')).not.toHaveClass('is-right')
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
-    expect(result()).toHaveTextContent('One or two are wrong.')
+    expect(result()).toHaveTextContent('One or two don’t match what the picture shows.')
     expect(screen.queryByRole('heading', { name: 'The case is closed.' })).not.toBeInTheDocument()
     slot('t2')
     chip('commander')
@@ -1771,7 +1905,7 @@ describe('the case solved (#6, 03c; #24)', () => {
   it('the tutorial closed, the reveal reads the passages as verses', async () => {
     start(<App passages={numbered} />)
     openCase(/The valley/)
-    solveTheValley()
+    await solveTheValley()
     expect(screen.getByRole('heading', { name: 'The case is closed.' })).toBeInTheDocument()
     expect(screen.getByText(/The boy was David/)).toBeInTheDocument()
     expect(screen.queryByRole('tab')).not.toBeInTheDocument()
@@ -1837,7 +1971,7 @@ describe('the case solved (#6, 03c; #24)', () => {
     const submit = screen.getByRole('button', { name: 'Close the case' })
     expect(submit).toBeEnabled()
     fireEvent.click(submit)
-    expect(result()).toHaveTextContent('Several are wrong.')
+    expect(result()).toHaveTextContent('Several don’t match what the pictures show.')
     expect(screen.queryByRole('heading', { name: 'The case is closed.' })).not.toBeInTheDocument()
     for (const [id, word] of [
       ['s1', 'garden'],
@@ -1848,7 +1982,7 @@ describe('the case solved (#6, 03c; #24)', () => {
       slot(id)
     }
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
-    expect(result()).toHaveTextContent('One or two are wrong.')
+    expect(result()).toHaveTextContent('One or two don’t match what the pictures show.')
     slot('s3')
     chip('inheritance')
     slot('s3')
@@ -1861,7 +1995,7 @@ describe('the case solved (#6, 03c; #24)', () => {
     // The default service asks the proxy, and no test reaches the network (src/test/setup.ts).
     const { unmount } = start()
     openCase(/The valley/)
-    solveTheValley()
+    await solveTheValley()
     expect(
       await screen.findByText(
         'The passage couldn’t be fetched. Read 1 Samuel 17:17–18 in your own Bible.',
@@ -1906,7 +2040,7 @@ describe('the case solved (#6, 03c; #24)', () => {
   it('the reveal is a history entry: back returns to the case, and Back to cases pops both (Gate 03 [1])', async () => {
     start()
     openCase(/The valley/)
-    solveTheValley()
+    await solveTheValley()
     expect(history.state).toEqual({ case: 'valley', view: 'reveal' })
     history.back()
     await waitFor(() =>
@@ -1928,7 +2062,7 @@ describe('the case solved (#6, 03c; #24)', () => {
   it('a closed case opens on its reveal with both entries, and Restart from the reveal starts it over', async () => {
     start()
     openCase(/The valley/)
-    solveTheValley()
+    await solveTheValley()
     fireEvent.click(screen.getByRole('button', { name: 'Back to cases' }))
     await waitFor(() => expect(screen.getByText('Closed ✓')).toBeInTheDocument())
     openCase(/The valley/)
@@ -1958,7 +2092,7 @@ describe('the case solved (#6, 03c; #24)', () => {
   it('a reveal entry left ahead by a restart shows no solution, and becomes a case entry', async () => {
     start()
     openCase(/The valley/)
-    solveTheValley()
+    await solveTheValley()
     // jsdom fires each move's popstate on a later task; the handlers have run once it arrives.
     const popped = () =>
       new Promise<void>((r) => addEventListener('popstate', () => r(), { once: true }))
@@ -1985,7 +2119,7 @@ describe('the case solved (#6, 03c; #24)', () => {
   it('a solved case’s own entry mounts on Solve: forward from the cards, and a reload on it', async () => {
     const { unmount } = start()
     openCase(/The valley/)
-    solveTheValley()
+    await solveTheValley()
     fireEvent.click(screen.getByRole('button', { name: 'Back to cases' }))
     await waitFor(() => expect(screen.getByText('Closed ✓')).toBeInTheDocument())
     history.forward()
