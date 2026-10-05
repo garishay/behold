@@ -171,6 +171,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   if (sweep && view === 'look' && !looked) setLooked(true)
   const holds = current?.until !== undefined && !(sweep && looked)
   const nudge = () => setNudges(nudges + 1)
+  // Close the case shows once it can close: every slot filled (#24, Solve's room).
+  const full = filled(s, progress) === total(s)
   const fleeting = current !== undefined && (current.until === undefined || looks)
   const showing = `${current?.id}#${nudges}`
   // A step that only tells, the dock's line of finds read, is met by a tap on the dock it rings, or
@@ -417,7 +419,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     if (asked !== undefined && view !== 'look') return `[data-slot="${asked}"]`
     if (until?.view || view === 'look') return '[data-view="solve"]'
     const filled = until?.filled
-    if (filled === undefined) return '[data-close]'
+    // The last step rings Solve's count until Close the case shows (#24, Solve's room).
+    if (filled === undefined) return full ? '[data-close]' : '[data-view="solve"]'
     const word = answer(s, filled)
     if (current.slotFirst)
       return selection.target === filled ? `[data-word="${word}"]` : `[data-slot="${filled}"]`
@@ -549,20 +552,21 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
           </div>
           {/* Close the case docks as its own row below the account, outside the scroll, so it never
               moves and never covers the account; a guided case offers it once its steps are done
-              (07d, #24; #26 [4]). */}
-          {closable(s, progress) && (
+              (07d, #24; #26 [4]). It shows once every slot is filled, and until then the account
+              has the row, or a hint on offer has it alone (#24, Solve's room). */}
+          {closable(s, progress) && (full || offer) && (
             <div className="submit-row">
-              <button
-                type="button"
-                className="submit"
-                data-close
-                disabled={filled(s, progress) < total(s) || progress.solved}
-                onClick={onSubmit}
-              >
-                {filled(s, progress) < total(s)
-                  ? strings.closeCaseProgress(filled(s, progress), total(s))
-                  : strings.closeCase}
-              </button>
+              {full && (
+                <button
+                  type="button"
+                  className="submit"
+                  data-close
+                  disabled={progress.solved}
+                  onClick={onSubmit}
+                >
+                  {strings.closeCase}
+                </button>
+              )}
               {offer}
             </div>
           )}

@@ -965,11 +965,31 @@ describe('the tutorial’s marks (#25)', () => {
 
   // Close the case docks as its own row between the account and the bank, outside the scroll, so
   // it never moves and never covers the account; its result shows in the bank's head below it
-  // (07d, #24).
-  it('docks Close the case between the account and the bank, outside the scroll', () => {
-    start(<App />, laterStarted)
+  // (07d, #24). It shows once every slot is filled, and until then the account has the row (#24,
+  // Solve's room).
+  it('docks Close the case between the account and the bank once every slot is filled', () => {
+    start(<App />, {
+      vineyard: {
+        ...fresh(vineyard),
+        bank: ['garden'],
+        faces: { p1: 'ahab', p2: 'jezebel', p3: 'naboth' },
+        order: ['bedchamber', 'gate', 'vineyard'],
+        fills: {
+          s2: 'vineyard',
+          s3: 'silver',
+          s4: 'jezebel',
+          s5: 'the-king',
+          v1: 'killed',
+          v2: 'taken-possession',
+        },
+      },
+    })
     openCase(/The vineyard/)
     tab(/Solve/)
+    expect(document.querySelector('.submit-row')).toBeNull()
+    expect(document.querySelector('.solve')!.nextElementSibling).toHaveClass('bank')
+    chip('garden')
+    slot('s1')
     const row = screen.getByRole('button', { name: /Close the case/ }).parentElement!
     expect(row).toHaveClass('submit-row')
     expect(row.closest('.solve')).toBeNull()
@@ -1025,8 +1045,9 @@ describe('the tutorial’s marks (#25)', () => {
     // The sword is asked about only on a miss, so Close the case follows the sweep (#77). From Look
     // it rings Solve's button with no words, which are Solve's to say there.
     expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
+    // On Solve the last step rings Solve's count until Close the case shows (#24, Solve's room).
     tab(/Solve/)
-    expect([at(), said()]).toEqual(['[data-close]', 'Fill the rest, then close the case.'])
+    expect([at(), said()]).toEqual(['[data-view="solve"]', 'Fill the rest, then close the case.'])
   })
 
   // The paid round's first session (#77): on a short screen the words above Solve's button sat on
@@ -1375,7 +1396,8 @@ describe('the tutorial’s marks (#25)', () => {
   })
 
   // The last step's words cover the account's end on Solve and the caption from Look, so they
-  // leave on the next tap after they show; its ring stays until the case closes (#24, ruling [3]).
+  // leave on the next tap after they show; its ring stays until the case closes (#24, ruling [3]),
+  // on Solve's count until Close the case shows, and then on Close (#24, Solve's room).
   it('the last step’s words leave on the next tap, and its ring stays', async () => {
     start()
     openCase(/The valley/)
@@ -1389,15 +1411,21 @@ describe('the tutorial’s marks (#25)', () => {
       slot(id)
     }
     await waitFor(() => expect(document.querySelector('.coach .label')).not.toBeNull())
-    expect([at(), said()]).toEqual(['[data-close]', 'Fill the rest, then close the case.'])
+    expect([at(), said()]).toEqual(['[data-view="solve"]', 'Fill the rest, then close the case.'])
     fireEvent.pointerDown(document.querySelector('[data-slot="t1"]')!)
     expect(document.querySelector('.coach .label')).toBeNull()
     expect(document.querySelector('.coach .ring')).not.toHaveClass('dim')
-    expect([at(), said()]).toEqual(['[data-close]', ''])
+    expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
     tab(/Look/)
     expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
     // The dim left with the words, and a new target doesn't bring it back (#24, addendum (b)).
     expect(document.querySelector('.coach .ring')).not.toHaveClass('dim')
+    tab(/Solve/)
+    for (const [id, word] of valleyAnswers.filter(([id]) => !['d1', 't4', 't5'].includes(id))) {
+      chip(word)
+      slot(id)
+    }
+    expect([at(), said()]).toEqual(['[data-close]', ''])
   })
 
   // Playtest 2 (#23): the first close the player met said "Several are wrong." in case three, and
@@ -1670,6 +1698,9 @@ describe('hints (#29)', () => {
       act(() => vi.advanceTimersByTime(stuck.stranded * 1000 - 1))
       expect(offer()).toBeNull()
       act(() => vi.advanceTimersByTime(1))
+      // Close the case can't close yet, so the offer has its row alone (#24, Solve's room).
+      expect(offer()?.closest('.submit-row')).not.toBeNull()
+      expect(screen.queryByRole('button', { name: /Close the case/ })).not.toBeInTheDocument()
       fireEvent.click(screen.getByRole('button', { name: 'Where to look' }))
       expect([at(), said()]).toEqual(['[data-view="look"]', 'Find the other words in the picture.'])
       tab(/Look/)
@@ -1938,8 +1969,8 @@ describe('the case solved (#6, 03c; #24)', () => {
     start()
     openCase(/The valley/)
     await sweep()
-    expect(coach()).toHaveAttribute('data-at', '[data-close]')
-    expect(screen.getByRole('button', { name: /Close the case/ })).toBeDisabled()
+    expect(coach()).toHaveAttribute('data-at', '[data-view="solve"]')
+    expect(screen.queryByRole('button', { name: /Close the case/ })).not.toBeInTheDocument()
     for (const [id, word] of valleyAnswers.slice(1, 3)) {
       chip(word)
       slot(id)
@@ -2007,7 +2038,7 @@ describe('the case solved (#6, 03c; #24)', () => {
     for (const s of ['letter', 'law']) tapSpot(s)
     fireEvent.click(screen.getByRole('button', { name: 'Close' }))
     tab(/Solve/)
-    expect(screen.getByRole('button', { name: /Close the case — 0 of 11 filled/ })).toBeDisabled()
+    expect(screen.queryByRole('button', { name: /Close the case/ })).not.toBeInTheDocument()
     for (const [id, word] of [
       ['p1', 'Ahab'],
       ['p2', 'Jezebel'],
