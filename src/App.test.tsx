@@ -1104,7 +1104,7 @@ describe('the tutorial’s marks (#25)', () => {
     }
     expect(document.querySelector('[data-slot="t5"]')).not.toHaveClass('is-right')
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
-    expect(result()).toHaveTextContent('One or two are wrong.')
+    expect(result()).toHaveTextContent('One or two don’t match what the picture shows.')
     expect([at(), said()]).toEqual(['[data-slot="t5"]', 'Whose sword? Look closer at the picture.'])
     fireEvent.pointerDown(document.querySelector('[data-slot="t1"]')!)
     expect([at(), said()]).toEqual(['[data-slot="t5"]', ''])
@@ -1393,9 +1393,12 @@ describe('the tutorial’s marks (#25)', () => {
     }
     fireEvent.pointerDown(document.querySelector('[data-close]')!)
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
-    expect(result()).toHaveTextContent('One or two are wrong.')
+    expect(result()).toHaveTextContent('One or two don’t match what the picture shows.')
     await waitFor(() => expect(document.querySelector('.coach .ring')).toHaveClass('dim'))
-    expect([at(), said()]).toEqual(['[data-close]', 'The ringed answers are wrong. Look closer.'])
+    expect([at(), said()]).toEqual([
+      '[data-close]',
+      'Ringed answers don’t match the picture. Look closer.',
+    ])
     fireEvent.pointerDown(document.querySelector('[data-slot="t3"]')!)
     expect([at(), said()]).toEqual(['[data-close]', ''])
   })
@@ -1419,7 +1422,9 @@ describe('the tutorial’s marks (#25)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     expect(ringed()).toEqual(['t1', 't3'])
     expect(at()).toBe('[data-slot="t5"]')
-    expect(document.querySelector('[data-slot="t1"]')).toHaveTextContent('five, ringed: wrong')
+    expect(document.querySelector('[data-slot="t1"]')).toHaveTextContent(
+      'five, ringed: doesn’t match the picture',
+    )
     chip('ten')
     slot('t1')
     expect(ringed()).toEqual(['t3'])
@@ -1472,7 +1477,7 @@ describe('the tutorial’s marks (#25)', () => {
     openCase(/The valley/)
     tab(/Solve/)
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
-    expect(result()).toHaveTextContent('Several are wrong.')
+    expect(result()).toHaveTextContent('Several don’t match what the picture shows.')
     const ringed = [...document.querySelectorAll('.is-wrong')].map((e) =>
       e.getAttribute('data-slot'),
     )
@@ -1887,7 +1892,7 @@ describe('the case solved (#6, 03c; #24)', () => {
     // The sword's blank is asked about only on a miss, so until then it takes no ✓ (#77).
     expect(document.querySelector('[data-slot="t5"]')).not.toHaveClass('is-right')
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
-    expect(result()).toHaveTextContent('One or two are wrong.')
+    expect(result()).toHaveTextContent('One or two don’t match what the picture shows.')
     expect(screen.queryByRole('heading', { name: 'The case is closed.' })).not.toBeInTheDocument()
     slot('t2')
     chip('commander')
@@ -1966,7 +1971,7 @@ describe('the case solved (#6, 03c; #24)', () => {
     const submit = screen.getByRole('button', { name: 'Close the case' })
     expect(submit).toBeEnabled()
     fireEvent.click(submit)
-    expect(result()).toHaveTextContent('Several are wrong.')
+    expect(result()).toHaveTextContent('Several don’t match what the pictures show.')
     expect(screen.queryByRole('heading', { name: 'The case is closed.' })).not.toBeInTheDocument()
     for (const [id, word] of [
       ['s1', 'garden'],
@@ -1977,7 +1982,7 @@ describe('the case solved (#6, 03c; #24)', () => {
       slot(id)
     }
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
-    expect(result()).toHaveTextContent('One or two are wrong.')
+    expect(result()).toHaveTextContent('One or two don’t match what the pictures show.')
     slot('s3')
     chip('inheritance')
     slot('s3')

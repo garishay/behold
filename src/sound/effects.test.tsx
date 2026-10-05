@@ -169,7 +169,7 @@ describe('the effects, each beside what the screen shows (Gate 10 A3, A5)', () =
     heard()
     closeTheCase()
     expect(heard()).toEqual(['notYet'])
-    expect(result()).toHaveTextContent('One or two are wrong.')
+    expect(result()).toHaveTextContent('One or two don’t match what the pictures show.')
     for (const [id, word] of [
       ['s1', 'garden'],
       ['s2', 'vineyard'],

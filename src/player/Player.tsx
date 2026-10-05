@@ -253,7 +253,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   }
   const onSubmit = () => {
     const off = wrong(s, progress)
-    setNote(off === 0 ? '' : off <= 2 ? strings.oneOrTwoWrong : strings.severalWrong)
+    setNote(off === 0 ? '' : strings.noMatch(off > 2, s.moments.length))
     if (off > 0) {
       play('notYet')
       setFails(fails + 1)

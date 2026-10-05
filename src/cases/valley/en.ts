@@ -74,7 +74,7 @@ export const en = {
     step6: 'Find the other words in the picture.',
     step7: 'Fill the rest, then close the case.',
   },
-  retry: 'The ringed answers are wrong. Look closer.',
+  retry: 'Ringed answers don’t match the picture. Look closer.',
   ask: 'Whose sword? Look closer at the picture.',
   reveal: [
     'The boy was David, sent by his father Jesse with ten loaves for his brothers and ten cheeses for the commander over their thousand. The fallen giant was Goliath of Gath, the Philistines’ champion, six cubits and a span tall.',
