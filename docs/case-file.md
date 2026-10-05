@@ -82,10 +82,12 @@ Solve, which takes the player there, meeting it and the step after; a tap on the
 too, and so does any move. While the dock shows no line, as on a reload or a return to the case,
 the step is passed (#77).
 
-No mark's words cover the dock's caption (#77). From Look, a step done on Solve, a fill or the
-close, rings Solve's button with no words, as the question does; the step that waits on Solve
-opening has its words above the dock. A mark's words sit below its target or above it, wherever
-that side leaves them two lines and one more, and else at the foot of the room above the dock.
+No mark's words cover the dock's caption, or the account's lines (#77). From Look, a step done on
+Solve, a fill or the close, rings Solve's button with no words, as the question does; the step that
+waits on Solve opening has its words above the dock. A mark's words sit below its target or above
+it, wherever that side leaves them two lines and one more, and else at the foot of the room above
+the dock. On Solve the account's lines on show split the room: a target above them or below them
+keeps its words on its own side, and a target among them, a blank, has its words just under them.
 
 A step that waits on a face or a blank may lead with it, `slotFirst: true` (#77): its mark rings
 the slot until the slot waits, then the answer's word, with the words of other kinds dimmed in the

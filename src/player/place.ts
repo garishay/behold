@@ -12,18 +12,28 @@ export interface Box {
  */
 export const words = 16 + 3 * 19.5
 
+/** A stretch of the screen from top to bottom, in CSS px: the account's lines on show. */
+export interface Span {
+  readonly top: number
+  readonly bottom: number
+}
+
 /**
  * Where a mark's words sit (#25): below a target in the top half of their room, above one in its
  * bottom half, wherever that side leaves them their room, and else at the room's foot, over the
  * ring, as a hint's ring on half the picture needs. On Look the room ends at the dock, so the
  * words never cover its caption, and a target below the dock's top, in the bar, has its words
- * above the dock (#77).
+ * above the dock (#77). On Solve the account's lines on show split the room, so the words of a
+ * target above them or below them stay that side, and a target among them has its words just
+ * under them: no words cover the account (#77).
  */
-export function labelAt(ring: Box, floor: number, height: number) {
-  const below = (ring.top + ring.bottom) / 2 < floor / 2
-  if (below && ring.bottom + 8 + words <= floor) return { top: ring.bottom + 8 }
-  const top = Math.min(ring.top, floor)
-  return { bottom: height - (top - 8 - words >= 0 ? top : floor) + 8 }
+export function labelAt(ring: Box, floor: number, height: number, lines?: Span) {
+  const mid = (ring.top + ring.bottom) / 2
+  if (lines && mid >= lines.top && mid <= lines.bottom) return { top: lines.bottom + 8 }
+  const [lo, hi] = !lines ? [0, floor] : mid < lines.top ? [0, lines.top] : [lines.bottom, floor]
+  if (mid - lo < (hi - lo) / 2 && ring.bottom + 8 + words <= hi) return { top: ring.bottom + 8 }
+  const top = Math.min(ring.top, hi)
+  return { bottom: height - (top - 8 - words >= lo ? top : hi) + 8 }
 }
 
 /** The boxes a target scrolls in: the account, a zoomed picture, the bank's words (07c, #24). */

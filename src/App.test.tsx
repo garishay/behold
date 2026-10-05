@@ -949,6 +949,20 @@ describe('the tutorial’s marks (#25)', () => {
     expect([ring()!.style.top, ring()!.style.height]).toEqual(['376px', '24px'])
   })
 
+  // The paid round's second session (#23, 2026-10-05): step 5's words sat under sling's blank,
+  // over the account's lines around it, the whole time she was stuck there. No mark covers the
+  // account: the words of a target among its lines sit just under the lines on show (#77).
+  it('puts no mark’s words over the account’s lines', async () => {
+    boxes = {
+      [blank]: new DOMRect(34, 148.5, 72, 30),
+      '.solve': new DOMRect(0, 0, 360, 319),
+      '.scroll': new DOMRect(16, 100, 328, 420),
+    }
+    toDavid()
+    await waitFor(() => expect(document.querySelector('.coach .label')).not.toBeNull())
+    expect(document.querySelector<HTMLElement>('.coach .label')!.style.top).toBe('327px')
+  })
+
   // Close the case docks as its own row between the account and the bank, outside the scroll, so
   // it never moves and never covers the account; its result shows in the bank's head below it
   // (07d, #24).

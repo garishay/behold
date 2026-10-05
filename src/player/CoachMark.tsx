@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { strings } from '../strings/en.ts'
-import { bring, labelAt, scroller, type Box } from './place.ts'
+import { bring, labelAt, scroller, type Box, type Span } from './place.ts'
 
 interface CoachMarkProps {
   /** The target's selector: a spot, a view's button, a word, a slot, or Close the case. */
@@ -35,6 +35,17 @@ const floorOf = () =>
       (e) => e.getBoundingClientRect().top,
     ),
   )
+
+/** The account's lines on show: its blocks, as far as Solve's scroll shows them (#77). */
+function linesOf(): Span | undefined {
+  const view = document.querySelector('.solve')?.getBoundingClientRect()
+  const blocks = [...document.querySelectorAll('.solve .scroll')].map((e) =>
+    e.getBoundingClientRect(),
+  )
+  const top = Math.max(view?.top ?? 0, Math.min(...blocks.map((b) => b.top)))
+  const bottom = Math.min(view?.bottom ?? 0, Math.max(...blocks.map((b) => b.bottom)))
+  return top < bottom ? { top, bottom } : undefined
+}
 
 /** Where two boxes overlap, or null where they don't. */
 function overlap(a: Box, b: Box): Box | null {
@@ -81,6 +92,7 @@ function ringFor(el: Element | null): Box | null {
 export function CoachMark({ at, label, onTap, onNext, hold }: CoachMarkProps) {
   const [ring, setRing] = useState<Box | null>(null)
   const [floor, setFloor] = useState(innerHeight)
+  const [lines, setLines] = useState<Span>()
   const [dim, setDim] = useState({ at, on: true })
   // A tap the hold refuses pulses the ring once, so it still answers with where to tap (#77).
   const [pulse, setPulse] = useState(0)
@@ -101,6 +113,8 @@ export function CoachMark({ at, label, onTap, onNext, hold }: CoachMarkProps) {
       last = now
       setRing((old) => (JSON.stringify(old) === now ? old : r))
       setFloor(floorOf())
+      const span = linesOf()
+      setLines((old) => (JSON.stringify(old) === JSON.stringify(span) ? old : span))
       frame = held < settle ? requestAnimationFrame(follow) : 0
     }
     const wake = () => {
@@ -168,7 +182,7 @@ export function CoachMark({ at, label, onTap, onNext, hold }: CoachMarkProps) {
           {label && (
             <div
               className="label"
-              style={{ left: centre ?? 0, ...labelAt(ring, floor, innerHeight) }}
+              style={{ left: centre ?? 0, ...labelAt(ring, floor, innerHeight, lines) }}
             >
               <span aria-hidden>{label}</span>
               {onNext && (
