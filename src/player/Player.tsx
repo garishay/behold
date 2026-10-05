@@ -11,6 +11,7 @@ import { Dock, type Caption } from './Dock.tsx'
 import { aim, firstWrong, half, stranded, stuck, type Aim, type Tier } from './hints.ts'
 import { PaperModal, PapersSheet } from './Papers.tsx'
 import { prefetch } from './pictures.ts'
+import { bring } from './place.ts'
 import { Reveal } from './Reveal.tsx'
 import { Stage } from './Stage.tsx'
 import {
@@ -30,6 +31,7 @@ import {
   tap,
   total,
   wrong,
+  wrongs,
   type Outcome,
   type Progress,
 } from './state.ts'
@@ -105,6 +107,9 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   // instead, at that slot, and from then on the slot takes its ✓ when right (#77).
   const [retry, setRetry] = useState(false)
   const [asking, setAsking] = useState(false)
+  // The valley teaches, so its failed close says where: every slot it found wrong, but the one its
+  // question asks about, is ringed with what it held, until that changes (#77).
+  const [ringed, setRinged] = useState<Readonly<Record<string, string | undefined>>>({})
   // The bank's head: a refused word's message, or how far off a close was (07c, #24 [3]).
   const [note, setNote] = useState('')
   // The stuck signals (#29): taps on the picture that find nothing new while something is unfound,
@@ -252,10 +257,17 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
       setFails(fails + 1)
       setMissed(firstWrong(s, progress) ?? null)
       // In the tutorial the last step's mark comes back, dim and all, with its retry (#25), or as
-      // the question at the slot the case asks about when this close found it wrong (#77).
+      // the question at the slot the case asks about when this close found it wrong; every other
+      // slot it found wrong is ringed, and with no question to bring one into view, the first
+      // ring is brought there (#77).
       if (current !== undefined && current.until === undefined) {
+        const at = wrongs(s, progress).filter((id) => id !== s.ask)
+        setRinged(Object.fromEntries(at.map((id) => [id, put(progress, id)])))
         if (wrongAt(s.ask)) setAsking(true)
-        else setRetry(true)
+        else {
+          setRetry(true)
+          bring(document.querySelector(`[data-slot="${at[0]}"]`))
+        }
         nudge()
       }
     }
@@ -488,10 +500,13 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
               text={text}
               progress={progress}
               selection={selection}
-              onSlot={(t) => apply(chooseSlot(s, progress, selection, t))}
+              onSlot={(t) =>
+                apply(chooseSlot(s, progress, selection, t, asking ? s.ask : undefined))
+              }
               onMoment={(id) => apply(chooseMoment(s, progress, selection, id))}
               onOrderSlot={(i) => apply(chooseOrderSlot(s, progress, selection, i))}
               asked={asking ? s.ask : undefined}
+              ringed={Object.keys(ringed).filter((id) => put(progress, id) === ringed[id])}
             />
           </div>
           {/* Close the case docks as its own row below the account, outside the scroll, so it never

@@ -89,7 +89,10 @@ sling's blank dims David for a thing.
 A guided case may name, as `ask`, the face or blank it asks about on a miss (#77): when a close
 finds it wrong, the retry is the question, the text's `ask`. It rings that slot and never its
 word, and from Look only Solve's button, with no words, leaving the picture clear ([Q11]). Once
-asked, the slot takes its ✓ when right. A close wrong elsewhere keeps the retry.
+asked, the slot takes its ✓ when right. A ✓ stays, there or on a slot a step names: a tap no
+longer empties it. A close wrong elsewhere keeps the retry. Either way the close rings every other
+face or blank it found wrong, each until it is changed, and with no question asking, the first
+ring is brought into view (#77).
 
 Every string in the structure is an id, a file name, a book code, or a cite. There is no field
 that can hold a sentence, so the structure cannot carry player text and cannot carry scripture.
@@ -116,7 +119,7 @@ The type is computed from the structure, so the keys below are exactly the struc
 | `papers`   | paper id → `title` and `body`; a paragraph break is `\n`                                                                               |
 | `blocks`   | block id → `heading` and `parts`: runs of text, `{ t: '…' }`, and the block's blanks, `{ b: 't1' }`, in this language's own word order |
 | `steps`    | step id → the step's words, eight or fewer, beside its mark; only when the structure has steps                                         |
-| `retry`    | the last step's words after a failed close, eight or fewer, which say the answers were checked; only when the structure has steps      |
+| `retry`    | the last step's words after a failed close, eight or fewer: the answers were checked, and the wrong ones ringed; only with steps       |
 | `ask`      | the question asked on a miss, eight or fewer, beside its mark; only when the structure names `ask`                                     |
 | `teach`    | the lesson's words, eight or fewer, beside its mark; only when the structure teaches                                                   |
 | `reveal`   | the paragraphs in the game's words, shown before the passage                                                                           |

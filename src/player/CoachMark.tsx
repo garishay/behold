@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { strings } from '../strings/en.ts'
-import { labelAt, type Box } from './place.ts'
+import { bring, labelAt, scroller, type Box } from './place.ts'
 
 interface CoachMarkProps {
   /** The target's selector: a spot, a view's button, a word, a slot, or Close the case. */
@@ -20,11 +20,6 @@ const gutter = 16
 const settle = 30
 /** What wakes a mark that has stopped following ([Q6]). */
 const wakers = ['pointerdown', 'scroll', 'resize'] as const
-/** The boxes a target scrolls in: the account, a zoomed picture, the bank's words (07c, #24). */
-const scrollers = '.solve, .stage, .chips'
-
-/** A target's scroll box, if it sits in one. */
-const scroller = (el: Element) => el.parentElement?.closest<HTMLElement>(scrollers) ?? null
 
 /** Where the room for a mark's words ends: the top of the dock's caption, open or not, else the screen's foot. */
 const floorOf = () =>
@@ -60,23 +55,6 @@ function ringFor(el: Element | null): Box | null {
   if (!view || !overlap(r, view)) return null
   const grown = { left: r.left - 4, top: r.top - 4, right: r.right + 4, bottom: r.bottom + 4 }
   return overlap(grown, view)
-}
-
-/**
- * Brings a target to the middle of its own scroll box, and never scrolls the page: the case
- * screen does not scroll, and a target outside a scroll box is always in view (07c, #24 [1]).
- * The scroll box's `scroll-behavior` is the stylesheet's, so reduced motion jumps. Both axes move
- * in one scroll: a second, even by nothing, would abort the first while it glides (#47).
- */
-function bring(el: Element | null) {
-  const box = el && scroller(el)
-  if (!el || !box) return
-  const r = el.getBoundingClientRect()
-  const b = box.getBoundingClientRect()
-  box.scrollBy({
-    top: r.top + r.height / 2 - (b.top + b.height / 2),
-    left: r.left + r.width / 2 - (b.left + b.width / 2),
-  })
 }
 
 /**

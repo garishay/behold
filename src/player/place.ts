@@ -25,3 +25,26 @@ export function labelAt(ring: Box, floor: number, height: number) {
   const top = Math.min(ring.top, floor)
   return { bottom: height - (top - 8 - words >= 0 ? top : floor) + 8 }
 }
+
+/** The boxes a target scrolls in: the account, a zoomed picture, the bank's words (07c, #24). */
+const scrollers = '.solve, .stage, .chips'
+
+/** A target's scroll box, if it sits in one. */
+export const scroller = (el: Element) => el.parentElement?.closest<HTMLElement>(scrollers) ?? null
+
+/**
+ * Brings a target to the middle of its own scroll box, and never scrolls the page: the case
+ * screen does not scroll, and a target outside a scroll box is always in view (07c, #24 [1]).
+ * The scroll box's `scroll-behavior` is the stylesheet's, so reduced motion jumps. Both axes move
+ * in one scroll: a second, even by nothing, would abort the first while it glides (#47).
+ */
+export function bring(el: Element | null) {
+  const box = el && scroller(el)
+  if (!el || !box) return
+  const r = el.getBoundingClientRect()
+  const b = box.getBoundingClientRect()
+  box.scrollBy({
+    top: r.top + r.height / 2 - (b.top + b.height / 2),
+    left: r.left + r.width / 2 - (b.left + b.width / 2),
+  })
+}

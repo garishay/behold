@@ -1163,9 +1163,41 @@ describe('the tutorial’s marks (#25)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     expect(result()).toHaveTextContent('One or two are wrong.')
     await waitFor(() => expect(document.querySelector('.coach .ring')).toHaveClass('dim'))
-    expect([at(), said()]).toEqual(['[data-close]', 'Some are wrong. Look closer, then try again.'])
+    expect([at(), said()]).toEqual(['[data-close]', 'The ringed answers are wrong. Look closer.'])
     fireEvent.pointerDown(document.querySelector('[data-slot="t3"]')!)
     expect([at(), said()]).toEqual(['[data-close]', ''])
+  })
+
+  // The paid round's first session (#77): "Several are wrong." said nothing of where, and after the
+  // question settled the sword the tester took Goliath back out three times. The valley teaches, so
+  // its failed close rings what it found wrong, but the slot its question asks about, each until it
+  // is changed, and a screen reader hears the ring; and a slot showing its ✓ keeps its word.
+  it('a failed close in the valley rings what it found wrong, and a ✓ stays', () => {
+    start()
+    openCase(/The valley/)
+    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
+    tab(/Solve/)
+    const missed: Record<string, string> = { t1: 'five', t3: 'ten', t5: 'Saul' }
+    for (const [id, word] of valleyAnswers) {
+      chip(missed[id] ?? word)
+      slot(id)
+    }
+    const ringed = () =>
+      [...document.querySelectorAll('.is-wrong')].map((e) => e.getAttribute('data-slot'))
+    expect(ringed()).toEqual([])
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(ringed()).toEqual(['t1', 't3'])
+    expect(at()).toBe('[data-slot="t5"]')
+    expect(document.querySelector('[data-slot="t1"]')).toHaveTextContent('five, ringed: wrong')
+    chip('ten')
+    slot('t1')
+    expect(ringed()).toEqual(['t3'])
+    chip('Goliath')
+    slot('t5')
+    expect(document.querySelector('[data-slot="t5"]')).toHaveClass('is-right')
+    slot('t5')
+    expect(document.querySelector('[data-slot="t5"]')).toHaveTextContent('Goliath')
+    expect(document.querySelector('[data-slot="t5"]')).toHaveClass('is-right')
   })
 })
 

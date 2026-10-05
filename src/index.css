@@ -1397,6 +1397,17 @@ button:focus-visible {
   font-size: 13px;
 }
 
+/* A slot a failed close in the valley found wrong, ringed until it is changed (#77): wine on the
+   account's papyrus, and on a face's dark ground the action kind's red, which shows there. */
+.scroll .slot.is-wrong {
+  box-shadow: 0 0 0 2px var(--wine);
+}
+
+.face .slot.is-wrong {
+  border-style: solid;
+  border-color: var(--t-action);
+}
+
 /* Close the case, docked as its own row between the account and the bank, outside the scroll, like
    the bank and the bar: it never moves and never covers the account (07d, #24). */
 .submit-row {

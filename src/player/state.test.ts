@@ -19,6 +19,7 @@ import {
   tap,
   total,
   wrong,
+  wrongs,
 } from './state.ts'
 
 describe('the model (#6)', () => {
@@ -59,16 +60,48 @@ describe('the model (#6)', () => {
   })
 
   it('a word then a slot, or a slot then a word, fills it; a filled slot tapped alone empties', () => {
-    const p = tap(valley, fresh(valley), 'boy').progress
-    const picked = chooseWord(valley, p, nothing, 'david')
-    const placed = chooseSlot(valley, picked.progress, picked.selection, 'd1')
-    expect(placed.progress.faces).toEqual({ d1: 'david' })
+    const p = tap(valley, tap(valley, fresh(valley), 'boy').progress, 'giant').progress
+    const picked = chooseWord(valley, p, nothing, 'goliath')
+    const placed = chooseSlot(valley, picked.progress, picked.selection, 'd2')
+    expect(placed.progress.faces).toEqual({ d2: 'goliath' })
     expect(placed.selection).toEqual(nothing)
-    const emptied = chooseSlot(valley, placed.progress, nothing, 'd1')
+    const emptied = chooseSlot(valley, placed.progress, nothing, 'd2')
     expect(emptied.progress.faces).toEqual({})
     const waiting = chooseSlot(valley, p, nothing, 't4')
     const filledIn = chooseWord(valley, p, waiting.selection, 'sling')
     expect(filledIn.progress.fills).toEqual({ t4: 'sling' })
+  })
+
+  // Playtest 2's paid round (#77): the sword's ✓ was emptied three times by a tap. A slot showing
+  // its ✓ keeps its word, a word picked up stays picked up, and one wrong there still empties.
+  it('a slot showing its ✓ keeps its word, and a word picked up stays picked up', () => {
+    const p = tap(valley, tap(valley, fresh(valley), 'boy').progress, 'giant').progress
+    const right = chooseSlot(valley, p, chooseWord(valley, p, nothing, 'david').selection, 'd1')
+    expect(chooseSlot(valley, right.progress, nothing, 'd1').progress).toBe(right.progress)
+    const sling = chooseWord(valley, right.progress, nothing, 'sling').selection
+    expect(chooseSlot(valley, right.progress, sling, 'd1')).toEqual({
+      progress: right.progress,
+      selection: sling,
+    })
+    const asked = { ...p, fills: { t5: 'goliath' } }
+    expect(chooseSlot(valley, asked, nothing, 't5', 't5').progress).toBe(asked)
+    expect(chooseSlot(valley, asked, nothing, 't5').progress.fills).toEqual({})
+    const wrongName = chooseSlot(
+      valley,
+      p,
+      chooseWord(valley, p, nothing, 'goliath').selection,
+      'd1',
+    )
+    expect(chooseSlot(valley, wrongName.progress, nothing, 'd1').progress.faces).toEqual({})
+  })
+
+  it('names the faces and blanks a close would find wrong', () => {
+    const p = {
+      ...fresh(valley),
+      faces: { d1: 'david', d2: 'saul' },
+      fills: { t1: 'ten', t3: 'five' },
+    }
+    expect(wrongs(valley, p)).toEqual(['d2', 't2', 't3', 't4', 't5'])
   })
 
   it('a moment placed in a second order slot leaves the first', () => {

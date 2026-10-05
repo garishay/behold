@@ -105,6 +105,8 @@ export const strings = {
       : `That blank wants ${wants[kind]}. Find one in the picture.`,
   oneOrTwoWrong: 'One or two are wrong.',
   severalWrong: 'Several are wrong.',
+  // What a screen reader hears after a slot a failed close in the valley ringed (#77).
+  ringedWrong: ', ringed: wrong',
 
   // Hints (#29): offered once the game sees a player stuck, in the caption's dock on Look and
   // beside Close the case on Solve, and quietly in the menu; each tier asked for. A hint's words
