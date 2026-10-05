@@ -73,8 +73,11 @@ Every step before the one that waits on everything found holds the screen to its
 tap anywhere in its ring is its target's, even on a spot drawn over it, and a tap outside the ring,
 its words included, plays nothing and leaves the dim, so the steps are played as taught. A tap the
 hold refuses pulses the ring once, so it still answers with where to tap. The menu still opens,
-and a tap while the target is out of view brings it back. Free play starts at the step that sends
-the player back to the picture.
+and a tap while the target is out of view brings it back. The step that sends the player back to
+the picture holds too, one step further: on Solve, only Look's button takes a tap, with the step's
+words, until Look opens. The guided fills leave nothing in the bank to place, so the hold costs
+nothing. Free play starts once Look opens, and a player back on Solve during the sweep is never
+held (#77).
 
 A step may wait on the dock's line of finds read, `{ read: 'found' }`: its mark rings the dock
 whole, the caption with its line, its words above the dock. It only tells, so its words carry Open

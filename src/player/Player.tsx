@@ -139,6 +139,9 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const [nudges, setNudges] = useState(0)
   // A caption opened whole over the picture's foot; the next caption opens closed (#24).
   const [reading, setReading] = useState(false)
+  // Whether Look has opened during the sweep: until it has, the sweep holds Solve to Look's button,
+  // and from then on the sweep holds nothing (#77, the addendum to the sixth amendment).
+  const [looked, setLooked] = useState(false)
   // The case's music on Look and Solve; on the reveal it fades under the close, and the passage is
   // read in quiet (Gate 10 A2).
   useCue(view === 'reveal' ? null : 'case')
@@ -162,9 +165,11 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const asked = asking && wrongAt(s.ask) ? s.ask : undefined
   const looks = sweep || asked !== undefined
   const guided = current?.until !== undefined && !(looks && view === 'look')
-  // The guided steps before the sweep hold the screen to their mark, each until it is met, so free
-  // play starts once the last of them is (#77).
-  const holds = current?.until !== undefined && !sweep
+  // The guided steps hold the screen to their mark, each until it is met, and the sweep holds Solve
+  // to Look's button until Look opens, so the way back to the picture is the only move; free play
+  // starts there, and a player back on Solve during the sweep is never held (#77).
+  if (sweep && view === 'look' && !looked) setLooked(true)
+  const holds = current?.until !== undefined && !(sweep && looked)
   const nudge = () => setNudges(nudges + 1)
   const fleeting = current !== undefined && (current.until === undefined || looks)
   const showing = `${current?.id}#${nudges}`
