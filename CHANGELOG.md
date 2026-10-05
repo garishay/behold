@@ -3,6 +3,16 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.16.2 — Gate 22's fifth amendment, a close that teaches (#77)
+
+- **77g — a close that teaches** (#91): the valley's failed close said "Several are wrong." and
+  nothing of where, and after its question settled the sword, the paid round's first tester took
+  Goliath back out three times. The valley teaches, so its failed close now rings each answer it
+  found wrong, but the one its question asks about, until that answer is changed, and brings the
+  first ring into view; its retry reads "The ringed answers are wrong. Look closer." A ✓ stays: a
+  tap no longer empties it or sets another word in it. Every case after the valley keeps the
+  coarse check, and rule 5 says so.
+
 ## v0.16.1 — Gate 22's fifth amendment, the valley on a short screen (#77)
 
 - **77f — the valley on a short screen** (#89): on a 16:9 phone in a browser, the paid round's
