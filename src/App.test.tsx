@@ -486,10 +486,10 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     expect(chips().filter((c) => c.classList.contains('is-new'))).toHaveLength(2)
   })
 
-  it('a chip picked up is marked, and put down on a second tap', () => {
+  it('a chip picked up is marked, and put down on a second tap', async () => {
     start()
     openCase(/The valley/)
-    guide()
+    await sweep()
     fireEvent.click(chips()[0])
     expect(chips()[0]).toHaveClass('is-on')
     fireEvent.click(chips()[0])
@@ -1157,8 +1157,10 @@ describe('the tutorial’s marks (#25)', () => {
     )
     tapSpot('giant')
     expect(document.querySelector('.dock .said')).toHaveTextContent(/The Philistines’ champion/)
+    // Back on Solve the sweep still rings Look's button. Its words left with the tap that opened
+    // Look, the step's own target, as a step's fleeting words leave on the next tap (#24 [3]).
     tab(/Solve/)
-    expect([at(), said()]).toEqual(['[data-view="look"]', 'Find the other words in the picture.'])
+    expect([at(), said()]).toEqual(['[data-view="look"]', ''])
   })
 
   // The owner's review on #92: the system's back and forward land a view as its tab lands it
@@ -1328,6 +1330,26 @@ describe('the tutorial’s marks (#25)', () => {
     expect(pulses()).toHaveLength(0)
     tapSpot('boy')
     expect([at(), pulses().length]).toEqual(['.dock', 0])
+  })
+
+  // The ruling's addendum to the sixth amendment (#77): the guided fills leave nothing in the bank
+  // to place, so after step 5 the sweep holds Solve to Look's button, with its words, and a refused
+  // tap pulses the ring. Free play starts once Look opens, and back on Solve nothing is held.
+  it('after the guided fills, the sweep holds Solve to Look’s button until Look opens', async () => {
+    start()
+    openCase(/The valley/)
+    guide()
+    await waitFor(() => expect(ring()).not.toBeNull())
+    expect([at(), said()]).toEqual(['[data-view="look"]', 'Find the other words in the picture.'])
+    slot('t1')
+    expect(document.querySelector('[data-slot="t1"]')).not.toHaveClass('is-target')
+    expect(document.querySelectorAll('.coach .ring .pulse')).toHaveLength(1)
+    expect(said()).toBe('Find the other words in the picture.')
+    tab(/Look/)
+    await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
+    tab(/Solve/)
+    slot('t1')
+    expect(document.querySelector('[data-slot="t1"]')).toHaveClass('is-target')
   })
 
   // A step can sit on a phone for minutes, so the mark stops reading its target's place once it
@@ -1704,13 +1726,23 @@ describe('hints (#29)', () => {
   // Under the step that sends the player back to the picture, its words, which sit over the bank,
   // leave on the next tap and its ring stays (#24 [3]); a wait on Solve with nothing left to place
   // shows the step again, a new mark with its words (A8 as ruled). On Look the step marks nothing,
-  // so the signals there offer hints as in any case (#25, #65).
+  // so the signals there offer hints as in any case (#25, #65). The valley is kept past its guided
+  // fills and opens on Look, so Solve is a way back during the sweep, which holds nothing there.
   it('under the tutorial’s sweep, a wait on Solve shows the step again, and Look offers hints', () => {
     vi.useFakeTimers()
     try {
-      start()
+      start(<App />, {
+        valley: {
+          ...fresh(valley),
+          tapped: ['boy'],
+          bank: ['david', 'sling'],
+          faces: { d1: 'david' },
+          fills: { t4: 'sling' },
+          step: 5,
+        },
+      })
       openCase(/The valley/)
-      guide()
+      tab(/Solve/)
       expect(said()).toBe('Find the other words in the picture.')
       fireEvent.pointerDown(document.querySelector('[data-word="david"]')!)
       expect([at(), said()]).toEqual(['[data-view="look"]', ''])
@@ -1851,6 +1883,10 @@ describe('the case solved (#6, 03c; #24)', () => {
     start()
     openCase(/The valley/)
     guide()
+    // The sweep holds Solve until Look opens (#77): to Look, finding nothing, and back.
+    tab(/Look/)
+    await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
+    tab(/Solve/)
     slot('t1')
     chip('David')
     expect(result()).toHaveTextContent(/^That blank wants a number\. Find one in the picture\.$/)
