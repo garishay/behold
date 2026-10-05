@@ -653,12 +653,72 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     openCase(/The vineyard/)
     expect(history.state).toEqual({ case: 'vineyard' })
     tab(/Solve/)
-    expect(history.state).toEqual({ case: 'vineyard' })
+    expect(history.state).toEqual({ case: 'vineyard', view: 'solve' })
     menu('Cases')
     await waitFor(() =>
       expect(screen.getByRole('heading', { level: 1, name: 'Behold' })).toBeInTheDocument(),
     )
     expect(history.state).toBeNull()
+  })
+
+  // The paid round's first session (#77): three times the browser's back took the tester from
+  // Solve to the cases page. In a case still open Solve is an entry over the case's own, so back
+  // steps down to Look first, forward returns to Solve, and Look's button from Solve steps back.
+  it('back steps down from Solve to Look before it leaves the case', async () => {
+    start()
+    openCase(/The valley/)
+    tab(/Solve/)
+    expect(history.state).toEqual({ case: 'valley', view: 'solve' })
+    history.back()
+    await waitFor(() => expect(screen.queryByRole('heading', { name: 'Who is who' })).toBeNull())
+    expect(screen.getByRole('tab', { name: /Look/ })).toHaveAttribute('aria-selected', 'true')
+    expect(history.state).toEqual({ case: 'valley' })
+    history.forward()
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: 'Who is who' })).toBeInTheDocument(),
+    )
+    tab(/Look/)
+    await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
+    expect(screen.queryByRole('heading', { name: 'Who is who' })).toBeNull()
+    history.back()
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { level: 1, name: 'Behold' })).toBeInTheDocument(),
+    )
+    expect(history.state).toBeNull()
+  })
+
+  // A restart from Solve turns Solve's entry into a case entry and steps back to the case's own:
+  // the fresh case opens on Look, forward stays on Look, and two back from there is the cases
+  // page (review round 1, #92).
+  it('a restart from Solve steps back, and leaves a case entry ahead, not Solve’s', async () => {
+    let pops = 0
+    const count = () => pops++
+    addEventListener('popstate', count)
+    start()
+    openCase(/The valley/)
+    tab(/Solve/)
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    menu('Restart')
+    confirm.mockRestore()
+    expect(screen.getByRole('tab', { name: /Look/ })).toHaveAttribute('aria-selected', 'true')
+    await waitFor(() => expect(pops).toBe(1))
+    expect(history.state).toEqual({ case: 'valley' })
+    history.forward()
+    await waitFor(() => expect(pops).toBe(2))
+    expect(history.state).toEqual({ case: 'valley' })
+    expect(screen.getByRole('tab', { name: /Look/ })).toHaveAttribute('aria-selected', 'true')
+    history.go(-2)
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { level: 1, name: 'Behold' })).toBeInTheDocument(),
+    )
+    expect(history.state).toBeNull()
+    removeEventListener('popstate', count)
+  })
+
+  it('a reload on Solve’s entry reopens the case on Solve', () => {
+    history.replaceState({ case: 'valley', view: 'solve' }, '')
+    render(<App />)
+    expect(screen.getByRole('heading', { name: 'Who is who' })).toBeInTheDocument()
   })
 
   it('a reload inside a case reopens it from the history entry', () => {
@@ -939,6 +999,7 @@ describe('the tutorial’s marks (#25)', () => {
     expect(at()).toBe('.dock')
     fireEvent.click(open)
     expect(screen.getByRole('heading', { name: 'Who is who' })).toBeInTheDocument()
+    expect(history.state).toEqual({ case: 'valley', view: 'solve' })
     expect([at(), said()]).toEqual(['[data-slot="d1"]', 'Tap the slot under the boy, then David.'])
     expect(screen.queryByRole('button', { name: 'Open Solve' })).not.toBeInTheDocument()
   })
@@ -1023,6 +1084,63 @@ describe('the tutorial’s marks (#25)', () => {
     expect(document.querySelector('.dock .said')).toHaveTextContent(/The Philistines’ champion/)
     tab(/Solve/)
     expect([at(), said()]).toEqual(['[data-view="look"]', 'Find the other words in the picture.'])
+  })
+
+  // The owner's review on #92: the system's back and forward land a view as its tab lands it
+  // (#77). jsdom fires each move's popstate on a later task, so each test waits for the view.
+  const onTab = (name: RegExp) =>
+    waitFor(() =>
+      expect(screen.getByRole('tab', { name })).toHaveAttribute('aria-selected', 'true'),
+    )
+
+  // Back from Solve leaves it, so the count of words found since Solve was last left clears, as
+  // Look's tab clears it: David and sling were just seen there.
+  it('back from Solve clears the new words’ count, as Look’s tab does', async () => {
+    start()
+    openCase(/The valley/)
+    tapSpot('boy')
+    expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('Solve0/7+2')
+    tab(/Solve/)
+    history.back()
+    await onTab(/Look/)
+    expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent(/^Solve0\/7$/)
+  })
+
+  // Back from Solve after the guided moves greets the player with Look's prompt, not the boy's
+  // caption, as Look's tab does (#25): the paid round's first tester took this way three times.
+  it('back from Solve after the guided moves shows the prompt, as Look’s tab does', async () => {
+    start()
+    openCase(/The valley/)
+    tapSpot('boy')
+    tab(/Solve/)
+    for (const [id, word] of [
+      ['d1', 'David'],
+      ['t4', 'sling'],
+    ] as const) {
+      chip(word)
+      slot(id)
+    }
+    expect(at()).toBe('[data-view="look"]')
+    history.back()
+    await onTab(/Look/)
+    expect(document.querySelector('.dock .said')).toHaveTextContent(
+      'Tap anything that looks like it matters.',
+    )
+  })
+
+  // Forward to Solve meets the steps its tab would: with Solve opened before the boy and left by
+  // back, the boy's tap and then forward meet the found line's step and Solve's own.
+  it('forward to Solve meets the found line’s step and Solve’s, as Solve’s tab does', async () => {
+    start()
+    openCase(/The valley/)
+    tab(/Solve/)
+    history.back()
+    await onTab(/Look/)
+    tapSpot('boy')
+    expect(at()).toBe('.dock')
+    history.forward()
+    await onTab(/Solve/)
+    expect([at(), said()]).toEqual(['[data-slot="d1"]', 'Tap the slot under the boy, then David.'])
   })
 
   it('marks nothing under the brief’s card or the menu, and nothing in a case without steps', async () => {
@@ -1833,20 +1951,27 @@ describe('the case solved (#6, 03c; #24)', () => {
     expect(screen.getByRole('dialog', { name: 'The valley' })).toBeInTheDocument()
   })
 
-  // Restart from the reveal steps back and leaves the reveal's entry ahead; forward must not show
-  // a fresh case's solution, so the entry becomes a case entry instead (review round 1, #21).
+  // A restart from a closed case's own entry leaves the reveal's entry ahead; forward must not
+  // show a fresh case's solution, so the entry becomes a case entry instead (review round 1, #21).
+  // A restart from the reveal turns its entry into a case entry itself (#77), so this one starts
+  // from the case's own, a step back from the reveal.
   it('a reveal entry left ahead by a restart shows no solution, and becomes a case entry', async () => {
     start()
     openCase(/The valley/)
     solveTheValley()
+    // jsdom fires each move's popstate on a later task; the handlers have run once it arrives.
+    const popped = () =>
+      new Promise<void>((r) => addEventListener('popstate', () => r(), { once: true }))
+    let landed = popped()
+    history.back()
+    await landed
+    expect(history.state).toEqual({ case: 'valley' })
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
     menu('Restart')
     confirm.mockRestore()
-    await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
-    // jsdom fires the forward's popstate on a later task; the handler has run once it arrives.
-    const popped = new Promise<void>((r) => addEventListener('popstate', () => r(), { once: true }))
+    landed = popped()
     history.forward()
-    await popped
+    await landed
     expect(history.state).toEqual({ case: 'valley' })
     await waitFor(() =>
       expect(screen.getByRole('dialog', { name: 'The valley' })).toBeInTheDocument(),

@@ -14,14 +14,18 @@ import { Title } from './Title.tsx'
 /**
  * The history entries the app pushes (Gate 03 [1]): one for an open case, and one on top of it
  * for the case's reveal, so the system's back returns from the reveal to the case and from the
- * case to the cards, and leaves the app only from the cards.
+ * case to the cards, and leaves the app only from the cards. While a case is still open, Solve is
+ * the entry on top of it, so back steps down from Solve to Look before it leaves (#77).
  */
 interface Entry {
   readonly case: string
-  readonly view?: 'reveal'
+  readonly view?: 'solve' | 'reveal'
 }
 
-/** The entry a history state carries, or none: the app's own states hold a case id and, on the reveal, its view. */
+/**
+ * The entry a history state carries, or none: the app's own states hold a case id and, on Solve
+ * (#77) or the reveal, its view.
+ */
 const entry = (state: unknown): Entry | null =>
   typeof state === 'object' && state !== null && 'case' in state && typeof state.case === 'string'
     ? (state as Entry)
@@ -91,12 +95,12 @@ export default function App({ passages = fetchedPassages }: AppProps) {
     setOpen(id)
   }
   // "Cases" and "Back to cases" pop the case's entries when they are on top — one for the case,
-  // two from its reveal — so the history stays true to the screen; after a reload the entries
-  // are still there to pop.
+  // two from Solve's or the reveal's (#77) — so the history stays true to the screen; after a
+  // reload the entries are still there to pop.
   const toCases = () => {
     const top = entry(history.state)
     if (top === null) setOpen(null)
-    else history.go(top.view === 'reveal' ? -2 : -1)
+    else history.go(top.view ? -2 : -1)
   }
 
   const found = cases.find((c) => c.structure.id === open)
@@ -112,8 +116,12 @@ export default function App({ passages = fetchedPassages }: AppProps) {
         onCases={toCases}
         onRestart={() => {
           if (!window.confirm(strings.restartConfirm)) return
-          // A restart from the reveal leaves the reveal's entry behind.
-          if (entry(history.state)?.view === 'reveal') history.back()
+          // A restart from Solve or the reveal leaves that entry behind as a case entry, and the
+          // fresh case mounts on Look before the step back lands (#77).
+          if (entry(history.state)?.view) {
+            history.replaceState({ case: open } satisfies Entry, '')
+            history.back()
+          }
           set(fresh(found.structure))
           setRestarts(restarts + 1)
         }}
