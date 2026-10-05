@@ -11,10 +11,11 @@ export const slip = 16
 /** The fingertip every spot keeps for itself, a square this many CSS px on a side (#27 [1]). */
 export const fingertip = 44
 /**
- * The picture's width, in CSS px, on the smallest phone the game supports, 360 × 640: the case
+ * The picture's width, in CSS px, on the phone the fingertip check is set at, 360 × 640: the case
  * screen's picker, caption, and bar leave a case of several moments 401 px for its 4:5 picture,
  * so 320.8 wide, and the check takes the floor (#24). The check lays every picture out at it; a
- * layout that changes the width changes this (#27, ruling on Gate 06 [1]).
+ * layout that changes the width changes this (#27, ruling on Gate 06 [1]). The screens are
+ * measured lower, at 360 × 548, where that picture is 247 px wide; the check stays here (#77).
  */
 export const smallestPicture = 320
 /**

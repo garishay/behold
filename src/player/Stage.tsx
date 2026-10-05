@@ -16,7 +16,10 @@ interface StageProps {
   onMiss: () => void
   /** The half of the picture a hint's first tier rings (#29). */
   half?: Box
-  /** What lies over the picture: the brief's card. */
+  /**
+   * What lies over the picture: the brief's card, over the picture's whole row, so a picture the
+   * screen's height narrows doesn't narrow it too, as at the floor (#77).
+   */
   children?: ReactNode
 }
 
@@ -98,8 +101,8 @@ export function Stage(props: StageProps) {
           >
             {strings.zoom}
           </button>
-          {children}
         </div>
+        {children}
       </div>
     </>
   )

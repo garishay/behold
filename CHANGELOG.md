@@ -3,6 +3,18 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.16.1 — Gate 22's fifth amendment, the valley on a short screen (#77)
+
+- **77f — the valley on a short screen** (#89): on a 16:9 phone in a browser, the paid round's
+  first tester lost the basket's evidence under a step's words, set above Solve's button on the
+  caption. No mark's words cover the dock's caption now. From Look, a step done on Solve rings
+  Solve's button with no words, as the question does, and step 3's words sit above the dock;
+  every mark's words, the hints' included, are placed by one rule that leaves them a line to
+  spare. The screens are measured at a new floor, 360 × 548, Safari's on the same phone, where
+  the brief's card now lies over the picture's whole row, so the mountain's keeps its Start in
+  view. The valley's card says the answers are in the picture, not in memory, and Open Solve, in
+  place of Next, takes the player from the found line to Solve.
+
 ## v0.16.0 — Gate 23, the music comes round (#84)
 
 - **84a — the music comes round** (#88): each cue played through, rested a minute, and faded

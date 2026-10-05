@@ -362,16 +362,27 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     expect(coach()).toHaveTextContent('Tap the boy with the sling.')
   })
 
-  // How to play, up front (#77): the tutorial's card carries one line under its brief, and a case
-  // without steps carries none.
-  it('the tutorial’s card says how to play under its brief, and no other card does', async () => {
+  // The evidence promised, up front (#77): the paid round's first tester felt "tested on biblical
+  // knowledge", so the tutorial's card says under its brief that the answers are in the picture,
+  // and a case without steps carries no such line.
+  it('the tutorial’s card says the answers are in the picture, and no other card does', async () => {
     start(<App />, laterStarted)
     openCase(/The valley/)
-    const how = 'Tap the picture to find words. What you see and read tells you where they go.'
+    const how = 'You don’t need to remember the story. Everything you need is in the picture.'
     expect(screen.getByRole('dialog', { name: 'The valley' })).toHaveTextContent(how)
     menu('Cases')
     fireEvent.click(await screen.findByRole('button', { name: /The mountain/ }))
     expect(screen.getByRole('dialog', { name: 'The mountain' })).not.toHaveTextContent(how)
+  })
+
+  // At the new floor, 360 × 548, a case of several moments lays its picture out 247 px wide, and
+  // the mountain's card, inside it, hid its Start under the dock (#77). The card lies over the
+  // picture's whole row instead, so the height that narrows the picture leaves the card its width.
+  it('the brief’s card lies over the picture’s whole row, not inside its frame', () => {
+    start(<App />, laterStarted)
+    openCase(/The mountain/)
+    const card = screen.getByRole('dialog', { name: 'The mountain' })
+    expect(card.parentElement).toHaveClass('stage-wrap')
   })
 
   // The mountain is the first case with more than one picture, and a picker's dot says more waits
@@ -869,10 +880,35 @@ describe('the tutorial’s marks (#25)', () => {
     tab(/Look/)
     expect(coach()).toBeNull()
     for (const id of ['giant', 'brook', 'bearer', 'armor', 'basket']) tapSpot(id)
-    // The sword is asked about only on a miss, so Close the case follows the sweep (#77).
-    expect([at(), said()]).toEqual(['[data-view="solve"]', 'Fill the rest, then close the case.'])
+    // The sword is asked about only on a miss, so Close the case follows the sweep (#77). From Look
+    // it rings Solve's button with no words, which are Solve's to say there.
+    expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
     tab(/Solve/)
-    expect(at()).toBe('[data-close]')
+    expect([at(), said()]).toEqual(['[data-close]', 'Fill the rest, then close the case.'])
+  })
+
+  // The paid round's first session (#77): on a short screen the words above Solve's button sat on
+  // the caption, and hid the basket's evidence. From Look a step done on Solve rings Solve's button
+  // with no words, and so no dim; only the step that waits on Solve opening speaks there.
+  it('from Look, a step done on Solve rings Solve’s button with no words', async () => {
+    start()
+    openCase(/The valley/)
+    tapSpot('boy')
+    fireEvent.pointerDown(document.querySelector('.dock .found')!)
+    expect([at(), said()]).toEqual(['[data-view="solve"]', 'Open Solve to name him.'])
+    tab(/Solve/)
+    expect(said()).toBe('Tap the slot under the boy, then David.')
+    tab(/Look/)
+    expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
+    await waitFor(() => expect(ring()).not.toBeNull())
+    expect(ring()).not.toHaveClass('dim')
+    tab(/Solve/)
+    slot('d1')
+    chip('David')
+    tab(/Look/)
+    expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
+    tab(/Solve/)
+    expect(said()).toBe('Tap the blank first. Fitting words stay bright.')
   })
 
   // The dock's line of finds is gone once the case opens again, so the step waiting on it is passed
@@ -889,20 +925,22 @@ describe('the tutorial’s marks (#25)', () => {
     expect(at()).toBe('[data-slot="d1"]')
   })
 
-  // The found line's step only tells, so its words carry Next, and Next meets it (#77). A press on
-  // Next is Next's own: met on the press, the step would take Next away before its click, and the
-  // click would fall to the picture under it. A step that asks for a move carries none.
-  it('the found line’s step carries Next, and Next meets it', async () => {
+  // The found line's step only tells, so its words carry Open Solve, which takes the player there,
+  // meeting it and the step after (#77): after the found line the paid round's first tester tapped
+  // round Look for about 50 s first. A press on the button is its own: met on the press, the step
+  // would take the button away before its click, and the click would fall to the picture under it.
+  // A tap anywhere else still moves on to the step after, as the step-targets test shows.
+  it('the found line’s step carries Open Solve, which opens Solve past the step after', async () => {
     start()
     openCase(/The valley/)
     tapSpot('boy')
-    const next = await screen.findByRole('button', { name: 'Next' })
-    fireEvent.pointerDown(next)
+    const open = await screen.findByRole('button', { name: 'Open Solve' })
+    fireEvent.pointerDown(open)
     expect(at()).toBe('.dock')
-    fireEvent.click(next)
-    expect([at(), said()]).toEqual(['[data-view="solve"]', 'Open Solve to name him.'])
-    await waitFor(() => expect(document.querySelector('.coach .label')).not.toBeNull())
-    expect(screen.queryByRole('button', { name: 'Next' })).not.toBeInTheDocument()
+    fireEvent.click(open)
+    expect(screen.getByRole('heading', { name: 'Who is who' })).toBeInTheDocument()
+    expect([at(), said()]).toEqual(['[data-slot="d1"]', 'Tap the slot under the boy, then David.'])
+    expect(screen.queryByRole('button', { name: 'Open Solve' })).not.toBeInTheDocument()
   })
 
   // Playtest 2's second session (#77): the player put David in the sword's blank, and every guided

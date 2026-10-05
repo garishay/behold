@@ -60,10 +60,10 @@ export const strings = {
   solve: 'Solve',
   menu: 'Menu',
   start: 'Start',
-  // How to play, under the tutorial's brief on its card (#77).
-  howTo: 'Tap the picture to find words. What you see and read tells you where they go.',
-  // Next, under the words of a tutorial step that only tells (#77).
-  next: 'Next',
+  // Under the tutorial's brief on its card: the answers are in the picture, not in memory (#77).
+  howTo: 'You don’t need to remember the story. Everything you need is in the picture.',
+  // Under the found line's words: it opens Solve, meeting the step and the one after (#77).
+  openSolve: 'Open Solve',
   cases: 'Cases',
   restart: 'Restart',
   restartConfirm: 'Start this case over? Its progress is cleared.',
