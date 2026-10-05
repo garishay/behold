@@ -162,14 +162,12 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const wrongAt = (id?: string) => id !== undefined && put(progress, id) !== answer(s, id)
   const asked = asking && wrongAt(s.ask) ? s.ask : undefined
   const looks = sweep || asked !== undefined
-  // From Look, a question's ring on Solve's button carries no words, and so no dim ([Q11]).
-  const silent = asked !== undefined && view === 'look'
   const guided = current?.until !== undefined && !(looks && view === 'look')
   const nudge = () => setNudges(nudges + 1)
   const fleeting = current !== undefined && (current.until === undefined || looks)
   const showing = `${current?.id}#${nudges}`
-  // A step that only tells, the dock's line of finds read, is met on the next tap or move, or on
-  // the Next its words carry (#77).
+  // A step that only tells, the dock's line of finds read, is met on the next tap or move; Open
+  // Solve, under its words, meets it and the step after (#77).
   const meet = current?.until?.read !== undefined ? () => onProgress(read(s, progress)) : undefined
   // The stay is timed on Look with nothing over the picture, an opened caption included (review
   // round 1), on a moment with something left, and only while the app is in view: the clock starts
@@ -356,7 +354,10 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   // step that waits on everything found, at Look's button and nowhere on Look;
   // the step that waits on the dock's line of finds read, at the dock whole, the caption with its
   // line, so its words sit above it (#77); and the question, at its slot, never its word, and from
-  // Look at Solve's button (#77, [Q11]). Nothing is marked under a card, a sheet, or a paper.
+  // Look at Solve's button (#77, [Q11]). From Look, a ring on Solve's button carries words only for
+  // the step that waits on Solve opening, and they sit above the dock: a fill, the close, and the
+  // question are Solve's to say, so the caption stays clear (#77). Nothing is marked under a card,
+  // a sheet, or a paper.
   const markAt = (until = current?.until) => {
     if (current === undefined || card || sheet !== null || paper !== null) return undefined
     if (until?.tapped)
@@ -386,6 +387,9 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   }
   const hinted = hintAt()
   const at = hinted ?? markAt()
+  // A ring with no words carries no dim either ([Q11]).
+  const silent =
+    view === 'look' && at === '[data-view="solve"]' && current?.until?.view === undefined
   // The case's one new idea, marked on Solve where it is first met: while the order is empty, the
   // pictures to place and then, once one is picked, the slots it goes in, as the tutorial marks a
   // word and then its slot (#30); or a face, until a name is placed in it (#53). A tutorial's step
@@ -561,7 +565,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
           onTap={
             meet ?? (fleeting && said !== showing && !silent ? () => setSaid(showing) : undefined)
           }
-          onNext={meet}
+          onNext={meet && (() => show('solve'))}
         />
       )}
       {lesson && <CoachMark at={lesson} label={text.teach ?? ''} />}

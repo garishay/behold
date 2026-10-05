@@ -4,6 +4,7 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { zoomPill } from './cases/spots.ts'
+import { words } from './player/place.ts'
 
 /*
  * Two things the tests cannot exercise, pinned as text (review round 4, #20): a Workbox option
@@ -95,6 +96,27 @@ describe('the words that wrap to a shape (#77)', () => {
   it('a card’s line under the brief wraps pretty, so the mountain’s note leaves no word alone', () => {
     const how = /\n\.card \.how \{([^}]*)\}/.exec(css)?.[1] ?? ''
     expect(how).toMatch(/text-wrap: pretty;/)
+  })
+})
+
+// A mark's words are placed by the room they are given, a number place.ts holds; this keeps it the
+// label's own: three of its lines, 15 px at 1.3, inside its 8 px of padding (#77).
+describe('the room a mark’s words are given (#77)', () => {
+  it('is three of the label’s lines and its padding, by the stylesheet’s numbers', () => {
+    const label = /\n\.coach \.label \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    const size = Number(/font-size: (\d+)px;/.exec(label)?.[1])
+    const line = Number(/line-height: ([\d.]+);/.exec(label)?.[1])
+    const pad = Number(/padding: (\d+)px \d+px;/.exec(label)?.[1])
+    expect(2 * pad + 3 * size * line).toBeCloseTo(words, 6)
+  })
+})
+
+// The brief's card is placed in the picture's row, which the row's own position makes its
+// containing block; the card's parent is tested, and this keeps the row positioned (#77).
+describe('the picture’s row holds the brief’s card (#77)', () => {
+  it('is positioned, so the card centres in it at its whole width', () => {
+    const row = /\n\.stage-wrap \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    expect(row).toMatch(/position: relative;/)
   })
 })
 

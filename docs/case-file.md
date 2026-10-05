@@ -70,9 +70,15 @@ Derived, never stored: a blank's kind is its answer's; a case is the tutorial wh
 the paper ids are those the spots open; a step whose `until` is `filled` is a Solve step.
 
 A step may wait on the dock's line of finds read, `{ read: 'found' }`: its mark rings the dock
-whole, the caption with its line, its words above the dock. It only tells, so its words carry
-Next, and Next meets it, as do the player's next tap and any move. While the dock shows no line,
-as on a reload or a return to the case, the step is passed (#77).
+whole, the caption with its line, its words above the dock. It only tells, so its words carry Open
+Solve, which takes the player there, meeting it and the step after; the player's next tap and any
+move meet it too. While the dock shows no line, as on a reload or a return to the case, the step is
+passed (#77).
+
+No mark's words cover the dock's caption (#77). From Look, a step done on Solve, a fill or the
+close, rings Solve's button with no words, as the question does; the step that waits on Solve
+opening has its words above the dock. A mark's words sit below its target or above it, wherever
+that side leaves them two lines and one more, and else at the foot of the room above the dock.
 
 A step that waits on a face or a blank may lead with it, `slotFirst: true` (#77): its mark rings
 the slot until the slot waits, then the answer's word, with the words of other kinds dimmed in the
