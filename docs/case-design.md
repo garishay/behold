@@ -38,8 +38,9 @@ rules below are the answer, ruled on #26.
 
 5. **The check is coarse.** Close the case says how many are wrong — one or two, or several —
    never which, in every case after the valley. The tutorial marks an answer right only on the
-   slots its guided steps name; when those steps are done, Close the case appears, the last step
-   points at it, and the tutorial closes on the same check as every case. The first case teaches
+   slots its guided steps name; when those steps are done, or once every slot is filled whatever
+   step waits, Close the case appears, the last step points at it, and the tutorial closes on the
+   same check as every case, so a full account is never a dead end (#77). The first case teaches
    the real check, and since it teaches, it says where: its failed close rings each answer it
    found wrong, until that answer is changed (#77). Its one inference is asked on a miss: when a
    close finds the sword's blank wrong, the retry rings that blank, not its word, and asks whose

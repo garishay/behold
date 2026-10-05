@@ -1341,6 +1341,32 @@ describe('the tutorial’s marks (#25)', () => {
     expect(document.querySelector('[data-slot="t1"]')).toHaveTextContent('five')
     expect(ringed()).toEqual([])
   })
+
+  // The paid round's second session (#23, 2026-10-05): with sword in sling's blank, step 5 was
+  // never met, and at 7/7 there was no close and no word; she reloaded, and it reopened so. Kept
+  // so, the valley now opens past every step: Close the case is offered, and the failed close
+  // teaches as any in the valley does, with rings and the sword's question (#77).
+  it('a full account kept at step 5 is offered the close, and the close teaches', () => {
+    start(<App />, {
+      valley: {
+        ...fresh(valley),
+        tapped: ['armor', 'giant', 'boy'],
+        bank: ['saul', 'king', 'sword', 'goliath', 'six', 'spear', 'david', 'sling'],
+        faces: { d1: 'david', d2: 'goliath' },
+        fills: { t4: 'sword', t1: 'six', t2: 'king', t3: 'six', t5: 'saul' },
+        step: 4,
+      },
+    })
+    openCase(/The valley/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(result()).toHaveTextContent('Several are wrong.')
+    const ringed = [...document.querySelectorAll('.is-wrong')].map((e) =>
+      e.getAttribute('data-slot'),
+    )
+    expect(ringed).toEqual(['t1', 't2', 't4'])
+    expect([at(), said()]).toEqual(['[data-slot="t5"]', 'Whose sword? Look closer at the picture.'])
+  })
 })
 
 describe('hints (#29)', () => {
