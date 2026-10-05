@@ -49,9 +49,9 @@ interface PlayerProps {
   passages: PassageService
 }
 
-/** Whether a history state is the reveal's entry (Gate 03 [1]). */
-const onReveal = (state: unknown) =>
-  typeof state === 'object' && state !== null && 'view' in state && state.view === 'reveal'
+/** The view a history state names: the reveal's entry (Gate 03 [1]), Solve's (#77), or none. */
+const viewOf = (state: unknown) =>
+  typeof state === 'object' && state !== null && 'view' in state ? state.view : undefined
 
 /**
  * A stuck signal's clock, as an effect's body (#29): it fires once, `seconds` after it starts,
@@ -76,18 +76,23 @@ const clock = (seconds: number, fire: () => void) => () => {
  * switched from a bar at the foot, with the menu at its left end — the only chrome on both. Look is
  * the picture and its caption; Solve is who is who, the account, and the word bank. The brief
  * opens a fresh case as a card over the picture and lives in the menu after. The reveal is its own
- * history entry, so the system's back returns from it to the case (Gate 03 [1]); Look and Solve
- * are not entries, so back from either returns to the cards. What the player has done is
- * `progress`, kept by the app; what they are in the middle of is this screen's.
+ * history entry, so the system's back returns from it to the case (Gate 03 [1]). In a case still
+ * open, Solve is an entry over the case's own, so back from Solve steps down to Look and back from
+ * Look returns to the cards (#77); the reveal takes Solve's entry when the case closes, so a closed
+ * case keeps the two it had. What the player has done is `progress`, kept by the app; what they
+ * are in the middle of is this screen's.
  */
 export function Player({ entry, progress, onProgress, onCases, onRestart, passages }: PlayerProps) {
   const { structure: s } = entry
   const text = entry.text.en
   // A solved case mounts on its reveal when that is the entry on top, else on Solve, where its
-  // answers are; a case still open mounts on Look (review round 1, #21).
-  const [view, setView] = useState<View>(() =>
-    progress.solved ? (onReveal(history.state) ? 'reveal' : 'solve') : 'look',
-  )
+  // answers are (review round 1, #21); a case still open mounts on Solve when Solve's entry is on
+  // top, as after a reload there, and else on Look (#77).
+  const [view, setView] = useState<View>(() => {
+    const at = viewOf(history.state)
+    if (progress.solved) return at === 'reveal' ? 'reveal' : 'solve'
+    return at === 'solve' ? 'solve' : 'look'
+  })
   const [selection, setSelection] = useState(nothing)
   const [caption, setCaption] = useState<Caption | null>(null)
   const [paper, setPaper] = useState<string | null>(null)
@@ -141,10 +146,12 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   useEffect(() => prefetch(s), [s])
   // Back from the reveal returns to Solve; forward to the reveal's entry returns to the reveal
   // while the case is solved. A reveal entry left ahead by a restart names a solution the case no
-  // longer has, so it is made a case entry instead (review round 1, #21).
+  // longer has, so it is made a case entry instead (review round 1, #21). In a case still open the
+  // case's own entry is Look and Solve's is Solve, so back and forward step between them (#77).
   useEffect(() => {
     const onPop = (e: PopStateEvent) => {
-      if (!onReveal(e.state)) setView((v) => (v === 'reveal' ? 'solve' : v))
+      const at = viewOf(e.state)
+      if (at !== 'reveal') setView(at === 'solve' || progress.solved ? 'solve' : 'look')
       else if (progress.solved) setView('reveal')
       else history.replaceState({ case: s.id }, '')
     }
@@ -200,12 +207,17 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     [stalled, guided, placements, hint],
   )
 
-  /** Progress after a move; the case closing on it plays the close and opens the reveal. */
+  /**
+   * Progress after a move; the case closing on it plays the close and opens the reveal, whose entry
+   * takes Solve's, so a closed case keeps the two entries it always had (#21, #77).
+   */
   const close = (next: Progress) => {
     onProgress(next)
     if (next.solved && !progress.solved) {
       play('close')
-      history.pushState({ case: s.id, view: 'reveal' }, '')
+      const reveal = { case: s.id, view: 'reveal' }
+      if (viewOf(history.state) === 'solve') history.replaceState(reveal, '')
+      else history.pushState(reveal, '')
       setView('reveal')
     }
   }
@@ -286,6 +298,11 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     // Back on Look while the tutorial waits on everything found, or on an answer worked out there,
     // the caption gives way to the prompt, "Tap anything that looks like it matters." (#25, #77).
     if (v === 'look' && looks) setCaption(null)
+    // In a case still open, Solve opens as an entry, and Look's button from it steps back (#77).
+    if (v !== view && !progress.solved) {
+      if (v === 'solve') history.pushState({ case: s.id, view: 'solve' }, '')
+      else if (viewOf(history.state) === 'solve') history.back()
+    }
     setView(v)
     onProgress(opened(s, progress, v))
   }

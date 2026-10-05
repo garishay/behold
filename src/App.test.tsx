@@ -653,12 +653,44 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     openCase(/The vineyard/)
     expect(history.state).toEqual({ case: 'vineyard' })
     tab(/Solve/)
-    expect(history.state).toEqual({ case: 'vineyard' })
+    expect(history.state).toEqual({ case: 'vineyard', view: 'solve' })
     menu('Cases')
     await waitFor(() =>
       expect(screen.getByRole('heading', { level: 1, name: 'Behold' })).toBeInTheDocument(),
     )
     expect(history.state).toBeNull()
+  })
+
+  // The paid round's first session (#77): three times the browser's back took the tester from
+  // Solve to the cases page. In a case still open Solve is an entry over the case's own, so back
+  // steps down to Look first, forward returns to Solve, and Look's button from Solve steps back.
+  it('back steps down from Solve to Look before it leaves the case', async () => {
+    start()
+    openCase(/The valley/)
+    tab(/Solve/)
+    expect(history.state).toEqual({ case: 'valley', view: 'solve' })
+    history.back()
+    await waitFor(() => expect(screen.queryByRole('heading', { name: 'Who is who' })).toBeNull())
+    expect(screen.getByRole('tab', { name: /Look/ })).toHaveAttribute('aria-selected', 'true')
+    expect(history.state).toEqual({ case: 'valley' })
+    history.forward()
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: 'Who is who' })).toBeInTheDocument(),
+    )
+    tab(/Look/)
+    await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
+    expect(screen.queryByRole('heading', { name: 'Who is who' })).toBeNull()
+    history.back()
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { level: 1, name: 'Behold' })).toBeInTheDocument(),
+    )
+    expect(history.state).toBeNull()
+  })
+
+  it('a reload on Solve’s entry reopens the case on Solve', () => {
+    history.replaceState({ case: 'valley', view: 'solve' }, '')
+    render(<App />)
+    expect(screen.getByRole('heading', { name: 'Who is who' })).toBeInTheDocument()
   })
 
   it('a reload inside a case reopens it from the history entry', () => {
@@ -939,6 +971,7 @@ describe('the tutorial’s marks (#25)', () => {
     expect(at()).toBe('.dock')
     fireEvent.click(open)
     expect(screen.getByRole('heading', { name: 'Who is who' })).toBeInTheDocument()
+    expect(history.state).toEqual({ case: 'valley', view: 'solve' })
     expect([at(), said()]).toEqual(['[data-slot="d1"]', 'Tap the slot under the boy, then David.'])
     expect(screen.queryByRole('button', { name: 'Open Solve' })).not.toBeInTheDocument()
   })
