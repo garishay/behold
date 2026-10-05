@@ -3,6 +3,14 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.16.5 — Gate 22's sixth amendment, the sweep held (#77)
+
+- **77k — the sweep held until Look opens** (#94): the hold runs one step further. After step 5, on
+  Solve, only Look's button takes a tap, with step 6's words, "Find the other words in the
+  picture.", and a refused tap pulses the ring as in steps 1 to 5. The guided fills leave nothing in
+  the bank to place, so the hold costs nothing and makes the way back to the picture the only move.
+  Free play starts once Look opens, and a player back on Solve during the sweep is never held.
+
 ## v0.16.4 — Gate 22's sixth amendment, the guided steps held (#77)
 
 - **77i — the guided steps held, the account clear, and a miss that is the picture's** (#93): the
