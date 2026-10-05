@@ -687,6 +687,34 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     expect(history.state).toBeNull()
   })
 
+  // A restart from Solve turns Solve's entry into a case entry and steps back to the case's own:
+  // the fresh case opens on Look, forward stays on Look, and two back from there is the cases
+  // page (review round 1, #92).
+  it('a restart from Solve steps back, and leaves a case entry ahead, not Solve’s', async () => {
+    let pops = 0
+    const count = () => pops++
+    addEventListener('popstate', count)
+    start()
+    openCase(/The valley/)
+    tab(/Solve/)
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    menu('Restart')
+    confirm.mockRestore()
+    expect(screen.getByRole('tab', { name: /Look/ })).toHaveAttribute('aria-selected', 'true')
+    await waitFor(() => expect(pops).toBe(1))
+    expect(history.state).toEqual({ case: 'valley' })
+    history.forward()
+    await waitFor(() => expect(pops).toBe(2))
+    expect(history.state).toEqual({ case: 'valley' })
+    expect(screen.getByRole('tab', { name: /Look/ })).toHaveAttribute('aria-selected', 'true')
+    history.go(-2)
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { level: 1, name: 'Behold' })).toBeInTheDocument(),
+    )
+    expect(history.state).toBeNull()
+    removeEventListener('popstate', count)
+  })
+
   it('a reload on Solve’s entry reopens the case on Solve', () => {
     history.replaceState({ case: 'valley', view: 'solve' }, '')
     render(<App />)
