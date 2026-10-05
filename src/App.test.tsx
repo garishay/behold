@@ -1975,6 +1975,22 @@ describe('Solve’s room (#24)', () => {
     tab(/Solve/)
     expect(scrolled).toHaveBeenCalledWith({ top: -160 })
   })
+
+  // The next round's first tester (#23) went back to the picture for the cubits, and Solve opened
+  // again at its top, the blank he had left out of view. Solve keeps its place across Look.
+  it('keeps Solve’s place across a trip to Look', async () => {
+    start()
+    openCase(/The valley/)
+    await sweep()
+    const solve = document.querySelector('.solve')!
+    Object.defineProperty(solve, 'scrollTop', { configurable: true, get: () => 210 })
+    const scrolled = vi.spyOn(Element.prototype, 'scrollBy')
+    tab(/Look/)
+    await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
+    tab(/Solve/)
+    expect(document.querySelector('.solve')).not.toBe(solve)
+    expect(scrolled).toHaveBeenCalledWith({ top: 210, behavior: 'instant' })
+  })
 })
 
 describe('the case solved (#6, 03c; #24)', () => {

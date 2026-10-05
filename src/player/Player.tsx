@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useState } from 'react'
+import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react'
 import type { CaseEntry } from '../cases/index.ts'
 import type { PassageService } from '../passages/service.ts'
 import { play } from '../sound/engine.ts'
@@ -139,6 +139,11 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const [nudges, setNudges] = useState(0)
   // A caption opened whole over the picture's foot; the next caption opens closed (#24).
   const [reading, setReading] = useState(false)
+  // Solve keeps its place: the account, left for Look, opens again where it was (#24, Solve's room).
+  const kept = useRef(0)
+  const keep = useCallback((el: HTMLDivElement | null) => {
+    el?.scrollBy({ top: kept.current, behavior: 'instant' })
+  }, [])
   // Whether Look has opened during the sweep: until it has, the sweep holds Solve to Look's button,
   // and from then on the sweep holds nothing (#77, the addendum to the sixth amendment).
   const [looked, setLooked] = useState(false)
@@ -293,6 +298,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     if (view === 'solve' && v !== 'solve') {
       setFresh([])
       setSelection(nothing)
+      kept.current = document.querySelector('.solve')?.scrollTop ?? 0
     }
     // Look's caption closes with the dock when Solve opens.
     if (v !== view) setReading(false)
@@ -541,7 +547,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
               </button>
             </div>
           )}
-          <div className="solve">
+          <div className="solve" ref={keep}>
             <Think
               structure={s}
               text={text}
