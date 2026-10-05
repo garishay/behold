@@ -1,9 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import type { CaseStructure, CaseText, Part } from '../cases/types.ts'
 import { strings } from '../strings/en.ts'
 import { picture } from './pictures.ts'
-import { show } from './place.ts'
-import { checked, kindOf } from './state.ts'
+import { show, showEmpty } from './place.ts'
+import { checked, filled, kindOf } from './state.ts'
 import type { Progress, Selection } from './state.ts'
 
 interface ThinkProps {
@@ -34,6 +34,13 @@ export function Think(props: ThinkProps) {
     if (selection.target === null) return
     show(document.querySelector(`[data-slot="${selection.target}"]`)?.closest('.sentence'))
   }, [selection.target])
+  // A fill that leaves Solve short, with no empty slot in view, brings the nearest into view (#23).
+  const count = filled(s, p)
+  const was = useRef(count)
+  useEffect(() => {
+    if (count > was.current) showEmpty()
+    was.current = count
+  }, [count])
   const slot = (target: string, value: string | undefined, placeholder: string) => {
     const kind = kindOf(s, target)
     const wrong = props.ringed?.includes(target) ?? false

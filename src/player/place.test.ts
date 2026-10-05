@@ -1,5 +1,33 @@
-import { describe, expect, it, vi } from 'vitest'
-import { labelAt, show } from './place.ts'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { labelAt, show, showEmpty } from './place.ts'
+
+// A short count with no empty slot in view (#23, the next round's second tester): the nearest
+// empty slot, above or below what the account shows, is brought into view; one in view is enough.
+describe('an empty slot brought into view (#24)', () => {
+  afterEach(() => document.body.replaceChildren())
+  const account = (...slots: [number, boolean][]) => {
+    document.body.replaceChildren()
+    const box = document.body.appendChild(document.createElement('div'))
+    box.className = 'solve'
+    vi.spyOn(box, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 100, 360, 300))
+    for (const [top, full] of slots) {
+      const slot = box.appendChild(document.createElement('button'))
+      slot.dataset.slot = `s${top}`
+      if (full) slot.className = 'is-filled'
+      vi.spyOn(slot, 'getBoundingClientRect').mockReturnValue(new DOMRect(40, top, 72, 30))
+    }
+    const scroll = vi.spyOn(box, 'scrollBy')
+    showEmpty()
+    return scroll.mock.calls.map(([o]) => (o as ScrollToOptions).top)
+  }
+
+  it('brings the nearest empty slot, above or below, and none while one is in view', () => {
+    expect(account([0, false], [520, false], [200, true])).toEqual([-100])
+    expect(account([-200, false], [430, false])).toEqual([60])
+    expect(account([0, false], [250, false])).toEqual([])
+    expect(account([0, true], [250, true])).toEqual([])
+  })
+})
 
 // A waiting blank's sentence, shown whole in the account (#24, Solve's room): the account here is
 // the valley's at the tester's 360 × 645, 301 px from 0, and the sentence three lines, 92 px.

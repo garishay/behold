@@ -1942,6 +1942,39 @@ describe('Solve’s room (#24)', () => {
     await away()
     expect(document.querySelector('[data-slot="t3"]')).not.toHaveClass('is-target')
   })
+
+  // The next round's second tester (#23): from 6 of 7 the one empty slot was the giant's face,
+  // above the account and out of view, and he read the count as one answer wrong for three
+  // minutes. A fill that leaves Solve short with no empty slot in view brings the nearest into
+  // view, and so does Solve's button, tapped on Solve, where the last step rings its count.
+  it('brings an empty slot into view when none is, after a fill and on Solve’s button', async () => {
+    start()
+    openCase(/The valley/)
+    await sweep()
+    for (const [id, word] of [
+      ['t1', 'ten'],
+      ['t2', 'commander'],
+      ['t3', 'six'],
+    ] as const) {
+      chip(word)
+      slot(id)
+    }
+    const solve = document.querySelector('.solve')!
+    const at = (sel: string, box: DOMRect) =>
+      vi.spyOn(document.querySelector(sel)!, 'getBoundingClientRect').mockReturnValue(box)
+    at('.solve', new DOMRect(0, 100, 360, 300))
+    at('[data-face="d2"]', new DOMRect(180, -60, 160, 140))
+    at('[data-slot="d2"]', new DOMRect(190, 20, 140, 44))
+    at('[data-slot="t5"]', new DOMRect(40, 300, 72, 30))
+    const scrolled = vi.spyOn(solve, 'scrollBy')
+    chip('Goliath')
+    slot('t5')
+    expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('6/7')
+    expect(scrolled).toHaveBeenCalledWith({ top: -160 })
+    scrolled.mockClear()
+    tab(/Solve/)
+    expect(scrolled).toHaveBeenCalledWith({ top: -160 })
+  })
 })
 
 describe('the case solved (#6, 03c; #24)', () => {

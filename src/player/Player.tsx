@@ -11,7 +11,7 @@ import { Dock, type Caption } from './Dock.tsx'
 import { aim, firstWrong, half, stranded, stuck, type Aim, type Tier } from './hints.ts'
 import { PaperModal, PapersSheet } from './Papers.tsx'
 import { prefetch } from './pictures.ts'
-import { bring } from './place.ts'
+import { bring, showEmpty } from './place.ts'
 import { Reveal } from './Reveal.tsx'
 import { Stage } from './Stage.tsx'
 import {
@@ -303,6 +303,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     onProgress(opened(s, progress, v))
   }
   const show = (v: 'look' | 'solve') => {
+    // Solve's button on Solve, its count ringed by the last step, brings an empty slot into view.
+    if (v === 'solve' && view === 'solve') showEmpty()
     // In a case still open, Solve opens as an entry, and Look's button from it steps back (#77).
     if (v !== view && !progress.solved) {
       if (v === 'solve') history.pushState({ case: s.id, view: 'solve' }, '')
