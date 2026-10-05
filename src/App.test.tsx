@@ -1199,6 +1199,30 @@ describe('the tutorial’s marks (#25)', () => {
     expect(document.querySelector('[data-slot="t5"]')).toHaveTextContent('Goliath')
     expect(document.querySelector('[data-slot="t5"]')).toHaveClass('is-right')
   })
+
+  // Review round 1 on #91: a ring lasts until its slot is changed, so it leaves for good on the
+  // first change. Putting back the answer it held doesn't bring it back; only a close checks again.
+  it('a ring leaves for good once its slot is changed (review round 1)', () => {
+    start()
+    openCase(/The valley/)
+    for (const s of ['boy', 'giant', 'brook', 'armor', 'basket', 'bearer']) tapSpot(s)
+    tab(/Solve/)
+    for (const [id, word] of valleyAnswers) {
+      chip(id === 't1' ? 'five' : word)
+      slot(id)
+    }
+    const ringed = () =>
+      [...document.querySelectorAll('.is-wrong')].map((e) => e.getAttribute('data-slot'))
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(ringed()).toEqual(['t1'])
+    chip('six')
+    slot('t1')
+    expect(ringed()).toEqual([])
+    chip('five')
+    slot('t1')
+    expect(document.querySelector('[data-slot="t1"]')).toHaveTextContent('five')
+    expect(ringed()).toEqual([])
+  })
 })
 
 describe('hints (#29)', () => {

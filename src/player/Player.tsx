@@ -108,8 +108,9 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const [retry, setRetry] = useState(false)
   const [asking, setAsking] = useState(false)
   // The valley teaches, so its failed close says where: every slot it found wrong, but the one its
-  // question asks about, is ringed with what it held, until that changes (#77).
-  const [ringed, setRinged] = useState<Readonly<Record<string, string | undefined>>>({})
+  // question asks about, is ringed until it is changed, and then for good, so only the next close
+  // checks it again (#77, review round 1).
+  const [ringed, setRinged] = useState<readonly string[]>([])
   // The bank's head: a refused word's message, or how far off a close was (07c, #24 [3]).
   const [note, setNote] = useState('')
   // The stuck signals (#29): taps on the picture that find nothing new while something is unfound,
@@ -217,6 +218,9 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     // A wrong word set in the slot a question asks about asks again, words, dim, and all (#77).
     const word = asked && put(o.progress, asked)
     if (word && word !== put(progress, asked) && word !== answer(s, asked)) nudge()
+    // A move that changes a ringed slot takes its ring away (#77, review round 1).
+    const kept = ringed.filter((id) => put(o.progress, id) === put(progress, id))
+    if (kept.length < ringed.length) setRinged(kept)
     close(o.progress)
   }
   // A tap that found nothing new, on a spot found before or on no spot, runs toward a hint while
@@ -262,7 +266,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
       // ring is brought there (#77).
       if (current !== undefined && current.until === undefined) {
         const at = wrongs(s, progress).filter((id) => id !== s.ask)
-        setRinged(Object.fromEntries(at.map((id) => [id, put(progress, id)])))
+        setRinged(at)
         if (wrongAt(s.ask)) setAsking(true)
         else {
           setRetry(true)
@@ -506,7 +510,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
               onMoment={(id) => apply(chooseMoment(s, progress, selection, id))}
               onOrderSlot={(i) => apply(chooseOrderSlot(s, progress, selection, i))}
               asked={asking ? s.ask : undefined}
-              ringed={Object.keys(ringed).filter((id) => put(progress, id) === ringed[id])}
+              ringed={ringed}
             />
           </div>
           {/* Close the case docks as its own row below the account, outside the scroll, so it never
