@@ -1894,20 +1894,27 @@ describe('the case solved (#6, 03c; #24)', () => {
     expect(screen.getByRole('dialog', { name: 'The valley' })).toBeInTheDocument()
   })
 
-  // Restart from the reveal steps back and leaves the reveal's entry ahead; forward must not show
-  // a fresh case's solution, so the entry becomes a case entry instead (review round 1, #21).
+  // A restart from a closed case's own entry leaves the reveal's entry ahead; forward must not
+  // show a fresh case's solution, so the entry becomes a case entry instead (review round 1, #21).
+  // A restart from the reveal turns its entry into a case entry itself (#77), so this one starts
+  // from the case's own, a step back from the reveal.
   it('a reveal entry left ahead by a restart shows no solution, and becomes a case entry', async () => {
     start()
     openCase(/The valley/)
     solveTheValley()
+    // jsdom fires each move's popstate on a later task; the handlers have run once it arrives.
+    const popped = () =>
+      new Promise<void>((r) => addEventListener('popstate', () => r(), { once: true }))
+    let landed = popped()
+    history.back()
+    await landed
+    expect(history.state).toEqual({ case: 'valley' })
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
     menu('Restart')
     confirm.mockRestore()
-    await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
-    // jsdom fires the forward's popstate on a later task; the handler has run once it arrives.
-    const popped = new Promise<void>((r) => addEventListener('popstate', () => r(), { once: true }))
+    landed = popped()
     history.forward()
-    await popped
+    await landed
     expect(history.state).toEqual({ case: 'valley' })
     await waitFor(() =>
       expect(screen.getByRole('dialog', { name: 'The valley' })).toBeInTheDocument(),
