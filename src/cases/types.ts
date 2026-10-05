@@ -58,8 +58,9 @@ type Without<K extends string> = { readonly [P in K]?: never }
  * What ends a tutorial step, and so where its mark sits (#25): a spot tapped, a face or blank
  * filled with its answer, Solve opened, or every spot of the case found, whose mark sits on Look's
  * button and leaves Look itself to the caption's prompt; or the dock's line of finds read, whose
- * mark rings the dock whole, the caption with its line, and which the next tap meets (#77). One of
- * the five. Everything Solve asks for filled ends every step but the last, whatever its `until`.
+ * mark rings the dock whole, the caption with its line, and which a tap on the dock meets (#77).
+ * One of the five. Everything Solve asks for filled ends every step but the last, whatever its
+ * `until`.
  */
 export type Until =
   | ({ readonly tapped: string } & Without<'filled' | 'view' | 'found' | 'read'>)

@@ -122,6 +122,22 @@ describe('the ring on a slot a failed close found wrong (#77)', () => {
   })
 })
 
+// A tap a guided step's hold refuses pulses its ring once; the pulse's element is tested, and its
+// look is the stylesheet's, pinned as text against removal: the screens are its evidence (#77).
+describe('the pulse of a tap the hold refuses (#77)', () => {
+  it('grows out of the ring and fades, once, and only fades under reduced motion', () => {
+    const pulse = /\n\.coach \.pulse \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    const end = /@keyframes pulse \{\s*to \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    const still =
+      /@media \(prefers-reduced-motion: reduce\) \{[^@]*?\n {2}\.coach \.pulse \{([^}]*)\}/.exec(
+        css,
+      )?.[1] ?? ''
+    expect(pulse).toMatch(/animation: pulse 0\.6s ease-out forwards;/)
+    expect(end).toMatch(/opacity: 0;[^}]*transform: scale\(1\.15\);/)
+    expect(still).toMatch(/animation-name: arrive;\s*animation-direction: reverse;/)
+  })
+})
+
 // The brief's card is placed in the picture's row, which the row's own position makes its
 // containing block; the card's parent is tested, and this keeps the row positioned (#77).
 describe('the picture’s row holds the brief’s card (#77)', () => {

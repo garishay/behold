@@ -162,11 +162,14 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const asked = asking && wrongAt(s.ask) ? s.ask : undefined
   const looks = sweep || asked !== undefined
   const guided = current?.until !== undefined && !(looks && view === 'look')
+  // The guided steps before the sweep hold the screen to their mark, each until it is met, so free
+  // play starts once the last of them is (#77).
+  const holds = current?.until !== undefined && !sweep
   const nudge = () => setNudges(nudges + 1)
   const fleeting = current !== undefined && (current.until === undefined || looks)
   const showing = `${current?.id}#${nudges}`
-  // A step that only tells, the dock's line of finds read, is met on the next tap or move; Open
-  // Solve, under its words, meets it and the step after (#77).
+  // A step that only tells, the dock's line of finds read, is met by a tap on the dock it rings, or
+  // by the next move; Open Solve, under its words, meets it and the step after (#77).
   const meet = current?.until?.read !== undefined ? () => onProgress(read(s, progress)) : undefined
   // The stay is timed on Look with nothing over the picture, an opened caption included (review
   // round 1), on a moment with something left, and only while the app is in view: the clock starts
@@ -222,13 +225,10 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     close(o.progress)
   }
   // A tap that found nothing new, on a spot found before or on no spot, runs toward a hint while
-  // something is still unfound; under a guided step the run shows the step again.
+  // something is still unfound. A guided step holds the picture to its ring, so none runs under one
+  // (#77).
   const nothingNew = () => {
-    if (!unfound(spots)) return
-    if (guided && run + 1 >= stuck.taps) {
-      setRun(0)
-      nudge()
-    } else setRun(run + 1)
+    if (unfound(spots)) setRun(run + 1)
   }
   const onTap = (spotId: string) => {
     const { progress: next, added } = tap(s, progress, spotId)
@@ -614,6 +614,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
             meet ?? (fleeting && said !== showing && !silent ? () => setSaid(showing) : undefined)
           }
           onNext={meet && (() => show('solve'))}
+          hold={holds}
         />
       )}
       {lesson && <CoachMark at={lesson} label={text.teach ?? ''} />}

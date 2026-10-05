@@ -68,7 +68,9 @@ export const en = {
     step2: 'That tap found two words: David and sling.',
     step3: 'Open Solve to name him.',
     step4: 'Tap the slot under the boy, then David.',
-    step5: 'Tap the blank first. Fitting words stay bright.',
+    // A no-break space holds "then sling" together, so the balanced wrap breaks between the two
+    // sentences, as 77d ruled for step 5's words (#77).
+    step5: 'Tap the blank, then\u00a0sling. Bright words fit.',
     step6: 'Find the other words in the picture.',
     step7: 'Fill the rest, then close the case.',
   },

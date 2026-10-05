@@ -11,6 +11,12 @@ interface CoachMarkProps {
   onTap?: () => void
   /** The found line's step carries Open Solve under its words, which opens Solve (#77). */
   onNext?: () => void
+  /**
+   * Whether the mark holds the case screen, as the guided steps do (#77): a tap anywhere in its
+   * ring is its target's, even on a spot drawn over it, and a tap outside, its words included,
+   * plays nothing and pulses the ring once.
+   */
+  hold?: boolean
 }
 
 /** Half a label's widest, and the gutter it keeps from the screen's edge. */
@@ -41,6 +47,10 @@ function overlap(a: Box, b: Box): Box | null {
   return box.right > box.left && box.bottom > box.top ? box : null
 }
 
+/** Whether a tap landed in a box. */
+const within = (b: Box, e: MouseEvent) =>
+  e.clientX >= b.left && e.clientX <= b.right && e.clientY >= b.top && e.clientY <= b.bottom
+
 /**
  * The ring's box: the target's own, 4 px wider all round, cut to what its scroll box and the
  * screen show — or null while the target is out of view, so the mark never floats over the bank
@@ -60,17 +70,20 @@ function ringFor(el: Element | null): Box | null {
 /**
  * A tutorial step shown at its target (#25): the target ringed, the rest of the screen dimmed,
  * and the step's words beside it, where `labelAt` places them, clear of the dock's caption on
- * Look (#77), and never past the gutter at either side. It blocks nothing: every tap still
- * reaches the game, and one anywhere but the target lifts the dim while the ring stays until the
- * step is done. Where a step's words have gone, its dim goes with them (#24, addendum (b)). The
- * mark shows only where its target can be seen (07c). A screen reader hears the words from a
- * live region; the ring takes no focus and never pulses. Open Solve, where a step carries it, is
- * the one part of a mark that takes a tap, and a button a keyboard reaches (#77).
+ * Look (#77), and never past the gutter at either side. Through the guided steps it holds the
+ * screen to its ring (#77); after them it blocks nothing: every tap still reaches the game, and
+ * one anywhere but the target lifts the dim while the ring stays until the step is done. Where a
+ * step's words have gone, its dim goes with them (#24, addendum (b)). The mark shows only where
+ * its target can be seen (07c). A screen reader hears the words from a live region; the ring
+ * takes no focus, and pulses only to answer a tap its hold refuses (#77). Open Solve, where a step
+ * carries it, is the one part of a mark that takes a tap, and a button a keyboard reaches (#77).
  */
-export function CoachMark({ at, label, onTap, onNext }: CoachMarkProps) {
+export function CoachMark({ at, label, onTap, onNext, hold }: CoachMarkProps) {
   const [ring, setRing] = useState<Box | null>(null)
   const [floor, setFloor] = useState(innerHeight)
   const [dim, setDim] = useState({ at, on: true })
+  // A tap the hold refuses pulses the ring once, so it still answers with where to tap (#77).
+  const [pulse, setPulse] = useState(0)
   const next = useRef<HTMLButtonElement>(null)
   // A new target dims again.
   if (dim.at !== at) setDim({ at, on: true })
@@ -102,6 +115,7 @@ export function CoachMark({ at, label, onTap, onNext }: CoachMarkProps) {
     }
   }, [at])
   useEffect(() => {
+    if (hold) return
     const tap = (e: Event) => {
       // Open Solve takes its own tap: met on the press, the step would take the button away before
       // its click, and the click would fall to the picture under it (#77).
@@ -111,7 +125,27 @@ export function CoachMark({ at, label, onTap, onNext }: CoachMarkProps) {
     }
     addEventListener('pointerdown', tap, true)
     return () => removeEventListener('pointerdown', tap, true)
-  }, [at, onTap])
+  }, [at, onTap, hold])
+  useEffect(() => {
+    if (!hold) return
+    // A mark that holds the screen hears a tap on its click, where it lands (#77): in the target,
+    // it plays; in the ring, it goes to the target; elsewhere on the case screen it plays nothing,
+    // and its dim stays, but the ring pulses. Open Solve and the menu take their own taps, and a
+    // tap while the ring is out of view brings the target back.
+    const click = (e: MouseEvent) => {
+      const t = e.target as Element
+      const el = document.querySelector(at)
+      if (!el || next.current?.contains(t) || !t.closest('.app') || t.closest('.menu-btn')) return
+      if (el.contains(t)) return onTap?.()
+      e.stopPropagation()
+      if (!ring) bring(el)
+      if (ring && e.detail > 0 && within(ring, e))
+        el.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+      else setPulse((n) => n + 1)
+    }
+    addEventListener('click', click, true)
+    return () => removeEventListener('click', click, true)
+  }, [at, onTap, hold, ring])
   const centre =
     ring &&
     Math.min(Math.max((ring.left + ring.right) / 2, half + gutter), innerWidth - half - gutter)
@@ -128,7 +162,9 @@ export function CoachMark({ at, label, onTap, onNext }: CoachMarkProps) {
               width: ring.right - ring.left,
               height: ring.bottom - ring.top,
             }}
-          />
+          >
+            {pulse > 0 && <i key={pulse} className="pulse" onAnimationEnd={() => setPulse(0)} />}
+          </div>
           {label && (
             <div
               className="label"
