@@ -1842,6 +1842,37 @@ describe('hints (#29)', () => {
   })
 })
 
+describe('Solve’s room (#24)', () => {
+  const words = () => chips().map((c) => c.textContent)
+  afterEach(() => vi.restoreAllMocks())
+
+  // The next round's first tester (#23, 2026-10-05): with a blank waiting, the words that fit it
+  // lay across five rows of a bank that showed two. While a slot waits they lead the bank, in the
+  // order found, with the rest after them, dimmed, and the bank shows them from its top.
+  it('leads the bank with the words that fit a waiting slot, shown from its top', async () => {
+    start()
+    openCase(/The valley/)
+    await sweep()
+    const found = words()
+    const bank = document.querySelector('.chips')!
+    let top = 96
+    Object.defineProperty(bank, 'scrollTop', {
+      configurable: true,
+      get: () => top,
+      set: (v: number) => (top = v),
+    })
+    slot('t2')
+    expect(words()).toEqual([
+      ...['sling', 'spear', 'sword', 'stones', 'king', 'brothers', 'commander', 'shield'],
+      ...['David', 'Goliath', 'six', 'five', 'Saul', 'ten'],
+    ])
+    expect(document.querySelector('[data-word="ten"]')).toHaveClass('is-dim')
+    expect(top).toBe(0)
+    slot('t2')
+    expect(words()).toEqual(found)
+  })
+})
+
 describe('the case solved (#6, 03c; #24)', () => {
   it('Solve counts what is filled and holds who is who, the account, and the bank', () => {
     start()

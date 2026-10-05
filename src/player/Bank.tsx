@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import type { CaseStructure, CaseText, Kind } from '../cases/types.ts'
 import { strings } from '../strings/en.ts'
 import { kindOf, type Progress, type Selection } from './state.ts'
@@ -20,11 +21,20 @@ const kinds: readonly Kind[] = ['name', 'noun', 'action', 'number']
  * The word bank (#6), docked on Solve above the bar, where it is used (#24): the words found so far
  * as chips, each with its kind's dot, the ones new since Solve was last open ringed, and all but
  * the kind a waiting slot takes dimmed. A word refused by a slot, and how far off a close was,
- * say so in the bank's head, where the player is looking (07c).
+ * say so in the bank's head, where the player is looking (07c). While a slot waits, the words
+ * that fit it lead the bank, shown from its top, so every one of them is in view (#24, Solve's
+ * room).
  */
 export function Bank(props: BankProps) {
   const { structure, text, progress, selection, fresh, note, onWord } = props
   const wants = selection.target === null ? undefined : kindOf(structure, selection.target)
+  const later = (id: string) => (structure.words[id] === wants ? 0 : 1)
+  const words =
+    wants === undefined ? progress.bank : [...progress.bank].sort((a, b) => later(a) - later(b))
+  const chips = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (selection.target !== null && chips.current) chips.current.scrollTop = 0
+  }, [selection.target])
   return (
     <footer className="bank">
       <div className="bank-head" role="status">
@@ -41,9 +51,9 @@ export function Bank(props: BankProps) {
           </span>
         )}
       </div>
-      <div className="chips">
-        {progress.bank.length === 0 && <span className="empty">{strings.bankEmpty}</span>}
-        {progress.bank.map((id) => {
+      <div className="chips" ref={chips}>
+        {words.length === 0 && <span className="empty">{strings.bankEmpty}</span>}
+        {words.map((id) => {
           const kind = structure.words[id]
           const state =
             (selection.word === id ? ' is-on' : '') +
