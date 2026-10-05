@@ -1086,6 +1086,63 @@ describe('the tutorial’s marks (#25)', () => {
     expect([at(), said()]).toEqual(['[data-view="look"]', 'Find the other words in the picture.'])
   })
 
+  // The owner's review on #92: the system's back and forward land a view as its tab lands it
+  // (#77). jsdom fires each move's popstate on a later task, so each test waits for the view.
+  const onTab = (name: RegExp) =>
+    waitFor(() =>
+      expect(screen.getByRole('tab', { name })).toHaveAttribute('aria-selected', 'true'),
+    )
+
+  // Back from Solve leaves it, so the count of words found since Solve was last left clears, as
+  // Look's tab clears it: David and sling were just seen there.
+  it('back from Solve clears the new words’ count, as Look’s tab does', async () => {
+    start()
+    openCase(/The valley/)
+    tapSpot('boy')
+    expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('Solve0/7+2')
+    tab(/Solve/)
+    history.back()
+    await onTab(/Look/)
+    expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent(/^Solve0\/7$/)
+  })
+
+  // Back from Solve after the guided moves greets the player with Look's prompt, not the boy's
+  // caption, as Look's tab does (#25): the paid round's first tester took this way three times.
+  it('back from Solve after the guided moves shows the prompt, as Look’s tab does', async () => {
+    start()
+    openCase(/The valley/)
+    tapSpot('boy')
+    tab(/Solve/)
+    for (const [id, word] of [
+      ['d1', 'David'],
+      ['t4', 'sling'],
+    ] as const) {
+      chip(word)
+      slot(id)
+    }
+    expect(at()).toBe('[data-view="look"]')
+    history.back()
+    await onTab(/Look/)
+    expect(document.querySelector('.dock .said')).toHaveTextContent(
+      'Tap anything that looks like it matters.',
+    )
+  })
+
+  // Forward to Solve meets the steps its tab would: with Solve opened before the boy and left by
+  // back, the boy's tap and then forward meet the found line's step and Solve's own.
+  it('forward to Solve meets the found line’s step and Solve’s, as Solve’s tab does', async () => {
+    start()
+    openCase(/The valley/)
+    tab(/Solve/)
+    history.back()
+    await onTab(/Look/)
+    tapSpot('boy')
+    expect(at()).toBe('.dock')
+    history.forward()
+    await onTab(/Solve/)
+    expect([at(), said()]).toEqual(['[data-slot="d1"]', 'Tap the slot under the boy, then David.'])
+  })
+
   it('marks nothing under the brief’s card or the menu, and nothing in a case without steps', async () => {
     start(<App />, vineyardStarted)
     openCase(/The valley/)

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useEffectEvent, useState } from 'react'
 import type { CaseEntry } from '../cases/index.ts'
 import type { PassageService } from '../passages/service.ts'
 import { play } from '../sound/engine.ts'
@@ -144,20 +144,6 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   useCue(view === 'reveal' ? null : 'case')
   // Every picture of the case is requested as it opens, so the whole case is cached for offline.
   useEffect(() => prefetch(s), [s])
-  // Back from the reveal returns to Solve; forward to the reveal's entry returns to the reveal
-  // while the case is solved. A reveal entry left ahead by a restart names a solution the case no
-  // longer has, so it is made a case entry instead (review round 1, #21). In a case still open the
-  // case's own entry is Look and Solve's is Solve, so back and forward step between them (#77).
-  useEffect(() => {
-    const onPop = (e: PopStateEvent) => {
-      const at = viewOf(e.state)
-      if (at !== 'reveal') setView(at === 'solve' || progress.solved ? 'solve' : 'look')
-      else if (progress.solved) setView('reveal')
-      else history.replaceState({ case: s.id }, '')
-    }
-    addEventListener('popstate', onPop)
-    return () => removeEventListener('popstate', onPop)
-  }, [progress.solved, s.id])
 
   const moment = s.moments.find((m) => m.id === progress.moment) ?? s.moments[0]
   const card = brief && progress.tapped.length === 0
@@ -290,7 +276,11 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     if (hint?.why === 'close') setHint(null)
     close(submit(s, progress))
   }
-  const show = (v: 'look' | 'solve') => {
+  /**
+   * A view landed, by its tab or by the history's back and forward (#77, the owner's review): all
+   * a tab does but its step in the history.
+   */
+  const land = (v: 'look' | 'solve') => {
     // The rings clear when Solve is left, not when its own tab is tapped again (review round 1).
     if (view === 'solve' && v !== 'solve') setFresh([])
     // Look's caption closes with the dock when Solve opens.
@@ -298,14 +288,36 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     // Back on Look while the tutorial waits on everything found, or on an answer worked out there,
     // the caption gives way to the prompt, "Tap anything that looks like it matters." (#25, #77).
     if (v === 'look' && looks) setCaption(null)
+    setView(v)
+    onProgress(opened(s, progress, v))
+  }
+  const show = (v: 'look' | 'solve') => {
     // In a case still open, Solve opens as an entry, and Look's button from it steps back (#77).
     if (v !== view && !progress.solved) {
       if (v === 'solve') history.pushState({ case: s.id, view: 'solve' }, '')
       else if (viewOf(history.state) === 'solve') history.back()
     }
-    setView(v)
-    onProgress(opened(s, progress, v))
+    land(v)
   }
+  // Back from the reveal returns to Solve; forward to the reveal's entry returns to the reveal
+  // while the case is solved. A reveal entry left ahead by a restart names a solution the case no
+  // longer has, so it is made a case entry instead (review round 1, #21). In a case still open the
+  // case's own entry is Look and Solve's is Solve, so back and forward step between them (#77). A
+  // view they step to lands as its tab lands it, and the view already showing, as after a tab's
+  // own step back, lands nothing more (#77, the owner's review).
+  const stepped = useEffectEvent((v: 'look' | 'solve') => {
+    if (v !== view) land(v)
+  })
+  useEffect(() => {
+    const onPop = (e: PopStateEvent) => {
+      const at = viewOf(e.state)
+      if (at !== 'reveal') stepped(at === 'solve' || progress.solved ? 'solve' : 'look')
+      else if (progress.solved) setView('reveal')
+      else history.replaceState({ case: s.id }, '')
+    }
+    addEventListener('popstate', onPop)
+    return () => removeEventListener('popstate', onPop)
+  }, [progress.solved, s.id])
   /**
    * A hint asked for, from the offer or the menu (#29): the second tier of the one showing, or a new
    * one's first. It starts the signals over, and the tier is kept for the close. Asked for past its
