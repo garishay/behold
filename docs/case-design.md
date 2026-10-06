@@ -32,12 +32,14 @@ rules below are the answer, ruled on #26.
    everyone knows teaches nothing; a blank on the detail is where the passage surprises.
 
 4. **Guessing first is allowed, and is the hook.** A player who knows the story may fill the
-   account from memory once a quick sweep has stocked the bank. When the check says several don't
-   match the picture, they go back to it with a question. That return trip is the loop the game is
-   built on, and the Playtests Issue's second criterion watches for it.
+   account from memory once a quick sweep has stocked the bank. When the check says how many
+   answers don't fit the story, they go back to the picture with a question. That return trip is
+   the loop the game is built on, and the Playtests Issue's second criterion watches for it.
 
-5. **The check is coarse.** Close the case says how many answers don't match what the pictures
-   show — one or two, or several — never which, in every case after the valley. A miss is the
+5. **The check converges.** Close the case says how many answers don't fit the story, as a
+   number, and from a case's second failed close it rings each of them, as the valley's does from
+   its first: a ring says which answer, never what it is. A close that fails while something is
+   still unfound says how much is left to find, and rings Look until it opens (#95). A miss is the
    picture's, never the player's: no close calls an answer wrong (#77). Close the case appears
    once every slot is filled, in every case (#24). The tutorial marks an answer right only on the
    slots its guided steps name; once those steps are done, its last step points at Solve's count,
@@ -45,11 +47,11 @@ rules below are the answer, ruled on #26.
    points at it, so the tutorial closes on the same check as every case, and a full account is
    never a dead end (#77).
    The first case teaches the real check, and since it teaches, it says where: its failed close
-   rings each answer that doesn't match, until that answer is changed (#77). Its one inference is
-   asked on a miss: when a close finds that the sword's blank doesn't match, the retry rings that
-   blank, not its word, and asks whose sword it was, so the answer is worked out from what is seen
-   on the return trip rule 4 counts on, the way rule 2 leaves every other. Once asked, the blank
-   takes its ✓ when right, and a ✓ stays: a tap no longer empties it (#77).
+   rings each answer that doesn't fit the story, until that answer is changed (#77). Its one
+   inference is asked on a miss: when a close finds that the sword's blank doesn't fit the story,
+   the retry rings that blank, not its word, and asks whose sword it was, so the answer is worked
+   out from what is seen on the return trip rule 4 counts on, the way rule 2 leaves every other.
+   Once asked, the blank takes its ✓ when right, and a ✓ stays: a tap no longer empties it (#77).
 
 6. **One new idea per case.** A case adds one thing the player has not done before, and names it
    in its brief to the author. The valley, then season one's first rungs:
