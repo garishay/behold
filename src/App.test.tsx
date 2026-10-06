@@ -2137,15 +2137,18 @@ describe('the close converges (#95)', () => {
   // marks what is found inside the half it rings, and nothing outside it: the altar, found, lies in
   // the right half that the spent prophets' smaller box sends the hint to; the caller, found, in
   // the left. The altar runs across the middle, so its mark sits at the middle of its part inside
-  // the ring, 569.25 of the picture's 900 across, not at the middle of the whole altar.
+  // the ring, 569.25 of the picture's 900 across, not at the middle of the whole altar. The
+  // pourers' middle lies just outside the half, but they cross into it, so they are marked at the
+  // middle of their part inside, at 549 (review on open).
   it('marks what is found inside the first tier’s half', () => {
-    start(<App />, mountain(['altar', 'caller'], {}))
+    start(<App />, mountain(['altar', 'caller', 'pourers'], {}))
     openCase(/The mountain/)
     menu('Hint')
     expect(at()).toBe('[data-half]')
     expect(document.querySelector('[data-found="altar"] circle')).toHaveAttribute('cx', '569.25')
+    expect(document.querySelector('[data-found="pourers"] circle')).toHaveAttribute('cx', '549')
     expect(document.querySelector('[data-found="caller"]')).toBeNull()
-    expect(document.querySelectorAll('[data-found]')).toHaveLength(1)
+    expect(document.querySelectorAll('[data-found]')).toHaveLength(2)
   })
 })
 
