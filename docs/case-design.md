@@ -37,21 +37,23 @@ rules below are the answer, ruled on #26.
    the loop the game is built on, and the Playtests Issue's second criterion watches for it.
 
 5. **The check converges.** Close the case says how many answers don't fit the story, as a
-   number, and from a case's second failed close it rings each of them, as the valley's does from
-   its first: a ring says which answer, never what it is. A close that fails while something is
-   still unfound says how much is left to find, and rings Look until it opens (#95). A miss is the
-   picture's, never the player's: no close calls an answer wrong (#77). Close the case appears
-   once every slot is filled, in every case (#24). The tutorial marks an answer right only on the
-   slots its guided steps name; once those steps are done, its last step points at Solve's count,
-   and once every slot is filled, whatever step waits, Close the case appears and the last step
-   points at it, so the tutorial closes on the same check as every case, and a full account is
-   never a dead end (#77).
+   number, and from a case's second failed close it marks every answer, as the valley's does from
+   its first: a ✓ on each that fits, and a ring on each that doesn't, which says which answer,
+   never what it is, and the first ring is brought into view (#95, #102). A close that fails while
+   something is still unfound says how much is left to find, and rings Look until it opens (#95).
+   A miss is the picture's, never the player's: no close calls an answer wrong (#77). Close the
+   case appears once every slot is filled, in every case (#24). Until a close marks them, the
+   tutorial marks an answer right only on the slots its guided steps name; once those steps are
+   done, its last step points at Solve's count, and once every slot is filled, whatever step
+   waits, Close the case appears and the last step points at it, so the tutorial closes on the
+   same check as every case, and a full account is never a dead end (#77).
    The first case teaches the real check, and since it teaches, it says where: its failed close
-   rings each answer that doesn't fit the story, until that answer is changed (#77). Its one
-   inference is asked on a miss: when a close finds that the sword's blank doesn't fit the story,
-   the retry rings that blank, not its word, and asks whose sword it was, so the answer is worked
-   out from what is seen on the return trip rule 4 counts on, the way rule 2 leaves every other.
-   Once asked, the blank takes its ✓ when right, and a ✓ stays: a tap no longer empties it (#77).
+   marks every answer, each ring until that answer is changed, and its retry sits at the first it
+   rang (#77, #102). Its one inference is asked on a miss: when a close finds that the sword's
+   blank doesn't fit the story, the retry rings that blank, not its word, and asks whose sword it
+   was, so the answer is worked out from what is seen on the return trip rule 4 counts on, the way
+   rule 2 leaves every other. Once asked, the blank takes its ✓ when right, and a ✓ stays,
+   whichever gave it: a tap no longer empties it (#77, #102).
 
 6. **One new idea per case.** A case adds one thing the player has not done before, and names it
    in its brief to the author. The valley, then season one's first rungs:

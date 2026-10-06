@@ -291,8 +291,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
       setMissed(first)
       // In the tutorial the last step's mark comes back, dim and all, with its retry (#25), or as
       // the question at the slot the case asks about when this close found it wrong; every other
-      // slot it found wrong is ringed, and with no question to bring one into view, the first
-      // ring is brought there (#77).
+      // slot it found wrong is ringed, every one that fits takes its ✓, and with no question to
+      // bring one into view, the first ring is brought there (#77, #102).
       if (current !== undefined && current.until === undefined) {
         const at = wrongs(s, progress).filter((id) => id !== s.ask)
         setRinged(at)
