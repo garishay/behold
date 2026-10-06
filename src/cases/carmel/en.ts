@@ -7,7 +7,7 @@ export const en = {
   title: 'The mountain',
   subtitle: 'Case one',
   brief:
-    'Two altars on a mountain, a bull on each, and all Israel watching. What did the people answer, what was poured out, and what did the fire burn?',
+    'Two altars on a mountain, a bull on each, and all Israel watching. What did the people answer, what did the fire burn, and what did the people do then?',
   // The first case with more than one picture says what a picker's dot means (#77).
   note: 'Three pictures this time. A dot means more to find there.',
   passages: ['1 Kings 18:17–40'],
