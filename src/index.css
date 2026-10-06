@@ -968,9 +968,12 @@ button:focus-visible {
   color: var(--gold);
 }
 
-/* The bank, docked on Solve above the bar (#24). */
+/* The bank, docked on Solve above the bar (#24): its head, then its words, which give up room
+   first. */
 .bank {
   flex: none;
+  display: flex;
+  flex-direction: column;
   background: var(--slate-deep);
   border-top: 1px solid var(--slate);
   padding: 8px var(--inset);
@@ -1050,6 +1053,13 @@ button:focus-visible {
 
 .submit-row + .bank .chips {
   max-height: 108px;
+}
+
+/* Under the row, the bank keeps its height when a failed close's count and what is left to find
+   take two lines of its head: the words give up the top of their third row, and the account keeps
+   eight lines at the floor (#24, ruling [2]; #95). */
+.submit-row + .bank {
+  max-height: 150px;
 }
 
 .chip {
