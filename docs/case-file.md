@@ -166,8 +166,8 @@ dressing (`docs/world-rules.md`, _The text decides_). Whether every spot must ci
 authoring gate's rule (#5).
 
 The account is the reason the tutorial has three passages: the champion's name and height are
-1 Samuel 17:4, and the loaves and cheeses are 17:17–18, and the account asks for both, so the
-reveal shows 17:4 and 17:17–18 before 17:38–51.
+1 Samuel 17:4, and the boy's errand to his brothers is 17:17–18, and the account asks for both, so
+the reveal shows 17:4 and 17:17–18 before 17:38–51.
 
 ## Pictures
 
