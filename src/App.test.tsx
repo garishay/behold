@@ -2132,6 +2132,21 @@ describe('the close converges (#95)', () => {
       'Ringed answers don’t fit the story. Look closer.',
     ])
   })
+
+  // Testers 2 and 3 (#23) tapped found things again inside "Where to look"'s ring. Its first tier
+  // marks what is found inside the half it rings, and nothing outside it: the altar, found, lies in
+  // the right half that the spent prophets' smaller box sends the hint to; the caller, found, in
+  // the left. The altar runs across the middle, so its mark sits at the middle of its part inside
+  // the ring, 569.25 of the picture's 900 across, not at the middle of the whole altar.
+  it('marks what is found inside the first tier’s half', () => {
+    start(<App />, mountain(['altar', 'caller'], {}))
+    openCase(/The mountain/)
+    menu('Hint')
+    expect(at()).toBe('[data-half]')
+    expect(document.querySelector('[data-found="altar"] circle')).toHaveAttribute('cx', '569.25')
+    expect(document.querySelector('[data-found="caller"]')).toBeNull()
+    expect(document.querySelectorAll('[data-found]')).toHaveLength(1)
+  })
 })
 
 describe('the case solved (#6, 03c; #24)', () => {

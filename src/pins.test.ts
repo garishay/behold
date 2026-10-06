@@ -171,12 +171,19 @@ describe('the bank’s rows (#24)', () => {
   })
 })
 
-// The close's order ring is a class the tests read; how it looks is the stylesheet's, pinned as
-// text against removal, and the screens are its evidence (#95).
-describe('the close’s order ring (#95)', () => {
+// The close's order ring and a hint's found marks are classes the tests read; how they look is the
+// stylesheet's, pinned as text against removal, and the screens are their evidence (#95).
+describe('the close’s order ring and the hint’s found marks (#95)', () => {
   it('rings the order whole in the faces’ red', () => {
     const order = /\n\.order\.is-wrong \{([^}]*)\}/.exec(css)?.[1] ?? ''
     expect(order).toMatch(/box-shadow: 0 0 0 2px var\(--t-action\);/)
+  })
+
+  it('marks a found thing in gold, taking no tap', () => {
+    const found = /\n\.stage \.found \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    const ring = /\n\.stage \.found circle \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    expect(found).toMatch(/pointer-events: none;/)
+    expect(ring).toMatch(/stroke: var\(--gold\);/)
   })
 })
 
