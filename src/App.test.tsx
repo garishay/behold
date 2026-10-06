@@ -1464,7 +1464,7 @@ describe('the tutorial’s marks (#25)', () => {
     await waitFor(() => expect(document.querySelector('.coach .ring')).toHaveClass('dim'))
     expect([at(), said()]).toEqual([
       '[data-close]',
-      'Ringed answers don’t match the picture. Look closer.',
+      'Ringed answers don’t fit the story. Look closer.',
     ])
     fireEvent.pointerDown(document.querySelector('[data-slot="t3"]')!)
     expect([at(), said()]).toEqual(['[data-close]', ''])
@@ -1490,7 +1490,7 @@ describe('the tutorial’s marks (#25)', () => {
     expect(ringed()).toEqual(['t1', 't3'])
     expect(at()).toBe('[data-slot="t5"]')
     expect(document.querySelector('[data-slot="t1"]')).toHaveTextContent(
-      'king, ringed: doesn’t match the picture',
+      'king, ringed: doesn’t fit the story',
     )
     chip('brothers')
     slot('t1')
@@ -1571,7 +1571,7 @@ describe('the tutorial’s marks (#25)', () => {
     )
     expect(ringed).toEqual(['t1', 't2'])
     await waitFor(() => expect(ring()).toHaveClass('dim'))
-    expect(said()).toBe('Ringed answers don’t match the picture. Look closer.')
+    expect(said()).toBe('Ringed answers don’t fit the story. Look closer.')
   })
 })
 
