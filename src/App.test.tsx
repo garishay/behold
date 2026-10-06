@@ -4,6 +4,7 @@ import App from './App'
 import { carmel } from './cases/carmel/case.ts'
 import { cases } from './cases/index.ts'
 import { micaiah } from './cases/micaiah/case.ts'
+import type { CaseStructure } from './cases/types.ts'
 import { valley } from './cases/valley/case.ts'
 import { vineyard } from './cases/vineyard/case.ts'
 import type { PassageService } from './passages/service.ts'
@@ -19,6 +20,24 @@ const laterStarted = Object.fromEntries(
 )
 /** The vineyard started before the valley was closed, which keeps it open (#75). */
 const vineyardStarted = { vineyard: fresh(vineyard) }
+/**
+ * A case closed as a player closes it: every spot found, and every face, place, and blank holding
+ * its answer. A closed case that would find something wrong loads open again (#12 [Q13]).
+ */
+const closedCase = (s: CaseStructure) => {
+  const spots = s.moments.flatMap((m) => m.spots)
+  return {
+    ...fresh(s),
+    tapped: spots.map((x) => x.id),
+    bank: [...new Set(spots.flatMap((x) => x.words))],
+    papers: [...new Set(spots.flatMap((x) => (x.paper === undefined ? [] : [x.paper])))],
+    faces: Object.fromEntries(s.faces.map((f) => [f.id, f.answer])),
+    order: [...(s.order ?? [])],
+    fills: Object.fromEntries(s.blocks.flatMap((b) => Object.entries(b.blanks))),
+    step: (s.steps?.length ?? 1) - 1,
+    solved: true,
+  }
+}
 
 /** The app opened on its title, and past it with Begin (#75), over the progress the device holds. */
 const start = (app = <App />, kept?: object) => {
@@ -303,9 +322,7 @@ describe('the season in order (#75)', () => {
   /** The first `n` cases closed, as the device keeps them. */
   const closedTo = (n: number) =>
     Object.fromEntries(
-      cases
-        .slice(0, n)
-        .map(({ structure }) => [structure.id, { ...fresh(structure), solved: true }]),
+      cases.slice(0, n).map(({ structure }) => [structure.id, closedCase(structure)]),
     )
 
   it('locks each case until the one before it is closed, each naming that case', () => {
@@ -1534,6 +1551,26 @@ describe('the tutorial’s marks (#25)', () => {
     expect(ringed).toEqual(['t1', 't2', 't4'])
     expect([at(), said()]).toEqual(['[data-slot="t5"]', 'Whose sword? Look closer at the picture.'])
   })
+
+  // A valley closed before #96 holds the loaves' count and the commander, which no longer match. It
+  // opens again at its last step with its slots filled, and its next close rings both (#12 [Q13]).
+  it('a valley closed before #96 opens again, and its next close rings the old words', async () => {
+    const closed = closedCase(valley)
+    start(<App />, {
+      valley: { ...closed, fills: { ...closed.fills, t1: 'ten', t2: 'commander' } },
+    })
+    openCase(/The valley/)
+    expect(screen.queryByRole('heading', { name: 'The case is closed.' })).not.toBeInTheDocument()
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(result()).toHaveTextContent('One or two don’t match what the picture shows.')
+    const ringed = [...document.querySelectorAll('.is-wrong')].map((e) =>
+      e.getAttribute('data-slot'),
+    )
+    expect(ringed).toEqual(['t1', 't2'])
+    await waitFor(() => expect(ring()).toHaveClass('dim'))
+    expect(said()).toBe('Ringed answers don’t match the picture. Look closer.')
+  })
 })
 
 describe('hints (#29)', () => {
@@ -2195,22 +2232,7 @@ describe('the case solved (#6, 03c; #24)', () => {
     unmount()
     history.replaceState(null, '')
     // A closed case in the store opens on its reveal, and the service refuses.
-    localStorage.setItem(
-      'behold.progress',
-      JSON.stringify({
-        vineyard: {
-          moment: 'vineyard',
-          tapped: [],
-          bank: [],
-          papers: [],
-          faces: {},
-          order: [null, null, null],
-          fills: {},
-          step: 0,
-          solved: true,
-        },
-      }),
-    )
+    localStorage.setItem('behold.progress', JSON.stringify({ vineyard: closedCase(vineyard) }))
     start(<App passages={() => Promise.reject(new Error('down'))} />)
     expect(screen.getByText('Closed ✓')).toBeInTheDocument()
     openCase(/The vineyard/)

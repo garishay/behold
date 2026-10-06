@@ -143,6 +143,27 @@ describe('progress on the device (#6, A6)', () => {
     expect(wrongs(valley, kept.valley).filter((id) => kept.valley.fills[id])).toEqual(['t1', 't2'])
   })
 
+  // A valley closed before #96 holds the loaves' count and the commander. A closed case that would
+  // now find something wrong loads unsolved, its slots filled, and one that wouldn't stays closed
+  // (#12 [Q13]).
+  it('reopens a closed case that would now find something wrong, and keeps one that would not', () => {
+    const spots = valley.moments.flatMap((m) => m.spots)
+    const closed = {
+      ...fresh(valley),
+      tapped: spots.map((x) => x.id),
+      bank: [...new Set(spots.flatMap((x) => x.words))],
+      faces: { d1: 'david', d2: 'goliath' },
+      fills: { t1: 'ten', t2: 'commander', t3: 'six', t4: 'sling', t5: 'goliath' },
+      step: valley.steps.length - 1,
+      solved: true,
+    }
+    localStorage.setItem(key, JSON.stringify({ valley: closed }))
+    expect(load(cases).valley).toEqual({ ...closed, solved: false })
+    const right = { ...closed, fills: { ...closed.fills, t1: 'brothers', t2: 'saul' } }
+    localStorage.setItem(key, JSON.stringify({ valley: right }))
+    expect(load(cases).valley).toEqual(right)
+  })
+
   // Progress gained the hints used (#29). An entry kept before them has used none and keeps its
   // place, where the shape check alone would start it fresh; a tier that is not one is dropped.
   it('reads an entry kept before hints as none used, and drops a tier that is not one', () => {
