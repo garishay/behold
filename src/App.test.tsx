@@ -965,11 +965,31 @@ describe('the tutorial’s marks (#25)', () => {
 
   // Close the case docks as its own row between the account and the bank, outside the scroll, so
   // it never moves and never covers the account; its result shows in the bank's head below it
-  // (07d, #24).
-  it('docks Close the case between the account and the bank, outside the scroll', () => {
-    start(<App />, laterStarted)
+  // (07d, #24). It shows once every slot is filled, and until then the account has the row (#24,
+  // Solve's room).
+  it('docks Close the case between the account and the bank once every slot is filled', () => {
+    start(<App />, {
+      vineyard: {
+        ...fresh(vineyard),
+        bank: ['garden'],
+        faces: { p1: 'ahab', p2: 'jezebel', p3: 'naboth' },
+        order: ['bedchamber', 'gate', 'vineyard'],
+        fills: {
+          s2: 'vineyard',
+          s3: 'silver',
+          s4: 'jezebel',
+          s5: 'the-king',
+          v1: 'killed',
+          v2: 'taken-possession',
+        },
+      },
+    })
     openCase(/The vineyard/)
     tab(/Solve/)
+    expect(document.querySelector('.submit-row')).toBeNull()
+    expect(document.querySelector('.solve')!.nextElementSibling).toHaveClass('bank')
+    chip('garden')
+    slot('s1')
     const row = screen.getByRole('button', { name: /Close the case/ }).parentElement!
     expect(row).toHaveClass('submit-row')
     expect(row.closest('.solve')).toBeNull()
@@ -1025,8 +1045,9 @@ describe('the tutorial’s marks (#25)', () => {
     // The sword is asked about only on a miss, so Close the case follows the sweep (#77). From Look
     // it rings Solve's button with no words, which are Solve's to say there.
     expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
+    // On Solve the last step rings Solve's count until Close the case shows (#24, Solve's room).
     tab(/Solve/)
-    expect([at(), said()]).toEqual(['[data-close]', 'Fill the rest, then close the case.'])
+    expect([at(), said()]).toEqual(['[data-view="solve"]', 'Fill the rest, then close the case.'])
   })
 
   // The paid round's first session (#77): on a short screen the words above Solve's button sat on
@@ -1375,7 +1396,8 @@ describe('the tutorial’s marks (#25)', () => {
   })
 
   // The last step's words cover the account's end on Solve and the caption from Look, so they
-  // leave on the next tap after they show; its ring stays until the case closes (#24, ruling [3]).
+  // leave on the next tap after they show; its ring stays until the case closes (#24, ruling [3]),
+  // on Solve's count until Close the case shows, and then on Close (#24, Solve's room).
   it('the last step’s words leave on the next tap, and its ring stays', async () => {
     start()
     openCase(/The valley/)
@@ -1389,15 +1411,21 @@ describe('the tutorial’s marks (#25)', () => {
       slot(id)
     }
     await waitFor(() => expect(document.querySelector('.coach .label')).not.toBeNull())
-    expect([at(), said()]).toEqual(['[data-close]', 'Fill the rest, then close the case.'])
+    expect([at(), said()]).toEqual(['[data-view="solve"]', 'Fill the rest, then close the case.'])
     fireEvent.pointerDown(document.querySelector('[data-slot="t1"]')!)
     expect(document.querySelector('.coach .label')).toBeNull()
     expect(document.querySelector('.coach .ring')).not.toHaveClass('dim')
-    expect([at(), said()]).toEqual(['[data-close]', ''])
+    expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
     tab(/Look/)
     expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
     // The dim left with the words, and a new target doesn't bring it back (#24, addendum (b)).
     expect(document.querySelector('.coach .ring')).not.toHaveClass('dim')
+    tab(/Solve/)
+    for (const [id, word] of valleyAnswers.filter(([id]) => !['d1', 't4', 't5'].includes(id))) {
+      chip(word)
+      slot(id)
+    }
+    expect([at(), said()]).toEqual(['[data-close]', ''])
   })
 
   // Playtest 2 (#23): the first close the player met said "Several are wrong." in case three, and
@@ -1670,6 +1698,9 @@ describe('hints (#29)', () => {
       act(() => vi.advanceTimersByTime(stuck.stranded * 1000 - 1))
       expect(offer()).toBeNull()
       act(() => vi.advanceTimersByTime(1))
+      // Close the case can't close yet, so the offer has its row alone (#24, Solve's room).
+      expect(offer()?.closest('.submit-row')).not.toBeNull()
+      expect(screen.queryByRole('button', { name: /Close the case/ })).not.toBeInTheDocument()
       fireEvent.click(screen.getByRole('button', { name: 'Where to look' }))
       expect([at(), said()]).toEqual(['[data-view="look"]', 'Find the other words in the picture.'])
       tab(/Look/)
@@ -1842,6 +1873,126 @@ describe('hints (#29)', () => {
   })
 })
 
+describe('Solve’s room (#24)', () => {
+  const words = () => chips().map((c) => c.textContent)
+  afterEach(() => vi.restoreAllMocks())
+
+  // The next round's first tester (#23, 2026-10-05): with a blank waiting, the words that fit it
+  // lay across five rows of a bank that showed two. While a slot waits they lead the bank, in the
+  // order found, with the rest after them, dimmed, and the bank shows them from its top.
+  it('leads the bank with the words that fit a waiting slot, shown from its top', async () => {
+    start()
+    openCase(/The valley/)
+    await sweep()
+    const found = words()
+    const bank = document.querySelector('.chips')!
+    let top = 96
+    Object.defineProperty(bank, 'scrollTop', {
+      configurable: true,
+      get: () => top,
+      set: (v: number) => (top = v),
+    })
+    slot('t2')
+    expect(words()).toEqual([
+      ...['sling', 'spear', 'sword', 'stones', 'king', 'brothers', 'commander', 'shield'],
+      ...['David', 'Goliath', 'six', 'five', 'Saul', 'ten'],
+    ])
+    expect(document.querySelector('[data-word="ten"]')).toHaveClass('is-dim')
+    expect(top).toBe(0)
+    slot('t2')
+    expect(words()).toEqual(found)
+  })
+
+  // A blank tapped on the account's last line under the faces left the rest of its sentence below
+  // the account's foot (#23). The account is set as its sentences, and a blank that starts waiting
+  // scrolls it the least it takes to show its sentence whole.
+  it('brings a waiting blank’s whole sentence into view', async () => {
+    start()
+    openCase(/The valley/)
+    await sweep()
+    const solve = document.querySelector('.solve')!
+    const sentence = document.querySelector('[data-slot="t2"]')!.closest('.sentence')!
+    expect(sentence.querySelector('[data-slot="t1"]')).not.toBeNull()
+    expect(sentence.nextElementSibling).toHaveTextContent(/^Against Israel stood a champion of/)
+    vi.spyOn(solve, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 360, 300))
+    vi.spyOn(sentence, 'getBoundingClientRect').mockReturnValue(new DOMRect(20, 270, 320, 92))
+    const scrolled = vi.spyOn(solve, 'scrollBy')
+    slot('t2')
+    expect(scrolled).toHaveBeenCalledWith({ top: 62 })
+  })
+
+  // The next round's first tester (#23): Goliath, tapped, was still picked up when he came back
+  // from Look, so his tap on the cubits' blank was refused. Leaving Solve lets go of a word picked
+  // up, and of a slot waiting.
+  it('lets go of a picked word, and of a waiting slot, when Solve is left', async () => {
+    start()
+    openCase(/The valley/)
+    await sweep()
+    const away = async () => {
+      tab(/Look/)
+      await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
+      tab(/Solve/)
+    }
+    chip('Goliath')
+    await away()
+    expect(document.querySelector('[data-word="goliath"]')).not.toHaveClass('is-on')
+    slot('t3')
+    expect(result()).not.toHaveTextContent('That blank wants a number.')
+    expect(document.querySelector('[data-slot="t3"]')).toHaveClass('is-target')
+    await away()
+    expect(document.querySelector('[data-slot="t3"]')).not.toHaveClass('is-target')
+  })
+
+  // The next round's second tester (#23): from 6 of 7 the one empty slot was the giant's face,
+  // above the account and out of view, and he read the count as one answer wrong for three
+  // minutes. A fill that leaves Solve short with no empty slot in view brings the nearest into
+  // view, and so does Solve's button, tapped on Solve, where the last step rings its count.
+  it('brings an empty slot into view when none is, after a fill and on Solve’s button', async () => {
+    start()
+    openCase(/The valley/)
+    await sweep()
+    for (const [id, word] of [
+      ['t1', 'ten'],
+      ['t2', 'commander'],
+      ['t3', 'six'],
+    ] as const) {
+      chip(word)
+      slot(id)
+    }
+    const solve = document.querySelector('.solve')!
+    const at = (sel: string, box: DOMRect) =>
+      vi.spyOn(document.querySelector(sel)!, 'getBoundingClientRect').mockReturnValue(box)
+    at('.solve', new DOMRect(0, 100, 360, 300))
+    at('[data-face="d2"]', new DOMRect(180, -60, 160, 140))
+    at('[data-slot="d2"]', new DOMRect(190, 20, 140, 44))
+    at('[data-slot="t5"]', new DOMRect(40, 300, 72, 30))
+    const scrolled = vi.spyOn(solve, 'scrollBy')
+    chip('Goliath')
+    slot('t5')
+    expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('6/7')
+    expect(scrolled).toHaveBeenCalledWith({ top: -160 })
+    scrolled.mockClear()
+    tab(/Solve/)
+    expect(scrolled).toHaveBeenCalledWith({ top: -160 })
+  })
+
+  // The next round's first tester (#23) went back to the picture for the cubits, and Solve opened
+  // again at its top, the blank he had left out of view. Solve keeps its place across Look.
+  it('keeps Solve’s place across a trip to Look', async () => {
+    start()
+    openCase(/The valley/)
+    await sweep()
+    const solve = document.querySelector('.solve')!
+    Object.defineProperty(solve, 'scrollTop', { configurable: true, get: () => 210 })
+    const scrolled = vi.spyOn(Element.prototype, 'scrollBy')
+    tab(/Look/)
+    await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
+    tab(/Solve/)
+    expect(document.querySelector('.solve')).not.toBe(solve)
+    expect(scrolled).toHaveBeenCalledWith({ top: 210, behavior: 'instant' })
+  })
+})
+
 describe('the case solved (#6, 03c; #24)', () => {
   it('Solve counts what is filled and holds who is who, the account, and the bank', () => {
     start()
@@ -1907,8 +2058,8 @@ describe('the case solved (#6, 03c; #24)', () => {
     start()
     openCase(/The valley/)
     await sweep()
-    expect(coach()).toHaveAttribute('data-at', '[data-close]')
-    expect(screen.getByRole('button', { name: /Close the case/ })).toBeDisabled()
+    expect(coach()).toHaveAttribute('data-at', '[data-view="solve"]')
+    expect(screen.queryByRole('button', { name: /Close the case/ })).not.toBeInTheDocument()
     for (const [id, word] of valleyAnswers.slice(1, 3)) {
       chip(word)
       slot(id)
@@ -1976,7 +2127,7 @@ describe('the case solved (#6, 03c; #24)', () => {
     for (const s of ['letter', 'law']) tapSpot(s)
     fireEvent.click(screen.getByRole('button', { name: 'Close' }))
     tab(/Solve/)
-    expect(screen.getByRole('button', { name: /Close the case — 0 of 11 filled/ })).toBeDisabled()
+    expect(screen.queryByRole('button', { name: /Close the case/ })).not.toBeInTheDocument()
     for (const [id, word] of [
       ['p1', 'Ahab'],
       ['p2', 'Jezebel'],

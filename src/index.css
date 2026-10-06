@@ -1013,12 +1013,20 @@ button:focus-visible {
   background: var(--t-number);
 }
 
+/* Three rows of words and the top of a fourth: the most of one kind the valley holds, its eight
+   things, lead the bank in three. The row above the bank, when it shows, takes the third row's
+   room: Close the case once every slot is filled, when no slot waits for a word, or a hint on
+   offer, so the account never has less room than with Close at every count (#24, Solve's room). */
 .chips {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  max-height: 108px;
+  max-height: 156px;
   overflow: auto;
+}
+
+.submit-row + .bank .chips {
+  max-height: 108px;
 }
 
 .chip {

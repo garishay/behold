@@ -1,7 +1,9 @@
-import type { CaseStructure, CaseText } from '../cases/types.ts'
+import { useEffect, useRef } from 'react'
+import type { CaseStructure, CaseText, Part } from '../cases/types.ts'
 import { strings } from '../strings/en.ts'
 import { picture } from './pictures.ts'
-import { checked, kindOf } from './state.ts'
+import { show, showEmpty } from './place.ts'
+import { checked, filled, kindOf } from './state.ts'
 import type { Progress, Selection } from './state.ts'
 
 interface ThinkProps {
@@ -27,6 +29,18 @@ interface ThinkProps {
  */
 export function Think(props: ThinkProps) {
   const { structure: s, text, progress: p, selection } = props
+  // A blank that starts waiting brings its whole sentence into view (#24, Solve's room).
+  useEffect(() => {
+    if (selection.target === null) return
+    show(document.querySelector(`[data-slot="${selection.target}"]`)?.closest('.sentence'))
+  }, [selection.target])
+  // A fill that leaves Solve short, with no empty slot in view, brings the nearest into view (#23).
+  const count = filled(s, p)
+  const was = useRef(count)
+  useEffect(() => {
+    if (count > was.current) showEmpty()
+    was.current = count
+  }, [count])
   const slot = (target: string, value: string | undefined, placeholder: string) => {
     const kind = kindOf(s, target)
     const wrong = props.ringed?.includes(target) ?? false
@@ -67,20 +81,41 @@ export function Think(props: ThinkProps) {
         <section key={b.id} className="blk">
           <h2>{text.blocks[b.id].heading}</h2>
           <div className="scroll">
-            {text.blocks[b.id].parts.map((part, i) =>
-              part.t !== undefined ? (
-                <span key={i}>{part.t}</span>
-              ) : (
-                <span key={i} className="blank-wrap">
-                  {slot(part.b, p.fills[part.b], '')}
-                </span>
-              ),
-            )}
+            {sentences(text.blocks[b.id].parts).map((parts, i) => (
+              <span key={i} className="sentence">
+                {parts.map((part, j) =>
+                  part.t !== undefined ? (
+                    <span key={j}>{part.t}</span>
+                  ) : (
+                    <span key={j} className="blank-wrap">
+                      {slot(part.b, p.fills[part.b], '')}
+                    </span>
+                  ),
+                )}
+              </span>
+            ))}
           </div>
         </section>
       ))}
     </>
   )
+}
+
+/**
+ * A block's parts as its sentences: a text is cut at each stop, with the quote that may close it
+ * and the space after, which ends its sentence (no lookbehind, which older Safari can't parse).
+ */
+function sentences<B extends string>(parts: readonly Part<B>[]) {
+  const out: Part<B>[][] = [[]]
+  for (const part of parts) {
+    if (part.t === undefined) out[out.length - 1].push(part)
+    else
+      part.t.split(/([.!?][”’]?\s)/).forEach((t, i) => {
+        if (t) out[out.length - 1].push({ t })
+        if (i % 2 === 1) out.push([])
+      })
+  }
+  return out.filter((s) => s.length > 0)
 }
 
 /** The order block: a slot per position, first to last, and the moments as tiles to place. */

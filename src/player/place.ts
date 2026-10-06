@@ -43,6 +43,39 @@ const scrollers = '.solve, .stage, .chips'
 export const scroller = (el: Element) => el.parentElement?.closest<HTMLElement>(scrollers) ?? null
 
 /**
+ * Scrolls a target's scroll box the least it takes to show the target whole, or from its top when
+ * it is taller than the box: a waiting blank's sentence (#24, Solve's room).
+ */
+export function show(el: Element | null | undefined) {
+  const box = el && scroller(el)
+  if (!el || !box) return
+  const r = el.getBoundingClientRect()
+  const b = box.getBoundingClientRect()
+  const off =
+    r.top < b.top || r.height > b.height ? r.top - b.top : Math.max(0, r.bottom - b.bottom)
+  if (off !== 0) box.scrollBy({ top: off })
+}
+
+/**
+ * While Solve still has empty slots and none of them is in view, brings the nearest one into view
+ * whole — its face, the order, or its sentence — so a short count shows where it is short (#23,
+ * the next round's second tester).
+ */
+export function showEmpty() {
+  const box = document.querySelector('.solve')
+  if (!box) return
+  const b = box.getBoundingClientRect()
+  const empty = [...box.querySelectorAll('[data-slot]:not(.is-filled), .oslot:not(.is-filled)')]
+  const away = (e: Element) => {
+    const r = e.getBoundingClientRect()
+    return r.bottom < b.top ? b.top - r.bottom : Math.max(0, r.top - b.bottom)
+  }
+  if (empty.length === 0 || empty.some((e) => away(e) === 0)) return
+  const near = empty.reduce((x, y) => (away(y) < away(x) ? y : x))
+  show(near.closest('.face, .order, .sentence') ?? near)
+}
+
+/**
  * Brings a target to the middle of its own scroll box, and never scrolls the page: the case
  * screen does not scroll, and a target outside a scroll box is always in view (07c, #24 [1]).
  * The scroll box's `scroll-behavior` is the stylesheet's, so reduced motion jumps. Both axes move

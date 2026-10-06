@@ -96,8 +96,6 @@ export const strings = {
   last: 'Last',
   emptySlot: '—',
   closeCase: 'Close the case',
-  closeCaseProgress: (filled: number, total: number) =>
-    `Close the case — ${filled} of ${total} filled`,
   // A blank's refusal names its kind, and while no word of that kind is found, where to look (#71).
   blankWants: (kind: Kind, found: boolean) =>
     found

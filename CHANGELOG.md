@@ -3,6 +3,18 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.17.0 — Gate 24, Solve's room (#24)
+
+- **24a — Solve's room** (#97): when "Fill the rest, then close the case." opened, the next round's
+  first tester had one line of the account under the faces, and the words that fit a blank lay
+  across five rows of a bank that showed two; the second read 6 of 7 as one answer off for three
+  minutes, the giant's face empty above the account. While a face or blank waits, the words that
+  fit it lead the bank, now three rows, and its sentence comes whole into view. Close the case
+  appears once every slot is filled, and takes the bank's third row's room; until then the last
+  step rings Solve's count. A fill that leaves Solve short with no empty slot in view brings the
+  nearest into view, and so does Solve's button tapped on Solve. Leaving Solve lets go of what was
+  picked up or waiting, and Solve keeps its place across Look.
+
 ## v0.16.5 — Gate 22's sixth amendment, the sweep held (#77)
 
 - **77k — the sweep held until Look opens** (#94): the hold runs one step further. After step 5, on

@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useState } from 'react'
+import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react'
 import type { CaseEntry } from '../cases/index.ts'
 import type { PassageService } from '../passages/service.ts'
 import { play } from '../sound/engine.ts'
@@ -11,7 +11,7 @@ import { Dock, type Caption } from './Dock.tsx'
 import { aim, firstWrong, half, stranded, stuck, type Aim, type Tier } from './hints.ts'
 import { PaperModal, PapersSheet } from './Papers.tsx'
 import { prefetch } from './pictures.ts'
-import { bring } from './place.ts'
+import { bring, showEmpty } from './place.ts'
 import { Reveal } from './Reveal.tsx'
 import { Stage } from './Stage.tsx'
 import {
@@ -139,6 +139,11 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const [nudges, setNudges] = useState(0)
   // A caption opened whole over the picture's foot; the next caption opens closed (#24).
   const [reading, setReading] = useState(false)
+  // Solve keeps its place: the account, left for Look, opens again where it was (#24, Solve's room).
+  const kept = useRef(0)
+  const keep = useCallback((el: HTMLDivElement | null) => {
+    el?.scrollBy({ top: kept.current, behavior: 'instant' })
+  }, [])
   // Whether Look has opened during the sweep: until it has, the sweep holds Solve to Look's button,
   // and from then on the sweep holds nothing (#77, the addendum to the sixth amendment).
   const [looked, setLooked] = useState(false)
@@ -171,6 +176,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   if (sweep && view === 'look' && !looked) setLooked(true)
   const holds = current?.until !== undefined && !(sweep && looked)
   const nudge = () => setNudges(nudges + 1)
+  // Close the case shows once it can close: every slot filled (#24, Solve's room).
+  const full = filled(s, progress) === total(s)
   const fleeting = current !== undefined && (current.until === undefined || looks)
   const showing = `${current?.id}#${nudges}`
   // A step that only tells, the dock's line of finds read, is met by a tap on the dock it rings, or
@@ -286,8 +293,13 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
    * a tab does but its step in the history.
    */
   const land = (v: 'look' | 'solve') => {
-    // The rings clear when Solve is left, not when its own tab is tapped again (review round 1).
-    if (view === 'solve' && v !== 'solve') setFresh([])
+    // The rings clear when Solve is left, not when its own tab is tapped again (review round 1),
+    // and what was picked up or waiting is let go (#24, Solve's room).
+    if (view === 'solve' && v !== 'solve') {
+      setFresh([])
+      setSelection(nothing)
+      kept.current = document.querySelector('.solve')?.scrollTop ?? 0
+    }
     // Look's caption closes with the dock when Solve opens.
     if (v !== view) setReading(false)
     // Back on Look while the tutorial waits on everything found, or on an answer worked out there,
@@ -297,6 +309,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     onProgress(opened(s, progress, v))
   }
   const show = (v: 'look' | 'solve') => {
+    // Solve's button on Solve, its count ringed by the last step, brings an empty slot into view.
+    if (v === 'solve' && view === 'solve') showEmpty()
     // In a case still open, Solve opens as an entry, and Look's button from it steps back (#77).
     if (v !== view && !progress.solved) {
       if (v === 'solve') history.pushState({ case: s.id, view: 'solve' }, '')
@@ -417,7 +431,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     if (asked !== undefined && view !== 'look') return `[data-slot="${asked}"]`
     if (until?.view || view === 'look') return '[data-view="solve"]'
     const filled = until?.filled
-    if (filled === undefined) return '[data-close]'
+    // The last step rings Solve's count until Close the case shows (#24, Solve's room).
+    if (filled === undefined) return full ? '[data-close]' : '[data-view="solve"]'
     const word = answer(s, filled)
     if (current.slotFirst)
       return selection.target === filled ? `[data-word="${word}"]` : `[data-slot="${filled}"]`
@@ -532,7 +547,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
               </button>
             </div>
           )}
-          <div className="solve">
+          <div className="solve" ref={keep}>
             <Think
               structure={s}
               text={text}
@@ -549,20 +564,21 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
           </div>
           {/* Close the case docks as its own row below the account, outside the scroll, so it never
               moves and never covers the account; a guided case offers it once its steps are done
-              (07d, #24; #26 [4]). */}
-          {closable(s, progress) && (
+              (07d, #24; #26 [4]). It shows once every slot is filled, and until then the account
+              has the row, or a hint on offer has it alone (#24, Solve's room). */}
+          {closable(s, progress) && (full || offer) && (
             <div className="submit-row">
-              <button
-                type="button"
-                className="submit"
-                data-close
-                disabled={filled(s, progress) < total(s) || progress.solved}
-                onClick={onSubmit}
-              >
-                {filled(s, progress) < total(s)
-                  ? strings.closeCaseProgress(filled(s, progress), total(s))
-                  : strings.closeCase}
-              </button>
+              {full && (
+                <button
+                  type="button"
+                  className="submit"
+                  data-close
+                  disabled={progress.solved}
+                  onClick={onSubmit}
+                >
+                  {strings.closeCase}
+                </button>
+              )}
               {offer}
             </div>
           )}
