@@ -13,8 +13,10 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   many loaves he brought, and its second asks who dressed him in his own armor, Saul, settled by
   the armor heap, not whose the cheeses were. The mountain asks how Baal's prophets called past
   noon, and in a new last sentence what the people did at the fire; its jars and times stay in the
-  account, and its number words leave the bank. A valley kept on a device keeps its words, now
-  misses, and a mountain that found a number starts fresh.
+  account, and its number words leave the bank. Its brief asks what the people did then, where it
+  asked what was poured out. A valley kept on a device keeps its words, now misses, and a mountain
+  that found a number starts fresh. A case closed before its answers changed opens again at its
+  last step with its slots filled, so the valley's next close rings the two old words.
 
 ## v0.17.0 — Gate 24, Solve's room (#24)
 
