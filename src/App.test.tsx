@@ -1681,8 +1681,6 @@ describe('hints (#29)', () => {
       for (const [word, id] of [
         ['Elijah', 'c1'],
         ['Ahab', 'c2'],
-        ['four', 'a2'],
-        ['three', 'a3'],
       ]) {
         chip(word)
         slot(id)
@@ -1694,7 +1692,7 @@ describe('hints (#29)', () => {
       act(() => vi.advanceTimersByTime(stuck.stranded * 1000))
       expect(offer()).toBeNull()
       chip('stones')
-      slot('a4')
+      slot('a3')
       act(() => vi.advanceTimersByTime(stuck.stranded * 1000 - 1))
       expect(offer()).toBeNull()
       act(() => vi.advanceTimersByTime(1))
@@ -1730,8 +1728,7 @@ describe('hints (#29)', () => {
       for (const [word, id] of [
         ['Elijah', 'c1'],
         ['Ahab', 'c2'],
-        ['four', 'a2'],
-        ['stones', 'a4'],
+        ['stones', 'a3'],
       ]) {
         chip(word)
         slot(id)
@@ -1742,9 +1739,8 @@ describe('hints (#29)', () => {
       }
       act(() => vi.advanceTimersByTime(stuck.stranded * 1000))
       expect(offer()).toHaveTextContent('Where to look')
-      // Four again, in the second number's blank: the action's blank is still empty, and nothing
-      // loose fits it.
-      chip('four')
+      // Jars in the stones' blank: the actions' blanks are still empty, and nothing loose fits them.
+      chip('jars')
       slot('a3')
       expect(offer()).toBeNull()
       act(() => vi.advanceTimersByTime(stuck.stranded * 1000))
