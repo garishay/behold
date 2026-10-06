@@ -3,6 +3,19 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.17.1 — Gate 24, the blanks (#96)
+
+- **96a — each blank asks what the story turns on** (#99): the next round's third tester said what
+  he learned was what he had thought inconsequential, the bread brought for David and the four
+  jars, and asked what the game is, none of the three said a mystery. Rule 7 joins the case-design
+  rules: a blank asks who, why, how, whose, or what changed, and a number is blanked only when the
+  number is the point. The valley's first blank asks why the boy came, for his brothers, not how
+  many loaves he brought, and its second asks who dressed him in his own armor, Saul, settled by
+  the armor heap, not whose the cheeses were. The mountain asks how Baal's prophets called past
+  noon, and in a new last sentence what the people did at the fire; its jars and times stay in the
+  account, and its number words leave the bank. A valley kept on a device keeps its words, now
+  misses, and a mountain that found a number starts fresh.
+
 ## v0.17.0 — Gate 24, Solve's room (#24)
 
 - **24a — Solve's room** (#97): when "Fill the rest, then close the case." opened, the next round's
