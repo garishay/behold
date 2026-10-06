@@ -1284,6 +1284,13 @@ button:focus-visible {
   gap: 10px;
 }
 
+/* The order a failed close found not to match, ringed whole as the one answer it is, in the
+   action kind's red that a face's ring takes on the same dark ground (#95). */
+.order.is-wrong {
+  border-radius: 10px;
+  box-shadow: 0 0 0 2px var(--t-action);
+}
+
 .order .step {
   font-size: 12px;
   color: var(--mist-dim);

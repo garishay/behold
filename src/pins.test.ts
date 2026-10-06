@@ -171,6 +171,15 @@ describe('the bank’s rows (#24)', () => {
   })
 })
 
+// The close's order ring is a class the tests read; how it looks is the stylesheet's, pinned as
+// text against removal, and the screens are its evidence (#95).
+describe('the close’s order ring (#95)', () => {
+  it('rings the order whole in the faces’ red', () => {
+    const order = /\n\.order\.is-wrong \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    expect(order).toMatch(/box-shadow: 0 0 0 2px var\(--t-action\);/)
+  })
+})
+
 describe('the sound effects (Gate 10 A6)', () => {
   it('are precached with the shell, so the first tap sounds offline', () => {
     expect(config).toMatch(/includeAssets: \[[^\]]*'audio\/\*\.m4a'[^\]]*\]/)

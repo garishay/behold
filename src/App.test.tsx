@@ -2029,6 +2029,57 @@ describe('Solve’s room (#24)', () => {
   })
 })
 
+describe('the close converges (#95)', () => {
+  const ringed = () =>
+    [...document.querySelectorAll('.is-wrong')].map((e) => e.getAttribute('data-slot') ?? 'order')
+  const spotsOf = (s: CaseStructure) => s.moments.flatMap((m) => m.spots)
+  /** The mountain with the spots given found, and their words in the bank. */
+  const mountain = (found: string[], kept: object) => {
+    const spots = spotsOf(carmel).filter((x) => found.includes(x.id))
+    return {
+      carmel: {
+        ...fresh(carmel),
+        tapped: found,
+        bank: [...new Set(spots.flatMap((x) => x.words))],
+        ...kept,
+      },
+    }
+  }
+  const everything = spotsOf(carmel).map((x) => x.id)
+  const right = {
+    faces: { c1: 'elijah', c2: 'ahab' },
+    order: ['baal', 'water', 'fire'],
+    fills: { a1: 'said-nothing', a2: 'cried-aloud', a3: 'stones', a4: 'fell-on-faces' },
+  }
+
+  // The next round's three testers (#23): in the mountain a right change read the same as a wrong
+  // one, and all three took right answers back out. Every failed close counts as a number, and from
+  // a case's second it rings what doesn't match, the order whole as the one answer it is, each ring
+  // until its answer changes.
+  it('counts as a number, and rings what doesn’t match from the second miss', () => {
+    const missed = {
+      ...right,
+      faces: { c1: 'elijah', c2: 'baal' },
+      order: ['water', 'fire', 'baal'],
+    }
+    start(<App />, mountain(everything, missed))
+    openCase(/The mountain/)
+    tab(/Solve/)
+    const close = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    close()
+    expect(result()).toHaveTextContent(/^Two answers don’t fit the story\.$/)
+    expect(ringed()).toEqual([])
+    close()
+    expect(ringed()).toEqual(['c2', 'order'])
+    expect(screen.getByText(/^What happened first, ringed: doesn’t fit the story$/)).toHaveClass(
+      'sr',
+    )
+    tile('Baal’s altar')
+    orderSlot(0)
+    expect(ringed()).toEqual(['c2'])
+  })
+})
+
 describe('the case solved (#6, 03c; #24)', () => {
   it('Solve counts what is filled and holds who is who, the account, and the bank', () => {
     start()

@@ -119,7 +119,7 @@ export const strings = {
   // A failed close with something still unfound says how much (#95).
   toFind: (n: number, pictures: number) =>
     `There ${n === 1 ? 'is' : 'are'} ${counted[n]} more to find in the ${shown(pictures)}.`,
-  // What a screen reader hears after a slot a failed close in the valley ringed (#77).
+  // What a screen reader hears after an answer a failed close rings (#77, #95).
   ringedNoMatch: ', ringed: doesn’t fit the story',
 
   // Hints (#29): offered once the game sees a player stuck, in the caption's dock on Look and

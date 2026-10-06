@@ -114,8 +114,11 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const [asking, setAsking] = useState(false)
   // The valley teaches, so its failed close says where: every slot it found wrong, but the one its
   // question asks about, is ringed until it is changed, and then for good, so only the next close
-  // checks it again (#77, review round 1).
+  // checks it again (#77, review round 1). Every case's close does so from its second miss, the
+  // order ringed whole as the one answer it is (#95).
   const [ringed, setRinged] = useState<readonly string[]>([])
+  const [orderRinged, setOrderRinged] = useState(false)
+  const [misses, setMisses] = useState(0)
   // The bank's head: a refused word's message, or how far off a close was (07c, #24 [3]).
   const [note, setNote] = useState('')
   // The stuck signals (#29): taps on the picture that find nothing new while something is unfound,
@@ -231,9 +234,11 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     // A wrong word set in the slot a question asks about asks again, words, dim, and all (#77).
     const word = asked && put(o.progress, asked)
     if (word && word !== put(progress, asked) && word !== answer(s, asked)) nudge()
-    // A move that changes a ringed slot takes its ring away (#77, review round 1).
+    // A move that changes a ringed slot takes its ring away (#77, review round 1), and one that
+    // changes the order takes the order's (#95).
     const kept = ringed.filter((id) => put(o.progress, id) === put(progress, id))
     if (kept.length < ringed.length) setRinged(kept)
+    if (o.progress.order.join() !== progress.order.join()) setOrderRinged(false)
     close(o.progress)
   }
   // A tap that found nothing new, on a spot found before or on no spot, runs toward a hint while
@@ -272,6 +277,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     if (off > 0) {
       play('notYet')
       setFails(fails + 1)
+      setMisses(misses + 1)
       setMissed(firstWrong(s, progress) ?? null)
       // In the tutorial the last step's mark comes back, dim and all, with its retry (#25), or as
       // the question at the slot the case asks about when this close found it wrong; every other
@@ -286,6 +292,10 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
           bring(document.querySelector(`[data-slot="${at[0]}"]`))
         }
         nudge()
+      } else if (misses > 0) {
+        // From a case's second miss, its close rings what doesn't match, as the valley's does (#95).
+        setRinged(wrongs(s, progress))
+        setOrderRinged(s.order?.some((m, i) => progress.order[i] !== m) ?? false)
       }
     }
     if (hint?.why === 'close') setHint(null)
@@ -563,6 +573,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
               onOrderSlot={(i) => apply(chooseOrderSlot(s, progress, selection, i))}
               asked={asking ? s.ask : undefined}
               ringed={ringed}
+              orderRinged={orderRinged}
             />
           </div>
           {/* Close the case docks as its own row below the account, outside the scroll, so it never

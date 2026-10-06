@@ -16,8 +16,10 @@ interface ThinkProps {
   onOrderSlot: (index: number) => void
   /** The slot the tutorial's question has asked about, which takes its ✓ from then on (#77). */
   asked?: string
-  /** The slots a failed close in the valley found wrong, ringed until each is changed (#77). */
+  /** The slots a failed close found wrong, ringed until each is changed (#77, #95). */
   ringed?: readonly string[]
+  /** Whether that close found the order wrong: it is ringed whole until it changes (#95). */
+  orderRinged?: boolean
 }
 
 /**
@@ -119,7 +121,8 @@ function sentences<B extends string>(parts: readonly Part<B>[]) {
 }
 
 /** The order block: a slot per position, first to last, and the moments as tiles to place. */
-function Order({ structure: s, text, progress: p, selection, onMoment, onOrderSlot }: ThinkProps) {
+function Order(props: ThinkProps) {
+  const { structure: s, text, progress: p, selection, onMoment, onOrderSlot } = props
   const label = (i: number) =>
     i === 0 ? strings.first : i === p.order.length - 1 ? strings.last : strings.then
   const name = (id: string) => text.moments[id]
@@ -127,7 +130,10 @@ function Order({ structure: s, text, progress: p, selection, onMoment, onOrderSl
     <section className="blk">
       <h2>{strings.whatHappenedFirst}</h2>
       <p className="hint">{strings.orderHint}</p>
-      <div className="order">
+      {props.orderRinged && (
+        <p className="sr">{strings.whatHappenedFirst + strings.ringedNoMatch}</p>
+      )}
+      <div className={'order' + (props.orderRinged ? ' is-wrong' : '')}>
         {p.order.map((id, i) => (
           <div key={i}>
             <div className="step">{label(i)}</div>
