@@ -95,6 +95,12 @@ export const wrongs = (s: CaseStructure, p: Progress) =>
     (id) => (p.faces[id] ?? p.fills[id]) !== answer(s, id),
   )
 
+/** The faces and blanks holding their answer, each of which a close that rings marks ✓ (#102). */
+export const fitting = (s: CaseStructure, p: Progress) =>
+  [...s.faces.map((f) => f.id), ...blanks(s).map(([id]) => id)].filter(
+    (id) => (p.faces[id] ?? p.fills[id]) === answer(s, id),
+  )
+
 /** The tutorial's current step, or none when the case has no steps or is solved. */
 export const step = (s: CaseStructure, p: Progress) =>
   guided(s) && !p.solved ? s.steps?.[p.step] : undefined
@@ -144,10 +150,12 @@ export const opened = (s: CaseStructure, before: Progress, view: 'look' | 'solve
 export const marked = (s: CaseStructure, target: string) =>
   s.steps?.some((x) => x.until?.filled === target) ?? false
 
-/** Whether a slot shows its ✓: right, and marked, or the one the question has asked about (#77). */
-export const checked = (s: CaseStructure, p: Progress, target: string, asked?: string) =>
-  (marked(s, target) || target === asked) &&
-  (p.faces[target] ?? p.fills[target]) === answer(s, target)
+/**
+ * Whether a slot shows its ✓: right, and marked, or told: the one the question has asked about
+ * (#77), or one a close that rings found fitting (#102).
+ */
+export const checked = (s: CaseStructure, p: Progress, id: string, told: readonly string[] = []) =>
+  (marked(s, id) || told.includes(id)) && (p.faces[id] ?? p.fills[id]) === answer(s, id)
 
 /** Whether Close the case is offered: in a guided case, once its guided steps are done. */
 export const closable = (s: CaseStructure, p: Progress) =>
@@ -193,9 +201,9 @@ export function chooseSlot(
   p: Progress,
   sel: Selection,
   target: string,
-  asked?: string,
+  told: readonly string[] = [],
 ): Outcome {
-  if (checked(s, p, target, asked)) return { progress: p, selection: sel }
+  if (checked(s, p, target, told)) return { progress: p, selection: sel }
   const kind = kindOf(s, target)
   if (sel.word !== null && s.words[sel.word] !== kind)
     return { progress: p, selection: sel, wants: kind }

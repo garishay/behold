@@ -14,20 +14,26 @@ interface ThinkProps {
   onSlot: (target: string) => void
   onMoment: (id: string) => void
   onOrderSlot: (index: number) => void
-  /** The slot the tutorial's question has asked about, which takes its ✓ from then on (#77). */
-  asked?: string
+  /**
+   * The slots told fitting, which take their ✓ when right: the one the tutorial's question has
+   * asked about (#77), and those a close that rings found fitting (#102).
+   */
+  told?: readonly string[]
   /** The slots a failed close found wrong, ringed until each is changed (#77, #95). */
   ringed?: readonly string[]
   /** Whether that close found the order wrong: it is ringed whole until it changes (#95). */
   orderRinged?: boolean
+  /** Whether a close that rings found the order fitting: it takes its ✓, as one (#102). */
+  orderFits?: boolean
 }
 
 /**
  * The Solve view (#6; Think until #24), scrolling as one so the account has room on the smallest
  * phone (#24, ruling [4]): who is who, what happened first when the case asks, and the blocks with
- * their blanks. A ✓ lands only on the slots a guided step names, and on the one the question has
- * asked about; everything else is checked on Close the case, docked below the account (07d). In
- * the valley a failed close rings what it found wrong, and a screen reader hears the ring (#77).
+ * their blanks. A ✓ lands on the slots a guided step names, on the one the question has asked
+ * about, and, once a close rings, on every one that fits (#102); everything is checked on Close
+ * the case, docked below the account (07d). A close that rings rings what it found wrong, and a
+ * screen reader hears the ring (#77, #95).
  */
 export function Think(props: ThinkProps) {
   const { structure: s, text, progress: p, selection } = props
@@ -49,7 +55,7 @@ export function Think(props: ThinkProps) {
     const state =
       (value ? ' is-filled' : '') +
       (selection.target === target ? ' is-target' : '') +
-      (checked(s, p, target, props.asked) ? ' is-right' : '') +
+      (checked(s, p, target, props.told) ? ' is-right' : '') +
       (wrong ? ' is-wrong' : '') +
       (selection.word !== null && s.words[selection.word] !== kind ? ' is-dim' : '')
     return (
@@ -128,7 +134,7 @@ function Order(props: ThinkProps) {
   const name = (id: string) => text.moments[id]
   return (
     <section className="blk">
-      <h2>{strings.whatHappenedFirst}</h2>
+      <h2 className={props.orderFits ? 'is-right' : undefined}>{strings.whatHappenedFirst}</h2>
       <p className="hint">{strings.orderHint}</p>
       {props.orderRinged && (
         <p className="sr">{strings.whatHappenedFirst + strings.ringedNoMatch}</p>
@@ -142,7 +148,8 @@ function Order(props: ThinkProps) {
               className={
                 'oslot' +
                 (id !== null ? ' is-filled' : '') +
-                (selection.slot === i ? ' is-target' : '')
+                (selection.slot === i ? ' is-target' : '') +
+                (props.orderFits ? ' is-right' : '')
               }
               onClick={() => onOrderSlot(i)}
             >

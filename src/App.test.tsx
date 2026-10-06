@@ -1475,7 +1475,7 @@ describe('the tutorial’s marks (#25)', () => {
     openCase(/The valley/)
     await sweep()
     // With the sword's blank right, a close that fails on a number brings the retry, not the
-    // question (#77).
+    // question (#77), at the first answer it rang (#102).
     for (const [id, word] of valleyAnswers) {
       chip(id === 't3' ? 'five' : word)
       slot(id)
@@ -1485,11 +1485,11 @@ describe('the tutorial’s marks (#25)', () => {
     expect(result()).toHaveTextContent('One answer doesn’t fit the story.')
     await waitFor(() => expect(document.querySelector('.coach .ring')).toHaveClass('dim'))
     expect([at(), said()]).toEqual([
-      '[data-close]',
+      '[data-slot="t3"]',
       'Ringed answers don’t fit the story. Look closer.',
     ])
     fireEvent.pointerDown(document.querySelector('[data-slot="t3"]')!)
-    expect([at(), said()]).toEqual(['[data-close]', ''])
+    expect([at(), said()]).toEqual(['[data-slot="t3"]', ''])
   })
 
   // The paid round's first session (#77): "Several are wrong." said nothing of where, and after the
@@ -2171,6 +2171,77 @@ describe('the close converges (#95)', () => {
     expect(document.querySelector('[data-found="pourers"] circle')).toHaveAttribute('cx', '549')
     expect(document.querySelector('[data-found="caller"]')).toBeNull()
     expect(document.querySelectorAll('[data-found]')).toHaveLength(2)
+  })
+
+  const marked = (cls: string) =>
+    [...document.querySelectorAll(`[data-slot].${cls}`)].map((e) => e.getAttribute('data-slot'))
+
+  // The next round's first tester (#102) read no ✓ as wrong and took right answers out four times,
+  // and never changed the giant's face, ringed in a thin red line. A close that rings marks every
+  // answer, a ✓ on each that fits, which keeps its word, and a ring on each that doesn't; the
+  // valley's retry sits at the first answer it rang.
+  it('a close that rings marks every answer, and its ✓ keeps its word', async () => {
+    start()
+    openCase(/The valley/)
+    await sweep()
+    const his: Record<string, string> = { d2: 'Saul', t1: 'spear' }
+    for (const [id, word] of valleyAnswers) {
+      chip(his[id] ?? word)
+      slot(id)
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(marked('is-wrong')).toEqual(['d2', 't1'])
+    expect(marked('is-right')).toEqual(['d1', 't3', 't2', 't4', 't5'])
+    await waitFor(() => expect(coach()?.querySelector('.ring')).toHaveClass('dim'))
+    expect([at(), said()]).toEqual([
+      '[data-slot="d2"]',
+      'Ringed answers don’t fit the story. Look closer.',
+    ])
+    slot('t3')
+    expect(document.querySelector('[data-slot="t3"]')).toHaveTextContent('six')
+  })
+
+  // Every case marks the same once its close rings, from its second miss (#95): a ✓ on each face,
+  // blank, and the order that fits, and the order, ✓'d, keeps its pictures (#102).
+  it('every case marks what fits once its close rings, the order too', () => {
+    start(<App />, mountain(everything, { ...right, faces: { c1: 'elijah', c2: 'baal' } }))
+    openCase(/The mountain/)
+    tab(/Solve/)
+    const close = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    const question = () => screen.getByRole('heading', { name: 'What happened first' })
+    close()
+    expect(marked('is-right')).toEqual([])
+    expect(question()).not.toHaveClass('is-right')
+    close()
+    expect(marked('is-wrong')).toEqual(['c2'])
+    expect(marked('is-right')).toEqual(['c1', 'a1', 'a2', 'a3', 'a4'])
+    expect(question()).toHaveClass('is-right')
+    const places = () => [...document.querySelectorAll('.oslot')]
+    expect(places().every((e) => e.classList.contains('is-right'))).toBe(true)
+    orderSlot(0)
+    expect(places()[0]).toHaveClass('is-filled')
+  })
+
+  // The owner's ruling [3] (#102): a close that rings brings its first ringed answer into view, in
+  // every case, as the valley's does. With only the mountain's order off, its ring sat below the
+  // fold at 360 × 548, under Close the case.
+  it('a close that rings brings its first ringed answer into view, in every case', () => {
+    start(<App />, mountain(everything, { ...right, order: ['water', 'fire', 'baal'] }))
+    openCase(/The mountain/)
+    tab(/Solve/)
+    const solve = document.querySelector('.solve')!
+    // Solve's room, and the order below it, the rest where beforeEach puts it.
+    vi.mocked(Element.prototype.getBoundingClientRect).mockImplementation(function (this: Element) {
+      if (this === solve) return new DOMRect(0, 100, 360, 300)
+      return this.matches('.order') ? new DOMRect(20, 500, 320, 120) : new DOMRect(10, 10, 100, 40)
+    })
+    const scrolled = vi.spyOn(solve, 'scrollBy')
+    const close = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    close()
+    scrolled.mockClear()
+    close()
+    expect(ringed()).toEqual(['order'])
+    expect(scrolled).toHaveBeenCalledWith({ top: 310, left: 0 })
   })
 })
 

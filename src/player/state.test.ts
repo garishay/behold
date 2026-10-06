@@ -85,7 +85,7 @@ describe('the model (#6)', () => {
       selection: sling,
     })
     const asked = { ...p, fills: { t5: 'goliath' } }
-    expect(chooseSlot(valley, asked, nothing, 't5', 't5').progress).toBe(asked)
+    expect(chooseSlot(valley, asked, nothing, 't5', ['t5']).progress).toBe(asked)
     expect(chooseSlot(valley, asked, nothing, 't5').progress.fills).toEqual({})
     const wrongName = chooseSlot(
       valley,

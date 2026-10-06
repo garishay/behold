@@ -1307,6 +1307,15 @@ button:focus-visible {
   color: #c9f0d0;
 }
 
+/* A face that fits shows its ✓ beside the name, as a blank does, and the order beside its question
+   (#102). A flex box trims a leading space, so a margin keeps the gap. */
+.face .slot.is-right::after,
+.app h2.is-right::after {
+  content: '\2713';
+  margin-left: 0.3em;
+  color: var(--right);
+}
+
 .slot.is-dim {
   opacity: 0.35;
 }
@@ -1318,10 +1327,10 @@ button:focus-visible {
 }
 
 /* The order a failed close found not to match, ringed whole as the one answer it is, in the
-   action kind's red that a face's ring takes on the same dark ground (#95). */
+   action kind's red that a face's ring takes on the same dark ground (#95), heavier (#102). */
 .order.is-wrong {
   border-radius: 10px;
-  box-shadow: 0 0 0 2px var(--t-action);
+  box-shadow: 0 0 0 3px var(--t-action);
 }
 
 .order .step {
@@ -1467,15 +1476,17 @@ button:focus-visible {
   font-size: 13px;
 }
 
-/* A slot a failed close in the valley found wrong, ringed until it is changed (#77): wine on the
-   account's papyrus, and on a face's dark ground the action kind's red, which shows there. */
+/* A slot a failed close found wrong, ringed until it is changed (#77, #95): wine on the account's
+   papyrus, and on a face's dark ground the action kind's red, which shows there. The ring is
+   heavier than a slot's line, so it reads as the close's mark beside a ✓ (#102). */
 .scroll .slot.is-wrong {
-  box-shadow: 0 0 0 2px var(--wine);
+  box-shadow: 0 0 0 3px var(--wine);
 }
 
 .face .slot.is-wrong {
   border-style: solid;
   border-color: var(--t-action);
+  box-shadow: 0 0 0 2px var(--t-action);
 }
 
 /* Close the case, docked as its own row between the account and the bank, outside the scroll, like
