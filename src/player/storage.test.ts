@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { carmel } from '../cases/carmel/case.ts'
 import { cases } from '../cases/index.ts'
 import { valley } from '../cases/valley/case.ts'
 import { vineyard } from '../cases/vineyard/case.ts'
-import { fresh } from './state.ts'
+import { fresh, wrongs } from './state.ts'
 import { load, save } from './storage.ts'
 
 const key = 'behold.progress'
@@ -123,6 +124,44 @@ describe('progress on the device (#6, A6)', () => {
     }
     localStorage.setItem(key, JSON.stringify({ valley: kept }))
     expect(load(cases).valley.step).toBe(6)
+  })
+
+  // Each blank asks what the story turns on (#96, B5 as ruled): a valley kept from before keeps the
+  // loaves' count and the commander in the blanks they filled, now misses, and a mountain that
+  // found one of its numbers, which have left its bank, starts fresh (#12 [Q4]).
+  it('keeps a valley stored before #96 with its words as misses, and starts a mountain with a number fresh', () => {
+    const before = {
+      ...fresh(valley),
+      tapped: ['basket'],
+      bank: ['ten', 'brothers', 'commander'],
+      fills: { t1: 'ten', t2: 'commander' },
+    }
+    const numbered = { ...fresh(carmel), tapped: ['pourers'], bank: ['four', 'jars'] }
+    localStorage.setItem(key, JSON.stringify({ valley: before, carmel: numbered }))
+    const kept = load(cases)
+    expect(kept).toEqual({ valley: before })
+    expect(wrongs(valley, kept.valley).filter((id) => kept.valley.fills[id])).toEqual(['t1', 't2'])
+  })
+
+  // A valley closed before #96 holds the loaves' count and the commander. A closed case that would
+  // now find something wrong loads unsolved, its slots filled, and one that wouldn't stays closed
+  // (#12 [Q13]).
+  it('reopens a closed case that would now find something wrong, and keeps one that would not', () => {
+    const spots = valley.moments.flatMap((m) => m.spots)
+    const closed = {
+      ...fresh(valley),
+      tapped: spots.map((x) => x.id),
+      bank: [...new Set(spots.flatMap((x) => x.words))],
+      faces: { d1: 'david', d2: 'goliath' },
+      fills: { t1: 'ten', t2: 'commander', t3: 'six', t4: 'sling', t5: 'goliath' },
+      step: valley.steps.length - 1,
+      solved: true,
+    }
+    localStorage.setItem(key, JSON.stringify({ valley: closed }))
+    expect(load(cases).valley).toEqual({ ...closed, solved: false })
+    const right = { ...closed, fills: { ...closed.fills, t1: 'brothers', t2: 'saul' } }
+    localStorage.setItem(key, JSON.stringify({ valley: right }))
+    expect(load(cases).valley).toEqual(right)
   })
 
   // Progress gained the hints used (#29). An entry kept before them has used none and keeps its

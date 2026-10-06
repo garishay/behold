@@ -29,7 +29,7 @@ describe('what a hint points at (#29)', () => {
   })
 
   it('Close the case once everything is found and filled', () => {
-    const fills = { t1: 'ten', t2: 'commander', t3: 'six', t4: 'sling', t5: 'goliath' }
+    const fills = { t1: 'brothers', t2: 'saul', t3: 'six', t4: 'sling', t5: 'goliath' }
     const p = { ...swept(valley), faces: { d1: 'david', d2: 'goliath' }, fills }
     expect(aim(valley, p, null)).toEqual({ why: 'close' })
   })
@@ -69,12 +69,12 @@ describe('a player with nothing left to place (#65)', () => {
     const faces = { d1: 'david' }
     const p = played(['boy', 'basket'], {
       faces,
-      fills: { t1: 'ten', t2: 'commander', t4: 'sling' },
+      fills: { t1: 'brothers', t3: 'ten', t4: 'sling' },
     })
-    expect(stranded(valley, p)).toEqual(new Set(['name', 'number']))
+    expect(stranded(valley, p)).toEqual(new Set(['name']))
     expect(aim(valley, p, null)).toEqual({ spot: 'armor', why: 'stranded' })
-    // With the commander's blank empty, a loose word fits it, and the hint is the plain one.
-    const q = played(['boy', 'basket'], { faces, fills: { t1: 'ten', t4: 'sling' } })
+    // With the cubits' blank empty, a loose word fits it, and the hint is the plain one.
+    const q = played(['boy', 'basket'], { faces, fills: { t1: 'brothers', t4: 'sling' } })
     expect(aim(valley, q, null)).toEqual({ spot: 'bearer', why: 'unfound' })
   })
 })

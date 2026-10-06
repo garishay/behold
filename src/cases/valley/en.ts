@@ -45,14 +45,14 @@ export const en = {
     account: {
       heading: 'The account',
       parts: [
-        { t: 'A boy came down to the valley with ' },
+        { t: 'A boy came down to the valley with ten loaves for his ' },
         { b: 't1' },
-        { t: ' loaves for his brothers, and cheeses for the ' },
-        { b: 't2' },
-        { t: '. Against Israel stood a champion of ' },
+        { t: ', and cheeses for their commander. Against Israel stood a champion of ' },
         { b: 't3' },
+        { t: ' cubits and a span. ' },
+        { b: 't2' },
         {
-          t: ' cubits and a span. Saul dressed the boy in his own armor, and the boy took it off, untested. From the brook he picked five smooth stones, and he went down with a staff and a ',
+          t: ' dressed the boy in his own armor, and the boy took it off, untested. From the brook he picked five smooth stones, and he went down with a staff and a ',
         },
         { b: 't4' },
         {

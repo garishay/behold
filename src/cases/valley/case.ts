@@ -68,10 +68,15 @@ export const valley = {
     { id: 'd1', picture: 'd1.jpg', answer: 'david' },
     { id: 'd2', picture: 'd2.jpg', answer: 'goliath' },
   ],
+  // Each blank asks what the story turns on (docs/case-design.md, rule 7; #96): why the boy came,
+  // the giant's measure, whose armor the boy took off, how he fought, and whose sword. The loaves'
+  // count and the commander's cheeses stay in the account as details. The blanks are listed in the
+  // account's order, the order a hint and the first ring take them in; Saul's keeps the id t2, so
+  // a valley kept from before keeps its words, as misses (B5).
   blocks: [
     {
       id: 'account',
-      blanks: { t1: 'ten', t2: 'commander', t3: 'six', t4: 'sling', t5: 'goliath' },
+      blanks: { t1: 'brothers', t3: 'six', t2: 'saul', t4: 'sling', t5: 'goliath' },
     },
   ],
   steps: [
@@ -93,7 +98,7 @@ export const valley = {
     d1: 'boy',
     d2: 'giant',
     t1: 'basket',
-    t2: 'basket',
+    t2: 'armor',
     t3: 'giant',
     t4: 'boy',
     t5: 'giant',

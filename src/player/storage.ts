@@ -1,6 +1,6 @@
 import type { CaseEntry } from '../cases/index.ts'
 import type { CaseStructure } from '../cases/types.ts'
-import { advance, type Progress } from './state.ts'
+import { advance, wrong, type Progress } from './state.ts'
 
 /**
  * Progress kept on the device (#6): one key in localStorage, every case's progress by id, so a
@@ -63,6 +63,16 @@ const fits = (s: CaseStructure, p: Progress) => {
 }
 
 /**
+ * Kept progress as it loads. It moves past every step it has met, as a move would, so a step the
+ * tutorial gains ahead of the stored one shows only while it is still to do (#77). A closed case
+ * that would now find something wrong, its answers changed since it closed, loads unsolved, so its
+ * next close checks it again: a guided one lands on its last step with its slots filled, and the
+ * valley's close rings what changed (#12 [Q13]).
+ */
+const restored = (s: CaseStructure, p: Progress) =>
+  advance(s, p.solved && wrong(s, p) > 0 ? { ...p, solved: false } : p)
+
+/**
  * The store's progress by case, for the cases registered: a store that is not one, an entry
  * that is not progress, or an entry whose ids its case no longer has, reads as none.
  */
@@ -72,11 +82,9 @@ export function load(registry: readonly CaseEntry[]): Saved {
     const parsed: unknown = raw === null ? {} : JSON.parse(raw)
     if (!record(parsed)) return {}
     const entries = Object.entries(parsed).map(([id, v]) => [id, withHints(v)] as const)
-    // Kept progress moves past every step it has met, as a move would, so a step the tutorial gains
-    // ahead of the stored one shows only while it is still to do (#77).
     const kept = entries.flatMap(([id, v]) => {
       const structure = registry.find((c) => c.structure.id === id)?.structure
-      return structure && progress(v) && fits(structure, v) ? [[id, advance(structure, v)]] : []
+      return structure && progress(v) && fits(structure, v) ? [[id, restored(structure, v)]] : []
     })
     return Object.fromEntries(kept)
   } catch {

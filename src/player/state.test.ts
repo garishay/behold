@@ -100,9 +100,9 @@ describe('the model (#6)', () => {
     const p = {
       ...fresh(valley),
       faces: { d1: 'david', d2: 'saul' },
-      fills: { t1: 'ten', t3: 'five' },
+      fills: { t1: 'brothers', t3: 'five' },
     }
-    expect(wrongs(valley, p)).toEqual(['d2', 't2', 't3', 't4', 't5'])
+    expect(wrongs(valley, p)).toEqual(['d2', 't3', 't2', 't4', 't5'])
   })
 
   it('a moment placed in a second order slot leaves the first', () => {
@@ -180,7 +180,7 @@ describe('the model (#6)', () => {
     expect(step(valley, p)?.id).toBe('step6')
     p = tap(valley, p, 'bearer').progress
     expect([step(valley, p)?.id, closable(valley, p)]).toEqual(['step7', true])
-    const answers = { d2: 'goliath', t1: 'ten', t2: 'commander', t3: 'six', t5: 'goliath' }
+    const answers = { d2: 'goliath', t1: 'brothers', t2: 'saul', t3: 'six', t5: 'goliath' }
     for (const [slot, word] of Object.entries(answers))
       p = chooseSlot(valley, p, chooseWord(valley, p, nothing, word).selection, slot).progress
     expect(wrong(valley, p)).toBe(0)
@@ -201,7 +201,7 @@ describe('the model (#6)', () => {
       spots.reduce((q, id) => tap(valley, q, id).progress, fresh(valley)),
       'solve',
     )
-    const fills = { d1: 'david', t4: 'sling', d2: 'goliath', t1: 'ten', t2: 'commander', t3: 'six' }
+    const fills = { d1: 'david', t4: 'sling', d2: 'goliath', t1: 'brothers', t2: 'saul', t3: 'six' }
     for (const [slot, word] of Object.entries(fills))
       p = chooseSlot(valley, p, chooseWord(valley, p, nothing, word).selection, slot).progress
     expect([step(valley, p)?.id, closable(valley, p)]).toEqual(['step6', false])
