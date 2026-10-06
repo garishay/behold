@@ -265,7 +265,10 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   }
   const onSubmit = () => {
     const off = wrong(s, progress)
-    setNote(off === 0 ? '' : strings.noMatch(off > 2, s.moments.length))
+    // How many don't match, as a number, and how many things are still to find (#95).
+    const left = spots.filter((x) => !progress.tapped.includes(x.id)).length
+    const rest = left > 0 ? ` ${strings.toFind(left, s.moments.length)}` : ''
+    setNote(off === 0 ? '' : strings.noMatch(off) + rest)
     if (off > 0) {
       play('notYet')
       setFails(fails + 1)

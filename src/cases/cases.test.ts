@@ -81,13 +81,24 @@ describe('the case registry (Gate 02 A1, A5)', () => {
 
   // The paid round's second session (#23, 2026-10-05): she spoke of knowledge, not clues. A failed
   // close's miss is the picture's, never the player's (#77): no word a player reads calls an answer
-  // wrong, in any case's text or in the app's copy, the close's count included in all its forms.
+  // wrong, in any case's text or in the app's copy, the close's count included in all its forms,
+  // with what is left to find (#95).
   it('no text the player reads calls an answer wrong', () => {
-    const counts = [false, true].flatMap((several) =>
-      [1, 3].map((n) => strings.noMatch(several, n)),
+    const counts = [1, 2, 11].flatMap((n) =>
+      [1, 3].flatMap((p) => [strings.noMatch(n), strings.toFind(n, p)]),
     )
     const read = [...cases.flatMap((c) => Object.values(c.text)), strings, counts]
     expect(JSON.stringify(read)).not.toMatch(/\bwrong\b/i)
+  })
+
+  // A failed close says in words how much is left to find (#95). Every case has a word for the
+  // most it can leave, all its spots but one; the vineyard, with eighteen, can leave seventeen.
+  it('has a word for everything a failed close can leave unfound', () => {
+    for (const { structure: s } of cases) {
+      const most = s.moments.flatMap((m) => m.spots).length - 1
+      expect(strings.toFind(most, s.moments.length), s.id).not.toMatch(/undefined|\d/)
+    }
+    expect(strings.toFind(17, 3)).toBe('There are seventeen more to find in the pictures.')
   })
 
   // The vineyard turns on the seal: it must be the smallest box it overlaps, so it is drawn on top

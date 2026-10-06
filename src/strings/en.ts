@@ -19,6 +19,17 @@ const wants: Readonly<Record<Kind, string>> = {
 /** A case's title inside a sentence: "The mountain" reads "the mountain". */
 const inline = (title: string) => title.charAt(0).toLowerCase() + title.slice(1)
 
+/**
+ * A count in words, as a close says it (#95): a case has eleven slots at most, and the vineyard,
+ * with the most spots, can leave seventeen unfound. The registry's test holds every case to it.
+ */
+const counted = [
+  ...'no one two three four five six seven eight nine ten eleven twelve'.split(' '),
+  ...'thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty'.split(' '),
+]
+/** What a case shows: its one picture, or its pictures. */
+const shown = (pictures: number) => (pictures > 1 ? 'pictures' : 'picture')
+
 export const strings = {
   title: 'Behold',
   kicker: 'Bible Mystery Game',
@@ -101,12 +112,13 @@ export const strings = {
     found
       ? `That blank wants ${wants[kind]}.`
       : `That blank wants ${wants[kind]}. Find one in the picture.`,
-  // A failed close's count, one or two or several, never which (rule 5), and worded as the
-  // picture's, never the player's: answers that don't match what the case's pictures show (#77).
-  noMatch: (several: boolean, pictures: number) => {
-    const shown = pictures > 1 ? 'what the pictures show' : 'what the picture shows'
-    return several ? `Several don’t match ${shown}.` : `One or two don’t match ${shown}.`
-  },
+  // A failed close's count, as a number (#95). A miss is the picture's, never the player's (#77):
+  // answers that don't fit the story.
+  noMatch: (n: number) =>
+    `${counted[n].charAt(0).toUpperCase()}${counted[n].slice(1)} ${n === 1 ? 'answer doesn’t' : 'answers don’t'} fit the story.`,
+  // A failed close with something still unfound says how much (#95).
+  toFind: (n: number, pictures: number) =>
+    `There ${n === 1 ? 'is' : 'are'} ${counted[n]} more to find in the ${shown(pictures)}.`,
   // What a screen reader hears after a slot a failed close in the valley ringed (#77).
   ringedNoMatch: ', ringed: doesn’t match the picture',
 
