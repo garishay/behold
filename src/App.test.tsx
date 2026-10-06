@@ -472,7 +472,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
       'Found: David, sling · one of the faces in Solve',
     )
     expect(screen.getByRole('tab', { name: /Look/ })).toHaveTextContent('Look1/6')
-    expect(coach()).toHaveTextContent('That tap found two words: David and sling.')
+    expect(coach()).toHaveTextContent('That tap found his name, David, and sling.')
     expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('Solve0/7+2')
     // The guided steps hold the screen until sling is in its blank (#77), and Solve opened by them
     // rings the two words its first time.
@@ -938,7 +938,7 @@ describe('the tutorial’s marks (#25)', () => {
     chip('sword')
     expect(document.querySelector('[data-word="sword"]')).not.toHaveClass('is-on')
     slot('t4')
-    expect(at()).toBe('[data-word="sling"]')
+    expect([at(), said()]).toEqual(['[data-word="sling"]', 'Now tap sling. Bright words fit.'])
     chip('sword')
     expect(document.querySelector(blank)).not.toHaveClass('is-filled')
     chip('sling')
@@ -1032,25 +1032,25 @@ describe('the tutorial’s marks (#25)', () => {
     tapSpot('boy')
     // The boy's tap found two words, and the dock says so: it is ringed whole, the caption with
     // its line of finds, and a tap on it reads it (#77).
-    expect([at(), said()]).toEqual(['.dock', 'That tap found two words: David and sling.'])
+    expect([at(), said()]).toEqual(['.dock', 'That tap found his name, David, and sling.'])
     fireEvent.click(document.querySelector('.dock .found')!)
     expect([at(), said()]).toEqual(['[data-view="solve"]', 'Open Solve to name him.'])
     tab(/Solve/)
     // Both guided fills lead with the slot (#77). The slot under the boy is ringed, and once it
     // waits, sling dims, since a thing can't name him, and the mark moves to David.
-    expect([at(), said()]).toEqual(['[data-slot="d1"]', 'Tap the slot under the boy, then David.'])
+    expect([at(), said()]).toEqual(['[data-slot="d1"]', 'Tap “who?” under the boy, then David.'])
     slot('d1')
-    expect(at()).toBe('[data-word="david"]')
+    expect([at(), said()]).toEqual(['[data-word="david"]', 'Now tap David, his name.'])
     expect(document.querySelector('[data-word="sling"]')).toHaveClass('is-dim')
     expect(document.querySelector('[data-word="david"]')).not.toHaveClass('is-dim')
     chip('David')
     // Sling's blank leads the same way, and once it waits, David dims.
     expect([at(), said()]).toEqual([
       '[data-slot="t4"]',
-      'Tap the blank, then\u00a0sling. Bright words fit.',
+      'The picture shows his sling. Tap the blank.',
     ])
     slot('t4')
-    expect(at()).toBe('[data-word="sling"]')
+    expect([at(), said()]).toEqual(['[data-word="sling"]', 'Now tap sling. Bright words fit.'])
     expect(document.querySelector('[data-word="david"]')).toHaveClass('is-dim')
     expect(document.querySelector('[data-word="sling"]')).not.toHaveClass('is-dim')
     chip('sling')
@@ -1078,7 +1078,7 @@ describe('the tutorial’s marks (#25)', () => {
     fireEvent.click(document.querySelector('.dock .found')!)
     expect([at(), said()]).toEqual(['[data-view="solve"]', 'Open Solve to name him.'])
     tab(/Solve/)
-    expect(said()).toBe('Tap the slot under the boy, then David.')
+    expect(said()).toBe('Tap “who?” under the boy, then David.')
     history.back()
     await onTab(/Look/)
     expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
@@ -1091,7 +1091,7 @@ describe('the tutorial’s marks (#25)', () => {
     await onTab(/Look/)
     expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
     tab(/Solve/)
-    expect(said()).toBe('Tap the blank, then\u00a0sling. Bright words fit.')
+    expect(said()).toBe('The picture shows his sling. Tap the blank.')
   })
 
   // The dock's line of finds is gone once the case opens again, so the step waiting on it is passed
@@ -1123,7 +1123,7 @@ describe('the tutorial’s marks (#25)', () => {
     fireEvent.click(open)
     expect(screen.getByRole('heading', { name: 'Who is who' })).toBeInTheDocument()
     expect(history.state).toEqual({ case: 'valley', view: 'solve' })
-    expect([at(), said()]).toEqual(['[data-slot="d1"]', 'Tap the slot under the boy, then David.'])
+    expect([at(), said()]).toEqual(['[data-slot="d1"]', 'Tap “who?” under the boy, then David.'])
     expect(screen.queryByRole('button', { name: 'Open Solve' })).not.toBeInTheDocument()
   })
 
@@ -1247,7 +1247,7 @@ describe('the tutorial’s marks (#25)', () => {
     expect(at()).toBe('.dock')
     history.forward()
     await onTab(/Solve/)
-    expect([at(), said()]).toEqual(['[data-slot="d1"]', 'Tap the slot under the boy, then David.'])
+    expect([at(), said()]).toEqual(['[data-slot="d1"]', 'Tap “who?” under the boy, then David.'])
   })
 
   it('marks nothing under the brief’s card or the menu, and nothing in a case without steps', async () => {

@@ -118,24 +118,24 @@ export const en = { … } satisfies CaseText<typeof valley>
 
 The type is computed from the structure, so the keys below are exactly the structure's ids.
 
-| field      | what it is                                                                                                                                     |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `title`    | the case card's title                                                                                                                          |
-| `subtitle` | the card's second line                                                                                                                         |
-| `brief`    | the case's opening question: its card over the picture when a fresh case opens, and the menu's sheet after (#24)                               |
-| `note`     | optional: a line under the brief, on its card only, for what the screen adds that the brief doesn't say — the mountain's dots (#77)            |
-| `passages` | one label per passage, in the language's own book names — `1 Samuel 17:38–51`                                                                  |
-| `moments`  | moment id → its name                                                                                                                           |
-| `captions` | spot id → what the player reads on a tap                                                                                                       |
-| `words`    | word id → the word as the word bank shows it                                                                                                   |
-| `faces`    | face id → the "who" line under the portrait — `the boy`                                                                                        |
-| `papers`   | paper id → `title` and `body`; a paragraph break is `\n`                                                                                       |
-| `blocks`   | block id → `heading` and `parts`: runs of text, `{ t: '…' }`, and the block's blanks, `{ b: 't1' }`, in this language's own word order         |
-| `steps`    | step id → the step's words, eight or fewer, beside its mark; only when the structure has steps                                                 |
-| `retry`    | the last step's words after a failed close, eight or fewer: the answers were checked, and the ringed ones don’t fit the story; only with steps |
-| `ask`      | the question asked on a miss, eight or fewer, beside its mark; only when the structure names `ask`                                             |
-| `teach`    | the lesson's words, eight or fewer, beside its mark; only when the structure teaches                                                           |
-| `reveal`   | the paragraphs in the game's words, shown before the passage                                                                                   |
+| field      | what it is                                                                                                                                                                               |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `title`    | the case card's title                                                                                                                                                                    |
+| `subtitle` | the card's second line                                                                                                                                                                   |
+| `brief`    | the case's opening question: its card over the picture when a fresh case opens, and the menu's sheet after (#24)                                                                         |
+| `note`     | optional: a line under the brief, on its card only, for what the screen adds that the brief doesn't say — the mountain's dots (#77)                                                      |
+| `passages` | one label per passage, in the language's own book names — `1 Samuel 17:38–51`                                                                                                            |
+| `moments`  | moment id → its name                                                                                                                                                                     |
+| `captions` | spot id → what the player reads on a tap                                                                                                                                                 |
+| `words`    | word id → the word as the word bank shows it                                                                                                                                             |
+| `faces`    | face id → the "who" line under the portrait — `the boy`                                                                                                                                  |
+| `papers`   | paper id → `title` and `body`; a paragraph break is `\n`                                                                                                                                 |
+| `blocks`   | block id → `heading` and `parts`: runs of text, `{ t: '…' }`, and the block's blanks, `{ b: 't1' }`, in this language's own word order                                                   |
+| `steps`    | step id → the step's words, eight or fewer, beside its mark; a step that leads with its slot may give a second form, shown once the slot waits (#102); only when the structure has steps |
+| `retry`    | the last step's words after a failed close, eight or fewer: the answers were checked, and the ringed ones don’t fit the story; only with steps                                           |
+| `ask`      | the question asked on a miss, eight or fewer, beside its mark; only when the structure names `ask`                                                                                       |
+| `teach`    | the lesson's words, eight or fewer, beside its mark; only when the structure teaches                                                                                                     |
+| `reveal`   | the paragraphs in the game's words, shown before the passage                                                                                                                             |
 
 That is every string the player reads for a case. What the interface says around it — the view
 names, "Who is who", "Close the case", the kind labels — is app copy in `src/strings/en.ts`.

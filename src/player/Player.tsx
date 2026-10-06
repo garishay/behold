@@ -472,6 +472,10 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   }
   const hinted = hintAt()
   const at = hinted ?? markAt()
+  // A step that leads with its slot says what comes next once the slot waits (#102).
+  const forms = current && text.steps?.[current.id]
+  const waits = current?.slotFirst === true && selection.target === current.until.filled
+  const stepWords = typeof forms === 'string' ? forms : forms?.[waits ? 1 : 0]
   // A ring with no words carries no dim either ([Q11]).
   const silent =
     view === 'look' && at === '[data-view="solve"]' && current?.until?.view === undefined
@@ -650,7 +654,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
                   ? text.ask
                   : retry && !current.until
                     ? text.retry
-                    : text.steps?.[current.id]) ?? '')
+                    : stepWords) ?? '')
           }
           onTap={
             meet ?? (fleeting && said !== showing && !silent ? () => setSaid(showing) : undefined)

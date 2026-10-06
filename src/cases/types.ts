@@ -150,6 +150,12 @@ type Keyed<K extends string, V> = [K] extends [never]
   ? { readonly [key: string]: never }
   : Readonly<Record<K, V>>
 
+/**
+ * A step's words: one form, or two for a step that leads with its slot, the second shown once the
+ * slot waits and the mark has moved to the answer's word (#102).
+ */
+export type StepWords = string | readonly [string, string]
+
 /** A run of text, or one of the block's blanks, in this language's own order — never both. */
 export type Part<B extends string> =
   { readonly t: string; readonly b?: never } | { readonly b: B; readonly t?: never }
@@ -181,9 +187,9 @@ export type CaseText<S extends CaseStructure> = {
   readonly reveal: readonly string[]
 } & (S extends { readonly steps: infer T extends readonly Step[] }
   ? // `retry`: the last step's words after a failed close, which say the answers were checked.
-    { readonly steps: Keyed<T[number]['id'], string>; readonly retry: string }
+    { readonly steps: Keyed<T[number]['id'], StepWords>; readonly retry: string }
   : CaseStructure extends S
-    ? { readonly steps?: Readonly<Record<string, string>>; readonly retry?: string }
+    ? { readonly steps?: Readonly<Record<string, StepWords>>; readonly retry?: string }
     : { readonly steps?: never; readonly retry?: never }) &
   (S extends { readonly teach: Teach }
     ? { readonly teach: string }
