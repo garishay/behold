@@ -732,6 +732,29 @@ button:focus-visible {
   pointer-events: none;
 }
 
+/* Inside a hint's half, a found thing's ✓: the game's gold on its dark ground, never in a tap's
+   way, its lines a steady width however large the picture is drawn (#95). */
+.stage .found {
+  pointer-events: none;
+}
+
+.stage .found circle {
+  fill: var(--slate-deep);
+  fill-opacity: 0.85;
+  stroke: var(--gold);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.stage .found path {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 2.5px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
 .stage.zoomed {
   overflow: auto;
 }
@@ -945,9 +968,12 @@ button:focus-visible {
   color: var(--gold);
 }
 
-/* The bank, docked on Solve above the bar (#24). */
+/* The bank, docked on Solve above the bar (#24): its head, then its words, which give up room
+   first. */
 .bank {
   flex: none;
+  display: flex;
+  flex-direction: column;
   background: var(--slate-deep);
   border-top: 1px solid var(--slate);
   padding: 8px var(--inset);
@@ -1027,6 +1053,13 @@ button:focus-visible {
 
 .submit-row + .bank .chips {
   max-height: 108px;
+}
+
+/* Under the row, the bank keeps its height when a failed close's count and what is left to find
+   take two lines of its head: the words give up the top of their third row, and the account keeps
+   eight lines at the floor (#24, ruling [2]; #95). */
+.submit-row + .bank {
+  max-height: 150px;
 }
 
 .chip {
@@ -1282,6 +1315,13 @@ button:focus-visible {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
+}
+
+/* The order a failed close found not to match, ringed whole as the one answer it is, in the
+   action kind's red that a face's ring takes on the same dark ground (#95). */
+.order.is-wrong {
+  border-radius: 10px;
+  box-shadow: 0 0 0 2px var(--t-action);
 }
 
 .order .step {

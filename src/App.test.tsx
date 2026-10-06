@@ -1142,7 +1142,7 @@ describe('the tutorial’s marks (#25)', () => {
     }
     expect(document.querySelector('[data-slot="t5"]')).not.toHaveClass('is-right')
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
-    expect(result()).toHaveTextContent('One or two don’t match what the picture shows.')
+    expect(result()).toHaveTextContent('One answer doesn’t fit the story.')
     expect([at(), said()]).toEqual(['[data-slot="t5"]', 'Whose sword? Look closer at the picture.'])
     fireEvent.pointerDown(document.querySelector('[data-slot="t1"]')!)
     expect([at(), said()]).toEqual(['[data-slot="t5"]', ''])
@@ -1460,11 +1460,11 @@ describe('the tutorial’s marks (#25)', () => {
     }
     fireEvent.pointerDown(document.querySelector('[data-close]')!)
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
-    expect(result()).toHaveTextContent('One or two don’t match what the picture shows.')
+    expect(result()).toHaveTextContent('One answer doesn’t fit the story.')
     await waitFor(() => expect(document.querySelector('.coach .ring')).toHaveClass('dim'))
     expect([at(), said()]).toEqual([
       '[data-close]',
-      'Ringed answers don’t match the picture. Look closer.',
+      'Ringed answers don’t fit the story. Look closer.',
     ])
     fireEvent.pointerDown(document.querySelector('[data-slot="t3"]')!)
     expect([at(), said()]).toEqual(['[data-close]', ''])
@@ -1490,7 +1490,7 @@ describe('the tutorial’s marks (#25)', () => {
     expect(ringed()).toEqual(['t1', 't3'])
     expect(at()).toBe('[data-slot="t5"]')
     expect(document.querySelector('[data-slot="t1"]')).toHaveTextContent(
-      'king, ringed: doesn’t match the picture',
+      'king, ringed: doesn’t fit the story',
     )
     chip('brothers')
     slot('t1')
@@ -1544,7 +1544,9 @@ describe('the tutorial’s marks (#25)', () => {
     openCase(/The valley/)
     tab(/Solve/)
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
-    expect(result()).toHaveTextContent('Several don’t match what the picture shows.')
+    expect(result()).toHaveTextContent(
+      'Four answers don’t fit the story. There are three more to find in the picture.',
+    )
     const ringed = [...document.querySelectorAll('.is-wrong')].map((e) =>
       e.getAttribute('data-slot'),
     )
@@ -1563,13 +1565,13 @@ describe('the tutorial’s marks (#25)', () => {
     expect(screen.queryByRole('heading', { name: 'The case is closed.' })).not.toBeInTheDocument()
     tab(/Solve/)
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
-    expect(result()).toHaveTextContent('One or two don’t match what the picture shows.')
+    expect(result()).toHaveTextContent('Two answers don’t fit the story.')
     const ringed = [...document.querySelectorAll('.is-wrong')].map((e) =>
       e.getAttribute('data-slot'),
     )
     expect(ringed).toEqual(['t1', 't2'])
     await waitFor(() => expect(ring()).toHaveClass('dim'))
-    expect(said()).toBe('Ringed answers don’t match the picture. Look closer.')
+    expect(said()).toBe('Ringed answers don’t fit the story. Look closer.')
   })
 })
 
@@ -2027,6 +2029,129 @@ describe('Solve’s room (#24)', () => {
   })
 })
 
+describe('the close converges (#95)', () => {
+  const at = () => coach()?.getAttribute('data-at')
+  const said = () => coach()?.querySelector('[role="status"]')?.textContent
+  const ringed = () =>
+    [...document.querySelectorAll('.is-wrong')].map((e) => e.getAttribute('data-slot') ?? 'order')
+  // jsdom lays nothing out, and a mark shows only where its target can be seen (07c).
+  beforeEach(() => {
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue(
+      new DOMRect(10, 10, 100, 40),
+    )
+  })
+  afterEach(() => vi.restoreAllMocks())
+  const spotsOf = (s: CaseStructure) => s.moments.flatMap((m) => m.spots)
+  /** The mountain with the spots given found, and their words in the bank. */
+  const mountain = (found: string[], kept: object) => {
+    const spots = spotsOf(carmel).filter((x) => found.includes(x.id))
+    return {
+      carmel: {
+        ...fresh(carmel),
+        tapped: found,
+        bank: [...new Set(spots.flatMap((x) => x.words))],
+        ...kept,
+      },
+    }
+  }
+  const everything = spotsOf(carmel).map((x) => x.id)
+  const right = {
+    faces: { c1: 'elijah', c2: 'ahab' },
+    order: ['baal', 'water', 'fire'],
+    fills: { a1: 'said-nothing', a2: 'cried-aloud', a3: 'stones', a4: 'fell-on-faces' },
+  }
+
+  // The next round's three testers (#23): in the mountain a right change read the same as a wrong
+  // one, and all three took right answers back out. Every failed close counts as a number, and from
+  // a case's second it rings what doesn't match, the order whole as the one answer it is, each ring
+  // until its answer changes.
+  it('counts as a number, and rings what doesn’t match from the second miss', () => {
+    const missed = {
+      ...right,
+      faces: { c1: 'elijah', c2: 'baal' },
+      order: ['water', 'fire', 'baal'],
+    }
+    start(<App />, mountain(everything, missed))
+    openCase(/The mountain/)
+    tab(/Solve/)
+    const close = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    close()
+    expect(result()).toHaveTextContent(/^Two answers don’t fit the story\.$/)
+    expect(ringed()).toEqual([])
+    close()
+    expect(ringed()).toEqual(['c2', 'order'])
+    expect(screen.getByText(/^What happened first, ringed: doesn’t fit the story$/)).toHaveClass(
+      'sr',
+    )
+    tile('Baal’s altar')
+    orderSlot(0)
+    expect(ringed()).toEqual(['c2'])
+  })
+
+  // The next round's third tester (#23) filled the valley from two of its six things, and its rings
+  // said which answers didn't match but not that their words were still in the picture. A close
+  // that fails with something unfound says how much, and rings Look until it opens: in a case
+  // without steps with no words, and in the valley with its retry.
+  it('says how much is left to find, and rings Look until it opens', async () => {
+    const found = everything.filter((id) => !['ruin', 'spent'].includes(id))
+    start(<App />, mountain(found, { ...right, faces: { c1: 'elijah', c2: 'baal' } }))
+    openCase(/The mountain/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(result()).toHaveTextContent(
+      /^One answer doesn’t fit the story\. There are two more to find in the pictures\.$/,
+    )
+    expect([at(), said()]).toEqual(['[data-view="look"]', ''])
+    tab(/Look/)
+    await waitFor(() => expect(history.state).toEqual({ case: 'carmel' }))
+    tab(/Solve/)
+    expect(at()).toBeUndefined()
+  })
+
+  it('in the valley, the retry rings Look while something is unfound', () => {
+    const tapped = ['boy', 'basket', 'giant', 'armor']
+    const spots = spotsOf(valley).filter((x) => tapped.includes(x.id))
+    start(<App />, {
+      valley: {
+        ...fresh(valley),
+        tapped,
+        bank: [...new Set(spots.flatMap((x) => x.words))],
+        faces: { d1: 'david', d2: 'goliath' },
+        fills: { t1: 'brothers', t2: 'saul', t3: 'ten', t4: 'sling', t5: 'goliath' },
+        step: valley.steps.length - 1,
+      },
+    })
+    openCase(/The valley/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(result()).toHaveTextContent(
+      /^One answer doesn’t fit the story\. There are two more to find in the picture\.$/,
+    )
+    expect([at(), said()]).toEqual([
+      '[data-view="look"]',
+      'Ringed answers don’t fit the story. Look closer.',
+    ])
+  })
+
+  // Testers 2 and 3 (#23) tapped found things again inside "Where to look"'s ring. Its first tier
+  // marks what is found inside the half it rings, and nothing outside it: the altar, found, lies in
+  // the right half that the spent prophets' smaller box sends the hint to; the caller, found, in
+  // the left. The altar runs across the middle, so its mark sits at the middle of its part inside
+  // the ring, 569.25 of the picture's 900 across, not at the middle of the whole altar. The
+  // pourers' middle lies just outside the half, but they cross into it, so they are marked at the
+  // middle of their part inside, at 549 (review on open).
+  it('marks what is found inside the first tier’s half', () => {
+    start(<App />, mountain(['altar', 'caller', 'pourers'], {}))
+    openCase(/The mountain/)
+    menu('Hint')
+    expect(at()).toBe('[data-half]')
+    expect(document.querySelector('[data-found="altar"] circle')).toHaveAttribute('cx', '569.25')
+    expect(document.querySelector('[data-found="pourers"] circle')).toHaveAttribute('cx', '549')
+    expect(document.querySelector('[data-found="caller"]')).toBeNull()
+    expect(document.querySelectorAll('[data-found]')).toHaveLength(2)
+  })
+})
+
 describe('the case solved (#6, 03c; #24)', () => {
   it('Solve counts what is filled and holds who is who, the account, and the bank', () => {
     start()
@@ -2113,7 +2238,7 @@ describe('the case solved (#6, 03c; #24)', () => {
     // The sword's blank is asked about only on a miss, so until then it takes no ✓ (#77).
     expect(document.querySelector('[data-slot="t5"]')).not.toHaveClass('is-right')
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
-    expect(result()).toHaveTextContent('One or two don’t match what the picture shows.')
+    expect(result()).toHaveTextContent('One answer doesn’t fit the story.')
     expect(screen.queryByRole('heading', { name: 'The case is closed.' })).not.toBeInTheDocument()
     slot('t2')
     chip('Saul')
@@ -2192,7 +2317,9 @@ describe('the case solved (#6, 03c; #24)', () => {
     const submit = screen.getByRole('button', { name: 'Close the case' })
     expect(submit).toBeEnabled()
     fireEvent.click(submit)
-    expect(result()).toHaveTextContent('Several don’t match what the pictures show.')
+    expect(result()).toHaveTextContent(
+      'Three answers don’t fit the story. There are nine more to find in the pictures.',
+    )
     expect(screen.queryByRole('heading', { name: 'The case is closed.' })).not.toBeInTheDocument()
     for (const [id, word] of [
       ['s1', 'garden'],
@@ -2203,7 +2330,9 @@ describe('the case solved (#6, 03c; #24)', () => {
       slot(id)
     }
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
-    expect(result()).toHaveTextContent('One or two don’t match what the pictures show.')
+    expect(result()).toHaveTextContent(
+      'One answer doesn’t fit the story. There are nine more to find in the pictures.',
+    )
     slot('s3')
     chip('inheritance')
     slot('s3')

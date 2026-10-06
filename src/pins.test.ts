@@ -169,6 +169,32 @@ describe('the bank’s rows (#24)', () => {
     expect(chips).toMatch(/max-height: 156px;/)
     expect(under).toMatch(/max-height: 108px;/)
   })
+
+  // Under the row, a failed close's count and what is left to find take two lines of the bank's
+  // head, and the words give that room back, so the account keeps eight lines at the floor (#24,
+  // ruling [2]; #95).
+  it('keeps its height under the row when its head takes two lines', () => {
+    const bank = /\n\.bank \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    const under = /\n\.submit-row \+ \.bank \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    expect(bank).toMatch(/display: flex;\s+flex-direction: column;/)
+    expect(under).toMatch(/max-height: 150px;/)
+  })
+})
+
+// The close's order ring and a hint's found marks are classes the tests read; how they look is the
+// stylesheet's, pinned as text against removal, and the screens are their evidence (#95).
+describe('the close’s order ring and the hint’s found marks (#95)', () => {
+  it('rings the order whole in the faces’ red', () => {
+    const order = /\n\.order\.is-wrong \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    expect(order).toMatch(/box-shadow: 0 0 0 2px var\(--t-action\);/)
+  })
+
+  it('marks a found thing in gold, taking no tap', () => {
+    const found = /\n\.stage \.found \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    const ring = /\n\.stage \.found circle \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    expect(found).toMatch(/pointer-events: none;/)
+    expect(ring).toMatch(/stroke: var\(--gold\);/)
+  })
 })
 
 describe('the sound effects (Gate 10 A6)', () => {

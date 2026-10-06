@@ -4,6 +4,19 @@ import type { Box, CaseStructure, CaseText, Moment } from '../cases/types.ts'
 import { strings } from '../strings/en.ts'
 import { picture } from './pictures.ts'
 
+/**
+ * Whether part of a box lies inside another, both in percentages of the picture: a thing across a
+ * ring's edge is marked inside it, wherever its middle lies (#95, review on open).
+ */
+const overlaps = ([l, t, w, h]: Box, [hl, ht, hw, hh]: Box) =>
+  l < hl + hw && hl < l + w && t < ht + hh && ht < t + h
+
+/** The part of a box inside another, so a mark on it sits inside the other's ring. */
+const clip = ([l, t, w, h]: Box, [hl, ht, hw, hh]: Box): Box => {
+  const [left, top] = [Math.max(l, hl), Math.max(t, ht)]
+  return [left, top, Math.min(l + w, hl + hw) - left, Math.min(t + h, ht + hh) - top]
+}
+
 interface StageProps {
   structure: CaseStructure
   text: CaseText<CaseStructure>
@@ -91,6 +104,24 @@ export function Stage(props: StageProps) {
               {spots.map((s) => (
                 <rect key={s.id} data-spot={s.id} {...place(s.box)} />
               ))}
+              {/* Inside a hint's half, what is found already is marked, so the ring's search is
+                  for the rest (#95): a ✓ at the middle of each found thing's part inside the
+                  ring, taking no tap. */}
+              {half &&
+                spots
+                  .filter((s) => tapped.includes(s.id) && overlaps(s.box, half))
+                  .map((s) => {
+                    const { x, y, width, height } = place(clip(s.box, half))
+                    const [cx, cy, r] = [x + width / 2, y + height / 2, w * 0.035]
+                    return (
+                      <g key={s.id} className="found" data-found={s.id}>
+                        <circle cx={cx} cy={cy} r={r} />
+                        <path
+                          d={`M${cx - r * 0.45} ${cy}l${r * 0.3} ${r * 0.32}l${r * 0.6} ${-r * 0.62}`}
+                        />
+                      </g>
+                    )
+                  })}
             </svg>
           </div>
           <button

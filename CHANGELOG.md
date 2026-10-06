@@ -3,6 +3,19 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.17.2 — Gate 24, the close (#95)
+
+- **95a — the close converges** (#101): in the mountain, "One or two don't match" read the same
+  after a right change as after a wrong one, and all three of the next round's testers took right
+  answers back out; the third filled the valley from two of its six things and couldn't tell that
+  the words he needed were still in the picture. A failed close now counts as a number, in the
+  owner's words, "One answer doesn't fit the story.", and from a case's second failed close it
+  rings each answer that doesn't fit, the order ringed whole, until it changes. A close that fails
+  with something unfound says how much is left to find and rings Look until it opens, and in the
+  valley the retry, "Ringed answers don't fit the story. Look closer.", rings Look too. "Where to
+  look" marks what is already found inside its ring. While the count and what is left take two
+  lines, the bank keeps its height, so the account keeps eight lines at the floor.
+
 ## v0.17.1 — Gate 24, the blanks (#96)
 
 - **96a — each blank asks what the story turns on** (#99): the next round's third tester said what
