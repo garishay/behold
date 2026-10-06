@@ -72,6 +72,11 @@ rules below are the answer, ruled on #26.
    player has already started stays open (#75). The valley teaches the game; the cases after it
    are one story as well as a ladder, so a payoff never comes before its setup.
 
+7. **A blank asks what the story turns on.** It asks who, why, how, whose, or what changed. A
+   number is blanked only when the number is the point, as six cubits and a span is the measure
+   of the man Israel fled from; a count that only fills in the scene, like ten loaves or four
+   jars, stays a detail in the account, the captions, and the reveal (#96).
+
 ## What holds a case to them
 
 **The validator** (`src/cases/validate.ts`, run by the test job over every registered case) holds
@@ -91,13 +96,16 @@ reference, with anything the passage does not say marked:
 - that a caption, a paper, and the brief describe and do not conclude (rule 2);
 - that the blanks are aimed at details, not the parts everyone knows (rule 3);
 - that the case adds one idea, and its brief to the author names it (rule 6);
+- that each blank asks what the story turns on, and a number only where the number is the point
+  (rule 7);
 - that each face's and blank's evidence, the spot a hint sends a stuck player to, is the one whose
   caption or paper settles it, and each moment's is the one that tells when it happened (#29). A
   hint points at evidence and never gives the word, so a wrong evidence spot is a wrong clue.
 
 ## Writing a case to them
 
-1. Read the passage through, and list what people get wrong about it. Those are the blanks.
+1. Read the passage through, and list what people get wrong about what it turns on: who, why,
+   how, whose, what changed (rule 7). Those are the blanks.
 2. For each blank, find its answer and two rivals in the passage, and make sure the pictures give
    a spot that yields each. A passage that names only one number can't give a number blank its
    two rivals, so it has no number blank. A blank a rival would make just as true — _killed_
