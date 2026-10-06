@@ -4,7 +4,7 @@ import { carmel } from '../cases/carmel/case.ts'
 import { valley } from '../cases/valley/case.ts'
 import { vineyard } from '../cases/vineyard/case.ts'
 import type { Box, CaseStructure } from '../cases/types.ts'
-import { aim, firstWrong, half, stranded } from './hints.ts'
+import { aim, broad, firstWrong, half, stranded } from './hints.ts'
 import { fresh, tap, type Progress } from './state.ts'
 
 /** A case with every spot tapped. */
@@ -22,10 +22,14 @@ describe('what a hint points at (#29)', () => {
 
   it('after a failed close, the evidence for what it found wrong; then the first empty thing’s', () => {
     const p = swept(valley)
-    expect(aim(valley, p, 't5')).toEqual({ spot: 'giant', why: 'evidence' })
-    expect(aim(valley, p, null)).toEqual({ spot: 'boy', why: 'evidence' })
+    expect(aim(valley, p, 't5')).toEqual({ spot: 'giant', why: 'evidence', for: 't5' })
+    expect(aim(valley, p, null)).toEqual({ spot: 'boy', why: 'evidence', for: 'd1' })
     const faces = { d1: 'david', d2: 'goliath' }
-    expect(aim(valley, { ...p, faces }, null)).toEqual({ spot: 'basket', why: 'evidence' })
+    expect(aim(valley, { ...p, faces }, null)).toEqual({
+      spot: 'basket',
+      why: 'evidence',
+      for: 't1',
+    })
   })
 
   it('Close the case once everything is found and filled', () => {
@@ -103,5 +107,26 @@ describe('the half of the picture (#29)', () => {
     expect(cut).toEqual([])
     expect(half([30, 28, 37, 63])).toEqual([0, 28, 100, 72])
     expect(half([31.5, 0, 40.5, 66])).toEqual([0, 0, 100, 66])
+  })
+
+  // The next round's first tester (#102): "Where to look" rang 80% of the picture for the giant,
+  // every thing in it found. A half that takes over 60% of the picture narrows little, so a hint
+  // there starts at its second tier, the thing itself (ruling [1]): six registered spots, from the
+  // giant's 80% to the altar's 64%. The next, the vineyard's cord, takes 59%.
+  it('takes most of the picture for six registered spots, so a hint there starts at tier 2', () => {
+    const wide = cases.flatMap(({ structure: s }) =>
+      s.moments
+        .flatMap((m) => m.spots)
+        .filter((x) => broad(x.box))
+        .map((x) => `${s.id}: ${x.id}`),
+    )
+    expect(wide).toEqual([
+      'valley: giant',
+      'carmel: altar',
+      'carmel: fire',
+      'carmel: prophets',
+      'micaiah: chariot',
+      'micaiah: horns',
+    ])
   })
 })

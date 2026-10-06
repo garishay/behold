@@ -133,10 +133,14 @@ export const strings = {
   hintSays: {
     unfound: 'There’s still something to find here.',
     stranded: 'Find the other words in the picture.',
-    evidence: 'Something here settles one answer.',
     close: 'Close the case to check your answers.',
   },
   hintThing: 'Here it is. Tap it.',
+  // A hint for an answer names it (#102): a face by its line, the order by its question, a blank by
+  // the words beside it, with its mark.
+  hintSettles: (answer: string) => `Something here settles “${answer}”.`,
+  hintSettlesThing: (answer: string) => `This settles “${answer}”. Tap it.`,
+  blankMark: '___',
 
   // The reveal.
   caseClosed: 'The case is closed.',

@@ -8,7 +8,7 @@ import { strings } from '../strings/en.ts'
 import { Bank } from './Bank.tsx'
 import { CoachMark } from './CoachMark.tsx'
 import { Dock, type Caption } from './Dock.tsx'
-import { aim, firstWrong, half, stranded, stuck, type Aim, type Tier } from './hints.ts'
+import { aim, broad, firstWrong, half, stranded, stuck, type Aim, type Tier } from './hints.ts'
 import { PaperModal, PapersSheet } from './Papers.tsx'
 import { prefetch } from './pictures.ts'
 import { bring, showEmpty } from './place.ts'
@@ -372,14 +372,18 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   /**
    * A hint asked for, from the offer or the menu (#29): the second tier of the one showing, or a new
    * one's first. It starts the signals over, and the tier is kept for the close. Asked for past its
-   * last tier, the hint's mark is shown again, and under a guided step the step's is.
+   * last tier, the hint's mark is shown again, and under a guided step the step's is. Where a
+   * thing's half would take most of the picture, its first hint is the second tier: tier 1 would
+   * ring the same box and say less (#102 [1]).
    */
   const take = () => {
     setSaidAt(null)
     if (guided || hint?.tier === 2 || hint?.why === 'close') return nudge()
+    const target = aim(s, progress, missed ?? asked ?? null)
+    const box = spots.find((x) => x.id === target.spot)?.box
     const next = hint
       ? { ...hint, tier: 2 as const }
-      : { ...aim(s, progress, missed ?? asked ?? null), tier: 1 as const }
+      : { ...target, tier: box && broad(box) ? (2 as const) : (1 as const) }
     setHint(next)
     setRun(0)
     setStayed(false)
@@ -481,12 +485,30 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   // for the second; or Close the case, through Solve's button. It takes the step's place.
   const aimed = spots.find((x) => x.id === hint?.spot)
   const home = s.moments.find((m) => aimed !== undefined && m.spots.includes(aimed))
+  const halved = hint?.tier === 1 && aimed !== undefined
   const hintAt = () => {
     if (hint === null || card || sheet !== null || paper !== null) return undefined
     if (hint.why === 'close') return view === 'look' ? '[data-view="solve"]' : '[data-close]'
     if (view !== 'look') return '[data-view="look"]'
     if (home !== undefined && home !== moment) return `[data-moment="${home.id}"]`
-    return hint.tier === 1 ? '[data-half]' : `[data-spot="${hint.spot}"]`
+    return halved ? '[data-half]' : `[data-spot="${hint.spot}"]`
+  }
+  // A hint for an answer says which (#102): a face by its line, the order by its question, a blank
+  // by the three words before it in its sentence, or after it when it opens one.
+  const named = (id: string) => {
+    if (s.faces.some((f) => f.id === id)) return text.faces[id]
+    if (s.order?.includes(id)) return strings.whatHappenedFirst
+    const parts = Object.values(text.blocks).find((b) => b.parts.some((x) => x.b === id))?.parts
+    const i = parts?.findIndex((x) => x.b === id) ?? -1
+    const before = (parts?.[i - 1]?.t ?? '')
+      .split(/[.!?][”’]?\s/)
+      .at(-1)!
+      .split(/\s+/)
+    const after = (parts?.[i + 1]?.t ?? '').split(/\s+/).filter(Boolean)
+    const near = before.filter(Boolean).slice(-3)
+    return near.length > 0
+      ? [...near, strings.blankMark].join(' ')
+      : [strings.blankMark, ...after.slice(0, 3)].join(' ')
   }
   const hinted = hintAt()
   const at = hinted ?? markAt()
@@ -554,7 +576,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
             }}
             onTap={onTap}
             onMiss={nothingNew}
-            half={hint?.tier === 1 && aimed && home === moment ? half(aimed.box) : undefined}
+            half={halved && aimed && home === moment ? half(aimed.box) : undefined}
+            marks={hint?.why !== 'evidence'}
           >
             {card && (
               <div className="card" role="dialog" aria-label={text.title}>
@@ -653,9 +676,13 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
           label={
             saidAt === hinted
               ? ''
-              : hint.tier === 2
-                ? strings.hintThing
-                : strings.hintSays[hint.why]
+              : hint.why === 'evidence'
+                ? (hint.tier === 2 ? strings.hintSettlesThing : strings.hintSettles)(
+                    named(hint.for),
+                  )
+                : hint.tier === 2
+                  ? strings.hintThing
+                  : strings.hintSays[hint.why]
           }
           onTap={() => setSaidAt(hinted)}
         />

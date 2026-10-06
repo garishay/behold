@@ -30,6 +30,11 @@ interface StageProps {
   /** The half of the picture a hint's first tier rings (#29). */
   half?: Box
   /**
+   * Whether the half marks what is found: on a hint for what is still unfound (#95), never on one
+   * for an answer, whose thing is found already (#102 [2]).
+   */
+  marks?: boolean
+  /**
    * What lies over the picture: the brief's card, over the picture's whole row, so a picture the
    * screen's height narrows doesn't narrow it too, as at the floor (#77).
    */
@@ -47,7 +52,7 @@ interface StageProps {
  * (#27 [2]).
  */
 export function Stage(props: StageProps) {
-  const { structure, text, moment, tapped, onMoment, onTap, onMiss, half, children } = props
+  const { structure, text, moment, tapped, onMoment, onTap, onMiss, half, marks, children } = props
   const [zoomed, setZoomed] = useState(false)
   const [w, h] = moment.size
   const spots = drawOrder(moment.spots)
@@ -104,10 +109,11 @@ export function Stage(props: StageProps) {
               {spots.map((s) => (
                 <rect key={s.id} data-spot={s.id} {...place(s.box)} />
               ))}
-              {/* Inside a hint's half, what is found already is marked, so the ring's search is
-                  for the rest (#95): a ✓ at the middle of each found thing's part inside the
-                  ring, taking no tap. */}
+              {/* Inside the half of a hint for what is still unfound, what is found already is
+                  marked, so the ring's search is for the rest (#95, #102 [2]): a ✓ at the middle
+                  of each found thing's part inside the ring, taking no tap. */}
               {half &&
+                marks &&
                 spots
                   .filter((s) => tapped.includes(s.id) && overlaps(s.box, half))
                   .map((s) => {

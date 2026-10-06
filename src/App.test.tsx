@@ -1187,7 +1187,8 @@ describe('the tutorial’s marks (#25)', () => {
 
   // On Look the question rings only Solve's button, so a hint is offered there as in any case (#29),
   // and takes the ring's place: it points at the evidence for the blank asked about, the giant
-  // (#77).
+  // (#77), and names the blank. His half would take 80% of the picture, so the first hint is the
+  // second tier, at him (#102 [1]).
   it('a hint asked for on Look during the question points at the giant', async () => {
     start()
     openCase(/The valley/)
@@ -1199,7 +1200,10 @@ describe('the tutorial’s marks (#25)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     tab(/Look/)
     menu('Hint')
-    expect([at(), said()]).toEqual(['[data-half]', 'Something here settles one answer.'])
+    expect([at(), said()]).toEqual([
+      '[data-spot="giant"]',
+      'This settles “the sword of ___”. Tap it.',
+    ])
   })
 
   // Playtest 2 (#23): the last step pointed at Close the case with five blanks no word could fill,
@@ -1761,9 +1765,10 @@ describe('hints (#29)', () => {
       expect(offer()?.closest('.submit-row')).not.toBeNull()
       expect(screen.queryByRole('button', { name: /Close the case/ })).not.toBeInTheDocument()
       fireEvent.click(screen.getByRole('button', { name: 'Where to look' }))
-      expect([at(), said()]).toEqual(['[data-view="look"]', 'Find the other words in the picture.'])
+      // The prophets' half would take most of the picture, so the first hint is the second tier,
+      // at them (#102 [1]).
+      expect([at(), said()]).toEqual(['[data-view="look"]', 'Here it is. Tap it.'])
       tab(/Look/)
-      fireEvent.click(screen.getByRole('button', { name: 'Still stuck? Show me' }))
       expect(at()).toBe('[data-spot="prophets"]')
     } finally {
       vi.useRealTimers()
@@ -1868,7 +1873,10 @@ describe('hints (#29)', () => {
     chip('brothers')
     slot('t1')
     fireEvent.click(screen.getByRole('button', { name: 'Where to look' }))
-    expect([at(), said()]).toEqual(['[data-view="look"]', 'Something here settles one answer.'])
+    expect([at(), said()]).toEqual([
+      '[data-view="look"]',
+      'Something here settles “loaves for his ___”.',
+    ])
     tab(/Look/)
     expect(at()).toBe('[data-half]')
     fireEvent.click(screen.getByRole('button', { name: 'Still stuck? Show me' }))
@@ -1893,10 +1901,67 @@ describe('hints (#29)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     expect(offer()).toBeNull()
     menu('Hint')
-    expect([at(), said()]).toEqual(['[data-view="look"]', 'Something here settles one answer.'])
+    expect([at(), said()]).toEqual([
+      '[data-view="look"]',
+      'Something here settles “loaves for his ___”.',
+    ])
     tab(/Look/)
     fireEvent.click(screen.getByRole('button', { name: 'Still stuck? Show me' }))
     expect(at()).toBe('[data-spot="basket"]')
+  })
+
+  // The owner's ruling [2] (#102): a hint for an answer points at a thing found already, so its half
+  // marks nothing found, where a ✓ would tell the player to skip it. The marks stay with the hints
+  // for what is still unfound (#95).
+  it('an evidence hint’s half marks nothing found', async () => {
+    start()
+    openCase(/The valley/)
+    await sweep()
+    for (const [id, word] of valleyAnswers) {
+      chip(id === 't1' ? 'commander' : word)
+      slot(id)
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    menu('Hint')
+    tab(/Look/)
+    expect(at()).toBe('[data-half]')
+    expect(document.querySelectorAll('[data-found]')).toHaveLength(0)
+  })
+
+  /** The valley swept and filled with its answers, one slot given another word, then closed. */
+  const missOne = async (id: string, word: string) => {
+    start()
+    openCase(/The valley/)
+    await sweep()
+    for (const [slotId, answer] of valleyAnswers) {
+      chip(slotId === id ? word : answer)
+      slot(slotId)
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+  }
+
+  // The next round's first tester (#102): all three of his hints were for the giant's face, and none
+  // said so. A hint for an answer names it, a blank by the words beside it, those after it when it
+  // opens its sentence, and its second tier names it again.
+  it('a hint names the answer it is for, at both tiers', async () => {
+    await missOne('t2', 'David')
+    menu('Hint')
+    expect(said()).toBe('Something here settles “___ dressed the boy”.')
+    tab(/Look/)
+    fireEvent.click(screen.getByRole('button', { name: 'Still stuck? Show me' }))
+    expect(said()).toBe('This settles “___ dressed the boy”. Tap it.')
+  })
+
+  // The owner's ruling [1] (#102): where a thing's half would take most of the picture, its first
+  // hint is the second tier, since tier 1 would ring the same box and say less. The giant's half
+  // takes 80%: a hint for his face rings him, names the face by its line, and offers no Show me.
+  it('a hint whose half would take most of the picture starts at its second tier', async () => {
+    await missOne('d2', 'Saul')
+    menu('Hint')
+    expect(said()).toBe('This settles “the fallen giant”. Tap it.')
+    tab(/Look/)
+    expect(at()).toBe('[data-spot="giant"]')
+    expect(screen.queryByRole('button', { name: /Show me/ })).toBeNull()
   })
 
   // Under a guided step the step's own mark is the hint, and the step holds the screen (#77): a run
@@ -2242,6 +2307,19 @@ describe('the close converges (#95)', () => {
     close()
     expect(ringed()).toEqual(['order'])
     expect(scrolled).toHaveBeenCalledWith({ top: 310, left: 0 })
+  })
+
+  // A hint for the order names it by its question (#102).
+  it('a hint for the order names it by its question', () => {
+    start(<App />, mountain(everything, { ...right, order: ['water', 'fire', 'baal'] }))
+    openCase(/The mountain/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    menu('Hint')
+    expect([at(), said()]).toEqual([
+      '[data-view="look"]',
+      'Something here settles “What happened first”.',
+    ])
   })
 })
 
