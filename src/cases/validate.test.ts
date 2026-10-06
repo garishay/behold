@@ -288,7 +288,6 @@ describe('validate (Gate 02 A6)', () => {
     const words = Object.fromEntries(Object.entries(valley.words).filter(([w]) => w !== 'five'))
     const noFive: CaseStructure = { ...withSpot('brook', { words: ['stones'] }), words }
     expect(validate(noFive, en)).toEqual([
-      'blank "t1" takes a "number" word, and the case has 2, not three',
       'blank "t3" takes a "number" word, and the case has 2, not three',
     ])
   })

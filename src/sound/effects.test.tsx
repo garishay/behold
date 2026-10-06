@@ -118,7 +118,7 @@ describe('the effects, each beside what the screen shows (Gate 10 A3, A5)', () =
     slot('d2')
     expect(heard()).toEqual([])
     expect(document.querySelector('[data-slot="d2"]')).not.toHaveTextContent('Goliath')
-    slot('t1')
+    slot('t3')
     chip('David')
     expect(result()).toHaveTextContent('That blank wants a number.')
     expect(heard()).toEqual([])
@@ -213,8 +213,8 @@ describe('the music by screen (Gate 10 A2)', () => {
     for (const [id, word] of [
       ['d1', 'David'],
       ['d2', 'Goliath'],
-      ['t1', 'ten'],
-      ['t2', 'commander'],
+      ['t1', 'brothers'],
+      ['t2', 'Saul'],
       ['t3', 'six'],
       ['t4', 'sling'],
       ['t5', 'Goliath'],

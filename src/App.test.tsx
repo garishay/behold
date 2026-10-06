@@ -69,8 +69,8 @@ const numbered: PassageService = () =>
 const valleyAnswers: [string, string][] = [
   ['d1', 'David'],
   ['d2', 'Goliath'],
-  ['t1', 'ten'],
-  ['t2', 'commander'],
+  ['t1', 'brothers'],
+  ['t2', 'Saul'],
   ['t3', 'six'],
   ['t4', 'sling'],
   ['t5', 'Goliath'],
@@ -1461,7 +1461,7 @@ describe('the tutorial’s marks (#25)', () => {
     start()
     openCase(/The valley/)
     await sweep()
-    const missed: Record<string, string> = { t1: 'five', t3: 'ten', t5: 'Saul' }
+    const missed: Record<string, string> = { t1: 'king', t3: 'ten', t5: 'Saul' }
     for (const [id, word] of valleyAnswers) {
       chip(missed[id] ?? word)
       slot(id)
@@ -1473,9 +1473,9 @@ describe('the tutorial’s marks (#25)', () => {
     expect(ringed()).toEqual(['t1', 't3'])
     expect(at()).toBe('[data-slot="t5"]')
     expect(document.querySelector('[data-slot="t1"]')).toHaveTextContent(
-      'five, ringed: doesn’t match the picture',
+      'king, ringed: doesn’t match the picture',
     )
-    chip('ten')
+    chip('brothers')
     slot('t1')
     expect(ringed()).toEqual(['t3'])
     chip('Goliath')
@@ -1493,19 +1493,19 @@ describe('the tutorial’s marks (#25)', () => {
     openCase(/The valley/)
     await sweep()
     for (const [id, word] of valleyAnswers) {
-      chip(id === 't1' ? 'five' : word)
+      chip(id === 't1' ? 'king' : word)
       slot(id)
     }
     const ringed = () =>
       [...document.querySelectorAll('.is-wrong')].map((e) => e.getAttribute('data-slot'))
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     expect(ringed()).toEqual(['t1'])
-    chip('six')
+    chip('commander')
     slot('t1')
     expect(ringed()).toEqual([])
-    chip('five')
+    chip('king')
     slot('t1')
-    expect(document.querySelector('[data-slot="t1"]')).toHaveTextContent('five')
+    expect(document.querySelector('[data-slot="t1"]')).toHaveTextContent('king')
     expect(ringed()).toEqual([])
   })
 
@@ -1801,15 +1801,15 @@ describe('hints (#29)', () => {
     openCase(/The valley/)
     await sweep()
     for (const [id, word] of valleyAnswers) {
-      chip(id === 't2' ? 'brothers' : word)
+      chip(id === 't1' ? 'commander' : word)
       slot(id)
     }
     const close = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     close()
     expect(offer()).toBeNull()
     close()
-    chip('commander')
-    slot('t2')
+    chip('brothers')
+    slot('t1')
     fireEvent.click(screen.getByRole('button', { name: 'Where to look' }))
     expect([at(), said()]).toEqual(['[data-view="look"]', 'Something here settles one answer.'])
     tab(/Look/)
@@ -1830,7 +1830,7 @@ describe('hints (#29)', () => {
     openCase(/The valley/)
     await sweep()
     for (const [id, word] of valleyAnswers) {
-      chip(id === 't2' ? 'brothers' : word)
+      chip(id === 't1' ? 'commander' : word)
       slot(id)
     }
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
@@ -1892,14 +1892,14 @@ describe('Solve’s room (#24)', () => {
       get: () => top,
       set: (v: number) => (top = v),
     })
-    slot('t2')
+    slot('t1')
     expect(words()).toEqual([
       ...['sling', 'spear', 'sword', 'stones', 'king', 'brothers', 'commander', 'shield'],
       ...['David', 'Goliath', 'six', 'five', 'Saul', 'ten'],
     ])
     expect(document.querySelector('[data-word="ten"]')).toHaveClass('is-dim')
     expect(top).toBe(0)
-    slot('t2')
+    slot('t1')
     expect(words()).toEqual(found)
   })
 
@@ -1911,9 +1911,10 @@ describe('Solve’s room (#24)', () => {
     openCase(/The valley/)
     await sweep()
     const solve = document.querySelector('.solve')!
+    // Saul's blank opens its sentence, which runs to the next stop (#96).
     const sentence = document.querySelector('[data-slot="t2"]')!.closest('.sentence')!
-    expect(sentence.querySelector('[data-slot="t1"]')).not.toBeNull()
-    expect(sentence.nextElementSibling).toHaveTextContent(/^Against Israel stood a champion of/)
+    expect(sentence).toHaveTextContent(/^dressed the boy in his own armor, .* untested\.$/)
+    expect(sentence.previousElementSibling).toHaveTextContent(/cubits and a span\.$/)
     vi.spyOn(solve, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 360, 300))
     vi.spyOn(sentence, 'getBoundingClientRect').mockReturnValue(new DOMRect(20, 270, 320, 92))
     const scrolled = vi.spyOn(solve, 'scrollBy')
@@ -1952,8 +1953,8 @@ describe('Solve’s room (#24)', () => {
     openCase(/The valley/)
     await sweep()
     for (const [id, word] of [
-      ['t1', 'ten'],
-      ['t2', 'commander'],
+      ['t1', 'brothers'],
+      ['t2', 'Saul'],
       ['t3', 'six'],
     ] as const) {
       chip(word)
@@ -2017,14 +2018,14 @@ describe('the case solved (#6, 03c; #24)', () => {
     await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
     tapSpot('brook')
     tab(/Solve/)
-    slot('t2')
+    slot('t1')
     chip('five')
     const head = document.querySelector('.bank-head')
     expect(head).toHaveTextContent(/^That blank wants a thing\.$/)
     chip('stones')
-    slot('t2')
+    slot('t1')
     expect(head).toHaveTextContent(/^namesthingsactionsnumbers$/)
-    expect(document.querySelector('[data-slot="t2"]')).toHaveTextContent('stones')
+    expect(document.querySelector('[data-slot="t1"]')).toHaveTextContent('stones')
     expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('3/7')
   })
 
@@ -2038,7 +2039,7 @@ describe('the case solved (#6, 03c; #24)', () => {
     tab(/Look/)
     await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
     tab(/Solve/)
-    slot('t1')
+    slot('t3')
     chip('David')
     expect(result()).toHaveTextContent(/^That blank wants a number\. Find one in the picture\.$/)
     // A refused word stays picked up; tapped again, it is put down.
@@ -2047,7 +2048,7 @@ describe('the case solved (#6, 03c; #24)', () => {
     await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
     tapSpot('brook')
     tab(/Solve/)
-    slot('t1')
+    slot('t3')
     chip('David')
     expect(result()).toHaveTextContent(/^That blank wants a number\.$/)
   })
@@ -2069,7 +2070,7 @@ describe('the case solved (#6, 03c; #24)', () => {
     expect(document.querySelector('[data-slot="d2"]')).not.toHaveClass('is-right')
     expect(document.querySelector('[data-slot="t1"]')).not.toHaveClass('is-right')
     for (const [id, word] of [
-      ['t2', 'brothers'],
+      ['t2', 'David'],
       ['t3', 'six'],
       ['t5', 'Goliath'],
     ] as const) {
@@ -2082,7 +2083,7 @@ describe('the case solved (#6, 03c; #24)', () => {
     expect(result()).toHaveTextContent('One or two don’t match what the picture shows.')
     expect(screen.queryByRole('heading', { name: 'The case is closed.' })).not.toBeInTheDocument()
     slot('t2')
-    chip('commander')
+    chip('Saul')
     slot('t2')
     expect(document.querySelector('[data-slot="t2"]')).not.toHaveClass('is-right')
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
