@@ -119,6 +119,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const [ringed, setRinged] = useState<readonly string[]>([])
   const [orderRinged, setOrderRinged] = useState(false)
   const [misses, setMisses] = useState(0)
+  // A failed close with something still unfound rings Look until it opens (#95).
+  const [seek, setSeek] = useState(false)
   // The bank's head: a refused word's message, or how far off a close was (07c, #24 [3]).
   const [note, setNote] = useState('')
   // The stuck signals (#29): taps on the picture that find nothing new while something is unfound,
@@ -278,6 +280,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
       play('notYet')
       setFails(fails + 1)
       setMisses(misses + 1)
+      setSeek(left > 0)
       setMissed(firstWrong(s, progress) ?? null)
       // In the tutorial the last step's mark comes back, dim and all, with its retry (#25), or as
       // the question at the slot the case asks about when this close found it wrong; every other
@@ -318,6 +321,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     // Back on Look while the tutorial waits on everything found, or on an answer worked out there,
     // the caption gives way to the prompt, "Tap anything that looks like it matters." (#25, #77).
     if (v === 'look' && looks) setCaption(null)
+    // Look opened, its ring from a failed close has done its work (#95).
+    if (v === 'look') setSeek(false)
     setView(v)
     onProgress(opened(s, progress, v))
   }
@@ -444,8 +449,10 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     if (asked !== undefined && view !== 'look') return `[data-slot="${asked}"]`
     if (until?.view || view === 'look') return '[data-view="solve"]'
     const filled = until?.filled
-    // The last step rings Solve's count until Close the case shows (#24, Solve's room).
-    if (filled === undefined) return full ? '[data-close]' : '[data-view="solve"]'
+    // The last step rings Solve's count until Close the case shows (#24, Solve's room), and Look's
+    // button while a failed close has left something unfound there (#95).
+    if (filled === undefined)
+      return seek ? '[data-view="look"]' : full ? '[data-close]' : '[data-view="solve"]'
     const word = answer(s, filled)
     if (current.slotFirst)
       return selection.target === filled ? `[data-word="${word}"]` : `[data-slot="${filled}"]`
@@ -653,6 +660,11 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
         />
       )}
       {lesson && <CoachMark at={lesson} label={text.teach ?? ''} />}
+      {/* A failed close with something unfound rings Look, with no words, until it opens; the
+          tutorial's last step rings it instead (#95). */}
+      {seek && view === 'solve' && !current && !hinted && (
+        <CoachMark at='[data-view="look"]' label="" />
+      )}
     </div>
   )
 }

@@ -2030,8 +2030,17 @@ describe('Solve’s room (#24)', () => {
 })
 
 describe('the close converges (#95)', () => {
+  const at = () => coach()?.getAttribute('data-at')
+  const said = () => coach()?.querySelector('[role="status"]')?.textContent
   const ringed = () =>
     [...document.querySelectorAll('.is-wrong')].map((e) => e.getAttribute('data-slot') ?? 'order')
+  // jsdom lays nothing out, and a mark shows only where its target can be seen (07c).
+  beforeEach(() => {
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue(
+      new DOMRect(10, 10, 100, 40),
+    )
+  })
+  afterEach(() => vi.restoreAllMocks())
   const spotsOf = (s: CaseStructure) => s.moments.flatMap((m) => m.spots)
   /** The mountain with the spots given found, and their words in the bank. */
   const mountain = (found: string[], kept: object) => {
@@ -2077,6 +2086,51 @@ describe('the close converges (#95)', () => {
     tile('Baal’s altar')
     orderSlot(0)
     expect(ringed()).toEqual(['c2'])
+  })
+
+  // The next round's third tester (#23) filled the valley from two of its six things, and its rings
+  // said which answers didn't match but not that their words were still in the picture. A close
+  // that fails with something unfound says how much, and rings Look until it opens: in a case
+  // without steps with no words, and in the valley with its retry.
+  it('says how much is left to find, and rings Look until it opens', async () => {
+    const found = everything.filter((id) => !['ruin', 'spent'].includes(id))
+    start(<App />, mountain(found, { ...right, faces: { c1: 'elijah', c2: 'baal' } }))
+    openCase(/The mountain/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(result()).toHaveTextContent(
+      /^One answer doesn’t fit the story\. There are two more to find in the pictures\.$/,
+    )
+    expect([at(), said()]).toEqual(['[data-view="look"]', ''])
+    tab(/Look/)
+    await waitFor(() => expect(history.state).toEqual({ case: 'carmel' }))
+    tab(/Solve/)
+    expect(at()).toBeUndefined()
+  })
+
+  it('in the valley, the retry rings Look while something is unfound', () => {
+    const tapped = ['boy', 'basket', 'giant', 'armor']
+    const spots = spotsOf(valley).filter((x) => tapped.includes(x.id))
+    start(<App />, {
+      valley: {
+        ...fresh(valley),
+        tapped,
+        bank: [...new Set(spots.flatMap((x) => x.words))],
+        faces: { d1: 'david', d2: 'goliath' },
+        fills: { t1: 'brothers', t2: 'saul', t3: 'ten', t4: 'sling', t5: 'goliath' },
+        step: valley.steps.length - 1,
+      },
+    })
+    openCase(/The valley/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(result()).toHaveTextContent(
+      /^One answer doesn’t fit the story\. There are two more to find in the picture\.$/,
+    )
+    expect([at(), said()]).toEqual([
+      '[data-view="look"]',
+      'Ringed answers don’t fit the story. Look closer.',
+    ])
   })
 })
 
