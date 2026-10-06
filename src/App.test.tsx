@@ -463,6 +463,27 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     ).toEqual(['Hint', 'Cases', 'Restart', 'Music · On', 'Effects · On'])
   })
 
+  // The next round's first tester (#102): "Show me" sent him to the giant twice, and tapped again,
+  // the giant said only that he is one of the faces. A tap that finds nothing new says what its
+  // spot holds, the words a first tap left out because another spot had found them included.
+  it('a tap that finds nothing new says what its spot holds', async () => {
+    start()
+    openCase(/The valley/)
+    guide()
+    tab(/Look/)
+    await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
+    const found = () => screen.getByText(/Found:/)
+    tapSpot('giant')
+    tapSpot('giant')
+    expect(found()).toHaveTextContent(
+      'Found: Goliath, six, spear, sword · one of the faces in Solve',
+    )
+    tapSpot('armor')
+    expect(found()).toHaveTextContent(/^Found: Saul, king$/)
+    tapSpot('armor')
+    expect(found()).toHaveTextContent(/^Found: Saul, king, sword$/)
+  })
+
   it('a tap shows the caption and what it found, and its words wait on Solve, ringed', () => {
     start()
     openCase(/The valley/)
@@ -647,8 +668,9 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  // A second tap on the seal opens the paper again but copies nothing, and the console says so by
-  // saying nothing (review round 3, #20).
+  // A second tap on the seal opens the paper again but copies nothing, and the line says nothing of
+  // Papers (review round 3, #20); it says what the seal holds, as any tap that finds nothing new
+  // does (#102).
   it('a repeat tap on a paper reopens it and reports no copy', () => {
     start(<App />, laterStarted)
     openCase(/The vineyard/)
@@ -658,7 +680,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     tapSpot('seal')
     expect(screen.getByRole('dialog', { name: 'The seal' })).toBeInTheDocument()
     expect(screen.queryByText(/copied to Papers/)).not.toBeInTheDocument()
-    expect(screen.queryByText(/Found:/)).not.toBeInTheDocument()
+    expect(screen.getByText(/Found:/)).toHaveTextContent(/^Found: Ahab, seal$/)
     fireEvent.click(screen.getByRole('button', { name: 'Close' }))
     tab(/Solve/)
     expect(screen.getByRole('button', { name: /Papers/ })).toHaveTextContent('Papers1')
