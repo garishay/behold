@@ -3,6 +3,20 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.18.0 — Gate 25, the valley teaches the loop (#102)
+
+- **102a — the valley teaches the loop** (#103): the next round's first tester was told where to
+  tap but not why, read no ✓ as wrong and took right answers out four times, never changed the
+  giant's face inside its thin red line, and took three hints for that face that never said which
+  answer they were for. The guided steps now say why: the boy's tap found his name, David, and
+  sling; step 4 points at "who?", and step 5 at the sling the picture shows, and both change their
+  words once their slot is tapped. A second tap on a thing says what it holds. A close that rings
+  marks every answer, in every case: a ✓ on each that fits, which stays, the order's beside its
+  question, and a heavier ring on each that doesn't, the first brought into view, where the
+  valley's retry now sits. A hint names the answer it is for, a face by its line, the order by its
+  question, and a blank by the words beside it. Where its thing's half would take most of the
+  picture, the first hint rings the thing itself, and a hint for an answer marks nothing found.
+
 ## v0.17.2 — Gate 24, the close (#95)
 
 - **95a — the close converges** (#101): in the mountain, "One or two don't match" read the same
