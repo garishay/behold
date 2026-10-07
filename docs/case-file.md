@@ -103,9 +103,10 @@ A guided case may name, as `ask`, the face or blank it asks about on a miss (#77
 finds it wrong, the retry is the question, the text's `ask`. It rings that slot and never its
 word, and from Look only Solve's button, with no words, leaving the picture clear ([Q11]). Once
 asked, the slot takes its ✓ when right. A close wrong elsewhere keeps the retry, at the first face
-or blank it rang, brought into view. Either way the close marks every other face and blank, a ✓ on
-each that fits and a ring on each that doesn't, each ring until its answer is changed (#77, #102).
-A ✓ stays, whichever gave it, a step, the question, or a close: a tap no longer empties it (#77).
+or blank it rang, brought into view; once no ring is left, the retry's mark has no words, wherever
+it sits (#104). Either way the close marks every other face and blank, a ✓ on each that fits and
+a ring on each that doesn't, each ring until its answer is changed (#77, #102). A ✓ stays,
+whichever gave it, a step, the question, or a close: a tap no longer empties it (#77).
 
 Every string in the structure is an id, a file name, a book code, or a cite. There is no field
 that can hold a sentence, so the structure cannot carry player text and cannot carry scripture.
