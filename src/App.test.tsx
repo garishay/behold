@@ -1499,6 +1499,29 @@ describe('the tutorial’s marks (#25)', () => {
     expect([at(), said()]).toEqual(['[data-slot="t3"]', ''])
   })
 
+  // The screens for #102 [4], E5: once its last ring was changed, the retry's mark went back to
+  // Close the case still saying "Ringed answers don't fit the story", over the bank's head. A tap's
+  // press sends its words away, but moves made as a keyboard makes them, with no press, don't, nor
+  // does a mark shown again by a hint asked past its last tier. With no ring left, the retry's mark
+  // says nothing (#104).
+  it('the retry says nothing once no ring is left', async () => {
+    start()
+    openCase(/The valley/)
+    await sweep()
+    for (const [id, word] of valleyAnswers) {
+      chip(id === 't3' ? 'five' : word)
+      slot(id)
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect([at(), said()]).toEqual([
+      '[data-slot="t3"]',
+      'Ringed answers don’t fit the story. Look closer.',
+    ])
+    chip('six')
+    slot('t3')
+    expect([at(), said()]).toEqual(['[data-close]', ''])
+  })
+
   // The paid round's first session (#77): "Several are wrong." said nothing of where, and after the
   // question settled the sword the tester took Goliath back out three times. The valley teaches, so
   // its failed close rings what it found wrong, but the slot its question asks about, each until it

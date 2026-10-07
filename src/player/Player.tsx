@@ -516,6 +516,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const forms = current && text.steps?.[current.id]
   const waits = current?.slotFirst === true && selection.target === current.until.filled
   const stepWords = typeof forms === 'string' ? forms : forms?.[waits ? 1 : 0]
+  // The retry's words speak of the rings, so its mark says nothing once none is left (#104).
+  const retryWords = ringed.length > 0 ? text.retry : ''
   // A ring with no words carries no dim either ([Q11]).
   const silent =
     view === 'look' && at === '[data-view="solve"]' && current?.until?.view === undefined
@@ -697,7 +699,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
               : ((asked !== undefined
                   ? text.ask
                   : retry && !current.until
-                    ? text.retry
+                    ? retryWords
                     : stepWords) ?? '')
           }
           onTap={
