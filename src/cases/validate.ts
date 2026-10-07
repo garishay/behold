@@ -211,12 +211,14 @@ export function validate(structure: CaseStructure, text: CaseText<CaseStructure>
         `spot ${q(s.id)} keeps no ${fingertip} px square of its own at ${smallestPicture} px wide`,
       )
 
-  // (m) A step's words sit beside its target, eight at most (#25), and so do the last step's retry
-  // after a failed close and the question a guided case asks on a miss, at a face or a blank (#77).
-  for (const [id, words] of Object.entries(text.steps ?? {})) {
-    const n = words.split(/\s+/).filter(Boolean).length
-    if (n > 8) fail(`step ${q(id)} says ${n} words, not eight or fewer`)
-  }
+  // (m) A step's words sit beside its target, eight at most (#25), in each of its forms (#102), and
+  // so do the last step's retry after a failed close and the question a guided case asks on a
+  // miss, at a face or a blank (#77).
+  for (const [id, words] of Object.entries(text.steps ?? {}))
+    for (const form of [words].flat()) {
+      const n = form.split(/\s+/).filter(Boolean).length
+      if (n > 8) fail(`step ${q(id)} says ${n} words, not eight or fewer`)
+    }
   const retried = text.retry?.split(/\s+/).filter(Boolean).length ?? 0
   if (retried > 8) fail(`the retry says ${retried} words, not eight or fewer`)
   const asks = text.ask?.split(/\s+/).filter(Boolean).length ?? 0

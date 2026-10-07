@@ -463,6 +463,27 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     ).toEqual(['Hint', 'Cases', 'Restart', 'Music · On', 'Effects · On'])
   })
 
+  // The next round's first tester (#102): "Show me" sent him to the giant twice, and tapped again,
+  // the giant said only that he is one of the faces. A tap that finds nothing new says what its
+  // spot holds, the words a first tap left out because another spot had found them included.
+  it('a tap that finds nothing new says what its spot holds', async () => {
+    start()
+    openCase(/The valley/)
+    guide()
+    tab(/Look/)
+    await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
+    const found = () => screen.getByText(/Found:/)
+    tapSpot('giant')
+    tapSpot('giant')
+    expect(found()).toHaveTextContent(
+      'Found: Goliath, six, spear, sword · one of the faces in Solve',
+    )
+    tapSpot('armor')
+    expect(found()).toHaveTextContent(/^Found: Saul, king$/)
+    tapSpot('armor')
+    expect(found()).toHaveTextContent(/^Found: Saul, king, sword$/)
+  })
+
   it('a tap shows the caption and what it found, and its words wait on Solve, ringed', () => {
     start()
     openCase(/The valley/)
@@ -472,7 +493,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
       'Found: David, sling · one of the faces in Solve',
     )
     expect(screen.getByRole('tab', { name: /Look/ })).toHaveTextContent('Look1/6')
-    expect(coach()).toHaveTextContent('That tap found two words: David and sling.')
+    expect(coach()).toHaveTextContent('That tap found his name, David, and sling.')
     expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('Solve0/7+2')
     // The guided steps hold the screen until sling is in its blank (#77), and Solve opened by them
     // rings the two words its first time.
@@ -647,8 +668,9 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  // A second tap on the seal opens the paper again but copies nothing, and the console says so by
-  // saying nothing (review round 3, #20).
+  // A second tap on the seal opens the paper again but copies nothing, and the line says nothing of
+  // Papers (review round 3, #20); it says what the seal holds, as any tap that finds nothing new
+  // does (#102).
   it('a repeat tap on a paper reopens it and reports no copy', () => {
     start(<App />, laterStarted)
     openCase(/The vineyard/)
@@ -658,7 +680,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     tapSpot('seal')
     expect(screen.getByRole('dialog', { name: 'The seal' })).toBeInTheDocument()
     expect(screen.queryByText(/copied to Papers/)).not.toBeInTheDocument()
-    expect(screen.queryByText(/Found:/)).not.toBeInTheDocument()
+    expect(screen.getByText(/Found:/)).toHaveTextContent(/^Found: Ahab, seal$/)
     fireEvent.click(screen.getByRole('button', { name: 'Close' }))
     tab(/Solve/)
     expect(screen.getByRole('button', { name: /Papers/ })).toHaveTextContent('Papers1')
@@ -938,7 +960,7 @@ describe('the tutorial’s marks (#25)', () => {
     chip('sword')
     expect(document.querySelector('[data-word="sword"]')).not.toHaveClass('is-on')
     slot('t4')
-    expect(at()).toBe('[data-word="sling"]')
+    expect([at(), said()]).toEqual(['[data-word="sling"]', 'Now tap sling. Bright words fit.'])
     chip('sword')
     expect(document.querySelector(blank)).not.toHaveClass('is-filled')
     chip('sling')
@@ -1032,25 +1054,25 @@ describe('the tutorial’s marks (#25)', () => {
     tapSpot('boy')
     // The boy's tap found two words, and the dock says so: it is ringed whole, the caption with
     // its line of finds, and a tap on it reads it (#77).
-    expect([at(), said()]).toEqual(['.dock', 'That tap found two words: David and sling.'])
+    expect([at(), said()]).toEqual(['.dock', 'That tap found his name, David, and sling.'])
     fireEvent.click(document.querySelector('.dock .found')!)
     expect([at(), said()]).toEqual(['[data-view="solve"]', 'Open Solve to name him.'])
     tab(/Solve/)
     // Both guided fills lead with the slot (#77). The slot under the boy is ringed, and once it
     // waits, sling dims, since a thing can't name him, and the mark moves to David.
-    expect([at(), said()]).toEqual(['[data-slot="d1"]', 'Tap the slot under the boy, then David.'])
+    expect([at(), said()]).toEqual(['[data-slot="d1"]', 'Tap “who?” under the boy, then David.'])
     slot('d1')
-    expect(at()).toBe('[data-word="david"]')
+    expect([at(), said()]).toEqual(['[data-word="david"]', 'Now tap David, his name.'])
     expect(document.querySelector('[data-word="sling"]')).toHaveClass('is-dim')
     expect(document.querySelector('[data-word="david"]')).not.toHaveClass('is-dim')
     chip('David')
     // Sling's blank leads the same way, and once it waits, David dims.
     expect([at(), said()]).toEqual([
       '[data-slot="t4"]',
-      'Tap the blank, then\u00a0sling. Bright words fit.',
+      'The picture shows his sling. Tap the blank.',
     ])
     slot('t4')
-    expect(at()).toBe('[data-word="sling"]')
+    expect([at(), said()]).toEqual(['[data-word="sling"]', 'Now tap sling. Bright words fit.'])
     expect(document.querySelector('[data-word="david"]')).toHaveClass('is-dim')
     expect(document.querySelector('[data-word="sling"]')).not.toHaveClass('is-dim')
     chip('sling')
@@ -1078,7 +1100,7 @@ describe('the tutorial’s marks (#25)', () => {
     fireEvent.click(document.querySelector('.dock .found')!)
     expect([at(), said()]).toEqual(['[data-view="solve"]', 'Open Solve to name him.'])
     tab(/Solve/)
-    expect(said()).toBe('Tap the slot under the boy, then David.')
+    expect(said()).toBe('Tap “who?” under the boy, then David.')
     history.back()
     await onTab(/Look/)
     expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
@@ -1091,7 +1113,7 @@ describe('the tutorial’s marks (#25)', () => {
     await onTab(/Look/)
     expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
     tab(/Solve/)
-    expect(said()).toBe('Tap the blank, then\u00a0sling. Bright words fit.')
+    expect(said()).toBe('The picture shows his sling. Tap the blank.')
   })
 
   // The dock's line of finds is gone once the case opens again, so the step waiting on it is passed
@@ -1123,7 +1145,7 @@ describe('the tutorial’s marks (#25)', () => {
     fireEvent.click(open)
     expect(screen.getByRole('heading', { name: 'Who is who' })).toBeInTheDocument()
     expect(history.state).toEqual({ case: 'valley', view: 'solve' })
-    expect([at(), said()]).toEqual(['[data-slot="d1"]', 'Tap the slot under the boy, then David.'])
+    expect([at(), said()]).toEqual(['[data-slot="d1"]', 'Tap “who?” under the boy, then David.'])
     expect(screen.queryByRole('button', { name: 'Open Solve' })).not.toBeInTheDocument()
   })
 
@@ -1165,7 +1187,8 @@ describe('the tutorial’s marks (#25)', () => {
 
   // On Look the question rings only Solve's button, so a hint is offered there as in any case (#29),
   // and takes the ring's place: it points at the evidence for the blank asked about, the giant
-  // (#77).
+  // (#77), and names the blank. His half would take 80% of the picture, so the first hint is the
+  // second tier, at him (#102 [1]).
   it('a hint asked for on Look during the question points at the giant', async () => {
     start()
     openCase(/The valley/)
@@ -1177,7 +1200,10 @@ describe('the tutorial’s marks (#25)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     tab(/Look/)
     menu('Hint')
-    expect([at(), said()]).toEqual(['[data-half]', 'Something here settles one answer.'])
+    expect([at(), said()]).toEqual([
+      '[data-spot="giant"]',
+      'This settles “the sword of ___”. Tap it.',
+    ])
   })
 
   // Playtest 2 (#23): the last step pointed at Close the case with five blanks no word could fill,
@@ -1247,7 +1273,7 @@ describe('the tutorial’s marks (#25)', () => {
     expect(at()).toBe('.dock')
     history.forward()
     await onTab(/Solve/)
-    expect([at(), said()]).toEqual(['[data-slot="d1"]', 'Tap the slot under the boy, then David.'])
+    expect([at(), said()]).toEqual(['[data-slot="d1"]', 'Tap “who?” under the boy, then David.'])
   })
 
   it('marks nothing under the brief’s card or the menu, and nothing in a case without steps', async () => {
@@ -1453,7 +1479,7 @@ describe('the tutorial’s marks (#25)', () => {
     openCase(/The valley/)
     await sweep()
     // With the sword's blank right, a close that fails on a number brings the retry, not the
-    // question (#77).
+    // question (#77), at the first answer it rang (#102).
     for (const [id, word] of valleyAnswers) {
       chip(id === 't3' ? 'five' : word)
       slot(id)
@@ -1463,11 +1489,11 @@ describe('the tutorial’s marks (#25)', () => {
     expect(result()).toHaveTextContent('One answer doesn’t fit the story.')
     await waitFor(() => expect(document.querySelector('.coach .ring')).toHaveClass('dim'))
     expect([at(), said()]).toEqual([
-      '[data-close]',
+      '[data-slot="t3"]',
       'Ringed answers don’t fit the story. Look closer.',
     ])
     fireEvent.pointerDown(document.querySelector('[data-slot="t3"]')!)
-    expect([at(), said()]).toEqual(['[data-close]', ''])
+    expect([at(), said()]).toEqual(['[data-slot="t3"]', ''])
   })
 
   // The paid round's first session (#77): "Several are wrong." said nothing of where, and after the
@@ -1739,9 +1765,10 @@ describe('hints (#29)', () => {
       expect(offer()?.closest('.submit-row')).not.toBeNull()
       expect(screen.queryByRole('button', { name: /Close the case/ })).not.toBeInTheDocument()
       fireEvent.click(screen.getByRole('button', { name: 'Where to look' }))
-      expect([at(), said()]).toEqual(['[data-view="look"]', 'Find the other words in the picture.'])
+      // The prophets' half would take most of the picture, so the first hint is the second tier,
+      // at them (#102 [1]).
+      expect([at(), said()]).toEqual(['[data-view="look"]', 'Here it is. Tap it.'])
       tab(/Look/)
-      fireEvent.click(screen.getByRole('button', { name: 'Still stuck? Show me' }))
       expect(at()).toBe('[data-spot="prophets"]')
     } finally {
       vi.useRealTimers()
@@ -1846,7 +1873,10 @@ describe('hints (#29)', () => {
     chip('brothers')
     slot('t1')
     fireEvent.click(screen.getByRole('button', { name: 'Where to look' }))
-    expect([at(), said()]).toEqual(['[data-view="look"]', 'Something here settles one answer.'])
+    expect([at(), said()]).toEqual([
+      '[data-view="look"]',
+      'Something here settles “loaves for his ___”.',
+    ])
     tab(/Look/)
     expect(at()).toBe('[data-half]')
     fireEvent.click(screen.getByRole('button', { name: 'Still stuck? Show me' }))
@@ -1871,10 +1901,67 @@ describe('hints (#29)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     expect(offer()).toBeNull()
     menu('Hint')
-    expect([at(), said()]).toEqual(['[data-view="look"]', 'Something here settles one answer.'])
+    expect([at(), said()]).toEqual([
+      '[data-view="look"]',
+      'Something here settles “loaves for his ___”.',
+    ])
     tab(/Look/)
     fireEvent.click(screen.getByRole('button', { name: 'Still stuck? Show me' }))
     expect(at()).toBe('[data-spot="basket"]')
+  })
+
+  // The owner's ruling [2] (#102): a hint for an answer points at a thing found already, so its half
+  // marks nothing found, where a ✓ would tell the player to skip it. The marks stay with the hints
+  // for what is still unfound (#95).
+  it('an evidence hint’s half marks nothing found', async () => {
+    start()
+    openCase(/The valley/)
+    await sweep()
+    for (const [id, word] of valleyAnswers) {
+      chip(id === 't1' ? 'commander' : word)
+      slot(id)
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    menu('Hint')
+    tab(/Look/)
+    expect(at()).toBe('[data-half]')
+    expect(document.querySelectorAll('[data-found]')).toHaveLength(0)
+  })
+
+  /** The valley swept and filled with its answers, one slot given another word, then closed. */
+  const missOne = async (id: string, word: string) => {
+    start()
+    openCase(/The valley/)
+    await sweep()
+    for (const [slotId, answer] of valleyAnswers) {
+      chip(slotId === id ? word : answer)
+      slot(slotId)
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+  }
+
+  // The next round's first tester (#102): all three of his hints were for the giant's face, and none
+  // said so. A hint for an answer names it, a blank by the words beside it, those after it when it
+  // opens its sentence, and its second tier names it again.
+  it('a hint names the answer it is for, at both tiers', async () => {
+    await missOne('t2', 'David')
+    menu('Hint')
+    expect(said()).toBe('Something here settles “___ dressed the boy”.')
+    tab(/Look/)
+    fireEvent.click(screen.getByRole('button', { name: 'Still stuck? Show me' }))
+    expect(said()).toBe('This settles “___ dressed the boy”. Tap it.')
+  })
+
+  // The owner's ruling [1] (#102): where a thing's half would take most of the picture, its first
+  // hint is the second tier, since tier 1 would ring the same box and say less. The giant's half
+  // takes 80%: a hint for his face rings him, names the face by its line, and offers no Show me.
+  it('a hint whose half would take most of the picture starts at its second tier', async () => {
+    await missOne('d2', 'Saul')
+    menu('Hint')
+    expect(said()).toBe('This settles “the fallen giant”. Tap it.')
+    tab(/Look/)
+    expect(at()).toBe('[data-spot="giant"]')
+    expect(screen.queryByRole('button', { name: /Show me/ })).toBeNull()
   })
 
   // Under a guided step the step's own mark is the hint, and the step holds the screen (#77): a run
@@ -2149,6 +2236,90 @@ describe('the close converges (#95)', () => {
     expect(document.querySelector('[data-found="pourers"] circle')).toHaveAttribute('cx', '549')
     expect(document.querySelector('[data-found="caller"]')).toBeNull()
     expect(document.querySelectorAll('[data-found]')).toHaveLength(2)
+  })
+
+  const marked = (cls: string) =>
+    [...document.querySelectorAll(`[data-slot].${cls}`)].map((e) => e.getAttribute('data-slot'))
+
+  // The next round's first tester (#102) read no ✓ as wrong and took right answers out four times,
+  // and never changed the giant's face, ringed in a thin red line. A close that rings marks every
+  // answer, a ✓ on each that fits, which keeps its word, and a ring on each that doesn't; the
+  // valley's retry sits at the first answer it rang.
+  it('a close that rings marks every answer, and its ✓ keeps its word', async () => {
+    start()
+    openCase(/The valley/)
+    await sweep()
+    const his: Record<string, string> = { d2: 'Saul', t1: 'spear' }
+    for (const [id, word] of valleyAnswers) {
+      chip(his[id] ?? word)
+      slot(id)
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(marked('is-wrong')).toEqual(['d2', 't1'])
+    expect(marked('is-right')).toEqual(['d1', 't3', 't2', 't4', 't5'])
+    await waitFor(() => expect(coach()?.querySelector('.ring')).toHaveClass('dim'))
+    expect([at(), said()]).toEqual([
+      '[data-slot="d2"]',
+      'Ringed answers don’t fit the story. Look closer.',
+    ])
+    slot('t3')
+    expect(document.querySelector('[data-slot="t3"]')).toHaveTextContent('six')
+  })
+
+  // Every case marks the same once its close rings, from its second miss (#95): a ✓ on each face,
+  // blank, and the order that fits, and the order, ✓'d, keeps its pictures (#102).
+  it('every case marks what fits once its close rings, the order too', () => {
+    start(<App />, mountain(everything, { ...right, faces: { c1: 'elijah', c2: 'baal' } }))
+    openCase(/The mountain/)
+    tab(/Solve/)
+    const close = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    const question = () => screen.getByRole('heading', { name: 'What happened first' })
+    close()
+    expect(marked('is-right')).toEqual([])
+    expect(question()).not.toHaveClass('is-right')
+    close()
+    expect(marked('is-wrong')).toEqual(['c2'])
+    expect(marked('is-right')).toEqual(['c1', 'a1', 'a2', 'a3', 'a4'])
+    expect(question()).toHaveClass('is-right')
+    const places = () => [...document.querySelectorAll('.oslot')]
+    expect(places().every((e) => e.classList.contains('is-right'))).toBe(true)
+    orderSlot(0)
+    expect(places()[0]).toHaveClass('is-filled')
+  })
+
+  // The owner's ruling [3] (#102): a close that rings brings its first ringed answer into view, in
+  // every case, as the valley's does. With only the mountain's order off, its ring sat below the
+  // fold at 360 × 548, under Close the case.
+  it('a close that rings brings its first ringed answer into view, in every case', () => {
+    start(<App />, mountain(everything, { ...right, order: ['water', 'fire', 'baal'] }))
+    openCase(/The mountain/)
+    tab(/Solve/)
+    const solve = document.querySelector('.solve')!
+    // Solve's room, and the order below it, the rest where beforeEach puts it.
+    vi.mocked(Element.prototype.getBoundingClientRect).mockImplementation(function (this: Element) {
+      if (this === solve) return new DOMRect(0, 100, 360, 300)
+      return this.matches('.order') ? new DOMRect(20, 500, 320, 120) : new DOMRect(10, 10, 100, 40)
+    })
+    const scrolled = vi.spyOn(solve, 'scrollBy')
+    const close = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    close()
+    scrolled.mockClear()
+    close()
+    expect(ringed()).toEqual(['order'])
+    expect(scrolled).toHaveBeenCalledWith({ top: 310, left: 0 })
+  })
+
+  // A hint for the order names it by its question (#102).
+  it('a hint for the order names it by its question', () => {
+    start(<App />, mountain(everything, { ...right, order: ['water', 'fire', 'baal'] }))
+    openCase(/The mountain/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    menu('Hint')
+    expect([at(), said()]).toEqual([
+      '[data-view="look"]',
+      'Something here settles “What happened first”.',
+    ])
   })
 })
 

@@ -65,12 +65,17 @@ export const en = {
   },
   steps: {
     step1: 'Tap the boy with the sling.',
-    step2: 'That tap found two words: David and sling.',
+    // A no-break space holds "his name" together, so the balanced wrap breaks after it (#102).
+    step2: 'That tap found his\u00a0name, David, and sling.',
     step3: 'Open Solve to name him.',
-    step4: 'Tap the slot under the boy, then David.',
-    // A no-break space holds "then sling" together, so the balanced wrap breaks between the two
-    // sentences, as 77d ruled for step 5's words (#77).
-    step5: 'Tap the blank, then\u00a0sling. Bright words fit.',
+    // The fills that lead with their slot say why, and say what comes next once the slot waits
+    // (#102): a face takes a name, and the picture shows the sling. No-break spaces hold "shows his
+    // sling" together, so the balanced wrap breaks between step 5's sentences, as 77d ruled (#77).
+    step4: ['Tap \u201cwho?\u201d under the boy, then David.', 'Now tap David, his name.'],
+    step5: [
+      'The picture shows\u00a0his\u00a0sling. Tap the blank.',
+      'Now tap sling. Bright words fit.',
+    ],
     step6: 'Find the other words in the picture.',
     step7: 'Fill the rest, then close the case.',
   },

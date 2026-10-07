@@ -341,6 +341,16 @@ describe('validate (Gate 02 A6)', () => {
     expect(validate(valley, long)).toEqual(['step "step4" says 9 words, not eight or fewer'])
   })
 
+  // A step that leads with its slot has a second form, once the slot waits, held the same (#102).
+  it('(m) a second form of nine words — step 4 once its slot waits', () => {
+    const [first] = en.steps.step4
+    const long: Text = {
+      ...en,
+      steps: { ...en.steps, step4: [first, 'Now tap David, the name of the boy here.'] },
+    }
+    expect(validate(valley, long)).toEqual(['step "step4" says 9 words, not eight or fewer'])
+  })
+
   // The last step's retry sits beside its mark too (#25).
   it('(m) a retry of nine words — "Some answers are wrong" in full', () => {
     const long: Text = { ...en, retry: 'Some answers are wrong. Look closer, then try again.' }

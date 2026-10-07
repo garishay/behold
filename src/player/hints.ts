@@ -21,11 +21,12 @@ export type Tier = Progress['hints'][number]
 
 /**
  * What a hint points at: a spot still unfound, one that yields a word a stranded player is
- * missing, a spot whose caption or paper settles one of the player's answers, or Close the case,
- * which says how far off they are.
+ * missing, a spot whose caption or paper settles one of the player's answers, and which answer it
+ * settles (#102), or Close the case, which says how far off they are.
  */
 export type Aim =
-  | { readonly spot: string; readonly why: 'unfound' | 'stranded' | 'evidence' }
+  | { readonly spot: string; readonly why: 'unfound' | 'stranded'; readonly for?: never }
+  | { readonly spot: string; readonly why: 'evidence'; readonly for: string }
   | { readonly spot?: never; readonly why: 'close' }
 
 /**
@@ -67,7 +68,7 @@ export const firstWrong = (s: CaseStructure, p: Progress) =>
  * still empty; and once everything is filled, Close the case.
  */
 export function aim(s: CaseStructure, p: Progress, missed: string | null): Aim {
-  if (missed !== null) return { spot: s.evidence[missed], why: 'evidence' }
+  if (missed !== null) return { spot: s.evidence[missed], why: 'evidence', for: missed }
   const need = stranded(s, p)
   const wanted = (x: Spot) => need.size === 0 || x.words.some((w) => need.has(s.words[w]))
   const left = (m: CaseStructure['moments'][number]) =>
@@ -77,7 +78,8 @@ export function aim(s: CaseStructure, p: Progress, missed: string | null): Aim {
   const why = need.size > 0 ? 'stranded' : 'unfound'
   if (moment !== undefined) return { spot: drawOrder(left(moment)).at(-1)!.id, why }
   const empty = things(s, p).find(([, put]) => !put)?.[0]
-  return empty === undefined ? { why: 'close' } : { spot: s.evidence[empty], why: 'evidence' }
+  if (empty === undefined) return { why: 'close' }
+  return { spot: s.evidence[empty], why: 'evidence', for: empty }
 }
 
 /**
@@ -91,4 +93,14 @@ export function half([l, t, w, h]: Box): Box {
     Math.abs(x) >= Math.abs(y) ? [x < 0 ? 0 : 50, 0, 50, 100] : [0, y < 0 ? 0 : 50, 100, 50]
   const [left, top] = [Math.min(L, l), Math.min(T, t)]
   return [left, top, Math.max(L + W, l + w) - left, Math.max(T + H, t + h) - top]
+}
+
+/**
+ * Whether the half that holds a box takes most of the picture, over 60% of it, as the valley's
+ * giant's takes 80%: such a ring narrows little, so a hint there starts at its second tier, the
+ * thing itself (#102, ruling [1]).
+ */
+export const broad = (box: Box) => {
+  const [, , w, h] = half(box)
+  return w * h > 6000
 }

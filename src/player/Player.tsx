@@ -8,7 +8,7 @@ import { strings } from '../strings/en.ts'
 import { Bank } from './Bank.tsx'
 import { CoachMark } from './CoachMark.tsx'
 import { Dock, type Caption } from './Dock.tsx'
-import { aim, firstWrong, half, stranded, stuck, type Aim, type Tier } from './hints.ts'
+import { aim, broad, firstWrong, half, stranded, stuck, type Aim, type Tier } from './hints.ts'
 import { PaperModal, PapersSheet } from './Papers.tsx'
 import { prefetch } from './pictures.ts'
 import { bring, showEmpty } from './place.ts'
@@ -22,6 +22,7 @@ import {
   chooseWord,
   closable,
   filled,
+  fitting,
   nothing,
   opened,
   placed,
@@ -119,6 +120,11 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const [ringed, setRinged] = useState<readonly string[]>([])
   const [orderRinged, setOrderRinged] = useState(false)
   const [misses, setMisses] = useState(0)
+  // A close that rings marks what fits too: each takes its ✓ and keeps it, as every ✓ does, the
+  // order as one (#102).
+  const [fits, setFits] = useState<readonly string[]>([])
+  const [orderFits, setOrderFits] = useState(false)
+  const told = asking && s.ask !== undefined ? [...fits, s.ask] : fits
   // A failed close with something still unfound rings Look until it opens (#95).
   const [seek, setSeek] = useState(false)
   // The bank's head: a refused word's message, or how far off a close was (07c, #24 [3]).
@@ -277,18 +283,20 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     const rest = left > 0 ? ` ${strings.toFind(left, s.moments.length)}` : ''
     setNote(off === 0 ? '' : strings.noMatch(off) + rest)
     if (off > 0) {
+      const first = firstWrong(s, progress) ?? null
       play('notYet')
       setFails(fails + 1)
       setMisses(misses + 1)
       setSeek(left > 0)
-      setMissed(firstWrong(s, progress) ?? null)
+      setMissed(first)
       // In the tutorial the last step's mark comes back, dim and all, with its retry (#25), or as
       // the question at the slot the case asks about when this close found it wrong; every other
-      // slot it found wrong is ringed, and with no question to bring one into view, the first
-      // ring is brought there (#77).
+      // slot it found wrong is ringed, every one that fits takes its ✓, and with no question to
+      // bring one into view, the first ring is brought there (#77, #102).
       if (current !== undefined && current.until === undefined) {
         const at = wrongs(s, progress).filter((id) => id !== s.ask)
         setRinged(at)
+        setFits(fitting(s, progress))
         if (wrongAt(s.ask)) setAsking(true)
         else {
           setRetry(true)
@@ -296,9 +304,15 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
         }
         nudge()
       } else if (misses > 0) {
-        // From a case's second miss, its close rings what doesn't match, as the valley's does (#95).
+        // From a case's second miss, its close rings what doesn't match, as the valley's does (#95),
+        // marks what fits, and brings the first ring into view in Solve's order: a face, the order,
+        // then a blank (#102 [3]).
         setRinged(wrongs(s, progress))
+        setFits(fitting(s, progress))
         setOrderRinged(s.order?.some((m, i) => progress.order[i] !== m) ?? false)
+        setOrderFits(s.order?.every((m, i) => progress.order[i] === m) ?? false)
+        const order = first !== null && s.order?.includes(first)
+        bring(document.querySelector(order ? '.order' : `[data-slot="${first}"]`))
       }
     }
     if (hint?.why === 'close') setHint(null)
@@ -358,14 +372,18 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   /**
    * A hint asked for, from the offer or the menu (#29): the second tier of the one showing, or a new
    * one's first. It starts the signals over, and the tier is kept for the close. Asked for past its
-   * last tier, the hint's mark is shown again, and under a guided step the step's is.
+   * last tier, the hint's mark is shown again, and under a guided step the step's is. Where a
+   * thing's half would take most of the picture, its first hint is the second tier: tier 1 would
+   * ring the same box and say less (#102 [1]).
    */
   const take = () => {
     setSaidAt(null)
     if (guided || hint?.tier === 2 || hint?.why === 'close') return nudge()
+    const target = aim(s, progress, missed ?? asked ?? null)
+    const box = spots.find((x) => x.id === target.spot)?.box
     const next = hint
       ? { ...hint, tier: 2 as const }
-      : { ...aim(s, progress, missed ?? asked ?? null), tier: 1 as const }
+      : { ...target, tier: box && broad(box) ? (2 as const) : (1 as const) }
     setHint(next)
     setRun(0)
     setStayed(false)
@@ -449,10 +467,14 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     if (asked !== undefined && view !== 'look') return `[data-slot="${asked}"]`
     if (until?.view || view === 'look') return '[data-view="solve"]'
     const filled = until?.filled
-    // The last step rings Solve's count until Close the case shows (#24, Solve's room), and Look's
-    // button while a failed close has left something unfound there (#95).
-    if (filled === undefined)
-      return seek ? '[data-view="look"]' : full ? '[data-close]' : '[data-view="solve"]'
+    // The last step rings Solve's count until Close the case shows (#24, Solve's room), Look's
+    // button while a failed close has left something unfound there (#95), and after one, the first
+    // answer it ringed (#102).
+    if (filled === undefined) {
+      if (seek) return '[data-view="look"]'
+      if (retry && ringed.length > 0) return `[data-slot="${ringed[0]}"]`
+      return full ? '[data-close]' : '[data-view="solve"]'
+    }
     const word = answer(s, filled)
     if (current.slotFirst)
       return selection.target === filled ? `[data-word="${word}"]` : `[data-slot="${filled}"]`
@@ -463,15 +485,37 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   // for the second; or Close the case, through Solve's button. It takes the step's place.
   const aimed = spots.find((x) => x.id === hint?.spot)
   const home = s.moments.find((m) => aimed !== undefined && m.spots.includes(aimed))
+  const halved = hint?.tier === 1 && aimed !== undefined
   const hintAt = () => {
     if (hint === null || card || sheet !== null || paper !== null) return undefined
     if (hint.why === 'close') return view === 'look' ? '[data-view="solve"]' : '[data-close]'
     if (view !== 'look') return '[data-view="look"]'
     if (home !== undefined && home !== moment) return `[data-moment="${home.id}"]`
-    return hint.tier === 1 ? '[data-half]' : `[data-spot="${hint.spot}"]`
+    return halved ? '[data-half]' : `[data-spot="${hint.spot}"]`
+  }
+  // A hint for an answer says which (#102): a face by its line, the order by its question, a blank
+  // by the three words before it in its sentence, or after it when it opens one.
+  const named = (id: string) => {
+    if (s.faces.some((f) => f.id === id)) return text.faces[id]
+    if (s.order?.includes(id)) return strings.whatHappenedFirst
+    const parts = Object.values(text.blocks).find((b) => b.parts.some((x) => x.b === id))?.parts
+    const i = parts?.findIndex((x) => x.b === id) ?? -1
+    const before = (parts?.[i - 1]?.t ?? '')
+      .split(/[.!?][”’]?\s/)
+      .at(-1)!
+      .split(/\s+/)
+    const after = (parts?.[i + 1]?.t ?? '').split(/\s+/).filter(Boolean)
+    const near = before.filter(Boolean).slice(-3)
+    return near.length > 0
+      ? [...near, strings.blankMark].join(' ')
+      : [strings.blankMark, ...after.slice(0, 3)].join(' ')
   }
   const hinted = hintAt()
   const at = hinted ?? markAt()
+  // A step that leads with its slot says what comes next once the slot waits (#102).
+  const forms = current && text.steps?.[current.id]
+  const waits = current?.slotFirst === true && selection.target === current.until.filled
+  const stepWords = typeof forms === 'string' ? forms : forms?.[waits ? 1 : 0]
   // A ring with no words carries no dim either ([Q11]).
   const silent =
     view === 'look' && at === '[data-view="solve"]' && current?.until?.view === undefined
@@ -532,7 +576,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
             }}
             onTap={onTap}
             onMiss={nothingNew}
-            half={hint?.tier === 1 && aimed && home === moment ? half(aimed.box) : undefined}
+            half={halved && aimed && home === moment ? half(aimed.box) : undefined}
+            marks={hint?.why !== 'evidence'}
           >
             {card && (
               <div className="card" role="dialog" aria-label={text.title}>
@@ -573,14 +618,13 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
               text={text}
               progress={progress}
               selection={selection}
-              onSlot={(t) =>
-                apply(chooseSlot(s, progress, selection, t, asking ? s.ask : undefined))
-              }
+              onSlot={(t) => apply(chooseSlot(s, progress, selection, t, told))}
               onMoment={(id) => apply(chooseMoment(s, progress, selection, id))}
-              onOrderSlot={(i) => apply(chooseOrderSlot(s, progress, selection, i))}
-              asked={asking ? s.ask : undefined}
+              onOrderSlot={(i) => orderFits || apply(chooseOrderSlot(s, progress, selection, i))}
+              told={told}
               ringed={ringed}
               orderRinged={orderRinged}
+              orderFits={orderFits}
             />
           </div>
           {/* Close the case docks as its own row below the account, outside the scroll, so it never
@@ -632,9 +676,13 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
           label={
             saidAt === hinted
               ? ''
-              : hint.tier === 2
-                ? strings.hintThing
-                : strings.hintSays[hint.why]
+              : hint.why === 'evidence'
+                ? (hint.tier === 2 ? strings.hintSettlesThing : strings.hintSettles)(
+                    named(hint.for),
+                  )
+                : hint.tier === 2
+                  ? strings.hintThing
+                  : strings.hintSays[hint.why]
           }
           onTap={() => setSaidAt(hinted)}
         />
@@ -650,7 +698,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
                   ? text.ask
                   : retry && !current.until
                     ? text.retry
-                    : text.steps?.[current.id]) ?? '')
+                    : stepWords) ?? '')
           }
           onTap={
             meet ?? (fleeting && said !== showing && !silent ? () => setSaid(showing) : undefined)

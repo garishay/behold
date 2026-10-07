@@ -42,7 +42,9 @@ export function Dock({ structure, text, caption, offer, onMore }: DockProps) {
     onMore(next !== null)
   }
   const spot = structure.moments.flatMap((m) => m.spots).find((x) => x.id === caption?.spot)
-  const words = caption?.added.map((w) => text.words[w]).join(', ')
+  // A tap that finds nothing new says what its spot holds, so a second tap names who is there (#102).
+  const held = caption?.added.length ? caption.added : (spot?.words ?? [])
+  const words = held.map((w) => text.words[w]).join(', ')
   const notes = [
     words && `${strings.found} ${words}`,
     caption?.paper !== undefined && strings.copiedToPapers,

@@ -112,13 +112,24 @@ describe('the room a mark’s words are given (#77)', () => {
 })
 
 // The valley's failed close rings what it found wrong; the class is tested, and the ring it draws
-// is the stylesheet's, pinned as text against removal: the screens are its evidence (#77).
+// is the stylesheet's, pinned as text against removal: the screens are its evidence (#77). The
+// ring is heavier than a slot's line, and a face that fits shows its ✓ as a blank does, and the
+// order beside its question (#102).
 describe('the ring on a slot a failed close found wrong (#77)', () => {
   it('is drawn on the account’s blanks and on the faces', () => {
     const blank = /\n\.scroll \.slot\.is-wrong \{([^}]*)\}/.exec(css)?.[1] ?? ''
     const face = /\n\.face \.slot\.is-wrong \{([^}]*)\}/.exec(css)?.[1] ?? ''
-    expect(blank).toMatch(/box-shadow: 0 0 0 2px var\(--wine\);/)
-    expect(face).toMatch(/border-color: var\(--t-action\);/)
+    expect(blank).toMatch(/box-shadow: 0 0 0 3px var\(--wine\);/)
+    expect(face).toMatch(
+      /border-color: var\(--t-action\);\s+box-shadow: 0 0 0 2px var\(--t-action\);/,
+    )
+  })
+
+  it('a face that fits shows its ✓ beside the name, and the order beside its question', () => {
+    const right =
+      /\n\.face \.slot\.is-right::after,\n\.app h2\.is-right::after \{([^}]*)\}/.exec(css)?.[1] ??
+      ''
+    expect(right).toMatch(/content: '\\2713';\s+margin-left: 0\.3em;\s+color: var\(--right\);/)
   })
 })
 
@@ -186,7 +197,7 @@ describe('the bank’s rows (#24)', () => {
 describe('the close’s order ring and the hint’s found marks (#95)', () => {
   it('rings the order whole in the faces’ red', () => {
     const order = /\n\.order\.is-wrong \{([^}]*)\}/.exec(css)?.[1] ?? ''
-    expect(order).toMatch(/box-shadow: 0 0 0 2px var\(--t-action\);/)
+    expect(order).toMatch(/box-shadow: 0 0 0 3px var\(--t-action\);/)
   })
 
   it('marks a found thing in gold, taking no tap', () => {
