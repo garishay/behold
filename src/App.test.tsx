@@ -988,6 +988,27 @@ describe('the tutorial’s marks (#25)', () => {
     expect([ring()!.style.top, ring()!.style.height]).toEqual(['376px', '24px'])
   })
 
+  // The owner's routing of #104: only a ring on the picture ends where the dock begins, at its
+  // caption's top. The dock's own ring at step 2 and a ring on the bar lie under that top, and keep
+  // their whole box. Boxes as at 360 × 548.
+  it('cuts no ring off the picture at the dock: the dock’s own at step 2, and the bar’s', async () => {
+    boxes = {
+      '.dock': new DOMRect(0, 365, 360, 104),
+      '.stage': new DOMRect(34, 0, 292, 365),
+      '[data-view="solve"]': new DOMRect(208, 476, 144, 48),
+    }
+    start()
+    openCase(/The valley/)
+    tapSpot('boy')
+    expect(at()).toBe('.dock')
+    await waitFor(() => expect(ring()).not.toBeNull())
+    expect([ring()!.style.top, ring()!.style.height]).toEqual(['361px', '112px'])
+    fireEvent.click(document.querySelector('.dock')!)
+    expect(at()).toBe('[data-view="solve"]')
+    await waitFor(() => expect(ring()?.style.top).toBe('472px'))
+    expect(ring()!.style.height).toBe('56px')
+  })
+
   // The paid round's second session (#23, 2026-10-05): step 5's words sat under sling's blank,
   // over the account's lines around it, the whole time she was stuck there. No mark covers the
   // account: the words of a target among its lines sit just under the lines on show (#77).
