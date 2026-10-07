@@ -3,6 +3,18 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.18.1 — Three fixes before the next tester (#104)
+
+- **104a — the ring, the fill, and the retry** (#105): the next round's first tester read the
+  basket's caption with a hint's ring drawn across it, and after he filled Saul's blank the
+  account jumped up to the loaves' blank while he was reading down. A ring on the picture now ends
+  where a caption opened over its foot begins, as a mark's words do, and a thing wholly under the
+  caption shows no ring until it closes; the dock's own ring and the bar's are unchanged. A fill
+  that leaves no empty slot in view goes on down to the nearest one below, and up only when none
+  is left below, and Solve's button on Solve takes the same order. Once no ring is left, the
+  valley's retry has no words, where at Close the case it still said that ringed answers don't
+  fit the story.
+
 ## v0.18.0 — Gate 25, the valley teaches the loop (#102)
 
 - **102a — the valley teaches the loop** (#103): the next round's first tester was told where to
