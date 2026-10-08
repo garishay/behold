@@ -9,11 +9,12 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   basket's caption with a hint's ring drawn across it, and after he filled Saul's blank the
   account jumped up to the loaves' blank while he was reading down. A ring on the picture now ends
   where a caption opened over its foot begins, as a mark's words do, and a thing wholly under the
-  caption shows no ring until it closes; the dock's own ring and the bar's are unchanged. A fill
-  that leaves no empty slot in view goes on down to the nearest one below, and up only when none
-  is left below, and Solve's button on Solve takes the same order. Once no ring is left, the
-  valley's retry has no words, where at Close the case it still said that ringed answers don't
-  fit the story.
+  caption shows no ring until it closes; the dock's own ring and the bar's are unchanged. A click
+  now wakes a mark as a tap's press does ([Q15]), so a caption opened or closed by keyboard or a
+  screen reader recuts the ring too. A fill that leaves no empty slot in view goes on down to the
+  nearest one below, and up only when none is left below, and Solve's button on Solve takes the
+  same order. Once no ring is left, the valley's retry has no words, where at Close the case it
+  still said that ringed answers don't fit the story.
 
 ## v0.18.0 — Gate 25, the valley teaches the loop (#102)
 
