@@ -37,16 +37,24 @@ rules below are the answer, ruled on #26.
    the loop the game is built on, and the Playtests Issue's second criterion watches for it.
 
 5. **The check converges.** Close the case says how many answers don't fit the story, as a
-   number, and from a case's second failed close it marks every answer, as the valley's does from
-   its first: a ✓ on each that fits, and a ring on each that doesn't, which says which answer,
-   never what it is, and the first ring is brought into view (#95, #102). A close that fails while
-   something is still unfound says how much is left to find, and rings Look until it opens (#95).
-   A miss is the picture's, never the player's: no close calls an answer wrong (#77). Close the
-   case appears once every slot is filled, in every case (#24). Until a close marks them, the
-   tutorial marks an answer right only on the slots its guided steps name; once those steps are
-   done, its last step points at Solve's count, and once every slot is filled, whatever step
-   waits, Close the case appears and the last step points at it, so the tutorial closes on the
-   same check as every case, and a full account is never a dead end (#77).
+   number. The valley and the mountain mark the answers too, because they teach the loop: from
+   the valley's first failed close and the mountain's second, a ✓ on each answer that fits and a
+   ring on each that doesn't, which says which answer, never what it is, and the first ring is
+   brought into view (#95, #102). From the vineyard on, a failed close says only how many, and
+   marks no answer (#106). Closes are free and the bank lights only a slot's kind, so there a
+   ringed answer would fall to its rivals in a close or two, every ring at once, with no trip
+   back to the picture: guessing would be cheaper than looking (rule 1), and the rings would
+   name every wrong answer for free, where a hint names one and the reveal counts it. The hint
+   offered after the second failed close names the first answer that doesn't fit, rings what
+   settles it, and counts on the reveal, so a stuck player learns which answer is wrong, one at
+   a time (#29, #102). A close that fails while something is still unfound says how much is left
+   to find, and rings Look until it opens (#95). A miss is the picture's, never the player's: no
+   close calls an answer wrong (#77). Close the case appears once every slot is filled, in every
+   case (#24). Until a close marks them, the tutorial marks an answer right only on the slots
+   its guided steps name; once those steps are done, its last step points at Solve's count, and
+   once every slot is filled, whatever step waits, Close the case appears and the last step
+   points at it, so the tutorial closes on the same check as every case, and a full account is
+   never a dead end (#77).
    The first case teaches the real check, and since it teaches, it says where: its failed close
    marks every answer, each ring until that answer is changed, and its retry sits at the first it
    rang (#77, #102). Its one inference is asked on a miss: when a close finds that the sword's
@@ -66,11 +74,11 @@ rules below are the answer, ruled on #26.
    | the battle   | a disguise: a face without its marker, named by what happens |
 
    The mountain marks its one idea the first time the player meets it: the pictures to place,
-   then the slots they go in (`teach`, #30). The battle marks its own at the disguised man's face,
-   until the player names him (#53). In the valley and on the mountain a person's tap gives
-   their name; from the vineyard on, the names the faces need come from something that bears
-   them — a seal, a letter, a note, or another person's words — and the player works out whose
-   each one is.
+   then the slots they go in (`teach`, #30). The vineyard marks its own at the face of the man on
+   the bed, and the battle at the disguised man's, each until the player names him (#106, #53).
+   In the valley and on the mountain a person's tap gives their name; from the vineyard on, the
+   names the faces need come from something that bears them — a seal, a letter, a note, or
+   another person's words — and the player works out whose each one is.
 
    The season plays in order: each case opens when the one before it is closed, and a case the
    player has already started stays open (#75). The valley teaches the game; the cases after it

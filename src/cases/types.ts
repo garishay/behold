@@ -120,6 +120,13 @@ export interface CaseStructure {
    */
   readonly teach?: Teach
   /**
+   * Whether a failed close marks the answers, from the case's second: a case that teaches the loop,
+   * as the mountain does, takes a ✓ on each answer that fits and a ring on each that doesn't (#95,
+   * #102). The valley's tutorial marks from its first close through its steps. From the vineyard
+   * on, a close says only how many (#106).
+   */
+  readonly marks?: true
+  /**
    * Where a hint points (#29): each face and blank names the spot whose caption or paper settles
    * it, and in a case with an order each moment names one of its own spots, the one that tells
    * when it happened.

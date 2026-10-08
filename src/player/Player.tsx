@@ -115,8 +115,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const [asking, setAsking] = useState(false)
   // The valley teaches, so its failed close says where: every slot it found wrong, but the one its
   // question asks about, is ringed until it is changed, and then for good, so only the next close
-  // checks it again (#77, review round 1). Every case's close does so from its second miss, the
-  // order ringed whole as the one answer it is (#95).
+  // checks it again (#77, review round 1). The mountain's close does so from its second miss, the
+  // order ringed whole as the one answer it is (#95), and from the vineyard on, none does (#106).
   const [ringed, setRinged] = useState<readonly string[]>([])
   const [orderRinged, setOrderRinged] = useState(false)
   const [misses, setMisses] = useState(0)
@@ -303,17 +303,19 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
           bring(document.querySelector(`[data-slot="${at[0]}"]`))
         }
         nudge()
-      } else if (misses > 0) {
-        // From a case's second miss, its close rings what doesn't match, as the valley's does (#95),
-        // marks what fits, and brings the first ring into view in Solve's order: a face, the order,
-        // then a blank (#102 [3]).
+      } else if (misses > 0 && s.marks) {
+        // From its second miss, a case that teaches the loop rings what doesn't match, as the valley
+        // does (#95), marks what fits, and brings the first ring into view in Solve's order: a face,
+        // the order, then a blank (#102 [3]). From the vineyard on, a close marks nothing: it says
+        // how many, and the hint after the second names one at a time (#106), so the close that
+        // makes that hint's offer due drops a hint still showing, at either tier ([Q16] on #12).
         setRinged(wrongs(s, progress))
         setFits(fitting(s, progress))
         setOrderRinged(s.order?.some((m, i) => progress.order[i] !== m) ?? false)
         setOrderFits(s.order?.every((m, i) => progress.order[i] === m) ?? false)
         const order = first !== null && s.order?.includes(first)
         bring(document.querySelector(order ? '.order' : `[data-slot="${first}"]`))
-      }
+      } else if (!s.marks && fails + 1 >= stuck.closes) setHint(null)
     }
     if (hint?.why === 'close') setHint(null)
     close(submit(s, progress))
@@ -485,12 +487,15 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   // for the second; or Close the case, through Solve's button. It takes the step's place.
   const aimed = spots.find((x) => x.id === hint?.spot)
   const home = s.moments.find((m) => aimed !== undefined && m.spots.includes(aimed))
+  // The hint's moment while Look shows another: its button takes the ring, and the words name it
+  // and say to open it (#106 [1]).
+  const away = view === 'look' && home !== moment ? home : undefined
   const halved = hint?.tier === 1 && aimed !== undefined
   const hintAt = () => {
     if (hint === null || card || sheet !== null || paper !== null) return undefined
     if (hint.why === 'close') return view === 'look' ? '[data-view="solve"]' : '[data-close]'
     if (view !== 'look') return '[data-view="look"]'
-    if (home !== undefined && home !== moment) return `[data-moment="${home.id}"]`
+    if (away !== undefined) return `[data-moment="${away.id}"]`
     return halved ? '[data-half]' : `[data-spot="${hint.spot}"]`
   }
   // A hint for an answer says which (#102): a face by its line, the order by its question, a blank
@@ -678,13 +683,18 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
           label={
             saidAt === hinted
               ? ''
-              : hint.why === 'evidence'
-                ? (hint.tier === 2 ? strings.hintSettlesThing : strings.hintSettles)(
-                    named(hint.for),
+              : away !== undefined
+                ? strings.hintOpen(
+                    text.moments[away.id],
+                    hint.why === 'evidence' ? named(hint.for) : undefined,
                   )
-                : hint.tier === 2
-                  ? strings.hintThing
-                  : strings.hintSays[hint.why]
+                : hint.why === 'evidence'
+                  ? (hint.tier === 2 ? strings.hintSettlesThing : strings.hintSettles)(
+                      named(hint.for),
+                    )
+                  : hint.tier === 2
+                    ? strings.hintThing
+                    : strings.hintSays[hint.why]
           }
           onTap={() => setSaidAt(hinted)}
         />
