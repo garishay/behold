@@ -2032,6 +2032,60 @@ describe('hints (#29)', () => {
     expect(screen.queryByRole('button', { name: /Show me/ })).toBeNull()
   })
 
+  // The restarted round's second session (#23): "There’s still something to find here." on The
+  // fire's button read as "find the fire in this picture", and he searched the water's. On a
+  // moment's button a hint's words name the moment and say to open it, at either tier, and once
+  // the moment opens they are the hint's own again (#106 [1]).
+  it('on a moment’s button, a hint for something still to find names it and says to open it', () => {
+    start(<App />, laterStarted)
+    openCase(/The mountain/)
+    for (const id of ['altar', 'pourers', 'caller', 'trench', 'spent']) tapSpot(id)
+    for (let i = 0; i < stuck.taps; i++) tapSpot('altar')
+    fireEvent.click(screen.getByRole('button', { name: 'Stuck? Where to look' }))
+    const opens = 'Open The fire: there’s more to find.'
+    expect([at(), said()]).toEqual(['[data-moment="fire"]', opens])
+    moment('The fire')
+    expect([at(), said()]).toEqual(['[data-half]', 'There’s still something to find here.'])
+    moment('The water')
+    fireEvent.click(screen.getByRole('button', { name: 'Still stuck? Show me' }))
+    expect([at(), said()]).toEqual(['[data-moment="fire"]', opens])
+  })
+
+  // From the vineyard on, the hint after a failed close is how a stuck player learns which answer
+  // doesn't fit (#106): on the moment's button that leads to its evidence, it names the moment and
+  // the answer, and says to open it.
+  it('on a moment’s button, a hint for an answer names it and the answer, and says to open it', () => {
+    const kept = closedCase(vineyard)
+    start(<App />, { vineyard: { ...kept, fills: { ...kept.fills, s4: 'ahab' }, solved: false } })
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    menu('Hint')
+    expect(said()).toBe('Something here settles “but written by ___”.')
+    tab(/Look/)
+    expect([at(), said()]).toEqual([
+      '[data-moment="bedchamber"]',
+      'Open Bedchamber to settle “but written by ___”.',
+    ])
+    moment('Bedchamber')
+    expect([at(), said()]).toEqual(['[data-half]', 'Something here settles “but written by ___”.'])
+  })
+
+  // The ruling on F3's words (#106 [1]): a stranded player's hint points at a spot not yet found,
+  // so on a moment's button it says there's more to find. The water's two words are placed, and
+  // nothing in the bank fits the empty face or the actions' blanks.
+  it('on a moment’s button, a stranded player’s hint says there’s more to find', () => {
+    const water = ['altar', 'pourers', 'caller', 'trench', 'spent']
+    const placed = { faces: { c1: 'elijah' }, fills: { a3: 'jars' } }
+    start(<App />, {
+      ...laterStarted,
+      carmel: { ...fresh(carmel), tapped: water, bank: ['jars', 'elijah'], ...placed },
+    })
+    openCase(/The mountain/)
+    menu('Hint')
+    expect([at(), said()]).toEqual(['[data-moment="fire"]', 'Open The fire: there’s more to find.'])
+  })
+
   // The next round's first tester (#104): "Where to look" rang most of the picture, and with the
   // basket's caption opened over its foot, its ring ran across the caption: "the yellow rectangle
   // is on top of the text." A ring on the picture is cut where an opened caption begins, and a

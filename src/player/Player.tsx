@@ -486,12 +486,15 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   // for the second; or Close the case, through Solve's button. It takes the step's place.
   const aimed = spots.find((x) => x.id === hint?.spot)
   const home = s.moments.find((m) => aimed !== undefined && m.spots.includes(aimed))
+  // The hint's moment while Look shows another: its button takes the ring, and the words name it
+  // and say to open it (#106 [1]).
+  const away = view === 'look' && home !== moment ? home : undefined
   const halved = hint?.tier === 1 && aimed !== undefined
   const hintAt = () => {
     if (hint === null || card || sheet !== null || paper !== null) return undefined
     if (hint.why === 'close') return view === 'look' ? '[data-view="solve"]' : '[data-close]'
     if (view !== 'look') return '[data-view="look"]'
-    if (home !== undefined && home !== moment) return `[data-moment="${home.id}"]`
+    if (away !== undefined) return `[data-moment="${away.id}"]`
     return halved ? '[data-half]' : `[data-spot="${hint.spot}"]`
   }
   // A hint for an answer says which (#102): a face by its line, the order by its question, a blank
@@ -679,13 +682,18 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
           label={
             saidAt === hinted
               ? ''
-              : hint.why === 'evidence'
-                ? (hint.tier === 2 ? strings.hintSettlesThing : strings.hintSettles)(
-                    named(hint.for),
+              : away !== undefined
+                ? strings.hintOpen(
+                    text.moments[away.id],
+                    hint.why === 'evidence' ? named(hint.for) : undefined,
                   )
-                : hint.tier === 2
-                  ? strings.hintThing
-                  : strings.hintSays[hint.why]
+                : hint.why === 'evidence'
+                  ? (hint.tier === 2 ? strings.hintSettlesThing : strings.hintSettles)(
+                      named(hint.for),
+                    )
+                  : hint.tier === 2
+                    ? strings.hintThing
+                    : strings.hintSays[hint.why]
           }
           onTap={() => setSaidAt(hinted)}
         />

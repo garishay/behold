@@ -124,7 +124,7 @@ export const strings = {
 
   // Hints (#29): offered once the game sees a player stuck, in the caption's dock on Look and
   // beside Close the case on Solve, and quietly in the menu; each tier asked for. A hint's words
-  // sit beside its ring, eight or fewer, and follow it through the buttons that lead there.
+  // sit beside its ring and follow it through the buttons that lead there.
   hint: 'Hint',
   stuck: 'Stuck?',
   whereToLook: 'Where to look',
@@ -140,6 +140,12 @@ export const strings = {
   // the words beside it, with its mark.
   hintSettles: (answer: string) => `Something here settles “${answer}”.`,
   hintSettlesThing: (answer: string) => `This settles “${answer}”. Tap it.`,
+  // On a moment's button, a hint's words name the moment as its button shows it and say to open
+  // it, in one sentence: for more to find, or to settle an answer, named (#106 [1]).
+  hintOpen: (moment: string, answer?: string) =>
+    answer === undefined
+      ? `Open ${moment}: there’s more to find.`
+      : `Open ${moment} to settle “${answer}”.`,
   blankMark: '___',
 
   // The reveal.
