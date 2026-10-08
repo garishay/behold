@@ -2,7 +2,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { labelAt, show, showEmpty } from './place.ts'
 
 // A short count with no empty slot in view (#23, the next round's second tester): the nearest
-// empty slot, above or below what the account shows, is brought into view; one in view is enough.
+// empty slot below what the account shows is brought into view, and the nearest above only when
+// none is left below (#104); one in view is enough.
 describe('an empty slot brought into view (#24)', () => {
   afterEach(() => document.body.replaceChildren())
   const account = (...slots: [number, boolean][]) => {
@@ -21,8 +22,12 @@ describe('an empty slot brought into view (#24)', () => {
     return scroll.mock.calls.map(([o]) => (o as ScrollToOptions).top)
   }
 
-  it('brings the nearest empty slot, above or below, and none while one is in view', () => {
-    expect(account([0, false], [520, false], [200, true])).toEqual([-100])
+  // The next round's first tester (#104): with the loaves' blank just above the view and the
+  // sword's below it, his fill of Saul's blank sent the account up: "why are going upward? I
+  // thought we were going downward." The account reads downward, so a fill goes on down.
+  it('brings the nearest empty slot below, above only when none is below, and none while one is in view', () => {
+    expect(account([0, false], [520, false], [200, true])).toEqual([150])
+    expect(account([0, false], [-100, false], [200, true])).toEqual([-100])
     expect(account([-200, false], [430, false])).toEqual([60])
     expect(account([0, false], [250, false])).toEqual([])
     expect(account([0, true], [250, true])).toEqual([])

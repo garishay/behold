@@ -988,6 +988,27 @@ describe('the tutorial’s marks (#25)', () => {
     expect([ring()!.style.top, ring()!.style.height]).toEqual(['376px', '24px'])
   })
 
+  // The owner's routing of #104: only a ring on the picture ends where the dock begins, at its
+  // caption's top. The dock's own ring at step 2 and a ring on the bar lie under that top, and keep
+  // their whole box. Boxes as at 360 × 548.
+  it('cuts no ring off the picture at the dock: the dock’s own at step 2, and the bar’s', async () => {
+    boxes = {
+      '.dock': new DOMRect(0, 365, 360, 104),
+      '.stage': new DOMRect(34, 0, 292, 365),
+      '[data-view="solve"]': new DOMRect(208, 476, 144, 48),
+    }
+    start()
+    openCase(/The valley/)
+    tapSpot('boy')
+    expect(at()).toBe('.dock')
+    await waitFor(() => expect(ring()).not.toBeNull())
+    expect([ring()!.style.top, ring()!.style.height]).toEqual(['361px', '112px'])
+    fireEvent.click(document.querySelector('.dock')!)
+    expect(at()).toBe('[data-view="solve"]')
+    await waitFor(() => expect(ring()?.style.top).toBe('472px'))
+    expect(ring()!.style.height).toBe('56px')
+  })
+
   // The paid round's second session (#23, 2026-10-05): step 5's words sat under sling's blank,
   // over the account's lines around it, the whole time she was stuck there. No mark covers the
   // account: the words of a target among its lines sit just under the lines on show (#77).
@@ -1335,6 +1356,7 @@ describe('the tutorial’s marks (#25)', () => {
   // tap anywhere inside it is the target's. The menu still opens (#77). Boxes as at 360 × 548.
   it('a guided step holds the screen: outside its ring nothing plays, inside it the target does', async () => {
     boxes = {
+      '.dock': new DOMRect(0, 365, 360, 104),
       '.stage': new DOMRect(0, 0, 360, 365),
       '[data-spot="boy"]': new DOMRect(196.1, 14.6, 99.2, 191.6),
       '[data-spot="giant"]': new DOMRect(35.5, 146, 233.6, 71.2),
@@ -1378,6 +1400,8 @@ describe('the tutorial’s marks (#25)', () => {
   // so a tap the hold refuses pulses the ring once, and the pulse leaves when its animation ends. A
   // second refused tap starts it over, and a tap the hold takes, on the target, pulses nothing.
   it('a tap the hold refuses pulses the ring once', async () => {
+    // The dock under the picture, where a ring on the picture ends (#104).
+    boxes = { '.dock': new DOMRect(0, 365, 360, 104) }
     start()
     openCase(/The valley/)
     fireEvent.click(screen.getByRole('button', { name: 'Start' }))
@@ -1417,7 +1441,8 @@ describe('the tutorial’s marks (#25)', () => {
   })
 
   // A step can sit on a phone for minutes, so the mark stops reading its target's place once it
-  // has held still, about half a second, and a scroll, a resize, or a tap wakes it ([Q6] on #12).
+  // has held still, about half a second, and a scroll, a resize, a tap, or a click wakes it ([Q6]
+  // and [Q15] on #12).
   // jsdom's target never moves, so it settles after its first frames.
   it('stops following a target that holds still, and a scroll wakes it', async () => {
     const frames = vi.spyOn(window, 'requestAnimationFrame')
@@ -1494,6 +1519,29 @@ describe('the tutorial’s marks (#25)', () => {
     ])
     fireEvent.pointerDown(document.querySelector('[data-slot="t3"]')!)
     expect([at(), said()]).toEqual(['[data-slot="t3"]', ''])
+  })
+
+  // The screens for #102 [4], E5: once its last ring was changed, the retry's mark went back to
+  // Close the case still saying "Ringed answers don't fit the story", over the bank's head. A tap's
+  // press sends its words away, but moves made as a keyboard makes them, with no press, don't, nor
+  // does a mark shown again by a hint asked past its last tier. With no ring left, the retry's mark
+  // says nothing (#104).
+  it('the retry says nothing once no ring is left', async () => {
+    start()
+    openCase(/The valley/)
+    await sweep()
+    for (const [id, word] of valleyAnswers) {
+      chip(id === 't3' ? 'five' : word)
+      slot(id)
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect([at(), said()]).toEqual([
+      '[data-slot="t3"]',
+      'Ringed answers don’t fit the story. Look closer.',
+    ])
+    chip('six')
+    slot('t3')
+    expect([at(), said()]).toEqual(['[data-close]', ''])
   })
 
   // The paid round's first session (#77): "Several are wrong." said nothing of where, and after the
@@ -1964,10 +2012,60 @@ describe('hints (#29)', () => {
     expect(screen.queryByRole('button', { name: /Show me/ })).toBeNull()
   })
 
+  // The next round's first tester (#104): "Where to look" rang most of the picture, and with the
+  // basket's caption opened over its foot, its ring ran across the caption: "the yellow rectangle
+  // is on top of the text." A ring on the picture is cut where an opened caption begins, and a
+  // target wholly under it shows no ring until the caption closes. The boxes are the valley's at
+  // 360 × 548: the picture 292 × 365 at 34, the basket's half its left, the giant's caption opened
+  // from 303. The mark is let sleep before More and before Less, so their clicks alone wake it, as
+  // a keyboard's or a screen reader's do ([Q15] on #12).
+  it('cuts a ring on the picture where an opened caption begins, and shows none under it', async () => {
+    const tall = vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get')
+    tall.mockImplementation(function (this: HTMLElement) {
+      return this.textContent?.startsWith('The Philistines') ? 90 : 0
+    })
+    const boxes: Record<string, DOMRect> = {
+      '.stage': new DOMRect(34, 0, 292, 365),
+      '[data-half]': new DOMRect(34, 0, 146, 365),
+      '.dock': new DOMRect(0, 365, 360, 104),
+      '.dock .whole': new DOMRect(0, 303, 360, 115),
+    }
+    vi.mocked(Element.prototype.getBoundingClientRect).mockImplementation(function (this: Element) {
+      const hit = Object.keys(boxes).find((s) => this.matches(s))
+      return hit ? boxes[hit] : new DOMRect(10, 10, 100, 40)
+    })
+    const ring = () => document.querySelector<HTMLElement>('.coach .ring')
+    const moved = () => fireEvent.scroll(document.querySelector('.stage')!)
+    // Past the half second a target holds still before its mark stops following ([Q6]).
+    const asleep = () => new Promise((r) => setTimeout(r, 1000))
+    try {
+      await missOne('t1', 'spear')
+      menu('Hint')
+      tab(/Look/)
+      tapSpot('giant')
+      await asleep()
+      fireEvent.click(screen.getByRole('button', { name: 'More' }))
+      await waitFor(() => expect(ring()?.style.height).toBe('303px'))
+      expect(ring()!.style.top).toBe('0px')
+      boxes['[data-half]'] = new DOMRect(34, 310, 146, 55)
+      moved()
+      await waitFor(() => expect(ring()).toBeNull())
+      await asleep()
+      fireEvent.click(screen.getByRole('button', { name: 'Less' }))
+      await waitFor(() => expect(ring()?.style.top).toBe('306px'))
+    } finally {
+      tall.mockRestore()
+    }
+  })
+
   // Under a guided step the step's own mark is the hint, and the step holds the screen (#77): a run
   // of taps outside its ring finds nothing and runs nothing, so nothing is offered, and the step
   // keeps its dim.
   it('under a guided step, taps outside its ring run nothing and nothing is offered', async () => {
+    // The dock under the picture, where a ring on the picture ends (#104).
+    vi.mocked(Element.prototype.getBoundingClientRect).mockImplementation(function (this: Element) {
+      return this.matches('.dock') ? new DOMRect(0, 365, 360, 104) : new DOMRect(10, 10, 100, 40)
+    })
     start()
     openCase(/The valley/)
     fireEvent.click(screen.getByRole('button', { name: 'Start' }))

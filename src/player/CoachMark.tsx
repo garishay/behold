@@ -24,10 +24,13 @@ const half = 150
 const gutter = 16
 /** Frames a target holds still before the mark stops following it, about half a second. */
 const settle = 30
-/** What wakes a mark that has stopped following ([Q6]). */
-const wakers = ['pointerdown', 'scroll', 'resize'] as const
+/** What wakes a mark that has stopped following ([Q6], [Q15]). */
+const wakers = ['pointerdown', 'click', 'scroll', 'resize'] as const
 
-/** Where the room for a mark's words ends: the top of the dock's caption, open or not, else the screen's foot. */
+/**
+ * Where the room for a mark's words ends, and a ring on the picture with it (#104): the top of the
+ * dock's caption, open or not, else the screen's foot.
+ */
 const floorOf = () =>
   Math.min(
     innerHeight,
@@ -64,14 +67,16 @@ const within = (b: Box, e: MouseEvent) =>
 
 /**
  * The ring's box: the target's own, 4 px wider all round, cut to what its scroll box and the
- * screen show — or null while the target is out of view, so the mark never floats over the bank
- * or the bar (07c, #24 [2]).
+ * screen show, and on the picture where a caption opened over its foot begins, as its words' room
+ * is (#104) — or null while the target is out of view, so the mark never floats over the bank, the
+ * bar, or a caption being read (07c, #24 [2]).
  */
 function ringFor(el: Element | null): Box | null {
   if (!el) return null
   const r = el.getBoundingClientRect()
   const box = scroller(el)?.getBoundingClientRect()
-  const screen = { left: 0, top: 0, right: innerWidth, bottom: innerHeight }
+  const bottom = el.closest('.stage') ? floorOf() : innerHeight
+  const screen = { left: 0, top: 0, right: innerWidth, bottom }
   const view = box ? overlap(box, screen) : screen
   if (!view || !overlap(r, view)) return null
   const grown = { left: r.left - 4, top: r.top - 4, right: r.right + 4, bottom: r.bottom + 4 }
@@ -103,8 +108,9 @@ export function CoachMark({ at, label, onTap, onNext, hold }: CoachMarkProps) {
     const target = () => document.querySelector(at)
     bring(target())
     // The target is followed as the account scrolls or the picture zooms. Once it has held still
-    // for about half a second the following sleeps, and a tap, a scroll, or a resize wakes it:
-    // every way the target moves starts with one of them ([Q6] on #12).
+    // for about half a second the following sleeps, and a tap, a click, a scroll, or a resize
+    // wakes it: every way the target moves starts with one of them ([Q6] on #12), a keyboard's
+    // or a screen reader's with a click ([Q15]).
     let [frame, held, last] = [0, 0, '']
     const follow = () => {
       const r = ringFor(target())
