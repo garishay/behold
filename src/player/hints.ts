@@ -4,8 +4,9 @@
  * picture that holds it, then the thing itself, ringed. Pure functions over the structure and
  * progress, as the model's are; the case screen keeps the signals and shows the mark.
  */
-import type { Box, CaseStructure, Kind, Spot } from '../cases/types.ts'
+import type { Box, CaseStructure, CaseText, Kind, Spot } from '../cases/types.ts'
 import { drawOrder } from '../cases/spots.ts'
+import { strings } from '../strings/en.ts'
 import { kindOf, type Progress } from './state.ts'
 
 /**
@@ -59,6 +60,27 @@ const things = (s: CaseStructure, p: Progress) => [
 /** The first thing a close found wrong, as Solve shows them: a close's hint points at its evidence. */
 export const firstWrong = (s: CaseStructure, p: Progress) =>
   things(s, p).find(([, put, answer]) => put !== answer)?.[0]
+
+/**
+ * How a hint names the answer it is for (#102), and the reveal a miss (#107): a face by its line,
+ * the order by its question, a blank by the three words before it in its sentence, or after it
+ * when it opens one.
+ */
+export function named(s: CaseStructure, text: CaseText<CaseStructure>, id: string) {
+  if (s.faces.some((f) => f.id === id)) return text.faces[id]
+  if (id === 'order' || s.order?.includes(id)) return strings.whatHappenedFirst
+  const parts = Object.values(text.blocks).find((b) => b.parts.some((x) => x.b === id))?.parts
+  const i = parts?.findIndex((x) => x.b === id) ?? -1
+  const before = (parts?.[i - 1]?.t ?? '')
+    .split(/[.!?][”’]?\s/)
+    .at(-1)!
+    .split(/\s+/)
+  const after = (parts?.[i + 1]?.t ?? '').split(/\s+/).filter(Boolean)
+  const near = before.filter(Boolean).slice(-3)
+  return near.length > 0
+    ? [...near, strings.blankMark].join(' ')
+    : [strings.blankMark, ...after.slice(0, 3)].join(' ')
+}
 
 /**
  * What the next hint points at. After a failed close, the evidence for the first thing it found

@@ -31,16 +31,21 @@ const progress = (v: unknown): v is Progress =>
   typeof v.step === 'number' &&
   typeof v.solved === 'boolean' &&
   Array.isArray(v.hints) &&
-  v.hints.every((t) => t === 1 || t === 2)
+  v.hints.every((t) => t === 1 || t === 2) &&
+  record(v.misses) &&
+  Object.values(v.misses).every(ids)
 
-/** An entry kept before hints (#29) has used none, and keeps its place. */
-const withHints = (v: unknown) => (record(v) ? { hints: [], ...v } : v)
+/**
+ * An entry kept before hints (#29) has used none, and one kept before a close's misses were (#107)
+ * has none: each keeps its place.
+ */
+const withDefaults = (v: unknown) => (record(v) ? { hints: [], misses: {}, ...v } : v)
 
 /**
  * Whether every id an entry holds is the case's — the moment, the spots tapped, the bank, the
- * papers, the faces' and fills' keys and words, the order's moments — with the order the case's
- * length and the step one of its steps. The store never trusts an id the case lacks: a case that
- * no longer fits starts fresh (#12 [Q4]).
+ * papers, the faces' and fills' keys and words, the order's moments, and the misses' slots, words,
+ * and moments — with the order the case's length and the step one of its steps. The store never
+ * trusts an id the case lacks: a case that no longer fits starts fresh (#12 [Q4]).
  */
 const fits = (s: CaseStructure, p: Progress) => {
   const spots = s.moments.flatMap((m) => m.spots)
@@ -57,6 +62,11 @@ const fits = (s: CaseStructure, p: Progress) => {
     Object.entries(p.fills).every(([b, w]) => blanks.includes(b) && word(w)) &&
     p.order.length === (s.order?.length ?? 0) &&
     p.order.every((m) => m === null || has(s.moments)(m)) &&
+    Object.entries(p.misses).every(([id, puts]) =>
+      id === 'order'
+        ? s.order !== undefined && puts.every((o) => o.split(' ').every(has(s.moments)))
+        : (has(s.faces)(id) || blanks.includes(id)) && puts.every(word),
+    ) &&
     p.step >= 0 &&
     p.step <= Math.max(0, (s.steps?.length ?? 1) - 1)
   )
@@ -81,7 +91,7 @@ export function load(registry: readonly CaseEntry[]): Saved {
     const raw = localStorage.getItem(key)
     const parsed: unknown = raw === null ? {} : JSON.parse(raw)
     if (!record(parsed)) return {}
-    const entries = Object.entries(parsed).map(([id, v]) => [id, withHints(v)] as const)
+    const entries = Object.entries(parsed).map(([id, v]) => [id, withDefaults(v)] as const)
     const kept = entries.flatMap(([id, v]) => {
       const structure = registry.find((c) => c.structure.id === id)?.structure
       return structure && progress(v) && fits(structure, v) ? [[id, restored(structure, v)]] : []

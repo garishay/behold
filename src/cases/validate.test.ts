@@ -147,7 +147,9 @@ describe('validate (Gate 02 A6)', () => {
 
   it('(c) a cite outside the passages — the basket with the 17:17–18 range removed', () => {
     const [giant, basket, rest] = valley.passages
-    const one: CaseStructure = { ...valley, passages: [giant, rest] }
+    // The brothers' verse goes with the range, so it moves to one left, failing (c) alone (#107).
+    const verses = { ...valley.verses, t1: '17:4' }
+    const one: CaseStructure = { ...valley, passages: [giant, rest], verses }
     expect(basket).toEqual({ book: '1SA', chapter: 17, from: 17, to: 18 })
     expect(validate(one, en)).toEqual(['spot "basket" cites "17:17-18", outside the passages'])
   })
@@ -163,6 +165,7 @@ describe('validate (Gate 02 A6)', () => {
     const two: CaseStructure = {
       ...withSpots(prefixed),
       passages: [...valley.passages, { book: '2SA', chapter: 1 }],
+      verses: Object.fromEntries(Object.entries(valley.verses).map(([id, v]) => [id, `1SA ${v}`])),
     }
     expect(validate(two, en)).toEqual([
       'spot "brook" cites "17:40" without its book in front, and the passages span more than one book',
@@ -411,5 +414,17 @@ describe('validate (Gate 02 A6)', () => {
     expect(validate({ ...carmel, moments: [baal, water, fire] }, carmelEn)).toEqual([
       'the moments are shown in the order they happened, [baal, water, fire]',
     ])
+  })
+
+  // (q) is #107's: the reveal points each miss at the verse that says its answer, so each face and
+  // blank, and each moment of an order, names a verse within the passages, as a spot's cite would.
+  it('(q) a face with no verse, a blank’s outside the passages, a moment’s with its book in front', () => {
+    const verses = Object.fromEntries(Object.entries(valley.verses).filter(([id]) => id !== 'd1'))
+    expect(validate({ ...valley, verses: { ...verses, t1: '17:30' } }, en)).toEqual([
+      'face "d1" names no verse within the passages',
+      'blank "t1" names no verse within the passages',
+    ])
+    const water: CaseStructure = { ...carmel, verses: { ...carmel.verses, water: '1KI 18:33' } }
+    expect(validate(water, carmelEn)).toEqual(['moment "water" names no verse within the passages'])
   })
 })

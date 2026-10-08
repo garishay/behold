@@ -27,10 +27,10 @@ const ref = (p: Passage) =>
   (p.from === undefined && p.to === undefined ? '' : `:${p.from}-${p.to}`)
 
 /** A cite read: the book when it is in front, the chapter, the first and the last verse. */
-type Cite = { book?: string; chapter: number; from: number; to: number }
+export type Cite = { book?: string; chapter: number; from: number; to: number }
 
 /** A cite's parts, or nothing when the string is not one: `1KI 21:1`, `17:38-39`. */
-function parseCite(s: string): Cite | undefined {
+export function parseCite(s: string): Cite | undefined {
   const m = cite.exec(s)
   if (!m) return undefined
   const [prefix, chapter, from, to] = [m.at(1), +m[2], +m[3], +(m.at(4) ?? m[3])]
@@ -252,6 +252,17 @@ export function validate(structure: CaseStructure, text: CaseText<CaseStructure>
   // order as shown, straight down, has it wrong and has to look.
   if (permutes && order?.every((id, i) => moments[i].id === id))
     fail(`the moments are shown in the order they happened, [${order.join(', ')}]`)
+
+  // (q) The reveal points a miss at its verse (#107): every face and blank, and in a case with an
+  // order every moment, names a verse within the passages, in a spot's cite form.
+  const says = (kind: string, id: string) => {
+    const c = parseCite(structure.verses[id] ?? '')
+    if (!c || (c.book !== undefined) !== spans || !within(c))
+      fail(`${kind} ${q(id)} names no verse within the passages`)
+  }
+  for (const f of faceIds) says('face', f)
+  for (const b of blanks) says('blank', b)
+  for (const m of order === undefined ? [] : moments) says('moment', m.id)
 
   return problems
 }

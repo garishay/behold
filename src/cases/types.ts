@@ -132,6 +132,12 @@ export interface CaseStructure {
    * when it happened.
    */
   readonly evidence: Readonly<Record<string, string>>
+  /**
+   * Where the reveal points a miss (#107): each face and blank names the verse that says its answer,
+   * and in a case with an order each moment names the verse that tells it, within the case's
+   * passages and in a spot's `cites` form.
+   */
+  readonly verses: Readonly<Record<string, string>>
 }
 
 type SpotOf<S extends CaseStructure> = S['moments'][number]['spots'][number]

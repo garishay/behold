@@ -102,4 +102,17 @@ export const carmel = {
     water: 'spent',
     fire: 'praying',
   },
+  // The verse that says each answer, and that tells each moment, where the reveal points a miss
+  // (#107): Baal called on all morning, then the four jars, then the fire.
+  verses: {
+    c1: '18:30',
+    c2: '18:20',
+    a1: '18:21',
+    a2: '18:28',
+    a3: '18:38',
+    a4: '18:39',
+    baal: '18:26',
+    water: '18:33-35',
+    fire: '18:38',
+  },
 } as const satisfies CaseStructure

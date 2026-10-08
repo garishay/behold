@@ -8,7 +8,17 @@ import { strings } from '../strings/en.ts'
 import { Bank } from './Bank.tsx'
 import { CoachMark } from './CoachMark.tsx'
 import { Dock, type Caption } from './Dock.tsx'
-import { aim, broad, firstWrong, half, stranded, stuck, type Aim, type Tier } from './hints.ts'
+import {
+  aim,
+  broad,
+  firstWrong,
+  half,
+  named as nameOf,
+  stranded,
+  stuck,
+  type Aim,
+  type Tier,
+} from './hints.ts'
 import { PaperModal, PapersSheet } from './Papers.tsx'
 import { prefetch } from './pictures.ts'
 import { bring, showEmpty } from './place.ts'
@@ -447,6 +457,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
           passages={passages}
           onBack={onCases}
           hints={progress.hints.length}
+          misses={progress.misses}
         />
       </div>
     )
@@ -498,23 +509,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     if (away !== undefined) return `[data-moment="${away.id}"]`
     return halved ? '[data-half]' : `[data-spot="${hint.spot}"]`
   }
-  // A hint for an answer says which (#102): a face by its line, the order by its question, a blank
-  // by the three words before it in its sentence, or after it when it opens one.
-  const named = (id: string) => {
-    if (s.faces.some((f) => f.id === id)) return text.faces[id]
-    if (s.order?.includes(id)) return strings.whatHappenedFirst
-    const parts = Object.values(text.blocks).find((b) => b.parts.some((x) => x.b === id))?.parts
-    const i = parts?.findIndex((x) => x.b === id) ?? -1
-    const before = (parts?.[i - 1]?.t ?? '')
-      .split(/[.!?][”’]?\s/)
-      .at(-1)!
-      .split(/\s+/)
-    const after = (parts?.[i + 1]?.t ?? '').split(/\s+/).filter(Boolean)
-    const near = before.filter(Boolean).slice(-3)
-    return near.length > 0
-      ? [...near, strings.blankMark].join(' ')
-      : [strings.blankMark, ...after.slice(0, 3)].join(' ')
-  }
+  // A hint for an answer says which (#102).
+  const named = (id: string) => nameOf(s, text, id)
   const hinted = hintAt()
   const at = hinted ?? markAt()
   // A step that leads with its slot says what comes next once the slot waits (#102).

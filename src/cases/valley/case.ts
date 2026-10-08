@@ -103,4 +103,14 @@ export const valley = {
     t4: 'boy',
     t5: 'giant',
   },
+  // The verse that says each answer, where the reveal points a miss (#107).
+  verses: {
+    d1: '17:50',
+    d2: '17:4',
+    t1: '17:17',
+    t2: '17:38',
+    t3: '17:4',
+    t4: '17:40',
+    t5: '17:51',
+  },
 } as const satisfies CaseStructure
