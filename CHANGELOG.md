@@ -9,13 +9,14 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   vineyard on, a failed close says how many answers don't fit the story and marks none of them.
   Closes are free, so a ringed answer would fall to its rivals in a close or two with no trip back
   to the picture; the hint offered after the second failed close names the first answer that
-  doesn't fit, one at a time, and counts on the reveal. The valley and the mountain keep their
-  marks, since they teach the loop, and rule 5 says which cases mark and why. The vineyard, the one
-  case whose new idea had no lesson, rings the face of the man on the bed until a name is placed
-  in it: "Who is he? Find what bears his name." The restarted round's second session read "There's
-  still something to find here." on The fire's button as "find the fire in this picture"; on a
-  moment's button a hint now names the moment and says to open it, "Open The fire: there's more to
-  find.", or for an answer, "Open Bedchamber to settle “but written by \_\_\_”."
+  doesn't fit, one at a time, and counts on the reveal, and a hint asked for earlier and still
+  showing gives way to it ([Q16]). The valley and the mountain keep their marks, since they teach
+  the loop, and rule 5 says which cases mark and why. The vineyard, the one case whose new idea had
+  no lesson, rings the face of the man on the bed until a name is placed in it: "Who is he? Find
+  what bears his name." The restarted round's second session read "There's still something to find
+  here." on The fire's button as "find the fire in this picture"; on a moment's button a hint now
+  names the moment and says to open it, "Open The fire: there's more to find.", or for an answer,
+  "Open Bedchamber to settle “but written by \_\_\_”."
 
 ## v0.18.1 — Three fixes before the next tester (#104)
 
