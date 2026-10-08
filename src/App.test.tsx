@@ -2086,6 +2086,33 @@ describe('hints (#29)', () => {
     expect([at(), said()]).toEqual(['[data-moment="fire"]', 'Open The fire: there’s more to find.'])
   })
 
+  // [Q16] on #12: from the vineyard on, the hint offered after the second failed close is how a
+  // stuck player learns which answer doesn't fit (#106), and a hint asked for earlier and left
+  // unfollowed doesn't hide it. Where a close doesn't mark, the failed close that makes the offer
+  // due drops a hint still showing, at either tier, so the offer names the first answer that
+  // doesn't fit. Everything is found but the woman at the table, whom the earlier hint is for.
+  it.each([1, 2])(
+    'a tier-%i hint still showing gives way to the close’s in the vineyard',
+    (tier) => {
+      const kept = closedCase(vineyard)
+      const tapped = kept.tapped.filter((id) => id !== 'woman')
+      const fills = { ...kept.fills, s4: 'ahab' }
+      start(<App />, { vineyard: { ...kept, tapped, fills, solved: false } })
+      openCase(/The vineyard/)
+      for (let i = 0; i < tier; i++) menu('Hint')
+      tab(/Solve/)
+      const close = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+      close()
+      close()
+      expect(offer()).toHaveTextContent(/^Where to look$/)
+      fireEvent.click(offer()!)
+      expect([at(), said()]).toEqual([
+        '[data-view="look"]',
+        'Something here settles “but written by ___”.',
+      ])
+    },
+  )
+
   // The next round's first tester (#104): "Where to look" rang most of the picture, and with the
   // basket's caption opened over its foot, its ring ran across the caption: "the yellow rectangle
   // is on top of the text." A ring on the picture is cut where an opened caption begins, and a

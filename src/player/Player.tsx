@@ -307,14 +307,15 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
         // From its second miss, a case that teaches the loop rings what doesn't match, as the valley
         // does (#95), marks what fits, and brings the first ring into view in Solve's order: a face,
         // the order, then a blank (#102 [3]). From the vineyard on, a close marks nothing: it says
-        // how many, and the hint after the second names one at a time (#106).
+        // how many, and the hint after the second names one at a time (#106), so the close that
+        // makes that hint's offer due drops a hint still showing, at either tier ([Q16] on #12).
         setRinged(wrongs(s, progress))
         setFits(fitting(s, progress))
         setOrderRinged(s.order?.some((m, i) => progress.order[i] !== m) ?? false)
         setOrderFits(s.order?.every((m, i) => progress.order[i] === m) ?? false)
         const order = first !== null && s.order?.includes(first)
         bring(document.querySelector(order ? '.order' : `[data-slot="${first}"]`))
-      }
+      } else if (!s.marks && fails + 1 >= stuck.closes) setHint(null)
     }
     if (hint?.why === 'close') setHint(null)
     close(submit(s, progress))
