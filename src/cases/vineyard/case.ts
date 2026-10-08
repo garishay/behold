@@ -3,7 +3,9 @@ import type { CaseStructure } from '../types.ts'
 // Case three: Naboth's vineyard (1 Kings 21) — three moments the player puts in order, four papers,
 // and a second block, the prophet's words. One spot carries no cite: the Law scroll, whose sources
 // are Deuteronomy and Leviticus. The empty chairs at the gate are set dressing, not a spot, since
-// no verse names them (#26).
+// no verse names them (#26). Its one new idea is names worked out from what bears them, so the
+// first-encounter mark rings the face of the man on the bed on Solve, until he is named (`teach`,
+// #106).
 export const vineyard = {
   id: 'vineyard',
   thumb: 'vineyard',
@@ -128,6 +130,7 @@ export const vineyard = {
     },
     { id: 'verdict', blanks: { v1: 'killed', v2: 'taken-possession' } },
   ],
+  teach: { face: 'p1' },
   // What settles each face and blank, and what dates each moment, for a hint (#29): the letters
   // not yet written, the stones still waiting, the dogs at the stain.
   evidence: {

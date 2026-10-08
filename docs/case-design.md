@@ -74,11 +74,11 @@ rules below are the answer, ruled on #26.
    | the battle   | a disguise: a face without its marker, named by what happens |
 
    The mountain marks its one idea the first time the player meets it: the pictures to place,
-   then the slots they go in (`teach`, #30). The battle marks its own at the disguised man's face,
-   until the player names him (#53). In the valley and on the mountain a person's tap gives
-   their name; from the vineyard on, the names the faces need come from something that bears
-   them — a seal, a letter, a note, or another person's words — and the player works out whose
-   each one is.
+   then the slots they go in (`teach`, #30). The vineyard marks its own at the face of the man on
+   the bed, and the battle at the disguised man's, each until the player names him (#106, #53).
+   In the valley and on the mountain a person's tap gives their name; from the vineyard on, the
+   names the faces need come from something that bears them — a seal, a letter, a note, or
+   another person's words — and the player works out whose each one is.
 
    The season plays in order: each case opens when the one before it is closed, and a case the
    player has already started stays open (#75). The valley teaches the game; the cases after it

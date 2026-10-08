@@ -1312,7 +1312,8 @@ describe('the tutorial’s marks (#25)', () => {
   })
 
   // Carmel's one new idea is the order, marked where it is first met (#30): on Solve while the order
-  // is empty, the pictures to place and then the slots. The vineyard has an order and no lesson.
+  // is empty, the pictures to place and then the slots. The vineyard has an order too, and marks a
+  // face, not the order (#106).
   it('marks the pictures and then the slots in the case that teaches the order, until one is placed', async () => {
     start(<App />, laterStarted)
     openCase(/The mountain/)
@@ -1328,7 +1329,26 @@ describe('the tutorial’s marks (#25)', () => {
     menu('Cases')
     fireEvent.click(await screen.findByRole('button', { name: /The vineyard/ }))
     tab(/Solve/)
+    await waitFor(() => expect(at()).toBe('[data-face="p1"]'))
+  })
+
+  // The vineyard's one new idea is names worked out from what bears them (#106): on Solve, while
+  // the face of the man on the bed is empty, it is ringed with the lesson's words, as the battle's
+  // disguised man is. A name placed takes the mark away, and emptying the face brings it back.
+  it('marks the face of the man on the bed in the vineyard, until a name is placed', async () => {
+    start(<App />, laterStarted)
+    openCase(/The vineyard/)
+    moment('Bedchamber')
+    tapSpot('seal')
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+    tab(/Solve/)
+    await waitFor(() => expect(at()).toBe('[data-face="p1"]'))
+    expect(said()).toBe('Who is he? Find what bears his name.')
+    chip('Ahab')
+    slot('p1')
     expect(coach()).toBeNull()
+    slot('p1')
+    expect(at()).toBe('[data-face="p1"]')
   })
 
   // The battle's one new idea is a disguise (#53): on Solve, while the disguised man's face is

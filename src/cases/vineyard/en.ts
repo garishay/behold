@@ -111,6 +111,7 @@ export const en = {
       ],
     },
   },
+  teach: 'Who is he? Find what bears his name.',
   reveal: [
     'The man on the bed was Ahab, king of Israel. The woman at the table was Jezebel, his wife. The seated man was Naboth, who owned the vineyard and would not give up his fathers’ inheritance. Jezebel wrote the letters in Ahab’s name and sealed them with his seal. The prophet at the wall was Elijah.',
     'When Ahab heard the prophet’s words, he tore his clothes, put on sackcloth, and fasted. And the word of the LORD came again: because he has humbled himself, the disaster will not come in his days — but it will come on his house in the days of his son.',
