@@ -1416,6 +1416,43 @@ describe('the tutorial’s marks (#25)', () => {
     expect([at(), look.textContent]).toEqual(['.dock', 'Look1/6'])
   })
 
+  // #109: CI failed once on `main` when the tap above, inside the boy's ring after the menu closed,
+  // was refused. The hold read the ring as of the render before, and a mark that comes back draws
+  // its ring a render before the hold hears of it. Here the tap lands the moment the ring is drawn
+  // again, before that render's effects run: the hold reads the ring at the tap, so the boy plays.
+  it('a tap inside a guided step’s ring the moment the mark comes back reaches the target', async () => {
+    boxes = {
+      '.dock': new DOMRect(0, 365, 360, 104),
+      '.stage': new DOMRect(0, 0, 360, 365),
+      '[data-spot="boy"]': new DOMRect(196.1, 14.6, 99.2, 191.6),
+      '[data-spot="giant"]': new DOMRect(35.5, 146, 233.6, 71.2),
+    }
+    start()
+    openCase(/The valley/)
+    fireEvent.click(screen.getByRole('button', { name: 'Start' }))
+    await waitFor(() => expect(ring()).not.toBeNull())
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }))
+    expect(ring()).toBeNull()
+    // At his feet, on the giant's box inside the boy's ring, as soon as the ring is back.
+    const tapped = new Promise<void>((resolve) => {
+      const drawn = new MutationObserver(() => {
+        if (!ring()) return
+        drawn.disconnect()
+        fireEvent.click(document.querySelector('[data-spot="giant"]')!, {
+          detail: 1,
+          clientX: 225.8,
+          clientY: 176.1,
+        })
+        resolve()
+      })
+      drawn.observe(document.body, { childList: true, subtree: true })
+    })
+    fireEvent.click(document.querySelector('.modal.sheet')!)
+    await tapped
+    expect(screen.getByText(/A shepherd boy in a plain tunic/)).toBeInTheDocument()
+    expect(document.querySelectorAll('.coach .ring .pulse')).toHaveLength(0)
+  })
+
   // The ruling on the sixth amendment (#77): a tap that does nothing at all reads as a frozen game,
   // so a tap the hold refuses pulses the ring once, and the pulse leaves when its animation ends. A
   // second refused tap starts it over, and a tap the hold takes, on the target, pulses nothing.

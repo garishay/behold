@@ -151,21 +151,24 @@ export function CoachMark({ at, label, onTap, onNext, hold }: CoachMarkProps) {
     // A mark that holds the screen hears a tap on its click, where it lands (#77): in the target,
     // it plays; in the ring, it goes to the target; elsewhere on the case screen it plays nothing,
     // and its dim stays, but the ring pulses. Open Solve and the menu take their own taps, and a
-    // tap while the ring is out of view brings the target back.
+    // tap while the ring is out of view brings the target back. The ring is read at the tap, not
+    // as a render drew it: a mark that comes back, as the menu closes, draws its ring a render
+    // before an effect could pass it here, and a tap in that moment was refused (#109).
     const click = (e: MouseEvent) => {
       const t = e.target as Element
       const el = document.querySelector(at)
       if (!el || next.current?.contains(t) || !t.closest('.app') || t.closest('.menu-btn')) return
       if (el.contains(t)) return onTap?.()
       e.stopPropagation()
-      if (!ring) bring(el)
-      if (ring && e.detail > 0 && within(ring, e))
+      const box = ringFor(el)
+      if (!box) bring(el)
+      if (box && e.detail > 0 && within(box, e))
         el.dispatchEvent(new MouseEvent('click', { bubbles: true }))
       else setPulse((n) => n + 1)
     }
     addEventListener('click', click, true)
     return () => removeEventListener('click', click, true)
-  }, [at, onTap, hold, ring])
+  }, [at, onTap, hold])
   const centre =
     ring &&
     Math.min(Math.max((ring.left + ring.right) / 2, half + gutter), innerWidth - half - gutter)
