@@ -2248,8 +2248,8 @@ describe('the close converges (#95)', () => {
 
   // The next round's three testers (#23): in the mountain a right change read the same as a wrong
   // one, and all three took right answers back out. Every failed close counts as a number, and from
-  // a case's second it rings what doesn't match, the order whole as the one answer it is, each ring
-  // until its answer changes.
+  // the mountain's second it rings what doesn't match, the order whole as the one answer it is, each
+  // ring until its answer changes; from the vineyard on, none rings (#106).
   it('counts as a number, and rings what doesn’t match from the second miss', () => {
     const missed = {
       ...right,
@@ -2364,8 +2364,8 @@ describe('the close converges (#95)', () => {
     expect(document.querySelector('[data-slot="t3"]')).toHaveTextContent('six')
   })
 
-  // Every case marks the same once its close rings, from its second miss (#95): a ✓ on each face,
-  // blank, and the order that fits, and the order, ✓'d, keeps its pictures (#102).
+  // A case whose close rings, from its second miss (#95, #106), marks as the valley's does: a ✓ on
+  // each face, blank, and the order that fits, and the order, ✓'d, keeps its pictures (#102).
   it('every case marks what fits once its close rings, the order too', () => {
     start(<App />, mountain(everything, { ...right, faces: { c1: 'elijah', c2: 'baal' } }))
     openCase(/The mountain/)
@@ -2417,6 +2417,45 @@ describe('the close converges (#95)', () => {
     expect([at(), said()]).toEqual([
       '[data-view="look"]',
       'Something here settles “What happened first”.',
+    ])
+  })
+
+  /** A case kept with everything found and filled, the answers given swapped for the words given. */
+  const offBy = (s: CaseStructure, off: Record<string, string>) => {
+    const kept = closedCase(s)
+    return { [s.id]: { ...kept, fills: { ...kept.fills, ...off }, solved: false } }
+  }
+
+  // #106: from the vineyard on, a failed close says only how many, however often it fails, and
+  // marks no answer. Closes are free, so rings would let an answer fall to its rivals with no trip
+  // back to the picture; the valley and the mountain keep their marks, since they teach the loop.
+  it.each([
+    ['vineyard', vineyard, { s4: 'ahab', v1: 'stoned' }],
+    ['battle', micaiah, { b1: 'thirty-two', b3: 'micaiah' }],
+  ] as const)('in the %s, every failed close counts and marks no answer', (name, s, off) => {
+    start(<App />, offBy(s, off))
+    openCase(new RegExp(`The ${name}`))
+    tab(/Solve/)
+    for (let i = 0; i < 3; i++) {
+      fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+      expect(result()).toHaveTextContent(/^Two answers don’t fit the story\.$/)
+      expect(document.querySelectorAll('.is-wrong, .is-right')).toHaveLength(0)
+    }
+  })
+
+  // #106: where no close marks, the hint offered after the second failed close is how a stuck
+  // player learns which answer doesn't fit, one at a time, as it was.
+  it('in the vineyard, the hint after the second failed close names the first answer that doesn’t fit', () => {
+    start(<App />, offBy(vineyard, { s4: 'ahab', v1: 'stoned' }))
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    const close = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    close()
+    close()
+    fireEvent.click(screen.getByRole('button', { name: 'Where to look' }))
+    expect([at(), said()]).toEqual([
+      '[data-view="look"]',
+      'Something here settles “but written by ___”.',
     ])
   })
 })

@@ -3,8 +3,10 @@ import type { CaseStructure } from '../types.ts'
 // Case two: the contest on Mount Carmel (1 Kings 18:17–40), the bridge between the valley and the
 // vineyard (#30). Its one new idea is several moments and the order they happened in, so it has no
 // papers, and every name comes from a person's tap, as in the valley (docs/case-design.md, rule
-// 6). The first-encounter mark rings the order's pictures and slots (`teach`). The boxes are
-// fitted to the pictures as they were generated from the scene briefs (scenes.md, world rules §6).
+// 6). The first-encounter mark rings the order's pictures and slots (`teach`). With the valley it
+// teaches the loop, so from its second failed close a close marks the answers (`marks`, #106). The
+// boxes are fitted to the pictures as they were generated from the scene briefs (scenes.md, world
+// rules §6).
 // The trench runs behind the altar, so its box is the larger and the altar is drawn over it.
 export const carmel = {
   id: 'carmel',
@@ -87,6 +89,7 @@ export const carmel = {
     },
   ],
   teach: 'order',
+  marks: true,
   // What settles each face and blank, and the sun that dates each moment, for a hint (#29).
   evidence: {
     c1: 'caller',
