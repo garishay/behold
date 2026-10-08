@@ -3,6 +3,14 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.19.1 — A tap the moment a mark comes back (#109)
+
+- **109a — the hold reads its ring at the tap** (#110): CI failed once on `main` when a tap inside
+  the boy's ring, right after the menu closed, was refused. A guided step's hold read its ring as
+  a render had drawn it, and a mark that comes back draws its ring a render before the hold hears
+  of it, so a tap in that moment pulsed the ring instead of reaching the target, as a quick player's
+  could. The hold now reads the ring at the tap. Nothing changes on screen.
+
 ## v0.19.0 — Gate 26, the close counts (#106)
 
 - **106a — the close counts, the vineyard teaches, and a hint opens its moment** (#108): from the
