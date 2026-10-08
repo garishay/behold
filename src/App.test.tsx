@@ -1441,7 +1441,8 @@ describe('the tutorial’s marks (#25)', () => {
   })
 
   // A step can sit on a phone for minutes, so the mark stops reading its target's place once it
-  // has held still, about half a second, and a scroll, a resize, or a tap wakes it ([Q6] on #12).
+  // has held still, about half a second, and a scroll, a resize, a tap, or a click wakes it ([Q6]
+  // and [Q15] on #12).
   // jsdom's target never moves, so it settles after its first frames.
   it('stops following a target that holds still, and a scroll wakes it', async () => {
     const frames = vi.spyOn(window, 'requestAnimationFrame')
@@ -2016,7 +2017,8 @@ describe('hints (#29)', () => {
   // is on top of the text." A ring on the picture is cut where an opened caption begins, and a
   // target wholly under it shows no ring until the caption closes. The boxes are the valley's at
   // 360 × 548: the picture 292 × 365 at 34, the basket's half its left, the giant's caption opened
-  // from 303.
+  // from 303. The mark is let sleep before More and before Less, so their clicks alone wake it, as
+  // a keyboard's or a screen reader's do ([Q15] on #12).
   it('cuts a ring on the picture where an opened caption begins, and shows none under it', async () => {
     const tall = vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get')
     tall.mockImplementation(function (this: HTMLElement) {
@@ -2034,20 +2036,22 @@ describe('hints (#29)', () => {
     })
     const ring = () => document.querySelector<HTMLElement>('.coach .ring')
     const moved = () => fireEvent.scroll(document.querySelector('.stage')!)
+    // Past the half second a target holds still before its mark stops following ([Q6]).
+    const asleep = () => new Promise((r) => setTimeout(r, 1000))
     try {
       await missOne('t1', 'spear')
       menu('Hint')
       tab(/Look/)
       tapSpot('giant')
+      await asleep()
       fireEvent.click(screen.getByRole('button', { name: 'More' }))
-      moved()
       await waitFor(() => expect(ring()?.style.height).toBe('303px'))
       expect(ring()!.style.top).toBe('0px')
       boxes['[data-half]'] = new DOMRect(34, 310, 146, 55)
       moved()
       await waitFor(() => expect(ring()).toBeNull())
+      await asleep()
       fireEvent.click(screen.getByRole('button', { name: 'Less' }))
-      moved()
       await waitFor(() => expect(ring()?.style.top).toBe('306px'))
     } finally {
       tall.mockRestore()

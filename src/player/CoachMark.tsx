@@ -24,8 +24,8 @@ const half = 150
 const gutter = 16
 /** Frames a target holds still before the mark stops following it, about half a second. */
 const settle = 30
-/** What wakes a mark that has stopped following ([Q6]). */
-const wakers = ['pointerdown', 'scroll', 'resize'] as const
+/** What wakes a mark that has stopped following ([Q6], [Q15]). */
+const wakers = ['pointerdown', 'click', 'scroll', 'resize'] as const
 
 /**
  * Where the room for a mark's words ends, and a ring on the picture with it (#104): the top of the
@@ -108,8 +108,9 @@ export function CoachMark({ at, label, onTap, onNext, hold }: CoachMarkProps) {
     const target = () => document.querySelector(at)
     bring(target())
     // The target is followed as the account scrolls or the picture zooms. Once it has held still
-    // for about half a second the following sleeps, and a tap, a scroll, or a resize wakes it:
-    // every way the target moves starts with one of them ([Q6] on #12).
+    // for about half a second the following sleeps, and a tap, a click, a scroll, or a resize
+    // wakes it: every way the target moves starts with one of them ([Q6] on #12), a keyboard's
+    // or a screen reader's with a click ([Q15]).
     let [frame, held, last] = [0, 0, '']
     const follow = () => {
       const r = ringFor(target())
