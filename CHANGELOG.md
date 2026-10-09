@@ -3,6 +3,19 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.20.0 — Gate 27, the reveal leads with the player's misses (#107)
+
+- **107a — worth a second look** (#111): asked for one detail they didn't know, the restarted
+  round's two sessions named none, and what testers have named across rounds is what they fought
+  over. Once a case is closed, its reveal now leads with what its closes found wrong, the most
+  tried first: each answer as a hint names it, what it was, what was put there, and a link to the
+  verse that says it, which brings that verse into view in the passage below and marks it. Three
+  lead and the rest wait under a button, so the story stays on the first screen. They're kept on
+  the device with the case's progress, so a reload or a return from the cards keeps them, and
+  Restart clears them. Every face, blank, and moment of an order now names its verse, and the
+  validator holds each within the passages. The valley's cubits sentence reads "a champion who
+  measured \_\_\_ cubits and a span", which tester 1 had read as a place.
+
 ## v0.19.1 — A tap the moment a mark comes back (#109)
 
 - **109a — the hold reads its ring at the tap** (#110): CI failed once on `main` when a tap inside
