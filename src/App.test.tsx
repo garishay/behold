@@ -2469,6 +2469,19 @@ describe('the faces and the order are part of the job (#114)', () => {
     slot('d2')
     expect(at()).toBe('[data-close]')
   })
+
+  // He read "That blank wants a name.", said at the giant's face, as about the account. A face's
+  // refusal says a face; a blank's still says a blank.
+  it('a face’s refusal says a face, and a blank’s a blank', async () => {
+    start()
+    openCase(/The valley/)
+    await sweep()
+    slot('d2')
+    chip('commander')
+    expect(result()).toHaveTextContent(/^That face wants a name\.$/)
+    slot('t5')
+    expect(result()).toHaveTextContent(/^That blank wants a name\.$/)
+  })
 })
 
 describe('the close converges (#95)', () => {
