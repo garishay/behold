@@ -68,8 +68,8 @@ carries all three; non-commercial; the words never changed; the key never shared
 - **Origins.** `ORIGINS` in `wrangler.jsonc`: the game at `https://play.beholdgame.com`, its old
   address `https://garishay.github.io`, where a copy installed before the move still asks (Gate
   17 A4), and the dev server. A request from anywhere else, or with no `Origin`, is refused with no
-  CORS header, so a page elsewhere reads nothing. The header is a browser's promise, not a lock: a script can set it, and what bounds a
-  script is the limits.
+  CORS header, so a page elsewhere reads nothing. The header is a browser's promise, not a lock: a
+  script can set it, and what bounds a script is the limits.
 - **Limits.** Two rate-limit bindings: 12 a minute per player address (`cf-connecting-ip`), and
   50 a minute for the Worker as a whole — per data centre, permissive by design.
 - **The key.** `ESV_TOKEN`, a Worker secret put once by hand and read from `env`; it goes to
