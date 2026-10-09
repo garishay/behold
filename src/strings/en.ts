@@ -107,6 +107,9 @@ export const strings = {
   last: 'Last',
   emptySlot: '—',
   closeCase: 'Close the case',
+  // Once the account is full, what's left is rung with what it wants: a face, or the order (#114).
+  owedFace: 'Who is this? A face takes a name.',
+  owedOrder: 'What happened first? Order the pictures too.',
   // A blank's refusal names its kind, and while no word of that kind is found, where to look (#71).
   blankWants: (kind: Kind, found: boolean) =>
     found

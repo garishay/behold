@@ -35,6 +35,7 @@ import {
   fitting,
   nothing,
   opened,
+  owed,
   placed,
   read,
   step,
@@ -199,6 +200,19 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const nudge = () => setNudges(nudges + 1)
   // Close the case shows once it can close: every slot filled (#24, Solve's room).
   const full = filled(s, progress) === total(s)
+  // Once the account is full, what's left of the job, the first face or the order still empty, is
+  // rung with what it wants: by the tutorial's last step, and else by its own mark (#114). The
+  // order is rung as the mountain's lesson rings it: the pictures, then the slots once one is
+  // picked, so its words never cover what is to be tapped next.
+  const leftover = owed(s, progress)
+  const leftAt =
+    leftover === undefined
+      ? undefined
+      : leftover !== 'order'
+        ? `[data-face="${leftover}"]`
+        : selection.moment === null
+          ? '.tiles'
+          : '.order'
   const fleeting = current !== undefined && (current.until === undefined || looks)
   const showing = `${current?.id}#${nudges}`
   // A step that only tells, the dock's line of finds read, is met by a tap on the dock it rings, or
@@ -522,6 +536,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   // A ring with no words carries no dim either ([Q11]).
   const silent =
     view === 'look' && at === '[data-view="solve"]' && current?.until?.view === undefined
+  // What's left says what it wants (#114).
+  const leftWords = leftover === 'order' ? strings.owedOrder : strings.owedFace
   // The case's one new idea, marked on Solve where it is first met: while the order is empty, the
   // pictures to place and then, once one is picked, the slots it goes in, as the tutorial marks a
   // word and then its slot (#30); or a face, until a name is placed in it (#53). A tutorial's step
@@ -535,6 +551,11 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     return selection.moment === null ? '.tiles' : '.order'
   }
   const lesson = lessonAt()
+  // Without a step, a hint, or a lesson marking anything, what's left has a mark of its own (#114).
+  const owedAt =
+    view === 'solve' && at === undefined && lesson === undefined && !seek && sheet === null
+      ? leftAt
+      : undefined
   // A hint on offer once a signal fires, or its second tier once its first shows; never under a
   // guided step (#29). It sits at the foot of the view: the caption's dock, or beside Close.
   const signalled = run >= stuck.taps || stayed || waited === placements || fails >= stuck.closes
@@ -715,7 +736,11 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
           hold={holds}
         />
       )}
-      {lesson && <CoachMark at={lesson} label={text.teach ?? ''} />}
+      {/* A lesson's mark comes into view again once the account is full (#114). */}
+      {lesson && (
+        <CoachMark key={String(leftover !== undefined)} at={lesson} label={text.teach ?? ''} />
+      )}
+      {owedAt && <CoachMark at={owedAt} label={leftWords} />}
       {/* A failed close with something unfound rings Look, with no words, until it opens; the
           tutorial's last step rings it instead (#95). */}
       {seek && view === 'solve' && !current && !hinted && (

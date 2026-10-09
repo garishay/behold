@@ -91,6 +91,18 @@ export const filled = (s: CaseStructure, p: Progress) =>
   (s.order && p.order.every((m) => m !== null) ? 1 : 0) +
   blanks(s).filter(([id]) => p.fills[id]).length
 
+/**
+ * What's left once every blank of the account is filled: the first face still empty, in Solve's
+ * order, then the order, as `order`, while a place in it is empty. A player takes the account for
+ * the whole job, so Solve rings what's left (#114).
+ */
+export function owed(s: CaseStructure, p: Progress) {
+  if (!blanks(s).every(([id]) => p.fills[id])) return undefined
+  const empty = s.faces.find((f) => !p.faces[f.id])
+  if (empty !== undefined) return empty.id
+  return p.order.some((m) => m === null) ? 'order' : undefined
+}
+
 export const wrong = (s: CaseStructure, p: Progress) =>
   s.faces.filter((f) => p.faces[f.id] !== f.answer).length +
   (s.order && s.order.some((m, i) => p.order[i] !== m) ? 1 : 0) +
