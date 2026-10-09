@@ -47,7 +47,7 @@ export const en = {
       parts: [
         { t: 'A boy came down to the valley with ten loaves for his ' },
         { b: 't1' },
-        { t: ', and cheeses for their commander. Against Israel stood a champion of ' },
+        { t: ', and cheeses for their commander. Against Israel stood a champion who measured ' },
         { b: 't3' },
         { t: ' cubits and a span. ' },
         { b: 't2' },

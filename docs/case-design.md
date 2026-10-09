@@ -49,7 +49,7 @@ rules below are the answer, ruled on #26.
    settles it, and counts on the reveal, so a stuck player learns which answer is wrong, one at
    a time (#29, #102). Once the case is closed, the reveal leads with what its closes found
    wrong, the most tried first: each answer as a hint names it, what it was, what was put there,
-   and a link to the verse that says so, so a miss is seen set right in the text (#107). A close
+   and a link to the verse that says it, so a miss is seen set right in the text (#107). A close
    that fails while something is still unfound says how much is left to find, and rings Look
    until it opens (#95). A miss is the picture's, never the player's: no close calls an answer
    wrong (#77). Close the case appears once every slot is filled, in every case (#24). Until a

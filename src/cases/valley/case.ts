@@ -111,6 +111,6 @@ export const valley = {
     t2: '17:38',
     t3: '17:4',
     t4: '17:40',
-    t5: '17:51',
+    t5: '17:50-51',
   },
 } as const satisfies CaseStructure

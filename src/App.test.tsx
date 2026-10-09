@@ -2737,7 +2737,7 @@ describe('the case solved (#6, 03c; #24)', () => {
   const missed = () => [...document.querySelectorAll('.missed li')].map((li) => li.textContent)
 
   // #107: the reveal leads with what the closes found wrong, ahead of the telling: each answer as a
-  // hint names it, what it was, what was put there, and a link to the verse that says so, which
+  // hint names it, what it was, what was put there, and a link to the verse that says it, which
   // marks the verse in its passage and brings it into view. The most tried lead, and a reload keeps
   // them.
   it('the reveal leads with what the closes found wrong, each with a link to its verse', async () => {

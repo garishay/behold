@@ -152,7 +152,7 @@ export const strings = {
   caseClosed: 'The case is closed.',
   hintsUsed: (n: number) => (n === 1 ? 'You asked for 1 hint.' : `You asked for ${n} hints.`),
   // The reveal leads with what the closes found wrong (#107): each answer as a hint names it, what
-  // it was, and what was put there, then the verse that says so, a link to it in the passage.
+  // it was, and what was put there, then the verse that says it, a link to it in the passage.
   secondLook: 'Worth a second look',
   missed: (name: string, answer: string, puts: readonly string[]) =>
     `“${name}”: ${answer}. You put ${puts.join(', then ')}.`,
