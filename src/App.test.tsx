@@ -2482,6 +2482,34 @@ describe('the faces and the order are part of the job (#114)', () => {
     slot('t5')
     expect(result()).toHaveTextContent(/^That blank wants a name\.$/)
   })
+
+  // He tapped the giant's face, left it waiting, and scrolled down the account, and his next word
+  // went to the face, refused. A face left waiting lets go once Solve scrolls it wholly out of view;
+  // one still on show keeps waiting, and so does a blank out of view ([1] on #114).
+  it('a face left waiting lets go once it scrolls out of view, and a blank keeps waiting', async () => {
+    start()
+    openCase(/The valley/)
+    await sweep()
+    const solve = document.querySelector('.solve')!
+    const face = document.querySelector('[data-slot="d2"]')!
+    const blank = document.querySelector('[data-slot="t1"]')!
+    box('.solve', new DOMRect(0, 0, 360, 300))
+    const where = box('[data-slot="d2"]', new DOMRect(190, 120, 140, 44))
+    box('[data-slot="t1"]', new DOMRect(40, 380, 120, 30))
+    slot('d2')
+    fireEvent.scroll(solve)
+    expect(face).toHaveClass('is-target')
+    where.mockReturnValue(new DOMRect(190, -60, 140, 44))
+    fireEvent.scroll(solve)
+    expect(face).not.toHaveClass('is-target')
+    chip('commander')
+    expect(result()).not.toHaveTextContent('wants a name')
+    expect(document.querySelector('[data-word="commander"]')).toHaveClass('is-on')
+    chip('commander')
+    slot('t1')
+    fireEvent.scroll(solve)
+    expect(blank).toHaveClass('is-target')
+  })
 })
 
 describe('the close converges (#95)', () => {

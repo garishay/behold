@@ -242,6 +242,20 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
         : undefined,
     [stalled, guided, placements, hint],
   )
+  // A face left waiting lets go once Solve scrolls it wholly out of view, so a word tapped for the
+  // account isn't caught by a face out of sight: the giant's, tapped and left above (#114). A blank
+  // keeps waiting, since a player rereading its story still means the next word for it ([1]).
+  useEffect(() => {
+    const box = document.querySelector('.solve')
+    if (!box || !s.faces.some((f) => f.id === selection.target)) return
+    const away = () => {
+      const r = box.querySelector(`[data-slot="${selection.target}"]`)?.getBoundingClientRect()
+      const b = box.getBoundingClientRect()
+      if (r && (r.bottom <= b.top || r.top >= b.bottom)) setSelection(nothing)
+    }
+    box.addEventListener('scroll', away)
+    return () => box.removeEventListener('scroll', away)
+  }, [selection.target, s.faces])
 
   /**
    * Progress after a move; the case closing on it plays the close and opens the reveal, whose entry
