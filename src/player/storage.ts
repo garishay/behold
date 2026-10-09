@@ -43,9 +43,9 @@ const withDefaults = (v: unknown) => (record(v) ? { hints: [], misses: {}, ...v 
 
 /**
  * Whether every id an entry holds is the case's — the moment, the spots tapped, the bank, the
- * papers, the faces' and fills' keys and words, the order's moments, and the misses' slots, words,
- * and moments — with the order the case's length and the step one of its steps. The store never
- * trusts an id the case lacks: a case that no longer fits starts fresh (#12 [Q4]).
+ * papers, the faces' and fills' keys and words, the order's moments — with the order the case's
+ * length and the step one of its steps. The store never trusts an id the case lacks: a case that
+ * no longer fits starts fresh (#12 [Q4]).
  */
 const fits = (s: CaseStructure, p: Progress) => {
   const spots = s.moments.flatMap((m) => m.spots)
@@ -62,11 +62,6 @@ const fits = (s: CaseStructure, p: Progress) => {
     Object.entries(p.fills).every(([b, w]) => blanks.includes(b) && word(w)) &&
     p.order.length === (s.order?.length ?? 0) &&
     p.order.every((m) => m === null || has(s.moments)(m)) &&
-    Object.entries(p.misses).every(([id, puts]) =>
-      id === 'order'
-        ? s.order !== undefined && puts.every((o) => o.split(' ').every(has(s.moments)))
-        : (has(s.faces)(id) || blanks.includes(id)) && puts.every(word),
-    ) &&
     p.step >= 0 &&
     p.step <= Math.max(0, (s.steps?.length ?? 1) - 1)
   )
@@ -83,6 +78,22 @@ const restored = (s: CaseStructure, p: Progress) =>
   advance(s, p.solved && wrong(s, p) > 0 ? { ...p, solved: false } : p)
 
 /**
+ * The misses an entry kept, but any its case no longer has — a slot, a word, a moment — dropped
+ * alone: a miss records a close, not progress, so the case keeps its place (#107).
+ */
+const known = (s: CaseStructure, misses: Progress['misses']) => {
+  const slots = [...s.faces.map((f) => f.id), ...s.blocks.flatMap((b) => Object.keys(b.blanks))]
+  const fits = (id: string, put: string) =>
+    id === 'order'
+      ? put.split(' ').every((m) => s.order?.includes(m))
+      : slots.includes(id) && Object.hasOwn(s.words, put)
+  const kept = Object.entries(misses).map(
+    ([id, puts]) => [id, puts.filter((x) => fits(id, x))] as const,
+  )
+  return Object.fromEntries(kept.filter(([, puts]) => puts.length > 0))
+}
+
+/**
  * The store's progress by case, for the cases registered: a store that is not one, an entry
  * that is not progress, or an entry whose ids its case no longer has, reads as none.
  */
@@ -94,7 +105,8 @@ export function load(registry: readonly CaseEntry[]): Saved {
     const entries = Object.entries(parsed).map(([id, v]) => [id, withDefaults(v)] as const)
     const kept = entries.flatMap(([id, v]) => {
       const structure = registry.find((c) => c.structure.id === id)?.structure
-      return structure && progress(v) && fits(structure, v) ? [[id, restored(structure, v)]] : []
+      if (!structure || !progress(v) || !fits(structure, v)) return []
+      return [[id, restored(structure, { ...v, misses: known(structure, v.misses) })]]
     })
     return Object.fromEntries(kept)
   } catch {
