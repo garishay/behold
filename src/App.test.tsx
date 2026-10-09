@@ -2449,6 +2449,26 @@ describe('the faces and the order are part of the job (#114)', () => {
     expect(scrolled).toHaveBeenCalledWith({ top: -380, left: -118 })
     expect(said()).toBe('Who is he? Find what bears his name.')
   })
+
+  // The same tester: the valley's account full and every blank right, with the giant's face empty,
+  // and the last step rang Solve's count, not the face. Once the account is full, the last step
+  // rings the face still empty with what it wants, and its words stay through a tap, since they sit
+  // above the account, not over it.
+  it('the valley’s last step rings the face still empty once the account is full', () => {
+    const fills = { t1: 'brothers', t2: 'saul', t3: 'six', t4: 'sling' }
+    start(<App />, { valley: found(valley, { faces: { d1: 'david' }, fills }) })
+    openCase(/The valley/)
+    tab(/Solve/)
+    expect([at(), said()]).toEqual(['[data-view="solve"]', 'Fill the rest, then close the case.'])
+    chip('Goliath')
+    slot('t5')
+    expect([at(), said()]).toEqual(['[data-face="d2"]', 'Who is this? A face takes a name.'])
+    fireEvent.pointerDown(document.querySelector('.bank')!)
+    expect(said()).toBe('Who is this? A face takes a name.')
+    chip('Goliath')
+    slot('d2')
+    expect(at()).toBe('[data-close]')
+  })
 })
 
 describe('the close converges (#95)', () => {

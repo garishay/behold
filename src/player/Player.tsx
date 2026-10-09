@@ -494,13 +494,13 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     if (asked !== undefined && view !== 'look') return `[data-slot="${asked}"]`
     if (until?.view || view === 'look') return '[data-view="solve"]'
     const filled = until?.filled
-    // The last step rings Solve's count until Close the case shows (#24, Solve's room), Look's
-    // button while a failed close has left something unfound there (#95), and after one, the first
-    // answer it ringed (#102).
+    // The last step rings Solve's count until Close the case shows (#24, Solve's room), or once the
+    // account is full, what's left of the job (#114); Look's button while a failed close has left
+    // something unfound there (#95), and after one, the first answer it ringed (#102).
     if (filled === undefined) {
       if (seek) return '[data-view="look"]'
       if (retry && ringed.length > 0) return `[data-slot="${ringed[0]}"]`
-      return full ? '[data-close]' : '[data-view="solve"]'
+      return full ? '[data-close]' : (leftAt ?? '[data-view="solve"]')
     }
     const word = answer(s, filled)
     if (current.slotFirst)
@@ -536,7 +536,9 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   // A ring with no words carries no dim either ([Q11]).
   const silent =
     view === 'look' && at === '[data-view="solve"]' && current?.until?.view === undefined
-  // What's left says what it wants (#114).
+  // What's left says what it wants, and where the last step rings it, its words stay: they sit
+  // above the account, not on it (#114).
+  const owing = leftAt !== undefined && at === leftAt
   const leftWords = leftover === 'order' ? strings.owedOrder : strings.owedFace
   // The case's one new idea, marked on Solve where it is first met: while the order is empty, the
   // pictures to place and then, once one is picked, the slots it goes in, as the tutorial marks a
@@ -721,13 +723,15 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
           key={nudges}
           at={at}
           label={
-            (fleeting && said === showing) || silent
-              ? ''
-              : ((asked !== undefined
-                  ? text.ask
-                  : retry && !current.until
-                    ? retryWords
-                    : stepWords) ?? '')
+            owing
+              ? leftWords
+              : (fleeting && said === showing) || silent
+                ? ''
+                : ((asked !== undefined
+                    ? text.ask
+                    : retry && !current.until
+                      ? retryWords
+                      : stepWords) ?? '')
           }
           onTap={
             meet ?? (fleeting && said !== showing && !silent ? () => setSaid(showing) : undefined)
