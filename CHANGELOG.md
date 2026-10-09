@@ -3,6 +3,18 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.21.0 — Gate 17, the road to Google Play (#68)
+
+- **68a — the game moves to play.beholdgame.com** (#113): the Android app will be verified on
+  one address, and a player's progress lives with the address, so the game takes its own before
+  the app is built on it. The site is now built for the root of `https://play.beholdgame.com`,
+  which the repository's Pages settings serve, and GitHub forwards the old address,
+  `garishay.github.io/behold/`, there; `beholdgame.com` and `www` forward to it too, until the
+  domain has a home page of its own (#70). The passage service answers the new address, and still
+  the old one, where a copy installed before the move keeps running its last version and its
+  progress. The Pages artifact now keeps dot-folders, for the asset links that verify the app
+  (68c).
+
 ## v0.20.0 — Gate 27, the reveal leads with the player's misses (#107)
 
 - **107a — worth a second look** (#111): asked for one detail they didn't know, the restarted
