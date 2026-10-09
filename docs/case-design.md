@@ -47,14 +47,17 @@ rules below are the answer, ruled on #26.
    name every wrong answer for free, where a hint names one and the reveal counts it. The hint
    offered after the second failed close names the first answer that doesn't fit, rings what
    settles it, and counts on the reveal, so a stuck player learns which answer is wrong, one at
-   a time (#29, #102). A close that fails while something is still unfound says how much is left
-   to find, and rings Look until it opens (#95). A miss is the picture's, never the player's: no
-   close calls an answer wrong (#77). Close the case appears once every slot is filled, in every
-   case (#24). Until a close marks them, the tutorial marks an answer right only on the slots
-   its guided steps name; once those steps are done, its last step points at Solve's count, and
-   once every slot is filled, whatever step waits, Close the case appears and the last step
-   points at it, so the tutorial closes on the same check as every case, and a full account is
-   never a dead end (#77).
+   a time (#29, #102). Once the case is closed, the reveal leads with what its closes found
+   wrong, the most tried first: each answer as a hint names it, what it was, what was put there,
+   and a link to the verse that says so, so a miss is seen set right in the text (#107). A close
+   that fails while something is still unfound says how much is left to find, and rings Look
+   until it opens (#95). A miss is the picture's, never the player's: no close calls an answer
+   wrong (#77). Close the case appears once every slot is filled, in every case (#24). Until a
+   close marks them, the tutorial marks an answer right only on the slots its guided steps name;
+   once those steps are done, its last step points at Solve's count, and once every slot is
+   filled, whatever step waits, Close the case appears and the last step points at it, so the
+   tutorial closes on the same check as every case, and a full account is never a dead end
+   (#77).
    The first case teaches the real check, and since it teaches, it says where: its failed close
    marks every answer, each ring until that answer is changed, and its retry sits at the first it
    rang (#77, #102). Its one inference is asked on a miss: when a close finds that the sword's
