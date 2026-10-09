@@ -2816,6 +2816,36 @@ describe('the case solved (#6, 03c; #24)', () => {
     expect(screen.queryByRole('button', { name: /more$/ })).toBeNull()
   })
 
+  // Review round 1 (#111): a link tapped before its passage had come back brought the loading line
+  // into view, and once the verses were drawn, the marked one could sit far off screen. The link's
+  // verse comes to the middle of the screen once it is drawn, however soon the tap came (#107).
+  it('a link tapped while its passage loads brings its verse into view once it is drawn', async () => {
+    let arrive = () => {}
+    const slow: PassageService = (passage, translation) =>
+      new Promise((resolve) => {
+        arrive = () => void versed(passage, translation).then(resolve)
+      })
+    start(<App passages={slow} />, {
+      vineyard: { ...closedCase(vineyard), misses: { s4: ['ahab'] } },
+    })
+    openCase(/The vineyard/)
+    expect(screen.getByText('Loading 1 Kings 21…')).toBeInTheDocument()
+    const into = vi.fn()
+    Element.prototype.scrollIntoView = into
+    try {
+      fireEvent.click(screen.getByRole('button', { name: 'Read 21:8' }))
+      await waitFor(() => expect(into).toHaveBeenCalledOnce())
+      expect(into.mock.contexts[0]).toBe(document.querySelector('.passage'))
+      act(() => arrive())
+      await screen.findByText('Made-up words, verse 8.')
+      await waitFor(() => expect(into).toHaveBeenCalledTimes(2))
+      expect(into.mock.contexts[1]).toBe(document.querySelector('.passage .is-cited'))
+      expect(into.mock.contexts[1]).toHaveTextContent('8Made-up words, verse 8.')
+    } finally {
+      Reflect.deleteProperty(Element.prototype, 'scrollIntoView')
+    }
+  })
+
   it('a case without steps closes on the submit, and says how far off it was', () => {
     start(<App />, laterStarted)
     openCase(/The vineyard/)

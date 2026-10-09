@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { CaseStructure, CaseText, Passage } from '../cases/types.ts'
 import { parseCite, type Cite } from '../cases/validate.ts'
 import type { PassageService, PassageText, Translation } from '../passages/service.ts'
@@ -38,15 +38,8 @@ const holds = (p: Passage, c: Cite) =>
  */
 export function Reveal({ structure: s, text, passages, onBack, hints, misses }: RevealProps) {
   const [all, setAll] = useState(false)
-  // The verse a miss's link asked for, and the ask's count, so each tap brings it into view.
-  const [cited, setCited] = useState<{ cite: Cite; n: number } | null>(null)
-  useEffect(() => {
-    if (cited === null) return
-    const at =
-      document.querySelector('.passage .is-cited') ?? document.querySelector('.passage.holds')
-    const motion = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
-    at?.scrollIntoView({ block: 'center', behavior: motion })
-  }, [cited])
+  // The verse a miss's link asked for, read afresh on each tap, so each brings it into view.
+  const [cited, setCited] = useState<Cite | null>(null)
   // The misses, the most tried first, then in Solve's order: the faces, the order, the blanks.
   const solve = [
     ...s.faces.map((f) => f.id),
@@ -66,10 +59,7 @@ export function Reveal({ structure: s, text, passages, onBack, hints, misses }: 
       return { id, line: strings.missed(named(s, text, id), told, put), verse }
     })
   const shown = all ? lines : lines.slice(0, leading)
-  const cite = (verse: string) => {
-    const c = parseCite(verse)
-    if (c) setCited({ cite: c, n: (cited?.n ?? 0) + 1 })
-  }
+  const cite = (verse: string) => setCited(parseCite(verse) ?? null)
   return (
     <div className="reveal">
       <h2>{strings.caseClosed}</h2>
@@ -109,7 +99,7 @@ export function Reveal({ structure: s, text, passages, onBack, hints, misses }: 
           passage={passage}
           label={text.passages[i]}
           service={passages}
-          cited={cited && holds(passage, cited.cite) ? cited.cite : undefined}
+          cited={cited && holds(passage, cited) ? cited : undefined}
         />
       ))}
       <p className="attribution">
@@ -154,8 +144,18 @@ function PassageBlock({ passage, label, service, cited }: PassageBlockProps) {
     }
   }, [passage, service])
   const marked = (n?: number) => cited && n !== undefined && n >= cited.from && n <= cited.to
+  // A link's verse comes to the middle of the screen on its tap, or while the passage is out the
+  // passage itself, and again once the verses are drawn, however soon the tap came (review round 1).
+  const block = useRef<HTMLElement>(null)
+  const drawn = state !== 'loading'
+  useEffect(() => {
+    if (!cited) return
+    const at = block.current?.querySelector('.is-cited') ?? block.current
+    const motion = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+    at?.scrollIntoView({ block: 'center', behavior: motion })
+  }, [cited, drawn])
   return (
-    <section className={'passage' + (cited ? ' holds' : '')}>
+    <section ref={block} className="passage">
       <h3>
         {label} <span className="tr">{strings.translations[translation]}</span>
       </h3>
