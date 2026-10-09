@@ -3,6 +3,14 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.22.1 — The passages cache keeps twelve (#3)
+
+- **The cache at twelve** (#116): the device kept the last eight passages read, which Gate 04
+  sized to season one's chapters, and the cases ruled since bring the season to ten, so a closed
+  case could have fetched its passage again. It now keeps twelve. A test holds the ESV's condition
+  on verses stored: twelve of the longest registered passage within 500, and no book's registered
+  verses at half the book, so a case whose passage would break either fails in CI.
+
 ## v0.22.0 — Gate 28, Solve rings what's left (#114)
 
 - **114a — what's left of the job** (#115): two testers stalled at a full account with a face
