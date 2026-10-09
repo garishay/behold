@@ -52,12 +52,15 @@ rules below are the answer, ruled on #26.
    and a link to the verse that says it, so a miss is seen set right in the text (#107). A close
    that fails while something is still unfound says how much is left to find, and rings Look
    until it opens (#95). A miss is the picture's, never the player's: no close calls an answer
-   wrong (#77). Close the case appears once every slot is filled, in every case (#24). Until a
-   close marks them, the tutorial marks an answer right only on the slots its guided steps name;
-   once those steps are done, its last step points at Solve's count, and once every slot is
-   filled, whatever step waits, Close the case appears and the last step points at it, so the
-   tutorial closes on the same check as every case, and a full account is never a dead end
-   (#77).
+   wrong (#77). Close the case appears once every slot is filled, in every case (#24). A player
+   takes the account for the whole job, so once its every blank holds a word, Solve rings the
+   first face or the order still empty, brings it into view, and says what it wants; where a
+   lesson already rings that face, its own words say it (#114). Until a close marks them, the
+   tutorial marks an answer right only on the slots its guided steps name; once those steps are
+   done, its last step points at Solve's count, or at the face still empty once the account is
+   full (#114), and once every slot is filled, whatever step waits, Close the case appears and
+   the last step points at it, so the tutorial closes on the same check as every case, and a full
+   account is never a dead end (#77).
    The first case teaches the real check, and since it teaches, it says where: its failed close
    marks every answer, each ring until that answer is changed, and its retry sits at the first it
    rang (#77, #102). Its one inference is asked on a miss: when a close finds that the sword's
