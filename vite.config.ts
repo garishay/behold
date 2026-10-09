@@ -33,9 +33,9 @@ export function audioHashes(root: string) {
 
 // https://vite.dev/config/
 export default defineConfig({
-  // The Pages deploy serves the site from /<repository>/ (Gate 01 A4); the workflow passes the
-  // path. Dev, tests, and a bare build stay at `/`, so nothing that pins a URL moves.
-  base: process.env.PAGES_BASE ?? '/',
+  // No `base`: the site is the root of its own origin, https://play.beholdgame.com (Gate 17 A4,
+  // as amended), so Vite's `/` serves the deploy as it serves dev and the tests.
+
   // The pictures' and the sound files' hashes, read from the files when the config loads, so the build, the dev
   // server, and the tests stamp each address from the picture as it is (#45); the title's too (#75).
   define: {
@@ -47,10 +47,10 @@ export default defineConfig({
     react(),
     // The PWA shell (Gate 01 A2). `prompt`: a new version waits until the player taps the
     // "Update available" toast, never reloading mid-case — `autoUpdate` would reload the app the
-    // moment a deploy lands. The manifest's start_url and scope default to `base`; the icons are
-    // the committed placeholders from `npm run icons`, precached with the bundle. So are the sound
-    // effects (Gate 10 A6), so the first tap sounds offline; a precached file's revision is its
-    // hash, so a changed effect reaches the phone with the next update at the same address.
+    // moment a deploy lands. The manifest's start_url and scope default to the base, `/`; the
+    // icons are the committed placeholders from `npm run icons`, precached with the bundle. So are
+    // the sound effects (Gate 10 A6), so the first tap sounds offline; a precached file's revision
+    // is its hash, so a changed effect reaches the phone with the next update at the same address.
     VitePWA({
       registerType: 'prompt',
       includeAssets: ['icons/*.png', 'audio/*.m4a'],

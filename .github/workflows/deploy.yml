@@ -28,13 +28,15 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      # `base` from the repository name, read in vite.config.ts: the site lives at /<repo>/.
+      # The site is the root of its own origin, https://play.beholdgame.com (Gate 17 A4, as
+      # amended), so the build keeps Vite's base, `/`, as dev and the tests do. The domain is the
+      # repository's Pages setting: a workflow's deploy needs no CNAME file.
       - run: npm run build
-        env:
-          PAGES_BASE: /${{ github.event.repository.name }}/
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
+          # Dot-folders are left out unless asked for, and the asset links live in one (68c, #68).
+          include-hidden-files: true
 
   deploy:
     name: deploy (Pages)

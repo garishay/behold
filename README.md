@@ -2,7 +2,7 @@
 
 **Bible Mystery Game — a deduction game about the stories you thought you knew.**
 
-**Live at <https://garishay.github.io/behold/>** — it opens on its title, then the cases, played
+**Live at <https://play.beholdgame.com/>** — it opens on its title, then the cases, played
 in order. It installs to a phone's home screen and opens offline after one visit. Every merge to
 `main` redeploys it.
 

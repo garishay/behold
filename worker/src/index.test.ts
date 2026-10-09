@@ -2,7 +2,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { handle, type Env, type Fetcher } from './index.ts'
 
-const site = 'https://garishay.github.io'
+const site = 'https://play.beholdgame.com'
 const limiter = (success = true) => ({ limit: vi.fn(() => Promise.resolve({ success })) })
 const env = (over: Partial<Env> = {}): Env => ({
   ESV_TOKEN: 'the-token',
