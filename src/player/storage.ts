@@ -83,12 +83,12 @@ const restored = (s: CaseStructure, p: Progress) =>
  */
 const known = (s: CaseStructure, misses: Progress['misses']) => {
   const slots = [...s.faces.map((f) => f.id), ...s.blocks.flatMap((b) => Object.keys(b.blanks))]
-  const fits = (id: string, put: string) =>
+  const stays = (id: string, put: string) =>
     id === 'order'
       ? put.split(' ').every((m) => s.order?.includes(m))
       : slots.includes(id) && Object.hasOwn(s.words, put)
   const kept = Object.entries(misses).map(
-    ([id, puts]) => [id, puts.filter((x) => fits(id, x))] as const,
+    ([id, puts]) => [id, puts.filter((x) => stays(id, x))] as const,
   )
   return Object.fromEntries(kept.filter(([, puts]) => puts.length > 0))
 }
