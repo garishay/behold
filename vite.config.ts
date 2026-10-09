@@ -72,15 +72,16 @@ export default defineConfig({
             options: { cacheName: 'cases', expiration: { maxEntries: 200 } },
           },
           // A passage the reveal fetched through the proxy (#3) is kept too, so a case once
-          // closed reads offline: at most eight passages, a month each — within the ESV's
-          // allowance of five hundred verses stored locally (Gate 04 A4). An error is never
-          // cached; the rule keeps only a reply that came back whole.
+          // closed reads offline: at most twelve passages, a month each, so season one's ten fit
+          // (#3, the ruling of 2026-09-30). The registry test holds twelve of the longest within
+          // the ESV's allowance of five hundred verses stored locally (Gate 04 A4). An error is
+          // never cached; the rule keeps only a reply that came back whole.
           {
             urlPattern: /^https:\/\/behold-esv\.[^/]+\.workers\.dev\/passage\?/,
             handler: 'CacheFirst',
             options: {
               cacheName: 'passages',
-              expiration: { maxEntries: 8, maxAgeSeconds: 30 * 24 * 60 * 60 },
+              expiration: { maxEntries: 12, maxAgeSeconds: 30 * 24 * 60 * 60 },
             },
           },
           // A cue is fetched when it first plays and kept from then on, so the install stays the

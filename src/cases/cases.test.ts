@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest'
 import { books } from '../../worker/src/books.ts'
 import { strings } from '../strings/en.ts'
 import { cases } from './index.ts'
+import type { Passage } from './types.ts'
 import { validate } from './validate.ts'
 
 /** A JPEG's pixel size — width, height — read from its start-of-frame marker. */
@@ -113,5 +114,44 @@ describe('the case registry (Gate 02 A1, A5)', () => {
     const over = spots.filter((s) => s.id !== 'seal' && overlaps(s.box, seal.box))
     expect(over.map((s) => s.id).sort()).toEqual(['sheets', 'woman'])
     for (const s of over) expect(area(s.box), s.id).toBeGreaterThan(area(seal.box))
+  })
+})
+
+// The verse counts the registry doesn't carry, for the ESV's fourth condition below: each passage
+// that is a whole chapter, by its chapter's verses, and each registered book's verses. A case that
+// registers a chapter or a book this table lacks fails until its gate adds the row.
+const chapterVerses: Readonly<Record<string, number>> = { '1KI 21': 29 }
+const bookVerses: Readonly<Record<string, number>> = { '1SA': 810, '1KI': 816 }
+const versesIn = (p: Passage) =>
+  p.from === undefined || p.to === undefined
+    ? chapterVerses[`${p.book} ${p.chapter}`]
+    : p.to - p.from + 1
+const passages = cases.flatMap((c) => c.structure.passages)
+
+// The ESV's fourth condition: no more than 500 verses stored locally (#3, the ruling of
+// 2026-09-30). The device keeps the last passages read, at most the passages rule's limit, so that
+// many of the longest registered passage must fit, and no book's registered verses may reach half
+// the book. A case whose passage would break either fails here, in CI.
+describe('the ESV’s limit on stored verses (#3)', () => {
+  it('counts every registered passage’s verses', () => {
+    for (const p of passages) expect(versesIn(p), `${p.book} ${p.chapter}`).toBeGreaterThan(0)
+  })
+
+  it('keeps the device’s passages within 500 verses, and each book under half', () => {
+    const rule = /cacheName: 'passages',\s*expiration: \{ maxEntries: (\d+)/.exec(
+      readFileSync('vite.config.ts', 'utf8'),
+    )
+    const kept = Number(rule?.[1])
+    const longest = Math.max(...passages.map(versesIn))
+    expect(
+      kept * longest,
+      `${kept} passages of ${longest} verses, past the ESV’s 500 stored`,
+    ).toBeLessThanOrEqual(500)
+    for (const book of new Set(passages.map((p) => p.book))) {
+      const total = passages.filter((p) => p.book === book).reduce((n, p) => n + versesIn(p), 0)
+      expect(total, `${book}: ${total} verses, half the book or more`).toBeLessThan(
+        bookVerses[book] / 2,
+      )
+    }
   })
 })
