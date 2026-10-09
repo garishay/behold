@@ -14,7 +14,7 @@ One request, the app's contract (`src/passages/service.ts`) on the wire:
 ```
 GET /passage?translation=ESV&book=1KI&chapter=21            a whole chapter
 GET /passage?translation=ESV&book=1SA&chapter=17&from=17&to=18   a range within one chapter
-Origin: https://garishay.github.io
+Origin: https://play.beholdgame.com
 ```
 
 The book is its USFM code; the Worker names it for the ESV from the table. A good reply is the
@@ -65,9 +65,10 @@ carries all three; non-commercial; the words never changed; the key never shared
 
 ## The guardrails
 
-- **Origins.** `ORIGINS` in `wrangler.jsonc`: the Pages site and the dev server. A request from
-  anywhere else, or with no `Origin`, is refused with no CORS header, so a page elsewhere reads
-  nothing. The header is a browser's promise, not a lock: a script can set it, and what bounds a
+- **Origins.** `ORIGINS` in `wrangler.jsonc`: the game at `https://play.beholdgame.com`, its old
+  address `https://garishay.github.io`, where a copy installed before the move still asks (Gate
+  17 A4), and the dev server. A request from anywhere else, or with no `Origin`, is refused with no
+  CORS header, so a page elsewhere reads nothing. The header is a browser's promise, not a lock: a script can set it, and what bounds a
   script is the limits.
 - **Limits.** Two rate-limit bindings: 12 a minute per player address (`cf-connecting-ip`), and
   50 a minute for the Worker as a whole — per data centre, permissive by design.

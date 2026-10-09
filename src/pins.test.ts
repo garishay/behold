@@ -14,6 +14,8 @@ import { words } from './player/place.ts'
  */
 const config = readFileSync('vite.config.ts', 'utf8')
 const css = readFileSync('src/index.css', 'utf8')
+const deploy = readFileSync('.github/workflows/deploy.yml', 'utf8')
+const wrangler = readFileSync('worker/wrangler.jsonc', 'utf8')
 
 describe('the service worker’s configuration (Gate 03 A3)', () => {
   it('claims the page when it first activates, and still waits for the tap to take over', () => {
@@ -229,5 +231,29 @@ describe('the music (Gate 10 A6)', () => {
     expect(matches.test('/audio/music/lamentation.m4a')).toBe(false)
     expect(handler).toBe('CacheFirst')
     expect(options).toMatch(/cacheName: 'music'/)
+  })
+})
+
+// Where the game is served is deploy configuration, which no test runs: the Pages build, its
+// artifact, and the origins the Worker answers, pinned as text against removal. The live site and
+// the phone check on the day of the move are their evidence (Gate 17 A4, as amended; 68a, #68).
+describe('the game at play.beholdgame.com (68a, #68)', () => {
+  it('is built for the root of its own origin, with no base from the config or the deploy', () => {
+    expect(config).not.toMatch(/^ {2}base:/m)
+    expect(deploy).not.toMatch(/PAGES_BASE|--base/)
+  })
+
+  it('keeps dot-folders in the Pages artifact, where the asset links will live (68c)', () => {
+    const upload = deploy.slice(deploy.indexOf('actions/upload-pages-artifact'))
+    expect(upload.slice(0, upload.indexOf('\n\n'))).toMatch(/^\s+include-hidden-files: true$/m)
+  })
+
+  it('is answered by the Worker, as is its old address, for a copy installed there', () => {
+    const origins = /"ORIGINS": "([^"]*)"/.exec(wrangler)?.[1].split(' ')
+    expect(origins).toEqual([
+      'https://play.beholdgame.com',
+      'https://garishay.github.io',
+      'http://localhost:5173',
+    ])
   })
 })

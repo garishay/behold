@@ -78,7 +78,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      # A production build at `/`. The Pages deploy (01b) builds again with its own base.
+      # The production build, at `/`, as the Pages deploy (01b) builds it since the move (68a).
       - run: npm run build
       # The Worker's bundle, built by wrangler without a deploy or a token (#3): a Worker that
       # will not bundle fails the required check, not the deploy after the merge.
