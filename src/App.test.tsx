@@ -2450,6 +2450,30 @@ describe('the faces and the order are part of the job (#114)', () => {
     expect(said()).toBe('Who is he? Find what bears his name.')
   })
 
+  // A paper opened on Look stays open if the history's forward brings Solve back beneath it. No
+  // step's, hint's, or lesson's mark shows under a paper, and nor does what's left.
+  it('marks nothing left under a paper', async () => {
+    const order = [...vineyard.order!]
+    const fills = Object.fromEntries(vineyard.blocks.flatMap((b) => Object.entries(b.blanks)))
+    const kept = found(vineyard, { faces: { p1: 'ahab' }, order, fills })
+    start(<App />, { ...laterStarted, vineyard: kept })
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    expect(at()).toBe('[data-face="p2"]')
+    const on = (name: RegExp) =>
+      waitFor(() =>
+        expect(screen.getByRole('tab', { name })).toHaveAttribute('aria-selected', 'true'),
+      )
+    history.back()
+    await on(/Look/)
+    moment('Bedchamber')
+    tapSpot('seal')
+    history.forward()
+    await on(/Solve/)
+    expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument()
+    expect(coach()).toBeNull()
+  })
+
   // The same tester: the valley's account full and every blank right, with the giant's face empty,
   // and the last step rang Solve's count, not the face. Once the account is full, the last step
   // rings the face still empty with what it wants, and its words stay through a tap, since they sit

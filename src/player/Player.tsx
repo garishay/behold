@@ -570,9 +570,10 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     return selection.moment === null ? '.tiles' : '.order'
   }
   const lesson = lessonAt()
-  // Without a step, a hint, or a lesson marking anything, what's left has a mark of its own (#114).
+  // Without a step, a hint, or a lesson marking anything, what's left has a mark of its own, and as
+  // no other mark is, it isn't marked under a sheet or a paper (#114).
   const owedAt =
-    view === 'solve' && at === undefined && lesson === undefined && !seek && sheet === null
+    view === 'solve' && at === undefined && lesson === undefined && !seek && !covered
       ? leftAt
       : undefined
   // A hint on offer once a signal fires, or its second tier once its first shows; never under a
