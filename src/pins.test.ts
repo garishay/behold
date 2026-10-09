@@ -41,8 +41,9 @@ describe('the service worker’s configuration (Gate 03 A3)', () => {
   })
 
   // A passage read once reads offline: the rule's matcher, strategy, and the limits Gate 04 A4 set
-  // under the ESV's five hundred verses stored locally (review round 1, #31).
-  it('caches a passage the Worker returned, at most eight for thirty days, and nothing else', () => {
+  // under the ESV's five hundred verses stored locally (review round 1, #31), eleven since #12
+  // [Q17], which the registry test holds to that bound with the passage coming in.
+  it('caches a passage the Worker returned, at most eleven for thirty days, and nothing else', () => {
     const rule = /\{\s*urlPattern: (\/[^\n]*\/),\s*handler: '(\w+)',([^}]*\}[^}]*)\}/.exec(
       config.slice(config.indexOf("cacheName: 'cases'")),
     )
@@ -59,7 +60,7 @@ describe('the service worker’s configuration (Gate 03 A3)', () => {
     expect(matches.test('/cases/vineyard/gate.jpg')).toBe(false)
     expect(handler).toBe('CacheFirst')
     expect(options).toMatch(/cacheName: 'passages'/)
-    expect(options).toMatch(/maxEntries: 8,/)
+    expect(options).toMatch(/maxEntries: 11,/)
     expect(options).toMatch(/maxAgeSeconds: 30 \* 24 \* 60 \* 60/)
   })
 })

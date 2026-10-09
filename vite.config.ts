@@ -72,7 +72,9 @@ export default defineConfig({
             options: { cacheName: 'cases', expiration: { maxEntries: 200 } },
           },
           // A passage the reveal fetched through the proxy (#3) is kept too, so a case once
-          // closed reads offline: at most eight passages, a month each — within the ESV's
+          // closed reads offline: at most eleven passages, a month each, so season one's ten fit
+          // (#12 [Q17]). Workbox adds a passage before it drops the oldest, so the registry test
+          // holds the eleven and the one coming in, twelve of the longest, within the ESV's
           // allowance of five hundred verses stored locally (Gate 04 A4). An error is never
           // cached; the rule keeps only a reply that came back whole.
           {
@@ -80,7 +82,7 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'passages',
-              expiration: { maxEntries: 8, maxAgeSeconds: 30 * 24 * 60 * 60 },
+              expiration: { maxEntries: 11, maxAgeSeconds: 30 * 24 * 60 * 60 },
             },
           },
           // A cue is fetched when it first plays and kept from then on, so the install stays the
