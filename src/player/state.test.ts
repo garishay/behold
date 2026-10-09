@@ -14,6 +14,7 @@ import {
   marked,
   nothing,
   opened,
+  owed,
   read,
   step,
   submit,
@@ -302,5 +303,20 @@ describe('the model (#6)', () => {
     expect(p.misses).toEqual({ ...kept, v1: ['stoned'] })
     p = submit(vineyard, { ...p, ...right })
     expect([p.solved, p.misses]).toEqual([true, { ...kept, v1: ['stoned'] }])
+  })
+})
+
+describe('what is left once the account is full (#114)', () => {
+  it('is nothing while a blank is empty, then each face in Solve’s order, then the order', () => {
+    const fills = Object.fromEntries(vineyard.blocks.flatMap((b) => Object.entries(b.blanks)))
+    const { v2, ...short } = fills
+    const p = { ...fresh(vineyard), fills: short }
+    expect([v2, owed(vineyard, p)]).toEqual(['taken-possession', undefined])
+    const full = { ...p, fills }
+    expect(owed(vineyard, full)).toBe('p1')
+    expect(owed(vineyard, { ...full, faces: { p1: 'ahab', p3: 'naboth' } })).toBe('p2')
+    const named = { ...full, faces: { p1: 'ahab', p2: 'jezebel', p3: 'naboth' } }
+    expect(owed(vineyard, { ...named, order: ['bedchamber', null, 'vineyard'] })).toBe('order')
+    expect(owed(vineyard, { ...named, order: [...vineyard.order!] })).toBeUndefined()
   })
 })

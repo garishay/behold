@@ -46,11 +46,15 @@ export interface Selection {
 
 export const nothing: Selection = { word: null, moment: null, target: null, slot: null }
 
-/** A move's result: the progress and selection after it, and the kind a blank refused, if one did. */
+/**
+ * A move's result: the progress and selection after it, and the kind a slot refused and which slot,
+ * if one did, so the refusal can say a face or a blank (#114).
+ */
 export interface Outcome {
   readonly progress: Progress
   readonly selection: Selection
   readonly wants?: Kind
+  readonly by?: string
 }
 
 export const fresh = (s: CaseStructure): Progress => ({
@@ -90,6 +94,18 @@ export const filled = (s: CaseStructure, p: Progress) =>
   s.faces.filter((f) => p.faces[f.id]).length +
   (s.order && p.order.every((m) => m !== null) ? 1 : 0) +
   blanks(s).filter(([id]) => p.fills[id]).length
+
+/**
+ * What's left once every blank of the account is filled: the first face still empty, in Solve's
+ * order, then the order, as `order`, while a place in it is empty. A player takes the account for
+ * the whole job, so Solve rings what's left (#114).
+ */
+export function owed(s: CaseStructure, p: Progress) {
+  if (!blanks(s).every(([id]) => p.fills[id])) return undefined
+  const empty = s.faces.find((f) => !p.faces[f.id])
+  if (empty !== undefined) return empty.id
+  return p.order.some((m) => m === null) ? 'order' : undefined
+}
 
 export const wrong = (s: CaseStructure, p: Progress) =>
   s.faces.filter((f) => p.faces[f.id] !== f.answer).length +
@@ -194,7 +210,7 @@ const put = (s: CaseStructure, p: Progress, target: string, word: string | undef
 export function chooseWord(s: CaseStructure, p: Progress, sel: Selection, word: string): Outcome {
   const kind = sel.target === null ? undefined : kindOf(s, sel.target)
   if (sel.target !== null && kind !== undefined && s.words[word] !== kind)
-    return { progress: p, selection: { ...nothing, word }, wants: kind }
+    return { progress: p, selection: { ...nothing, word }, wants: kind, by: sel.target }
   if (sel.target !== null) return { progress: put(s, p, sel.target, word), selection: nothing }
   return { progress: p, selection: { ...nothing, word: sel.word === word ? null : word } }
 }
@@ -213,7 +229,7 @@ export function chooseSlot(
   if (checked(s, p, target, told)) return { progress: p, selection: sel }
   const kind = kindOf(s, target)
   if (sel.word !== null && s.words[sel.word] !== kind)
-    return { progress: p, selection: sel, wants: kind }
+    return { progress: p, selection: sel, wants: kind, by: target }
   if (sel.word !== null) return { progress: put(s, p, target, sel.word), selection: nothing }
   if (p.faces[target] ?? p.fills[target])
     return { progress: put(s, p, target, undefined), selection: nothing }

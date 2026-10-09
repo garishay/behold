@@ -3,6 +3,18 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.22.0 — Gate 28, Solve rings what's left (#114)
+
+- **114a — what's left of the job** (#115): two testers stalled at a full account with a face
+  still empty, one of them for most of his time in the valley; they took the account for the whole
+  job. Once every blank holds a word, Solve now rings the first face still empty, then the order,
+  brings it into view, and says what it wants: "Who is this? A face takes a name." or "What
+  happened first? Order the pictures too.", the order's pictures and then its slots, as the
+  mountain's lesson rings them. The valley's last step rings the empty face the same way, where it
+  rang Solve's count. A face's refusal says "That face wants a name.", where "blank" had read as the
+  account, and a face left waiting lets go once it scrolls out of view, so the next word tapped is
+  picked up, not refused by it; a blank keeps waiting.
+
 ## v0.21.0 — Gate 17, the road to Google Play (#68)
 
 - **68a — the game moves to play.beholdgame.com** (#113): the Android app will be verified on

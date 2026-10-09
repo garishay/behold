@@ -2364,6 +2364,178 @@ describe('Solve’s room (#24)', () => {
   })
 })
 
+describe('the faces and the order are part of the job (#114)', () => {
+  const at = () => coach()?.getAttribute('data-at')
+  const said = () => coach()?.querySelector('[role="status"]')?.textContent
+  afterEach(() => vi.restoreAllMocks())
+  /** A case with every spot found and the answers given in place, the rest empty. */
+  const found = (s: CaseStructure, over: Partial<ReturnType<typeof fresh>>) => {
+    const spots = s.moments.flatMap((m) => m.spots)
+    return {
+      ...fresh(s),
+      tapped: spots.map((x) => x.id),
+      bank: [...new Set(spots.flatMap((x) => x.words))],
+      papers: [...new Set(spots.flatMap((x) => (x.paper === undefined ? [] : [x.paper])))],
+      step: (s.steps?.length ?? 1) - 1,
+      ...over,
+    }
+  }
+  const box = (sel: string, rect: DOMRect) =>
+    vi.spyOn(document.querySelector(sel)!, 'getBoundingClientRect').mockReturnValue(rect)
+
+  // The vineyard round's tester 1 (#23, 2026-10-09): in the mountain the order and the four blanks
+  // were in, and both faces empty, for nearly three minutes. Once the account's last blank is
+  // filled, Solve rings the first face still empty with what it wants, then the next, then the
+  // order, its pictures and then its slots as the mountain's lesson rings them, until Close the
+  // case shows.
+  it('rings what is left once the account is full: each face, then the order', () => {
+    const fills = { a1: 'said-nothing', a2: 'cried-aloud', a3: 'stones' }
+    start(<App />, {
+      ...laterStarted,
+      carmel: found(carmel, { order: ['baal', null, null], fills }),
+    })
+    openCase(/The mountain/)
+    tab(/Solve/)
+    expect(coach()).toBeNull()
+    chip('fell on their faces')
+    slot('a4')
+    expect([at(), said()]).toEqual(['[data-face="c1"]', 'Who is this? A face takes a name.'])
+    chip('Elijah')
+    slot('c1')
+    expect(at()).toBe('[data-face="c2"]')
+    chip('Ahab')
+    slot('c2')
+    expect([at(), said()]).toEqual(['.tiles', 'What happened first? Order the pictures too.'])
+    tile('The water')
+    expect([at(), said()]).toEqual(['.order', 'What happened first? Order the pictures too.'])
+    orderSlot(1)
+    tile('The fire')
+    orderSlot(2)
+    expect(coach()).toBeNull()
+    expect(screen.getByRole('button', { name: 'Close the case' })).toBeInTheDocument()
+  })
+
+  // He had the giant's face on screen at times and still left it: what is left is brought to the
+  // middle of Solve as it is rung.
+  it('brings what is left into view as it is rung', () => {
+    const fills = { a1: 'said-nothing', a2: 'cried-aloud', a3: 'stones' }
+    const order = [...carmel.order!]
+    start(<App />, { ...laterStarted, carmel: found(carmel, { order, fills }) })
+    openCase(/The mountain/)
+    tab(/Solve/)
+    box('.solve', new DOMRect(0, 0, 360, 300))
+    box('[data-face="c1"]', new DOMRect(20, -260, 160, 140))
+    const scrolled = vi.spyOn(document.querySelector('.solve')!, 'scrollBy')
+    chip('fell on their faces')
+    slot('a4')
+    expect(scrolled).toHaveBeenCalledWith({ top: -340, left: -80 })
+  })
+
+  // A case that teaches a face rings it while it is empty (#53, #106). Once the account is full and
+  // that face is what is left, its mark is brought into view again.
+  it('brings the lesson’s face into view again once the account is full', async () => {
+    const fills = { s1: 'garden', s2: 'vineyard', s3: 'inheritance', s4: 'jezebel' }
+    const kept = { ...fills, s5: 'the-king', v1: 'killed' }
+    const order = [...vineyard.order!]
+    start(<App />, { ...laterStarted, vineyard: found(vineyard, { order, fills: kept }) })
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    await waitFor(() => expect(at()).toBe('[data-face="p1"]'))
+    box('.solve', new DOMRect(0, 0, 360, 300))
+    box('[data-face="p1"]', new DOMRect(12, -300, 100, 140))
+    const scrolled = vi.spyOn(document.querySelector('.solve')!, 'scrollBy')
+    chip('taken possession')
+    slot('v2')
+    expect(scrolled).toHaveBeenCalledWith({ top: -380, left: -118 })
+    expect(said()).toBe('Who is he? Find what bears his name.')
+  })
+
+  // A paper opened on Look stays open if the history's forward brings Solve back beneath it. No
+  // step's, hint's, or lesson's mark shows under a paper, and nor does what's left.
+  it('marks nothing left under a paper', async () => {
+    const order = [...vineyard.order!]
+    const fills = Object.fromEntries(vineyard.blocks.flatMap((b) => Object.entries(b.blanks)))
+    const kept = found(vineyard, { faces: { p1: 'ahab' }, order, fills })
+    start(<App />, { ...laterStarted, vineyard: kept })
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    expect(at()).toBe('[data-face="p2"]')
+    const on = (name: RegExp) =>
+      waitFor(() =>
+        expect(screen.getByRole('tab', { name })).toHaveAttribute('aria-selected', 'true'),
+      )
+    history.back()
+    await on(/Look/)
+    moment('Bedchamber')
+    tapSpot('seal')
+    history.forward()
+    await on(/Solve/)
+    expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument()
+    expect(coach()).toBeNull()
+  })
+
+  // The same tester: the valley's account full and every blank right, with the giant's face empty,
+  // and the last step rang Solve's count, not the face. Once the account is full, the last step
+  // rings the face still empty with what it wants, and its words stay through a tap, since they sit
+  // above the account, not over it.
+  it('the valley’s last step rings the face still empty once the account is full', () => {
+    const fills = { t1: 'brothers', t2: 'saul', t3: 'six', t4: 'sling' }
+    start(<App />, { valley: found(valley, { faces: { d1: 'david' }, fills }) })
+    openCase(/The valley/)
+    tab(/Solve/)
+    expect([at(), said()]).toEqual(['[data-view="solve"]', 'Fill the rest, then close the case.'])
+    chip('Goliath')
+    slot('t5')
+    expect([at(), said()]).toEqual(['[data-face="d2"]', 'Who is this? A face takes a name.'])
+    fireEvent.pointerDown(document.querySelector('.bank')!)
+    expect(said()).toBe('Who is this? A face takes a name.')
+    chip('Goliath')
+    slot('d2')
+    expect(at()).toBe('[data-close]')
+  })
+
+  // He read "That blank wants a name.", said at the giant's face, as about the account. A face's
+  // refusal says a face; a blank's still says a blank.
+  it('a face’s refusal says a face, and a blank’s a blank', async () => {
+    start()
+    openCase(/The valley/)
+    await sweep()
+    slot('d2')
+    chip('commander')
+    expect(result()).toHaveTextContent(/^That face wants a name\.$/)
+    slot('t5')
+    expect(result()).toHaveTextContent(/^That blank wants a name\.$/)
+  })
+
+  // He tapped the giant's face, left it waiting, and scrolled down the account, and his next word
+  // went to the face, refused. A face left waiting lets go once Solve scrolls it wholly out of view;
+  // one still on show keeps waiting, and so does a blank out of view ([1] on #114).
+  it('a face left waiting lets go once it scrolls out of view, and a blank keeps waiting', async () => {
+    start()
+    openCase(/The valley/)
+    await sweep()
+    const solve = document.querySelector('.solve')!
+    const face = document.querySelector('[data-slot="d2"]')!
+    const blank = document.querySelector('[data-slot="t1"]')!
+    box('.solve', new DOMRect(0, 0, 360, 300))
+    const where = box('[data-slot="d2"]', new DOMRect(190, 120, 140, 44))
+    box('[data-slot="t1"]', new DOMRect(40, 380, 120, 30))
+    slot('d2')
+    fireEvent.scroll(solve)
+    expect(face).toHaveClass('is-target')
+    where.mockReturnValue(new DOMRect(190, -60, 140, 44))
+    fireEvent.scroll(solve)
+    expect(face).not.toHaveClass('is-target')
+    chip('commander')
+    expect(result()).not.toHaveTextContent('wants a name')
+    expect(document.querySelector('[data-word="commander"]')).toHaveClass('is-on')
+    chip('commander')
+    slot('t1')
+    fireEvent.scroll(solve)
+    expect(blank).toHaveClass('is-target')
+  })
+})
+
 describe('the close converges (#95)', () => {
   const at = () => coach()?.getAttribute('data-at')
   const said = () => coach()?.querySelector('[role="status"]')?.textContent

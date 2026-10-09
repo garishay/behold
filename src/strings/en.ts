@@ -107,11 +107,17 @@ export const strings = {
   last: 'Last',
   emptySlot: '—',
   closeCase: 'Close the case',
+  // Once the account is full, what's left is rung with what it wants: a face, or the order (#114).
+  owedFace: 'Who is this? A face takes a name.',
+  owedOrder: 'What happened first? Order the pictures too.',
   // A blank's refusal names its kind, and while no word of that kind is found, where to look (#71).
   blankWants: (kind: Kind, found: boolean) =>
     found
       ? `That blank wants ${wants[kind]}.`
       : `That blank wants ${wants[kind]}. Find one in the picture.`,
+  // A face's says a face, since "blank" reads as the account's (#114).
+  faceWants: (found: boolean) =>
+    found ? 'That face wants a name.' : 'That face wants a name. Find one in the picture.',
   // A failed close's count, as a number (#95). A miss is the picture's, never the player's (#77):
   // answers that don't fit the story.
   noMatch: (n: number) =>
