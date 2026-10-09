@@ -24,7 +24,7 @@ proxy (#3): [`worker/`](worker/README.md), the Cloudflare Worker between the app
 a registered case's passage in, its verses out, the token in the Worker's own store — deployed
 from Actions on merge, its one book table held against every case's passages in CI. The tutorial
 and case two play through, and the reveal reads each passage through the Worker, marked ESV, with
-Crossway's notice and a link to www.esv.org beneath; the last twelve passages read stay on the
+Crossway's notice and a link to www.esv.org beneath; the last eleven passages read stay on the
 device, so a closed case reads offline. The world rules — the accuracy and art constraints every picture and every case is
 checked against — are [`docs/world-rules.md`](docs/world-rules.md).
 

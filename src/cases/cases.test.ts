@@ -129,23 +129,24 @@ const versesIn = (p: Passage) =>
 const passages = cases.flatMap((c) => c.structure.passages)
 
 // The ESV's fourth condition: no more than 500 verses stored locally (#3, the ruling of
-// 2026-09-30). The device keeps the last passages read, at most the passages rule's limit, so that
-// many of the longest registered passage must fit, and no book's registered verses may reach half
-// the book. A case whose passage would break either fails here, in CI.
+// 2026-09-30, as #12 [Q17] amends it). The device keeps the last passages read, at most the
+// passages rule's limit, and Workbox adds a passage before it drops the oldest, so the limit and
+// the one coming in must fit, each the longest registered passage; and no book's registered verses
+// may reach half the book. A case whose passage would break either fails here, in CI.
 describe('the ESV’s limit on stored verses (#3)', () => {
   it('counts every registered passage’s verses', () => {
     for (const p of passages) expect(versesIn(p), `${p.book} ${p.chapter}`).toBeGreaterThan(0)
   })
 
-  it('keeps the device’s passages within 500 verses, and each book under half', () => {
+  it('keeps the device’s passages within 500 verses, the one coming in counted, and each book under half', () => {
     const rule = /cacheName: 'passages',\s*expiration: \{ maxEntries: (\d+)/.exec(
       readFileSync('vite.config.ts', 'utf8'),
     )
-    const kept = Number(rule?.[1])
+    const held = Number(rule?.[1]) + 1
     const longest = Math.max(...passages.map(versesIn))
     expect(
-      kept * longest,
-      `${kept} passages of ${longest} verses, past the ESV’s 500 stored`,
+      held * longest,
+      `${held} passages of ${longest} verses, the one coming in counted, past the ESV’s 500 stored`,
     ).toBeLessThanOrEqual(500)
     for (const book of new Set(passages.map((p) => p.book))) {
       const total = passages.filter((p) => p.book === book).reduce((n, p) => n + versesIn(p), 0)

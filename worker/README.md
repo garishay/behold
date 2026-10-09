@@ -59,8 +59,8 @@ Authorization: Token <ESV_TOKEN>
 The ESV's conditions of use (api.esv.org) the Worker and the app keep: at most 500 verses or half
 a book a query — a request here is at most a chapter; 5,000 queries a day, 1,000 an hour, 60 a
 minute, throttled past them — the limits below sit under 60; no more than 500 verses stored
-locally — the app keeps at most twelve passages on the device, and the registry test holds twelve
-of the longest within it; the standard notice, the passages identified as the ESV's, and a link to
+locally — the app keeps at most eleven passages on the device, and the registry test holds those
+and the one coming in, twelve of the longest, within it (#12 [Q17]); the standard notice, the passages identified as the ESV's, and a link to
 www.esv.org on each page that shows the text — the reveal carries all three; non-commercial; the
 words never changed; the key never shared.
 
