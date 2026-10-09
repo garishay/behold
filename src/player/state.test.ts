@@ -21,6 +21,7 @@ import {
   total,
   wrong,
   wrongs,
+  type Progress,
 } from './state.ts'
 
 describe('the model (#6)', () => {
@@ -265,5 +266,41 @@ describe('the model (#6)', () => {
     p = { ...p, fills: right.fills }
     expect(p.solved).toBe(false)
     expect(submit(vineyard, p).solved).toBe(true)
+  })
+
+  // #107: the reveal leads with what the closes found wrong, so a failed close keeps each word put
+  // where it doesn't fit, and the order as put, each once and the first found first; a close that
+  // closes the case adds nothing.
+  it('a failed close keeps what it found wrong, each word once, for the reveal', () => {
+    const right = {
+      faces: { p1: 'ahab', p2: 'jezebel', p3: 'naboth' },
+      order: ['bedchamber', 'gate', 'vineyard'],
+      fills: {
+        s1: 'garden',
+        s2: 'vineyard',
+        s3: 'inheritance',
+        s4: 'jezebel',
+        s5: 'the-king',
+        v1: 'killed',
+        v2: 'taken-possession',
+      },
+    }
+    /** The progress given, every slot holding its answer but the ones changed. */
+    const off = (p: Progress, faces: object, order: string[], fills: object) => ({
+      ...p,
+      faces: { ...right.faces, ...faces },
+      order,
+      fills: { ...right.fills, ...fills },
+    })
+    const swapped = ['gate', 'bedchamber', 'vineyard']
+    let p = submit(vineyard, off(fresh(vineyard), { p1: 'naboth' }, swapped, { s4: 'ahab' }))
+    expect(p.misses).toEqual({ p1: ['naboth'], order: ['gate bedchamber vineyard'], s4: ['ahab'] })
+    p = submit(vineyard, off(p, {}, right.order, { s4: 'ahab', v1: 'stoned' }))
+    p = submit(vineyard, off(p, {}, right.order, { s4: 'jezebel', v1: 'stoned' }))
+    p = submit(vineyard, off(p, {}, right.order, { s4: 'naboth', v1: 'stoned' }))
+    const kept = { p1: ['naboth'], order: ['gate bedchamber vineyard'], s4: ['ahab', 'naboth'] }
+    expect(p.misses).toEqual({ ...kept, v1: ['stoned'] })
+    p = submit(vineyard, { ...p, ...right })
+    expect([p.solved, p.misses]).toEqual([true, { ...kept, v1: ['stoned'] }])
   })
 })

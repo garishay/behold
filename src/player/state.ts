@@ -26,6 +26,12 @@ export interface Progress {
   readonly solved: boolean
   /** The hints shown, each by its tier, in the order asked for: counted at the close (#29). */
   readonly hints: readonly (1 | 2)[]
+  /**
+   * What the failed closes found wrong, kept for the reveal (#107): a face's or a blank's id → the
+   * words put there, and `order` → the orders put, each its moments in turn, space-separated; each
+   * once, the first found first.
+   */
+  readonly misses: Readonly<Record<string, readonly string[]>>
 }
 
 /** What the player has picked up and not yet put down: a word or a moment, and the slot waiting for one. */
@@ -58,6 +64,7 @@ export const fresh = (s: CaseStructure): Progress => ({
   step: 0,
   solved: false,
   hints: [],
+  misses: {},
 })
 
 export const guided = (s: CaseStructure) => (s.steps?.length ?? 0) > 0
@@ -255,9 +262,17 @@ export const placed = (before: Progress, after: Progress) =>
   ) || after.order.some((m, i) => m !== null && m !== before.order[i])
 
 /**
- * The case closed on the player's word: solved when nothing is wrong, else unchanged — the screen
- * says how far off.
+ * The case closed on the player's word: solved when nothing is wrong — the screen says how far
+ * off — else unchanged but for what the close found wrong, each word put where it doesn't fit, and
+ * the order put, kept for the reveal (#107).
  */
 export function submit(s: CaseStructure, p: Progress): Progress {
-  return wrong(s, p) === 0 ? { ...p, solved: true } : p
+  if (wrong(s, p) === 0) return { ...p, solved: true }
+  const off = s.order?.some((m, i) => p.order[i] !== m) && p.order.every((m) => m !== null)
+  const order = off ? [['order', p.order.join(' ')]] : []
+  const found = [...wrongs(s, p).map((id) => [id, p.faces[id] ?? p.fills[id]]), ...order]
+  const misses = { ...p.misses }
+  for (const [id, put] of found)
+    if (put && !misses[id]?.includes(put)) misses[id] = [...(misses[id] ?? []), put]
+  return { ...p, misses }
 }

@@ -175,4 +175,28 @@ describe('progress on the device (#6, A6)', () => {
     localStorage.setItem(key, JSON.stringify({ vineyard: { ...played, hints: [1, 3] } }))
     expect(load(cases)).toEqual({})
   })
+
+  // Progress gained what the closes found wrong (#107), so a reload or a return keeps the reveal's
+  // misses. An entry kept before them has none and keeps its place. A miss naming a slot, a word,
+  // or a moment its case no longer has is dropped alone: it records a close, not progress, so the
+  // case keeps its place; misses that aren't lists of ids are not progress, and the entry goes.
+  it('keeps what the closes found wrong, reads an entry kept before as none, and drops a stranger', () => {
+    const order = ['gate bedchamber vineyard']
+    const kept = { ...fresh(vineyard), misses: { s4: ['ahab', 'naboth'], order } }
+    localStorage.setItem(key, JSON.stringify({ vineyard: kept }))
+    expect(load(cases)).toEqual({ vineyard: kept })
+    const before: Partial<typeof kept> = { ...kept }
+    delete before.misses
+    localStorage.setItem(key, JSON.stringify({ vineyard: before }))
+    expect(load(cases)).toEqual({ vineyard: { ...kept, misses: {} } })
+    const strangers = {
+      s9: ['ahab'],
+      s4: ['ahab', 'goliath'],
+      order: [...order, 'gate pool vineyard'],
+    }
+    localStorage.setItem(key, JSON.stringify({ vineyard: { ...kept, misses: strangers } }))
+    expect(load(cases)).toEqual({ vineyard: { ...kept, misses: { s4: ['ahab'], order } } })
+    localStorage.setItem(key, JSON.stringify({ vineyard: { ...kept, misses: { s4: [1] } } }))
+    expect(load(cases)).toEqual({})
+  })
 })

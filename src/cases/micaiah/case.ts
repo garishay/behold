@@ -121,4 +121,19 @@ export const micaiah = {
     battle: 'rider',
     pool: 'armor',
   },
+  // The verse that says each answer, and that tells each moment, where the reveal points a miss
+  // (#107): the kings on their thrones, the arrow drawn at random, the chariot washed.
+  verses: {
+    m1: '22:30',
+    m2: '22:14',
+    b1: '22:6',
+    b2: '22:15',
+    b3: '22:24',
+    b4: '22:30',
+    b5: '22:31',
+    b6: '22:38',
+    thrones: '22:10',
+    battle: '22:34',
+    pool: '22:38',
+  },
 } as const satisfies CaseStructure

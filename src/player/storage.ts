@@ -31,10 +31,15 @@ const progress = (v: unknown): v is Progress =>
   typeof v.step === 'number' &&
   typeof v.solved === 'boolean' &&
   Array.isArray(v.hints) &&
-  v.hints.every((t) => t === 1 || t === 2)
+  v.hints.every((t) => t === 1 || t === 2) &&
+  record(v.misses) &&
+  Object.values(v.misses).every(ids)
 
-/** An entry kept before hints (#29) has used none, and keeps its place. */
-const withHints = (v: unknown) => (record(v) ? { hints: [], ...v } : v)
+/**
+ * An entry kept before hints (#29) has used none, and one kept before a close's misses were (#107)
+ * has none: each keeps its place.
+ */
+const withDefaults = (v: unknown) => (record(v) ? { hints: [], misses: {}, ...v } : v)
 
 /**
  * Whether every id an entry holds is the case's — the moment, the spots tapped, the bank, the
@@ -73,6 +78,22 @@ const restored = (s: CaseStructure, p: Progress) =>
   advance(s, p.solved && wrong(s, p) > 0 ? { ...p, solved: false } : p)
 
 /**
+ * The misses an entry kept, but any its case no longer has — a slot, a word, a moment — dropped
+ * alone: a miss records a close, not progress, so the case keeps its place (#107).
+ */
+const known = (s: CaseStructure, misses: Progress['misses']) => {
+  const slots = [...s.faces.map((f) => f.id), ...s.blocks.flatMap((b) => Object.keys(b.blanks))]
+  const stays = (id: string, put: string) =>
+    id === 'order'
+      ? put.split(' ').every((m) => s.order?.includes(m))
+      : slots.includes(id) && Object.hasOwn(s.words, put)
+  const kept = Object.entries(misses).map(
+    ([id, puts]) => [id, puts.filter((x) => stays(id, x))] as const,
+  )
+  return Object.fromEntries(kept.filter(([, puts]) => puts.length > 0))
+}
+
+/**
  * The store's progress by case, for the cases registered: a store that is not one, an entry
  * that is not progress, or an entry whose ids its case no longer has, reads as none.
  */
@@ -81,10 +102,11 @@ export function load(registry: readonly CaseEntry[]): Saved {
     const raw = localStorage.getItem(key)
     const parsed: unknown = raw === null ? {} : JSON.parse(raw)
     if (!record(parsed)) return {}
-    const entries = Object.entries(parsed).map(([id, v]) => [id, withHints(v)] as const)
+    const entries = Object.entries(parsed).map(([id, v]) => [id, withDefaults(v)] as const)
     const kept = entries.flatMap(([id, v]) => {
       const structure = registry.find((c) => c.structure.id === id)?.structure
-      return structure && progress(v) && fits(structure, v) ? [[id, restored(structure, v)]] : []
+      if (!structure || !progress(v) || !fits(structure, v)) return []
+      return [[id, restored(structure, { ...v, misses: known(structure, v.misses) })]]
     })
     return Object.fromEntries(kept)
   } catch {

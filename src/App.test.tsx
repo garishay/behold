@@ -84,6 +84,18 @@ const numbered: PassageService = () =>
     ],
   })
 
+/**
+ * A passage service that numbers each verse of the range asked for, a whole chapter as 1 to 29:
+ * made-up words, never scripture.
+ */
+const versed: PassageService = ({ from = 1, to = 29 }) =>
+  Promise.resolve({
+    verses: Array.from({ length: to - from + 1 }, (_, i) => ({
+      number: from + i,
+      text: `Made-up words, verse ${from + i}.`,
+    })),
+  })
+
 /** The tutorial's answers, faces and blanks. */
 const valleyAnswers: [string, string][] = [
   ['d1', 'David'],
@@ -2719,6 +2731,119 @@ describe('the case solved (#6, 03c; #24)', () => {
     expect(screen.getAllByText(/One thing\./)[0].querySelector('sup')).toHaveTextContent('38')
     fireEvent.click(screen.getByRole('button', { name: 'Back to cases' }))
     await waitFor(() => expect(screen.getByText('Closed ✓')).toBeInTheDocument())
+  })
+
+  /** The misses leading the reveal, each line as it reads, its verse's link last. */
+  const missed = () => [...document.querySelectorAll('.missed li')].map((li) => li.textContent)
+
+  // #107: the reveal leads with what the closes found wrong, ahead of the telling: each answer as a
+  // hint names it, what it was, what was put there, and a link to the verse that says it, which
+  // marks the verse in its passage and brings it into view. The most tried lead, and a reload keeps
+  // them.
+  it('the reveal leads with what the closes found wrong, each with a link to its verse', async () => {
+    const kept = closedCase(vineyard)
+    const faces = { ...kept.faces, p1: 'naboth' }
+    const fills = { ...kept.fills, s4: 'ahab', v1: 'stoned' }
+    const { unmount } = start(<App passages={versed} />, {
+      vineyard: { ...kept, solved: false, faces, fills },
+    })
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    const close = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    close()
+    chip('Naboth')
+    slot('s4')
+    close()
+    for (const [id, word] of [
+      ['p1', 'Ahab'],
+      ['s4', 'Jezebel'],
+      ['v1', 'killed'],
+    ]) {
+      chip(word)
+      slot(id)
+    }
+    close()
+    const said = [
+      '“but written by ___”: Jezebel. You put Ahab, then Naboth. 21:8',
+      '“the man on the bed”: Ahab. You put Naboth. 21:4',
+      '“First you ___”: killed. You put stoned. 21:19',
+    ]
+    expect(missed()).toEqual(said)
+    const story = screen.getByText(/^The man on the bed was Ahab/)
+    expect(document.querySelector('.missed')!.compareDocumentPosition(story)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    )
+    await screen.findByText('Made-up words, verse 8.')
+    const into = vi.fn()
+    Element.prototype.scrollIntoView = into
+    try {
+      fireEvent.click(screen.getByRole('button', { name: 'Read 21:8' }))
+      await waitFor(() => expect(into).toHaveBeenCalledOnce())
+      const cited = document.querySelectorAll('.passage .is-cited')
+      expect([...cited].map((p) => p.textContent)).toEqual(['8Made-up words, verse 8.'])
+      expect(into.mock.contexts[0]).toBe(cited[0])
+    } finally {
+      Reflect.deleteProperty(Element.prototype, 'scrollIntoView')
+    }
+    unmount()
+    render(<App passages={versed} />)
+    expect(missed()).toEqual(said)
+  })
+
+  // Three misses lead, and the rest wait under a button; the order's line names it in turn, then
+  // the order as put, and its link is the verse of what came first. A closed case's return from
+  // the cards opens on its reveal, its misses kept (#107).
+  it('three misses lead the reveal and the rest wait under a button, the order named in turn', () => {
+    const misses = {
+      p1: ['naboth'],
+      p3: ['ahab'],
+      order: ['gate bedchamber vineyard'],
+      s4: ['ahab', 'naboth'],
+      v1: ['stoned'],
+    }
+    start(<App passages={versed} />, { vineyard: { ...closedCase(vineyard), misses } })
+    openCase(/The vineyard/)
+    expect(missed()).toEqual([
+      '“but written by ___”: Jezebel. You put Ahab, then Naboth. 21:8',
+      '“the man on the bed”: Ahab. You put Naboth. 21:4',
+      '“the seated man”: Naboth. You put Ahab. 21:12',
+    ])
+    fireEvent.click(screen.getByRole('button', { name: '2 more' }))
+    expect(missed().slice(3)).toEqual([
+      '“What happened first”: Bedchamber, then The gate, then The vineyard. You put The gate, Bedchamber, The vineyard. 21:8',
+      '“First you ___”: killed. You put stoned. 21:19',
+    ])
+    expect(screen.queryByRole('button', { name: /more$/ })).toBeNull()
+  })
+
+  // Review round 1 (#111): a link tapped before its passage had come back brought the loading line
+  // into view, and once the verses were drawn, the marked one could sit far off screen. The link's
+  // verse comes to the middle of the screen once it is drawn, however soon the tap came (#107).
+  it('a link tapped while its passage loads brings its verse into view once it is drawn', async () => {
+    let arrive = () => {}
+    const slow: PassageService = (passage, translation) =>
+      new Promise((resolve) => {
+        arrive = () => void versed(passage, translation).then(resolve)
+      })
+    start(<App passages={slow} />, {
+      vineyard: { ...closedCase(vineyard), misses: { s4: ['ahab'] } },
+    })
+    openCase(/The vineyard/)
+    expect(screen.getByText('Loading 1 Kings 21…')).toBeInTheDocument()
+    const into = vi.fn()
+    Element.prototype.scrollIntoView = into
+    try {
+      fireEvent.click(screen.getByRole('button', { name: 'Read 21:8' }))
+      await waitFor(() => expect(into).toHaveBeenCalledOnce())
+      expect(into.mock.contexts[0]).toBe(document.querySelector('.passage'))
+      act(() => arrive())
+      await screen.findByText('Made-up words, verse 8.')
+      await waitFor(() => expect(into).toHaveBeenCalledTimes(2))
+      expect(into.mock.contexts[1]).toBe(document.querySelector('.passage .is-cited'))
+      expect(into.mock.contexts[1]).toHaveTextContent('8Made-up words, verse 8.')
+    } finally {
+      Reflect.deleteProperty(Element.prototype, 'scrollIntoView')
+    }
   })
 
   it('a case without steps closes on the submit, and says how far off it was', () => {

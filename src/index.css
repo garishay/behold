@@ -1537,6 +1537,61 @@ button:focus-visible {
   color: var(--mist-dim);
 }
 
+/* What the closes found wrong, ahead of the telling (#107): a panel of lines, each ended by its
+   verse, a link whose tap reaches past the line's height, as a fingertip needs. */
+.reveal .missed {
+  margin: 4px 0 18px;
+  padding: 12px 14px 4px;
+  border: 1px solid var(--slate);
+  border-radius: 10px;
+  background: var(--night);
+}
+
+.reveal .missed h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.reveal .missed ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reveal .missed li {
+  margin: 0 0 10px;
+  font-family: var(--serif);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.reveal .verse,
+.reveal .missed .more {
+  margin: -12px -4px;
+  padding: 12px 4px;
+  font-family: var(--sans);
+  font-size: 14px;
+  color: var(--gold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.reveal .missed .more {
+  display: block;
+  margin: -4px -4px 0;
+}
+
+/* The verses a miss's link asked for, marked in the passage it brought into view (#107). */
+.passage p.is-cited {
+  border-radius: 4px;
+  background: rgba(201, 169, 78, 0.3);
+  box-shadow: 0 0 0 4px rgba(201, 169, 78, 0.3);
+}
+
 .passage {
   background: var(--papyrus);
   color: var(--papyrus-ink);

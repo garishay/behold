@@ -148,4 +148,21 @@ export const vineyard = {
     gate: 'stones',
     vineyard: 'stain',
   },
+  // The verse that says each answer, and that tells each moment, where the reveal points a miss
+  // (#107): the letters written, the stoning at the gate, the walk down to the vineyard.
+  verses: {
+    p1: '21:4',
+    p2: '21:7-8',
+    p3: '21:12',
+    s1: '21:2',
+    s2: '21:2',
+    s3: '21:3',
+    s4: '21:8',
+    s5: '21:13',
+    v1: '21:19',
+    v2: '21:19',
+    bedchamber: '21:8',
+    gate: '21:13',
+    vineyard: '21:16',
+  },
 } as const satisfies CaseStructure
