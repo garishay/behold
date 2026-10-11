@@ -40,8 +40,9 @@ unreachable line; none repeats a word of the ESV's:
 | 404    | `unregistered` | a reference no registered case has, a registered chapter asked as a range included |
 | 503    | `pending`      | a registered passage the store doesn't hold yet                                    |
 
-A passage is pending before the store's first fill, and for up to ten minutes after the deploy
-that registers it — a new case's, or a case's changed range — until the next fill keeps it.
+A passage is pending before the store's first fill, and after the deploy that registers it — a new
+case's, or a case's changed range — until the next fill keeps it: up to ten minutes, and KV's
+minute or so to carry it.
 
 ## The store, and the one call that fills it
 
