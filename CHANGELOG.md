@@ -3,6 +3,22 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.23.0 — Gate 04c, the Worker's store (#3)
+
+- **04c — the passages from a store, filled on a schedule** (#117): the ESV proxy answers a
+  registered case's passage from a store of its own, one key in a KV namespace, and nothing else —
+  a reference no case registers is refused, and a registered one the store doesn't hold yet is
+  pending, which the reveal shows as its unreachable line. A fill on Cloudflare's schedule, every
+  ten minutes, is the one place the ESV is asked: a passage the store lacks, or has kept a day, at
+  most twenty a fill; the last copy kept when the ESV doesn't answer, for up to thirty days; a
+  passage no longer registered dropped; never past the ESV's 500 verses stored. So no player's
+  request reaches Crossway, and the ESV sees each passage about once a day whatever the number of
+  players. The registry is the store's one source: the Worker deploys on a merge that touches the
+  cases, and the registry test holds the registered passages together within the ESV's 500, the
+  game's ceiling. Both rate limits go, since nothing a player asks reaches the ESV and a refused
+  request counts against the free plan's day all the same, so the Worker no longer reads a
+  player's address.
+
 ## v0.22.1 — The passages cache keeps eleven (#3)
 
 - **The cache at eleven** (#116): the device kept the last eight passages read, which Gate 04
