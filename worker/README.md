@@ -66,7 +66,10 @@ fit in the store at once, so all of the game's passages together stay within the
 stored: season one's come to 217 once its last three cases land, which leaves room for about one
 more season of its size (Gate 04c A3, as ruled). The registry test fails a case that would pass
 it, and the season that would chooses then, at its own gate: shorter passages, Crossway's
-permission beyond the API's terms, or another translation.
+permission beyond the API's terms, or another translation. It holds the registered passages to
+twenty too, the most a fill asks for, so every due passage is asked at every fill and one that
+keeps failing never crowds out another (#12 [Q18]); the season that would pass twenty chooses at
+its gate as well.
 
 The call, the ESV's text endpoint, asked for verse numbers and nothing else — no reference line,
 headings, footnotes, short copyright, horizontal lines, indentation, or wrapping — so what comes
@@ -123,8 +126,8 @@ the key never shared.
 `src/books.ts` is the one book table: USFM code → the ESV's name and the chapter count. The
 registry test, `src/cases/cases.test.ts`, holds every registered case's passages against it, so a
 reference the Worker could not serve fails in CI and never on a phone, and holds them together
-within the store's 500 verses, so a case that would take the store past it fails there too; the
-app's bundle imports nothing from `worker/` and carries no table.
+within the store's 500 verses and to a fill's twenty passages, so a case that would take the store
+past either fails there too; the app's bundle imports nothing from `worker/` and carries no table.
 
 ## Commands
 

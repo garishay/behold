@@ -4,7 +4,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { books } from '../../worker/src/books.ts'
-import { BOUND, registered } from '../../worker/src/store.ts'
+import { BOUND, PER_FILL, registered } from '../../worker/src/store.ts'
 import { strings } from '../strings/en.ts'
 import { cases } from './index.ts'
 import type { Passage } from './types.ts'
@@ -166,5 +166,18 @@ describe('the ESV’s limit on stored verses (#3)', () => {
       total,
       `${total} verses registered, past the ESV’s limit on stored verses (${BOUND}): the Worker’s store keeps every registered passage`,
     ).toBeLessThanOrEqual(BOUND)
+  })
+})
+
+// A fill asks the ESV for at most twenty passages (04c), so with more registered, a few that keep
+// failing would take every fill's twenty and the rest would never be asked. Held to twenty, every
+// due passage is asked at every fill (#12 [Q18]); the season that would pass it chooses at its own
+// gate, as for the 500 verses.
+describe('the Worker’s fill (04c, #12 [Q18])', () => {
+  it('registers no more passages than a fill asks the ESV for', () => {
+    expect(
+      registered.size,
+      `${registered.size} passages registered, past the ${PER_FILL} a fill asks the ESV for: one that keeps failing could keep the rest from ever being asked`,
+    ).toBeLessThanOrEqual(PER_FILL)
   })
 })

@@ -15,9 +15,10 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   request reaches Crossway, and the ESV sees each passage about once a day whatever the number of
   players. The registry is the store's one source: the Worker deploys on a merge that touches the
   cases, and the registry test holds the registered passages together within the ESV's 500, the
-  game's ceiling. Both rate limits go, since nothing a player asks reaches the ESV and a refused
-  request counts against the free plan's day all the same, so the Worker no longer reads a
-  player's address.
+  game's ceiling, and to twenty, the most a fill asks for, so a passage that keeps failing never
+  crowds out the rest (#12 [Q18]). Both rate limits go, since nothing a player asks reaches the ESV
+  and a refused request counts against the free plan's day all the same, so the Worker no longer
+  reads a player's address.
 
 ## v0.22.1 — The passages cache keeps eleven (#3)
 

@@ -36,8 +36,12 @@ export const BOUND = 500
 const DAY = 24 * 60 * 60 * 1000
 /** A copy the ESV hasn't given again in thirty days goes, as a device's copy does (Gate 04 A4). */
 const MONTH = 30 * DAY
-/** The most the ESV is asked in one fill: under its 60 a minute, and the free plan's 50 requests out. */
-const PER_FILL = 20
+/**
+ * The most the ESV is asked in one fill: under its 60 a minute, and the free plan's 50 requests out.
+ * The registry test holds the registered passages to it, so every due passage is asked at every
+ * fill, and one that keeps failing never crowds out another (#12 [Q18]).
+ */
+export const PER_FILL = 20
 
 /** The store under its one key, as the fill wrote it, or an empty one before the first fill. */
 export const read = async (kv: KV) => ((await kv.get('passages', 'json')) ?? {}) as Store

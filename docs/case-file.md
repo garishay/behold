@@ -162,7 +162,7 @@ serves a registered case's passages only, from a store it fills every ten minute
 case's passage reads from the first fill after the merge that registers it, and before then its
 reveal shows the unreachable line. The registry test holds the registered passages together
 within the store's 500 verses, so a whole chapter's length, and a new book's verses, go in its
-table with the case.
+table with the case; and to twenty passages, the most one fill asks for.
 
 A spot's `cites` names the verses that put the thing in the picture: `17:40`, or `17:38-39` for a
 run of verses, always within one of the case's passages. When a case's passages span more than
