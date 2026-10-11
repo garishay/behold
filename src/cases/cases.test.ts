@@ -4,6 +4,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { books } from '../../worker/src/books.ts'
+import { BOUND, registered } from '../../worker/src/store.ts'
 import { strings } from '../strings/en.ts'
 import { cases } from './index.ts'
 import type { Passage } from './types.ts'
@@ -154,5 +155,16 @@ describe('the ESV’s limit on stored verses (#3)', () => {
         bookVerses[book] / 2,
       )
     }
+  })
+
+  // The Worker's store keeps every registered passage at once (04c), so all of the game's passages
+  // together are its ceiling (Gate 04c A3, as ruled): a case whose passage would take them past it
+  // fails here, and its gate chooses then (worker/README.md).
+  it('keeps the Worker’s store within 500 verses: every registered passage together', () => {
+    const total = [...registered.values()].reduce((n, p) => n + versesIn(p), 0)
+    expect(
+      total,
+      `${total} verses registered, past the ESV’s limit on stored verses (${BOUND}): the Worker’s store keeps every registered passage`,
+    ).toBeLessThanOrEqual(BOUND)
   })
 })

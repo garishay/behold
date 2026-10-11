@@ -258,3 +258,14 @@ describe('the game at play.beholdgame.com (68a, #68)', () => {
     ])
   })
 })
+
+// The Worker reads the registry for the passages its store keeps (04c, #3): a merge that changes a
+// case deploys the Worker too, or a new case's passage would never reach the store.
+describe('the Worker’s deploy (04c, #3)', () => {
+  it('runs on a merge that touches the cases, as on one that touches the Worker', () => {
+    const workflow = readFileSync('.github/workflows/deploy-worker.yml', 'utf8')
+    const paths = /\n {4}paths:\n((?: {6}.*\n)+)/.exec(workflow)?.[1] ?? ''
+    expect(paths).toMatch(/^ {6}- worker\/\*\*$/m)
+    expect(paths).toMatch(/^ {6}- src\/cases\/\*\*$/m)
+  })
+})
