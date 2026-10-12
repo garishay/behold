@@ -64,6 +64,23 @@ describe('generate-icons (Gate 18, #10)', () => {
     expect(file.length).toBeLessThanOrEqual(1024 * 1024)
   })
 
+  // The feature graphic is committed as the owner accepted it (Gate 18 A7), so its record's hash
+  // holds it, as the master's does; Play takes "JPEG or 24-bit PNG (no alpha)" at 1024 × 500.
+  it('keeps the store’s feature graphic as accepted: its recorded SHA-256, 1024 × 500, no alpha', async () => {
+    const file = await readFile('assets/feature-graphic.png')
+    const record = await readFile('docs/icon.md', 'utf8')
+    const recorded =
+      /^The feature graphic, `assets\/feature-graphic\.png`: .*SHA-256 `([0-9a-f]{64})`\.$/m.exec(
+        record,
+      )
+    expect(recorded?.[1]).toBe(createHash('sha256').update(file).digest('hex'))
+    expect([...file.subarray(0, 8)]).toEqual(SIGNATURE)
+    expect(file.toString('ascii', 12, 16)).toBe('IHDR')
+    // Its width and height, then 8 bits a channel, colour type 2 (RGB, no alpha), and no interlace.
+    const ihdr = [file.readUInt32BE(16), file.readUInt32BE(20), file[24], file[25], file[28]]
+    expect(ihdr).toEqual([1024, 500, 8, 2, 0])
+  })
+
   it.each(ICONS)(
     'meets the ground exactly at every edge of $file, so the splash shows no square',
     (icon) => {

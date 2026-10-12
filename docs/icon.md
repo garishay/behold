@@ -117,3 +117,87 @@ The files, as hashed in the images folder (SHA-256):
 - `icon-sheet-v2.png`: `ead3a535491b0b6bb661aefa43f7f27ad84e0401b965d061e53cdcfe110bd700`
 - `icon-scroll-lens-v1.png`, as generated: `bc837451d9d2f5c8e02ca49222159f6f34d57000e80d6610aedbc305ca977e34`
 - `icon.png`, retouched, the master: `08b2c28c37ea86c35fc828507f51261fbdce85eb5c93b83aeb27e442bff05718`
+
+## The feature graphic
+
+The store's feature graphic (Gate 18 A7), accepted by the owner on 2026-10-01
+(issuecomment-5939422449). Play shows it at the top of the listing, and asks for 1024 × 500,
+"JPEG or 24-bit PNG (no alpha)".
+
+The feature graphic, `assets/feature-graphic.png`: 1,024 × 500, 24-bit RGB, SHA-256 `3760c7f6c8522555814f3f276d2f0f9ea49e09ebf7cb45f6668930cafe523edc`.
+
+It is the images folder's `feature-graphic-1024x500.png`, committed as it is. The icons' test holds
+it to the hash above and to Play's size and kind. The owner uploads it with the listing, at 68b's
+time.
+
+It was generated in a new ChatGPT Images chat on 2026-10-01, and its seal was edited once. The
+first paragraph of the prompt is world rules §6's style header, with "Landscape, twice as wide as
+it is tall." in place of "Portrait orientation." (§6). Its last sentence is the one Gate 18's
+ruling amended: the middle half of the height, so that a 3:2 canvas could be cropped to 2:1 and
+keep what matters.
+
+### 1. The picture
+
+Attached: `bedchamber.jpg`, the vineyard's bedchamber (`public/cases/vineyard/bedchamber.jpg` at
+`071fe77`), for style, as A7 names it. It was the only attachment.
+
+```
+Match the style of the attached image exactly: flat, clean illustration with bold shapes and strong contrast, like a picture book for adults. Landscape, twice as wide as it is tall. No text or lettering anywhere. Ninth-century-BC Israel: wool robes, sandals, mudbrick and stone. No crosses, nothing Greek or Roman.
+
+Night, a low wooden table in a house of ninth-century-BC Israel, lit warm from the left by an oil lamp that stands out of the picture. On the table, laid out like evidence: a folded papyrus letter sealed with a lump of red clay pressed by a seal, a gold signet ring with a dark stone beside it, a smooth river stone of the kind a sling throws, and a reed pen. Behind the table, a square window with a heavy timber lintel and no glass shows a hilltop town of flat-roofed houses of stone and mudbrick under a full moon, in deep blue night. No people. No writing on the letter, the clay, the ring, or anywhere else. Everything that matters sits in the middle 70% of the width and the middle half of the height; the edges are plain wall, table, and night.
+```
+
+It came back 1,774 × 887, exactly 2:1, as 24-bit RGB, and passed:
+
+- **The still life:** the folded letter with its seal, the gold signet ring with a dark stone, the
+  smooth sling stone, and a pen, on a dark wooden table lit warm from the left.
+- **The window:** a timber lintel on stone jambs, with no glass and no arch, onto a hilltop town of
+  flat-roofed houses under a full moon, in deep blue night.
+- **No people, and no text anywhere:** the seal's face, the letter, and the ring are blank.
+- **The catch list (§3):** no crosses, nothing Greek or Roman, and no arches, coins, or glass.
+- **Google's lines:** nothing like the icon; no pure white, black, or dark gray; and the key
+  objects inside the middle 70% × 70% once fitted.
+
+Two notes, neither a fault. The still life sits lower than asked, 57–77% of the way down once
+fitted; the canvas came back 2:1, so the fit trims only 12 px of 887, and the objects stay inside
+Google's bands. The pen reads closer to a modern pen than a cut reed; the bedchamber's pen,
+accepted at Gate 12, is the same light reed with a dark nib, so it passes on that precedent.
+
+It had one fault: **the seal was sealing wax,** glossy crimson with a crimped rim, which is
+medieval. The prompt asked for clay, and world rules §2 seal letters "with a clay bulla pressed by
+a stamp seal". A recolor in code read as a brown wax seal, since the crimped rim is what says wax,
+so it wasn't kept.
+
+### 2. The edit
+
+Sent to the chat that made the picture:
+
+```
+Change only the seal on the folded letter, keeping its size and place. Make it a lump of matte reddish-brown clay, like the clay seal on the table in the image I attached: dull and slightly rough, uneven at the edge, pressed flat by a stamp seal, with a plain round dent in its middle and nothing in the dent. Clay, not wax: no shine and no crimped rim. Keep everything else in the picture exactly as it is.
+```
+
+It came back with the seal right: matte reddish-brown clay, slightly rough, uneven at the edge,
+with a plain round dent and nothing in it. The rest was redrawn too, as ChatGPT's edits are: 17.1%
+of the picture's pixels moved by more than 8 levels. So only its seal was used.
+
+### 3. The accepted picture, and the store's file
+
+The first picture with the edit's seal set in, in code. Inside an ellipse round the seal and its
+shadow, centred on (880, 578) with semi-axes of 66 × 36 px, every pixel within 0.86 of its radius
+is the edit's, and across the rest it eases to the first picture's (a smoothstep), so the paper
+meets without a seam. 7,084 pixels differ from the first picture, all within x 816–944, y 543–613.
+The owner accepted it from a preview showing the fitted graphic, the seal before and after, and
+Google's bands shaded.
+
+The store's file is that picture scaled to 1,024 × 512, each pixel the average of the source
+pixels it covers, with rows 6–505 kept: 1,024 × 500, 24-bit RGB, no alpha. The letter, the seal,
+the ring, and the stone sit inside the middle 70% × 70%, clear of Google's cutoff bands. The pen's
+tip meets the bottom band's line, and the moon, scenery only, sits in the top band.
+
+The files, as hashed in the images folder (SHA-256):
+
+- `feature-graphic-v1.png`, as generated: `a13fce58b648715a82ff92cc55d6ee2ef3a58bbf5b809d9088b76ac5948994d5`
+- `feature-graphic-v2.png`, the edit: `015949b07d98a35bce725ad4f838df522fab374ec35137838f2029a80aebb60c`
+- `feature-graphic.png`, the accepted picture: `c1ecd47befa8bde32bacb551ff750ff20e18e24c230248d3a020d503186ea01b`
+- `feature-graphic-1024x500.png`, the store's file: `3760c7f6c8522555814f3f276d2f0f9ea49e09ebf7cb45f6668930cafe523edc`
+- `feature-graphic-preview.png`, the preview: `7eeca14220f82e5bf83cccd9911e04995f8572b3bbbe371aa970a8c4c4364e54`
