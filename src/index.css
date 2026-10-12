@@ -1511,7 +1511,9 @@ button:focus-visible {
   font-size: 16px;
 }
 
-.submit:disabled {
+/* Close the case shut once the case is closed, and while a failed close owes a look (#118). */
+.submit:disabled,
+.submit[aria-disabled='true'] {
   background: var(--slate);
   color: var(--mist-dim);
   cursor: default;

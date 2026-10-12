@@ -134,7 +134,7 @@ describe('the effects, each beside what the screen shows (Gate 10 A3, A5)', () =
     expect(document.querySelectorAll('.oslot')[0]).toHaveTextContent('The gate')
   })
 
-  it('not yet on a wrong close, beside how far off; the close on the right one, beside the reveal', () => {
+  it('not yet on a wrong close, beside how far off; the close on the right one, beside the reveal', async () => {
     start(<App />, laterStarted)
     openCase(/The vineyard/)
     for (const s of ['man-rows', 'cord', 'prophet', 'balcony']) tapSpot(s)
@@ -172,6 +172,12 @@ describe('the effects, each beside what the screen shows (Gate 10 A3, A5)', () =
     expect(result()).toHaveTextContent(
       'Two answers don’t fit the story. There are nine more to find in the pictures.',
     )
+    // From the vineyard on, a failed close owes a look before the next (#118): the Law again.
+    tab(/Look/)
+    await waitFor(() => expect(history.state).toEqual({ case: 'vineyard' }))
+    tapSpot('law')
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+    tab(/Solve/)
     for (const [id, word] of [
       ['s1', 'garden'],
       ['s2', 'vineyard'],

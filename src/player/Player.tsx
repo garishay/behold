@@ -138,6 +138,9 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const told = asking && s.ask !== undefined ? [...fits, s.ask] : fits
   // A failed close with something still unfound rings Look until it opens (#95).
   const [seek, setSeek] = useState(false)
+  // From the vineyard on, a failed close owes a look: Close the case comes back once a thing is
+  // opened on Look, and says so in its place, so a guess never costs less than a look (#118).
+  const [owe, setOwe] = useState(false)
   // The bank's head: a refused word's message, or how far off a close was (07c, #24 [3]).
   const [note, setNote] = useState('')
   // The stuck signals (#29): taps on the picture that find nothing new while something is unfound,
@@ -311,8 +314,9 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
       setStayed(false)
       setWaited(null)
     } else nothingNew()
-    // A hint has done its work once its thing is tapped (#29).
+    // A hint has done its work once its thing is tapped (#29), and a look owed is paid (#118).
     if (hint?.spot === spotId) setHint(null)
+    setOwe(false)
     setFresh([...fresh, ...added])
     if (spot?.paper !== undefined) setPaper(spot.paper)
     onProgress(next)
@@ -356,7 +360,11 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
         setOrderFits(s.order?.every((m, i) => progress.order[i] === m) ?? false)
         const order = first !== null && s.order?.includes(first)
         bring(document.querySelector(order ? '.order' : `[data-slot="${first}"]`))
-      } else if (!s.marks && fails + 1 >= stuck.closes) setHint(null)
+      } else if (!s.marks) {
+        // A case that doesn't mark owes a look before it closes again (#118).
+        setOwe(true)
+        if (fails + 1 >= stuck.closes) setHint(null)
+      }
     }
     if (hint?.why === 'close') setHint(null)
     close(submit(s, progress))
@@ -677,15 +685,17 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
               has the row, or a hint on offer has it alone (#24, Solve's room). */}
           {closable(s, progress) && (full || offer) && (
             <div className="submit-row">
+              {/* While a look is owed, Close's place says what brings it back (#118). */}
               {full && (
                 <button
                   type="button"
                   className="submit"
                   data-close
                   disabled={progress.solved}
-                  onClick={onSubmit}
+                  aria-disabled={owe || undefined}
+                  onClick={owe ? undefined : onSubmit}
                 >
-                  {strings.closeCase}
+                  {owe ? strings.closeAfterLook : strings.closeCase}
                 </button>
               )}
               {offer}
