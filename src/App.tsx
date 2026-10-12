@@ -6,6 +6,7 @@ import { picture } from './player/pictures.ts'
 import { Player } from './player/Player.tsx'
 import { fresh, type Progress } from './player/state.ts'
 import { load, save, type Saved } from './player/storage.ts'
+import { path as privacy } from './privacy/page.ts'
 import { Music } from './sound/music.ts'
 import { Switches } from './sound/Switches.tsx'
 import { strings } from './strings/en.ts'
@@ -213,6 +214,10 @@ export default function App({ passages = fetchedPassages }: AppProps) {
         <a href={strings.creditLicence.href} target="_blank" rel="noreferrer">
           {strings.creditLicence.text}
         </a>
+      </p>
+      {/* The privacy policy, its own page on the site, opened in place (#9). */}
+      <p className="privacy">
+        <a href={`${import.meta.env.BASE_URL}${privacy}`}>{strings.privacy}</a>
       </p>
       <p className={nudge > 0 ? 'nudge toast' : 'nudge'} role="status">
         {nudge > 0 &&

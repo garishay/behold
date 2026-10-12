@@ -51,6 +51,9 @@ export const strings = {
   // file to a name here.
   credit: 'Music: “Desert City” and “Lamentation” by Kevin MacLeod (incompetech.com), edited,',
   creditLicence: { text: 'CC BY 4.0', href: 'https://creativecommons.org/licenses/by/4.0/' },
+  // The privacy policy's link, at the cases page's foot under the credit (#9). The policy's own
+  // words are `policy`, below.
+  privacy: 'Privacy policy',
   updateAvailable: 'Update available',
   update: 'Update',
 
