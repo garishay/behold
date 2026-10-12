@@ -27,7 +27,10 @@ answering from a store it fills on a schedule, so no player's request reaches th
 and case two play through, and the reveal reads each passage through the Worker, marked ESV, with
 Crossway's notice and a link to www.esv.org beneath; the last eleven passages read stay on the
 device, so a closed case reads offline. The world rules — the accuracy and art constraints every picture and every case is
-checked against — are [`docs/world-rules.md`](docs/world-rules.md).
+checked against — are [`docs/world-rules.md`](docs/world-rules.md). The privacy policy (#9) is a
+page of its own, <https://play.beholdgame.com/privacy/>, written at build from the strings module
+so it reads without JavaScript, and linked from the cases page; a test holds what it says to the
+code.
 
 ## Stack
 
