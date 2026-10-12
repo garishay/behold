@@ -1,8 +1,10 @@
 import react from '@vitejs/plugin-react'
 import { hash } from 'node:crypto'
 import { readdirSync, readFileSync } from 'node:fs'
+import type { Plugin } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { defineConfig } from 'vitest/config'
+import { page, path } from './src/privacy/page.ts'
 
 /** A file's hash, the first eight hex digits of its SHA-256: the stamp on its address. */
 export const stamp = (path: string) => hash('sha256', readFileSync(path)).slice(0, 8)
@@ -31,6 +33,29 @@ export function audioHashes(root: string) {
   return hashes
 }
 
+/**
+ * The privacy policy (#9) as a page of its own, `privacy/index.html`, written from the strings
+ * module into the build, where the precache takes it, and answered at the same address by the dev
+ * server. It needs no JavaScript to read.
+ */
+function privacy(): Plugin {
+  let base = '/'
+  const html = () => page(base, readFileSync('src/privacy/page.css', 'utf8'))
+  return {
+    name: 'behold:privacy',
+    configResolved: (config) => void (base = config.base),
+    configureServer: (server) =>
+      void server.middlewares.use((req, res, next) => {
+        if (req.url !== `${base}${path}`) return next()
+        res.setHeader('content-type', 'text/html; charset=utf-8')
+        res.end(html())
+      }),
+    generateBundle() {
+      this.emitFile({ type: 'asset', fileName: `${path}index.html`, source: html() })
+    },
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   // No `base`: the site is the root of its own origin, https://play.beholdgame.com (Gate 17 A4,
@@ -45,6 +70,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    privacy(),
     // The PWA shell (Gate 01 A2). `prompt`: a new version waits until the player taps the
     // "Update available" toast, never reloading mid-case — `autoUpdate` would reload the app the
     // moment a deploy lands. The manifest's start_url and scope default to the base, `/`; the
