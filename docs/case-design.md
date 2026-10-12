@@ -41,10 +41,12 @@ rules below are the answer, ruled on #26.
    the valley's first failed close and the mountain's second, a ✓ on each answer that fits and a
    ring on each that doesn't, which says which answer, never what it is, and the first ring is
    brought into view (#95, #102). From the vineyard on, a failed close says only how many, and
-   marks no answer (#106). Closes are free and the bank lights only a slot's kind, so there a
-   ringed answer would fall to its rivals in a close or two, every ring at once, with no trip
-   back to the picture: guessing would be cheaper than looking (rule 1), and the rings would
-   name every wrong answer for free, where a hint names one and the reveal counts it. The hint
+   marks no answer (#106), and the next close waits for a look: Close the case comes back once a
+   thing is tapped on Look, and its place says so, so a guess never costs less than a look
+   (#118). The bank lights only a slot's kind, so there a ringed answer would fall to its rivals
+   in a few closes, every ring at once, without a look at what settles it: guessing would be
+   cheaper than looking (rule 1), and the rings would name every wrong answer for free, where a
+   hint names one and the reveal counts it. The hint
    offered after the second failed close names the first answer that doesn't fit, rings what
    settles it, and counts on the reveal, so a stuck player learns which answer is wrong, one at
    a time (#29, #102). Once the case is closed, the reveal leads with what its closes found
@@ -102,7 +104,8 @@ the counts of rule 1: a blank's kind has at least three words in the case — it
 rivals — and the case has one name more than it has faces. Each fails in CI with one sentence,
 `blank "t3" takes a "number" word, and the case has 2, not three`. It holds too that a case's
 pictures are never shown in the order they happened, so the order as shown is never the answer
-(#77). The authoring tool (#5) inherits them.
+(#77), and Solve's line under the order can say they're shuffled in every case (#118). The
+authoring tool (#5) inherits them.
 
 **Review, by reading**, holds the rest, with the accuracy table as its handle — every sentence of
 the account and the reveal, every caption, and every paper against its verse, citing by
