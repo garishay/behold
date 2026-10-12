@@ -101,7 +101,8 @@ export const strings = {
   whoIsWho: 'Who is who',
   who: 'who?',
   whatHappenedFirst: 'What happened first',
-  orderHint: 'Tap a picture below, then tap First, Then, or Last.',
+  // The pictures are never shown in the order they happened, and the line says so (#118).
+  orderHint: 'The pictures below are shuffled. Tap one, then tap First, Then, or Last.',
   first: 'First',
   then: 'Then',
   last: 'Last',

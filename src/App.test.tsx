@@ -462,16 +462,33 @@ describe('the case screen explored (#6, 03b; #24)', () => {
 
   // The mountain is the first case with more than one picture, and a picker's dot says more waits
   // there: its card says so under the brief, in the case's own words, and the valley's doesn't
-  // (#77).
-  it('the mountain’s card says what a dot means under its brief, and the valley’s does not', async () => {
+  // (#77). Four testers took its listed order for the answer, so the card says they're shuffled
+  // (#118).
+  it('the mountain’s card says its pictures are shuffled and what a dot means, and the valley’s does not', async () => {
     start(<App />, laterStarted)
     openCase(/The valley/)
-    const note = 'Three pictures this time. A dot means more to find there.'
+    const note = 'Three pictures this time, shuffled. A dot means more to find there.'
     expect(screen.getByRole('dialog', { name: 'The valley' })).not.toHaveTextContent(note)
     menu('Cases')
     fireEvent.click(await screen.findByRole('button', { name: /The mountain/ }))
     expect(screen.getByRole('dialog', { name: 'The mountain' })).toHaveTextContent(note)
   })
+
+  // A case's pictures are never shown in the order they happened (#77), and the vineyard round's
+  // tester 1 placed the vineyard's as listed too (#23), so in every case with an order the line
+  // under its question says they're shuffled (#118).
+  it.each(['mountain', 'vineyard', 'battle'])(
+    'the %s’s order says under its question that the pictures are shuffled',
+    (name) => {
+      start(<App />, laterStarted)
+      openCase(new RegExp(`The ${name}`))
+      tab(/Solve/)
+      const question = screen.getByRole('heading', { name: 'What happened first' })
+      expect(question.nextElementSibling).toHaveTextContent(
+        /^The pictures below are shuffled\. Tap one, then tap First, Then, or Last\.$/,
+      )
+    },
+  )
 
   it('the brief’s card goes with the first tap, and the menu holds the brief, a hint, Cases, Restart, and the switches', () => {
     start(<App />, laterStarted)
@@ -1344,10 +1361,10 @@ describe('the tutorial’s marks (#25)', () => {
     expect(coach()).toBeNull()
     tab(/Solve/)
     await waitFor(() => expect(at()).toBe('.tiles'))
-    expect(said()).toBe('These are out of order. Which happened first?')
+    expect(said()).toBe('These are shuffled. Which happened first?')
     tile('Baal’s altar')
     expect(at()).toBe('.order')
-    expect(said()).toBe('These are out of order. Which happened first?')
+    expect(said()).toBe('These are shuffled. Which happened first?')
     orderSlot(0)
     expect(coach()).toBeNull()
     menu('Cases')
