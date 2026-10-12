@@ -73,7 +73,8 @@ describe('progress on the device (#6, A6)', () => {
   })
 
   // The store never trusts an id the case lacks: an entry the case no longer fits starts fresh,
-  // and so does one for a case the registry no longer has (#12 [Q4]).
+  // and so does one for a case the registry no longer has (#12 [Q4]). A fill for a blank the case
+  // no longer has is dropped alone (#118, below).
   it('drops an entry whose ids its case no longer has, and one for a case not registered', () => {
     const played = {
       ...fresh(vineyard),
@@ -81,7 +82,7 @@ describe('progress on the device (#6, A6)', () => {
       bank: ['ahab', 'seal'],
       papers: ['seal'],
       faces: { p1: 'ahab' },
-      fills: { s2: 'silver' },
+      fills: { s3: 'silver' },
       order: ['bedchamber', null, null],
     }
     localStorage.setItem(key, JSON.stringify({ vineyard: played }))
@@ -93,8 +94,7 @@ describe('progress on the device (#6, A6)', () => {
       { ...played, papers: ['ghost'] },
       { ...played, faces: { p9: 'ahab' } },
       { ...played, faces: { p1: 'ghost' } },
-      { ...played, fills: { s9: 'silver' } },
-      { ...played, fills: { s2: 'ghost' } },
+      { ...played, fills: { s3: 'ghost' } },
       { ...played, order: ['bedchamber', null] },
       { ...played, order: ['nowhere', null, null] },
       { ...played, step: 1 },
@@ -108,6 +108,32 @@ describe('progress on the device (#6, A6)', () => {
     expect(load(cases)).toEqual({ valley: guided })
     localStorage.setItem(key, JSON.stringify({ valley: { ...guided, step: valley.steps.length } }))
     expect(load(cases)).toEqual({})
+  })
+
+  // The vineyard's "a better ___" is told in its account now (#118). A fill kept for a blank the
+  // case no longer has is dropped alone, as a miss is (#107), so a vineyard closed with it stays
+  // closed, and one in progress keeps its other words; its word for a blank still there is still
+  // checked against the case.
+  it('drops alone a fill whose blank the case no longer has, and the case keeps its place', () => {
+    const fills = Object.fromEntries(vineyard.blocks.flatMap((b) => Object.entries(b.blanks)))
+    const closed = {
+      ...fresh(vineyard),
+      faces: { p1: 'ahab', p2: 'jezebel', p3: 'naboth' },
+      order: [...vineyard.order!],
+      fills,
+      solved: true,
+    }
+    localStorage.setItem(
+      key,
+      JSON.stringify({ vineyard: { ...closed, fills: { ...fills, s2: 'vineyard' } } }),
+    )
+    expect(load(cases)).toEqual({ vineyard: closed })
+    const open = { ...fresh(vineyard), fills: { s1: 'garden' } }
+    localStorage.setItem(
+      key,
+      JSON.stringify({ vineyard: { ...open, fills: { s1: 'garden', s2: 'silver' } } }),
+    )
+    expect(load(cases)).toEqual({ vineyard: open })
   })
 
   // The tutorial's question moved from a step to the retry, and the dock's line read joined the

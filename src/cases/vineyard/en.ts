@@ -83,9 +83,9 @@ export const en = {
       parts: [
         { t: 'A vineyard lay beside the king’s house, and the king wanted it, to make it his ' },
         { b: 's1' },
-        { t: '. He offered its owner a better ' },
-        { b: 's2' },
-        { t: ' for it, or its worth in silver. The owner refused: the vineyard was the ' },
+        {
+          t: '. He offered its owner a better vineyard for it, or its worth in silver. The owner refused: the vineyard was the ',
+        },
         { b: 's3' },
         {
           t: ' of his fathers. The king went home, lay down with his face turned away, and would not eat. Then letters went out to the elders of the owner’s city, sealed with the king’s seal but written by ',

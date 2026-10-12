@@ -117,12 +117,13 @@ export const vineyard = {
     { id: 'p3', picture: 'p3.jpg', answer: 'naboth' },
   ],
   order: ['bedchamber', 'gate', 'vineyard'],
+  // The offer of a better vineyard is told, not asked: no picture shows it, so its blank fell to
+  // guessing (#118). The blanks keep their ids, so a kept vineyard keeps its words.
   blocks: [
     {
       id: 'account',
       blanks: {
         s1: 'garden',
-        s2: 'vineyard',
         s3: 'inheritance',
         s4: 'jezebel',
         s5: 'the-king',
@@ -138,7 +139,6 @@ export const vineyard = {
     p2: 'balcony',
     p3: 'letter',
     s1: 'cord',
-    s2: 'window',
     s3: 'law',
     s4: 'seal',
     s5: 'letter',
@@ -155,7 +155,6 @@ export const vineyard = {
     p2: '21:7-8',
     p3: '21:12',
     s1: '21:2',
-    s2: '21:2',
     s3: '21:3',
     s4: '21:8',
     s5: '21:13',

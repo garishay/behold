@@ -101,12 +101,16 @@ export const strings = {
   whoIsWho: 'Who is who',
   who: 'who?',
   whatHappenedFirst: 'What happened first',
-  orderHint: 'Tap a picture below, then tap First, Then, or Last.',
+  // The pictures are never shown in the order they happened, and the line says so (#118).
+  orderHint: 'The pictures below are shuffled. Tap one, then tap First, Then, or Last.',
   first: 'First',
   then: 'Then',
   last: 'Last',
   emptySlot: '—',
   closeCase: 'Close the case',
+  // From the vineyard on, Close's place after a failed close, until something is tapped on Look
+  // (#118). "Things" in the bank's legend are a kind of word.
+  closeAfterLook: 'Tap something on Look to close again.',
   // Once the account is full, what's left is rung with what it wants: a face, or the order (#114).
   owedFace: 'Who is this? A face takes a name.',
   owedOrder: 'What happened first? Order the pictures too.',
@@ -142,12 +146,15 @@ export const strings = {
     close: 'Close the case to check your answers.',
   },
   hintThing: 'Here it is. Tap it.',
-  // A hint for an answer names it (#102): a face by its line, the order by its question, a blank by
-  // the words beside it, with its mark.
+  // A hint for an answer names it (#102): a face by its line, a blank by the words beside it, with
+  // its mark, and the order as the order, since "What happened first" beside a moment's name read
+  // as the answer (#118).
   hintSettles: (answer: string) => `Something here settles “${answer}”.`,
   hintSettlesThing: (answer: string) => `This settles “${answer}”. Tap it.`,
-  // On a moment's button, a hint's words name the moment as its button shows it and say to open
-  // it, in one sentence: for more to find, or to settle an answer, named (#106 [1]).
+  theOrder: 'the order',
+  // On a moment's button, or Look's from Solve, a hint's words name the button as it shows it and
+  // say to open it, in one sentence: for more to find, or to settle an answer, named (#106 [1],
+  // #118).
   hintOpen: (moment: string, answer?: string) =>
     answer === undefined
       ? `Open ${moment}: there’s more to find.`

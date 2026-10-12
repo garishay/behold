@@ -31,7 +31,7 @@ describe('the model (#6)', () => {
     expect(p.moment).toBe('vineyard')
     expect(p.order).toEqual([null, null, null])
     expect(filled(vineyard, p)).toBe(0)
-    expect(total(vineyard)).toBe(3 + 1 + 7)
+    expect(total(vineyard)).toBe(3 + 1 + 6)
     expect(total(valley)).toBe(2 + 5)
   })
 
@@ -139,14 +139,14 @@ describe('the model (#6)', () => {
       fills: { s1: 'silver' },
     }
     expect(filled(vineyard, p)).toBe(3)
-    expect(wrong(vineyard, p)).toBe(2 + 0 + 7)
+    expect(wrong(vineyard, p)).toBe(2 + 0 + 6)
     // A partial order is nothing filled and one thing wrong — never a thing filled at the first
     // tile, or the submit could open with the order half done (the owner's note at 03a's open).
     const partial = { ...fresh(vineyard), order: ['bedchamber', null, null] }
     expect(filled(vineyard, partial)).toBe(0)
-    expect(wrong(vineyard, partial)).toBe(3 + 1 + 7)
+    expect(wrong(vineyard, partial)).toBe(3 + 1 + 6)
     p = { ...p, order: ['gate', 'bedchamber', 'vineyard'] }
-    expect(wrong(vineyard, p)).toBe(2 + 1 + 7)
+    expect(wrong(vineyard, p)).toBe(2 + 1 + 6)
   })
 
   // The tutorial goes all the way to rule 5 (#26 [4]): it steps on as each until is met, marks
@@ -252,7 +252,6 @@ describe('the model (#6)', () => {
       order: ['bedchamber', 'gate', 'vineyard'],
       fills: {
         s1: 'garden',
-        s2: 'vineyard',
         s3: 'inheritance',
         s4: 'jezebel',
         s5: 'the-king',
@@ -260,7 +259,7 @@ describe('the model (#6)', () => {
         v2: 'taken-possession',
       },
     }
-    p = { ...p, ...right, fills: { ...right.fills, s2: 'garden' } }
+    p = { ...p, ...right, fills: { ...right.fills, s1: 'vineyard' } }
     expect(filled(vineyard, p)).toBe(total(vineyard))
     expect(p.solved).toBe(false)
     expect(submit(vineyard, p).solved).toBe(false)
@@ -278,7 +277,6 @@ describe('the model (#6)', () => {
       order: ['bedchamber', 'gate', 'vineyard'],
       fills: {
         s1: 'garden',
-        s2: 'vineyard',
         s3: 'inheritance',
         s4: 'jezebel',
         s5: 'the-king',
