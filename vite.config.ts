@@ -48,12 +48,16 @@ export default defineConfig({
     // The PWA shell (Gate 01 A2). `prompt`: a new version waits until the player taps the
     // "Update available" toast, never reloading mid-case — `autoUpdate` would reload the app the
     // moment a deploy lands. The manifest's start_url and scope default to the base, `/`; the
-    // icons are the committed placeholders from `npm run icons`, precached with the bundle. So are
-    // the sound effects (Gate 10 A6), so the first tap sounds offline; a precached file's revision
-    // is its hash, so a changed effect reaches the phone with the next update at the same address.
+    // icons are framed from the master by `npm run icons` (#10). The two the page links, the
+    // favicon and the 192, are precached with the bundle, and the manifest's 512s and 1024 are not:
+    // they are read when the app is installed, never offline, and would more than double the shell
+    // (Gate 18). The sound effects are precached too (Gate 10 A6), so the first tap sounds offline;
+    // a precached file's revision is its hash, so a changed effect reaches the phone with the next
+    // update at the same address.
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['icons/*.png', 'audio/*.m4a'],
+      includeAssets: ['icons/favicon-48.png', 'icons/icon-192.png', 'audio/*.m4a'],
+      includeManifestIcons: false,
       // The case pictures are fetched when a case opens and kept from then on (Gate 02 A5), so a
       // played case stays offline; they are not precached, so the install stays the shell. The
       // worker claims the page as soon as it first activates, so a case opened on the first visit
@@ -105,6 +109,8 @@ export default defineConfig({
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+          // The largest `any` icon, so Bubblewrap draws its splash from it (Gate 18's ruling).
+          { src: 'icons/icon-1024.png', sizes: '1024x1024', type: 'image/png' },
           {
             src: 'icons/icon-512-maskable.png',
             sizes: '512x512',

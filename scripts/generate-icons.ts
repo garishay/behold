@@ -1,87 +1,150 @@
 /**
- * Writes the placeholder app icons (Gate 01 A2): a flat oil lamp — the shallow clay saucer with a
- * pinched spout that the world rules name as the Behold icon — on the night colour, as three PNGs
- * in `public/icons/`: 192 and 512 for `any`, and a 512 `maskable` with the lamp drawn inside the
- * safe zone. Drawn from shapes here rather than exported from a tool so the files' provenance is
- * this script, and deterministic so a test can hold the committed pixels to the function that made
- * them. The real icon is #10.
+ * Writes Behold's icons (Gate 18, #10) from the master, `assets/icon.png`: a scroll on two rollers
+ * under a lens, with a blank in gold under the glass, generated in ChatGPT Images and retouched in
+ * code (`docs/icon.md`). The master's ground is the manifest's background colour to every edge, so
+ * each file frames it on that colour — the art at a share of the width, centred on the art's box —
+ * and averages it down to the file's size. No image library: the script reads the one PNG it is
+ * given and writes its own, so the files' provenance is the master and this script, and a test
+ * holds the committed pixels to the function that made them.
  *
  * Run: `npm run icons`
  */
 
-import { mkdir, writeFile } from 'node:fs/promises'
+import { readFile, writeFile } from 'node:fs/promises'
 import { basename } from 'node:path'
-import { deflateSync } from 'node:zlib'
+import { deflateSync, inflateSync } from 'node:zlib'
 
-type Rgb = readonly [number, number, number]
+export const MASTER = 'assets/icon.png'
 
-/** The manifest's theme colour; the icons' ground. */
-export const NIGHT: Rgb = [0x23, 0x2a, 0x3d]
-const CLAY: Rgb = [0xcd, 0xbb, 0x93]
-const CLAY_SHADE: Rgb = [0x8b, 0x7a, 0x55]
-const GOLD: Rgb = [0xc9, 0xa9, 0x4e]
-const MIST: Rgb = [0xe6, 0xe1, 0xd6]
+/** The manifest's background colour: the master's ground, and every frame's. */
+export const GROUND = [0x1b, 0x20, 0x33] as const
 
-/** The three files the manifest names. `scale` shrinks the lamp toward the centre. */
+/** The art's box in the master, edges inclusive: the knobs, the rollers, and the lens's handle. */
+export const ART = { left: 53, top: 146, right: 1199, bottom: 1129 } as const
+
+/**
+ * The master's outer band, in its pixels, that fades to the ground exactly. The master's ground
+ * sits up to a level below #1B2033 at its edges, and a level's step in that dark blue would show as
+ * a square on the splash. Nothing in the band is more than 5 levels off the ground, and the art is
+ * 53 px in at its nearest.
+ */
+const FADE = 40
+
+/** The art's share of the store's icon, as the owner approved it and ruled: the master at 82%. */
+const STORE = 0.75
+
+/**
+ * The files the manifest and the page name, each with the art's share of its width. The 512 is
+ * also the store's icon. Bubblewrap draws its splash at 300 dp from the largest `any` icon, up to
+ * 1,200 px, so the 1024 gives it the art rather than the 512 enlarged (Gate 18's ruling). It lays
+ * the maskable image over 91 dp of the launcher's 108 and shows the middle 72, so the launcher
+ * shows the store's framing, and the whole art sits inside the 66 dp circle no mask clips. A
+ * browser's tab draws the favicon at 16 px, unmasked.
+ */
 export const ICONS = [
-  { file: 'icon-192.png', size: 192, scale: 1 },
-  { file: 'icon-512.png', size: 512, scale: 1 },
-  // The maskable safe zone is the circle inscribed in the inner 80% of the square.
-  { file: 'icon-512-maskable.png', size: 512, scale: 0.8 },
+  { file: 'icon-192.png', size: 192, share: STORE },
+  { file: 'icon-512.png', size: 512, share: STORE },
+  { file: 'icon-1024.png', size: 1024, share: STORE },
+  { file: 'icon-512-maskable.png', size: 512, share: STORE * (72 / 91) },
+  { file: 'favicon-48.png', size: 48, share: 0.9 },
 ] as const
 
-const ellipse = (x: number, y: number, cx: number, cy: number, rx: number, ry: number) =>
-  ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1
-
-/** Barycentric sign test: the point is inside when it is on the same side of all three edges. */
-function triangle(x: number, y: number, ...p: [number, number, number, number, number, number]) {
-  const side = (ax: number, ay: number, bx: number, by: number) =>
-    (bx - ax) * (y - ay) - (by - ay) * (x - ax)
-  const a = side(p[0], p[1], p[2], p[3])
-  const b = side(p[2], p[3], p[4], p[5])
-  const c = side(p[4], p[5], p[0], p[1])
-  return (a >= 0 && b >= 0 && c >= 0) || (a <= 0 && b <= 0 && c <= 0)
+export interface Raster {
+  width: number
+  height: number
+  /** RGB, three bytes a pixel, row by row. */
+  pixels: Uint8Array
 }
 
-/** The lamp at a point of the unit square, painter's order — the last shape that holds the point wins. */
-export function lampAt(x: number, y: number): Rgb {
-  let colour = NIGHT
-  // The saucer: the lower half of an ellipse below the rim line, pinched to a spout on the right.
-  if (
-    (y >= 0.54 && ellipse(x, y, 0.47, 0.54, 0.34, 0.15)) ||
-    triangle(x, y, 0.75, 0.495, 0.86, 0.54, 0.75, 0.585)
-  )
-    colour = CLAY
-  // The opening, seen from a little above.
-  if (ellipse(x, y, 0.47, 0.54, 0.34, 0.05)) colour = CLAY_SHADE
-  // The flame, rising from the spout: a round base drawn up to a point, with a pale core.
-  if (ellipse(x, y, 0.82, 0.465, 0.05, 0.05) || triangle(x, y, 0.77, 0.465, 0.87, 0.465, 0.82, 0.3))
-    colour = GOLD
-  if (ellipse(x, y, 0.82, 0.475, 0.02, 0.02)) colour = MIST
-  return colour
+const SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+
+/** The Paeth predictor (PNG, filter type 4): whichever neighbour is closest to a + b − c. */
+function paeth(a: number, b: number, c: number): number {
+  const p = a + b - c
+  const [pa, pb, pc] = [Math.abs(p - a), Math.abs(p - b), Math.abs(p - c)]
+  return pa <= pb && pa <= pc ? a : pb <= pc ? b : c
 }
 
-/** The icon's RGB rows, 3 × 3 samples per pixel so the flat shapes keep a clean edge. */
-export function lampPixels(size: number, scale: number): Uint8Array {
-  const pixels = new Uint8Array(size * size * 3)
-  const samples = 3
-  for (let py = 0; py < size; py++) {
-    for (let px = 0; px < size; px++) {
-      const sum = [0, 0, 0]
-      for (let sy = 0; sy < samples; sy++) {
-        for (let sx = 0; sx < samples; sx++) {
-          const x = 0.5 + ((px + (sx + 0.5) / samples) / size - 0.5) / scale
-          const y = 0.5 + ((py + (sy + 0.5) / samples) / size - 0.5) / scale
-          const [r, g, b] = lampAt(x, y)
-          sum[0] += r
-          sum[1] += g
-          sum[2] += b
-        }
-      }
-      const at = (py * size + px) * 3
-      sum.forEach((channel, i) => (pixels[at + i] = Math.round(channel / (samples * samples))))
+/** Reads an 8-bit RGB PNG, not interlaced — the master's kind, and the only kind this reads. */
+export function decode(file: Buffer): Raster {
+  if (!file.subarray(0, 8).equals(SIGNATURE)) throw new Error('not a PNG')
+  let [width, height] = [0, 0]
+  const idat: Buffer[] = []
+  for (let at = 8; at < file.length;) {
+    const length = file.readUInt32BE(at)
+    const type = file.toString('ascii', at + 4, at + 8)
+    const data = file.subarray(at + 8, at + 8 + length)
+    if (type === 'IHDR') {
+      ;[width, height] = [data.readUInt32BE(0), data.readUInt32BE(4)]
+      if (data[8] !== 8 || data[9] !== 2 || data[12] !== 0)
+        throw new Error('the master must be an 8-bit RGB PNG, not interlaced')
+    }
+    if (type === 'IDAT') idat.push(data)
+    at += 12 + length
+  }
+  const raw = inflateSync(Buffer.concat(idat))
+  const stride = width * 3
+  const pixels = new Uint8Array(stride * height)
+  for (let y = 0; y < height; y++) {
+    const filter = raw[y * (stride + 1)]
+    for (let x = 0; x < stride; x++) {
+      const at = y * stride + x
+      const a = x >= 3 ? pixels[at - 3] : 0
+      const b = y > 0 ? pixels[at - stride] : 0
+      const c = x >= 3 && y > 0 ? pixels[at - stride - 3] : 0
+      const predicted = [0, a, b, (a + b) >> 1, paeth(a, b, c)][filter]
+      pixels[at] = (raw[y * (stride + 1) + 1 + x] + predicted) & 0xff
     }
   }
+  return { width, height, pixels }
+}
+
+/** Each output pixel's span along one axis: the master's pixels it covers, with each one's share. */
+function spans(size: number, start: number, step: number) {
+  return Array.from({ length: size }, (_, i) => {
+    const [from, to] = [start + i * step, start + (i + 1) * step]
+    const span: { at: number; weight: number }[] = []
+    for (let at = Math.floor(from); at < to; at++)
+      span.push({ at, weight: Math.min(at + 1, to) - Math.max(at, from) })
+    return span
+  })
+}
+
+/**
+ * The master framed for one file: a square on the ground whose width the art fills at `share`,
+ * centred on the art's box, each output pixel the average of the master's pixels it covers — the
+ * ground beyond the master's edges, and its outer band faded to the ground. RGBA, opaque: the
+ * store asks for a 32-bit PNG.
+ */
+export function frame(master: Raster, size: number, share: number): Uint8Array {
+  const side = (ART.right + 1 - ART.left) / share
+  const step = side / size
+  const columns = spans(size, (ART.left + ART.right + 1 - side) / 2, step)
+  const rows = spans(size, (ART.top + ART.bottom + 1 - side) / 2, step)
+  const pixels = new Uint8Array(size * size * 4)
+  for (let y = 0; y < size; y++)
+    for (let x = 0; x < size; x++) {
+      const sum = [0, 0, 0]
+      for (const row of rows[y])
+        for (const column of columns[x]) {
+          const edge = Math.min(
+            row.at,
+            column.at,
+            master.height - 1 - row.at,
+            master.width - 1 - column.at,
+          )
+          const fade = Math.min(1, Math.max(0, (edge + 1) / FADE))
+          const at = (row.at * master.width + column.at) * 3
+          for (let k = 0; k < 3; k++) {
+            const value =
+              fade > 0 ? GROUND[k] + fade * (master.pixels[at + k] - GROUND[k]) : GROUND[k]
+            sum[k] += row.weight * column.weight * value
+          }
+        }
+      const at = (y * size + x) * 4
+      for (let k = 0; k < 3; k++) pixels[at + k] = Math.round(sum[k] / (step * step))
+      pixels[at + 3] = 255
+    }
   return pixels
 }
 
@@ -106,17 +169,17 @@ function chunk(type: string, data: Uint8Array): Buffer {
   return Buffer.concat([head, body, tail])
 }
 
-/** A PNG of the RGB rows: 8-bit truecolour, no alpha, no interlace, filter 0 on every row. */
+/** A PNG of the RGBA rows: 8 bits a channel, 32 a pixel, no interlace, filter 0 on every row. */
 export function png(size: number, pixels: Uint8Array): Buffer {
   const ihdr = Buffer.alloc(13)
   ihdr.writeUInt32BE(size, 0)
   ihdr.writeUInt32BE(size, 4)
-  ihdr.set([8, 2, 0, 0, 0], 8)
-  const raw = Buffer.alloc((size * 3 + 1) * size)
+  ihdr.set([8, 6, 0, 0, 0], 8)
+  const raw = Buffer.alloc((size * 4 + 1) * size)
   for (let row = 0; row < size; row++)
-    raw.set(pixels.subarray(row * size * 3, (row + 1) * size * 3), row * (size * 3 + 1) + 1)
+    raw.set(pixels.subarray(row * size * 4, (row + 1) * size * 4), row * (size * 4 + 1) + 1)
   return Buffer.concat([
-    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    SIGNATURE,
     chunk('IHDR', ihdr),
     chunk('IDAT', deflateSync(raw)),
     chunk('IEND', new Uint8Array()),
@@ -124,9 +187,9 @@ export function png(size: number, pixels: Uint8Array): Buffer {
 }
 
 async function main(): Promise<void> {
-  await mkdir('public/icons', { recursive: true })
-  for (const { file, size, scale } of ICONS) {
-    await writeFile(`public/icons/${file}`, png(size, lampPixels(size, scale)))
+  const master = decode(await readFile(MASTER))
+  for (const { file, size, share } of ICONS) {
+    await writeFile(`public/icons/${file}`, png(size, frame(master, size, share)))
     process.stdout.write(`wrote public/icons/${file}\n`)
   }
 }
