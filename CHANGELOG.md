@@ -3,6 +3,19 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.24.0 — Gate 29, a guess costs a look (#118)
+
+- **118a — a retry costs a look** (#119): the vineyard round's tester 2 closed the vineyard by
+  guessing, 38 closes in eight minutes, most of them straight from Solve, each fix confirmed by the
+  count. From the vineyard on, a failed close now waits for a look: Close the case's place says
+  "Tap something on Look to close again." until a thing is tapped on Look, so a guess never costs
+  less than a look, and a stuck player still gets through by the hint, whose thing pays the look.
+  The vineyard's account tells the offer of a better vineyard, a blank no picture could settle, and
+  a vineyard kept on a device keeps its place. From Solve, a hint says "Open Look to settle “…”.",
+  its second tier waits for Look, and hints call the order "the order", where "What happened first"
+  beside a moment's name read as the answer. The mountain's card and lesson say its pictures are
+  shuffled, and so does the line under every order.
+
 ## v0.23.0 — Gate 04c, the Worker's store (#3)
 
 - **04c — the passages from a store, filled on a schedule** (#117): the ESV proxy answers a
