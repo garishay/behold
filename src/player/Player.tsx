@@ -425,11 +425,13 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
    * one's first. It starts the signals over, and the tier is kept for the close. Asked for past its
    * last tier, the hint's mark is shown again, and under a guided step the step's is. Where a
    * thing's half would take most of the picture, its first hint is the second tier: tier 1 would
-   * ring the same box and say less (#102 [1]).
+   * ring the same box and say less (#102 [1]). On Solve both tiers ring Look's button, so a hint
+   * showing there is shown again, and its second tier waits for Look (#118).
    */
   const take = () => {
     setSaidAt(null)
-    if (guided || hint?.tier === 2 || hint?.why === 'close') return nudge()
+    if (guided || hint?.tier === 2 || hint?.why === 'close' || (hint && view !== 'look'))
+      return nudge()
     const target = aim(s, progress, missed ?? asked ?? null)
     const box = spots.find((x) => x.id === target.spot)?.box
     const next = hint
@@ -538,8 +540,16 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const aimed = spots.find((x) => x.id === hint?.spot)
   const home = s.moments.find((m) => aimed !== undefined && m.spots.includes(aimed))
   // The hint's moment while Look shows another: its button takes the ring, and the words name it
-  // and say to open it (#106 [1]).
+  // and say to open it (#106 [1]). From Solve, Look's button does so too (#118).
   const away = view === 'look' && home !== moment ? home : undefined
+  const door =
+    hint?.why === 'close'
+      ? undefined
+      : away !== undefined
+        ? text.moments[away.id]
+        : view !== 'look'
+          ? strings.look
+          : undefined
   const halved = hint?.tier === 1 && aimed !== undefined
   const hintAt = () => {
     if (hint === null || card || sheet !== null || paper !== null) return undefined
@@ -587,7 +597,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   // A hint on offer once a signal fires, or its second tier once its first shows; never under a
   // guided step (#29). It sits at the foot of the view: the caption's dock, or beside Close.
   const signalled = run >= stuck.taps || stayed || waited === placements || fails >= stuck.closes
-  const more = hint?.tier === 1 && hint.why !== 'close'
+  const more = hint?.tier === 1 && hint.why !== 'close' && view === 'look'
   const offer = !guided && !progress.solved && (more || (hint === null && signalled)) && (
     <button type="button" className="offer" onClick={take}>
       {view === 'look' && <span>{more ? strings.stillStuck : strings.stuck}</span>}{' '}
@@ -730,11 +740,8 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
           label={
             saidAt === hinted
               ? ''
-              : away !== undefined
-                ? strings.hintOpen(
-                    text.moments[away.id],
-                    hint.why === 'evidence' ? named(hint.for) : undefined,
-                  )
+              : door !== undefined
+                ? strings.hintOpen(door, hint.why === 'evidence' ? named(hint.for) : undefined)
                 : hint.why === 'evidence'
                   ? (hint.tier === 2 ? strings.hintSettlesThing : strings.hintSettles)(
                       named(hint.for),

@@ -63,12 +63,14 @@ export const firstWrong = (s: CaseStructure, p: Progress) =>
 
 /**
  * How a hint names the answer it is for (#102), and the reveal a miss (#107): a face by its line,
- * the order by its question, a blank by the three words before it in its sentence, or after it
- * when it opens one.
+ * a blank by the three words before it in its sentence, or after it when it opens one, and the
+ * order, which a hint asks about by one of its moments, as the order, and the reveal, whose line
+ * gives the answer after it, by its question (#118).
  */
 export function named(s: CaseStructure, text: CaseText<CaseStructure>, id: string) {
   if (s.faces.some((f) => f.id === id)) return text.faces[id]
-  if (id === 'order' || s.order?.includes(id)) return strings.whatHappenedFirst
+  if (s.order?.includes(id)) return strings.theOrder
+  if (id === 'order') return strings.whatHappenedFirst
   const parts = Object.values(text.blocks).find((b) => b.parts.some((x) => x.b === id))?.parts
   const i = parts?.findIndex((x) => x.b === id) ?? -1
   const before = (parts?.[i - 1]?.t ?? '')
