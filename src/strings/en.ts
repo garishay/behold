@@ -295,7 +295,7 @@ export const policy: Policy = {
     },
     {
       heading: 'Contact',
-      points: ['Write with any question about privacy:'],
+      points: ['Behold is made by Shay House.', 'Write with any question about privacy:'],
       links: [{ text: 'hello@beholdgame.com', href: 'mailto:hello@beholdgame.com' }],
     },
   ],

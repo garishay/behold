@@ -12,9 +12,10 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   switches, and the copies of the game's files, pictures, passages, and music, each with its limit
   — what it sends and who sees it — the site to GitHub Pages, and a passage's reference to the
   passage service on Cloudflare, which answers from its own copy, so nothing about a player
-  reaches Crossway — how long each is kept, and where to write. A test holds what it says to the
-  code: the storage keys, the caches' limits, the sites the game asks or links to, and the modules
-  that ask ([G13]).
+  reaches Crossway — how long each is kept, who makes the game, Shay House, and where to write. A
+  test holds what it says to the code: the storage keys, the caches' limits, the sites the game
+  asks or links to, and the modules that ask ([G13]); another builds the game and finds the page
+  emitted and precached (#12 [Q19]).
 
 ## v0.24.1 — Gate 29's amendment, check the evidence (#118)
 
