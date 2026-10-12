@@ -2854,7 +2854,7 @@ describe('the close converges (#95)', () => {
       const close = () => screen.getByRole('button', { name: 'Close the case' })
       close().focus()
       fireEvent.click(close())
-      const owed = screen.getByRole('button', { name: 'Tap something on Look to close again.' })
+      const owed = screen.getByRole('button', { name: 'Check the evidence: tap anything on Look.' })
       expect(owed).toHaveAttribute('aria-disabled', 'true')
       expect(owed).toHaveFocus()
       fireEvent.click(owed)
@@ -2865,7 +2865,7 @@ describe('the close converges (#95)', () => {
       expect(screen.queryByRole('button', { name: 'Close the case' })).toBeNull()
       await lookAgain(s.id, spot)
       fireEvent.click(close())
-      expect(screen.getByRole('button', { name: /^Tap something on Look/ })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /^Check the evidence/ })).toBeInTheDocument()
     },
   )
 

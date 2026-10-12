@@ -3,6 +3,14 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.24.1 — Gate 29's amendment, check the evidence (#118)
+
+- **118b — check the evidence** (#120): from the vineyard on, Close the case's place after a
+  failed close read "Tap something on Look to close again.", and its "something" echoed "There’s
+  still something to find here.", so a player who had found everything could think there was more
+  to find. It now reads "Check the evidence: tap anything on Look.", which says any tap counts,
+  found or not, and why the look comes first, without telling the player they guessed.
+
 ## v0.24.0 — Gate 29, a guess costs a look (#118)
 
 - **118a — a retry costs a look** (#119): the vineyard round's tester 2 closed the vineyard by

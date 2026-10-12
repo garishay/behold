@@ -109,8 +109,9 @@ export const strings = {
   emptySlot: '—',
   closeCase: 'Close the case',
   // From the vineyard on, Close's place after a failed close, until something is tapped on Look
-  // (#118). "Things" in the bank's legend are a kind of word.
-  closeAfterLook: 'Tap something on Look to close again.',
+  // (#118). It says why the look comes first, not that the player guessed; "anything", since
+  // "something" echoed "There’s still something to find here." as if more were left (118b).
+  closeAfterLook: 'Check the evidence: tap anything on Look.',
   // Once the account is full, what's left is rung with what it wants: a face, or the order (#114).
   owedFace: 'Who is this? A face takes a name.',
   owedOrder: 'What happened first? Order the pictures too.',
