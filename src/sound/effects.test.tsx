@@ -150,8 +150,7 @@ describe('the effects, each beside what the screen shows (Gate 10 A3, A5)', () =
       ['p2', 'Jezebel'],
       ['p3', 'Naboth'],
       ['s1', 'vineyard'],
-      ['s2', 'garden'],
-      ['s3', 'inheritance'],
+      ['s3', 'silver'],
       ['s4', 'Jezebel'],
       ['s5', 'the king'],
       ['v1', 'killed'],
@@ -180,7 +179,7 @@ describe('the effects, each beside what the screen shows (Gate 10 A3, A5)', () =
     tab(/Solve/)
     for (const [id, word] of [
       ['s1', 'garden'],
-      ['s2', 'vineyard'],
+      ['s3', 'inheritance'],
     ]) {
       slot(id)
       chip(word)

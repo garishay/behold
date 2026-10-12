@@ -1060,7 +1060,6 @@ describe('the tutorial’s marks (#25)', () => {
         faces: { p1: 'ahab', p2: 'jezebel', p3: 'naboth' },
         order: ['bedchamber', 'gate', 'vineyard'],
         fills: {
-          s2: 'vineyard',
           s3: 'silver',
           s4: 'jezebel',
           s5: 'the-king',
@@ -2448,7 +2447,7 @@ describe('the faces and the order are part of the job (#114)', () => {
   // A case that teaches a face rings it while it is empty (#53, #106). Once the account is full and
   // that face is what is left, its mark is brought into view again.
   it('brings the lesson’s face into view again once the account is full', async () => {
-    const fills = { s1: 'garden', s2: 'vineyard', s3: 'inheritance', s4: 'jezebel' }
+    const fills = { s1: 'garden', s3: 'inheritance', s4: 'jezebel' }
     const kept = { ...fills, s5: 'the-king', v1: 'killed' }
     const order = [...vineyard.order!]
     start(<App />, { ...laterStarted, vineyard: found(vineyard, { order, fills: kept }) })
@@ -3099,7 +3098,6 @@ describe('the case solved (#6, 03c; #24)', () => {
     orderSlot(2)
     const fills: [string, string][] = [
       ['s1', 'vineyard'],
-      ['s2', 'garden'],
       ['s3', 'silver'],
       ['s4', 'Jezebel'],
       ['s5', 'the king'],
@@ -3114,18 +3112,13 @@ describe('the case solved (#6, 03c; #24)', () => {
     expect(submit).toBeEnabled()
     fireEvent.click(submit)
     expect(result()).toHaveTextContent(
-      'Three answers don’t fit the story. There are nine more to find in the pictures.',
+      'Two answers don’t fit the story. There are nine more to find in the pictures.',
     )
     expect(screen.queryByRole('heading', { name: 'The case is closed.' })).not.toBeInTheDocument()
     await lookAgain('vineyard', 'law')
-    for (const [id, word] of [
-      ['s1', 'garden'],
-      ['s2', 'vineyard'],
-    ] as const) {
-      slot(id)
-      chip(word)
-      slot(id)
-    }
+    slot('s1')
+    chip('garden')
+    slot('s1')
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     expect(result()).toHaveTextContent(
       'One answer doesn’t fit the story. There are nine more to find in the pictures.',

@@ -94,6 +94,15 @@ const known = (s: CaseStructure, misses: Progress['misses']) => {
 }
 
 /**
+ * The fills an entry kept, but any for a blank its case no longer has, dropped alone: a blank now
+ * told in the account takes its word with it, and the case keeps its place (#118).
+ */
+const still = (s: CaseStructure, fills: Progress['fills']) => {
+  const blanks = s.blocks.flatMap((b) => Object.keys(b.blanks))
+  return Object.fromEntries(Object.entries(fills).filter(([b]) => blanks.includes(b)))
+}
+
+/**
  * The store's progress by case, for the cases registered: a store that is not one, an entry
  * that is not progress, or an entry whose ids its case no longer has, reads as none.
  */
@@ -105,8 +114,9 @@ export function load(registry: readonly CaseEntry[]): Saved {
     const entries = Object.entries(parsed).map(([id, v]) => [id, withDefaults(v)] as const)
     const kept = entries.flatMap(([id, v]) => {
       const structure = registry.find((c) => c.structure.id === id)?.structure
-      if (!structure || !progress(v) || !fits(structure, v)) return []
-      return [[id, restored(structure, { ...v, misses: known(structure, v.misses) })]]
+      if (!structure || !progress(v)) return []
+      const p = { ...v, fills: still(structure, v.fills), misses: known(structure, v.misses) }
+      return fits(structure, p) ? [[id, restored(structure, p)]] : []
     })
     return Object.fromEntries(kept)
   } catch {
