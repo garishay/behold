@@ -22,7 +22,8 @@ each case's pictures and their spots, the word bank, the papers, who is who, wha
 the account and its blanks, the close, and the reveal; progress kept on the device. Gate 04 — ESV
 proxy (#3): [`worker/`](worker/README.md), the Cloudflare Worker between the app and the ESV API —
 a registered case's passage in, its verses out, the token in the Worker's own store — deployed
-from Actions on merge, its one book table held against every case's passages in CI. The tutorial
+from Actions on merge, its one book table held against every case's passages in CI, and since 04c
+answering from a store it fills on a schedule, so no player's request reaches the ESV. The tutorial
 and case two play through, and the reveal reads each passage through the Worker, marked ESV, with
 Crossway's notice and a link to www.esv.org beneath; the last eleven passages read stay on the
 device, so a closed case reads offline. The world rules — the accuracy and art constraints every picture and every case is
@@ -50,8 +51,8 @@ npm run check -w worker         # bundle the Worker without deploying, as CI's b
 npm run dev -w worker           # the Worker at http://localhost:8787 (see worker/README.md)
 ```
 
-The Worker deploys from Actions on a merge to `main` that touches it; nothing runs on a PC after
-a merge.
+The Worker deploys from Actions on a merge to `main` that touches it or the cases, whose passages
+its store keeps; nothing runs on a PC after a merge.
 
 ## How this repo is built
 

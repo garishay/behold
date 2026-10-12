@@ -10,6 +10,8 @@ on:
     branches: [main]
     paths:
       - worker/**
+      # The store keeps the registry's passages (04c), so a case that registers one redeploys it.
+      - src/cases/**
       - package-lock.json
       - .github/workflows/deploy-worker.yml
 
