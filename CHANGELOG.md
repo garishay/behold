@@ -3,6 +3,20 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.26.0 — Gate 30, only evidence brings Close back (#123)
+
+- **123a — only evidence brings Close back** (#124): the vineyard round's tester 3 paid the owed
+  look as a toll, one tap on whatever was under his thumb, and only 2 of his 7 fixes came from a
+  look. From the vineyard on, Close the case's place after a failed close says "To close again,
+  open Look and find a clue.", and only a thing tapped on Look that settles an answer the close
+  found wrong brings it back. Papers on Solve pays nothing, a tap on the waiting Close rings Look's
+  button, taps that settle nothing bring a hint's offer, and the owed look survives leaving the
+  case until a reload or Restart. Everywhere but the valley, a failed close's count stays in the
+  bank's head until the next close. A hint for an answer a close found wrong says it doesn't fit
+  and where its clue is, and each new hint names the next answer. The order says its pictures
+  aren't in story order and refuses them as listed, and the vineyard's prophet raises a hand "as
+  if to accuse him".
+
 ## v0.25.0 — Gate 19, the privacy page (#9)
 
 - **9a — the privacy policy** (#121): its own page at play.beholdgame.com/privacy/, written whole
