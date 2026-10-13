@@ -48,13 +48,15 @@ export const nothing: Selection = { word: null, moment: null, target: null, slot
 
 /**
  * A move's result: the progress and selection after it, and the kind a slot refused and which slot,
- * if one did, so the refusal can say a face or a blank (#114).
+ * if one did, so the refusal can say a face or a blank (#114), or whether the order refused the
+ * pictures as listed (#123).
  */
 export interface Outcome {
   readonly progress: Progress
   readonly selection: Selection
   readonly wants?: Kind
   readonly by?: string
+  readonly listed?: true
 }
 
 export const fresh = (s: CaseStructure): Progress => ({
@@ -242,6 +244,13 @@ const placeMoment = (s: CaseStructure, p: Progress, index: number, moment: strin
     order: p.order.map((m, i) => (i === index ? moment : m === moment ? null : m)),
   })
 
+/**
+ * Whether an order holds every picture as the tray lists them, which check (p) keeps from being
+ * the story's: the picture that would make it so is refused, and stays picked up (#123).
+ */
+const listed = (s: CaseStructure, p: Progress) =>
+  s.order !== undefined && p.order.every((m, i) => m === s.moments[i].id)
+
 /** A moment tile tapped: it fills the waiting order slot, or becomes the selection. */
 export function chooseMoment(
   s: CaseStructure,
@@ -249,8 +258,11 @@ export function chooseMoment(
   sel: Selection,
   moment: string,
 ): Outcome {
-  if (sel.slot !== null)
-    return { progress: placeMoment(s, p, sel.slot, moment), selection: nothing }
+  if (sel.slot !== null) {
+    const next = placeMoment(s, p, sel.slot, moment)
+    if (listed(s, next)) return { progress: p, selection: { ...nothing, moment }, listed: true }
+    return { progress: next, selection: nothing }
+  }
   return { progress: p, selection: { ...nothing, moment: sel.moment === moment ? null : moment } }
 }
 
@@ -261,8 +273,11 @@ export function chooseOrderSlot(
   sel: Selection,
   index: number,
 ): Outcome {
-  if (sel.moment !== null)
-    return { progress: placeMoment(s, p, index, sel.moment), selection: nothing }
+  if (sel.moment !== null) {
+    const next = placeMoment(s, p, index, sel.moment)
+    if (listed(s, next)) return { progress: p, selection: sel, listed: true }
+    return { progress: next, selection: nothing }
+  }
   if (p.order[index] !== null)
     return { progress: placeMoment(s, p, index, null), selection: nothing }
   return { progress: p, selection: { ...nothing, slot: sel.slot === index ? null : index } }

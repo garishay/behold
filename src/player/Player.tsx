@@ -296,8 +296,15 @@ export function Player(props: PlayerProps) {
     const kind = o.wants
     const found = progress.bank.some((w) => s.words[w] === kind)
     const face = s.faces.some((f) => f.id === o.by)
+    // The order refuses the pictures as listed, as a slot refuses the wrong kind (#123).
     setNote(
-      kind === undefined ? '' : face ? strings.faceWants(found) : strings.blankWants(kind, found),
+      o.listed
+        ? strings.listed
+        : kind === undefined
+          ? ''
+          : face
+            ? strings.faceWants(found)
+            : strings.blankWants(kind, found),
     )
     if (placed(progress, o.progress)) play('place')
     // A wrong word set in the slot a question asks about asks again, words, dim, and all (#77).

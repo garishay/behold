@@ -8,9 +8,9 @@ export const en = {
   subtitle: 'Case one',
   brief:
     'Two altars on a mountain, a bull on each, and all Israel watching. What did the people answer, what did the fire burn, and what did the people do then?',
-  // The first case with more than one picture says they are shuffled, and what a picker's dot
-  // means (#77, #118).
-  note: 'Three pictures this time, shuffled. A dot means more to find there.',
+  // The first case with more than one picture says they aren't in story order, and what a
+  // picker's dot means (#77, #118, #123).
+  note: 'Three pictures this time, not in story order. A dot means more to find there.',
   passages: ['1 Kings 18:17–40'],
   moments: { water: 'The water', fire: 'The fire', baal: 'Baal’s altar' },
   captions: {
@@ -71,7 +71,7 @@ export const en = {
       ],
     },
   },
-  teach: 'These are shuffled. Which happened first?',
+  teach: 'These aren’t in story order. Which happened first?',
   reveal: [
     'The man in the hair cloak was Elijah, the LORD’s prophet, who stood alone against Baal’s four hundred and fifty. The man under the awning was Ahab, king of Israel, who met him as the troubler of Israel and gathered the people and the prophets to Mount Carmel at his word.',
     'Asked how long they would waver, the people said not a word. Baal’s prophets called from morning past noon, and no one answered. Elijah rebuilt the LORD’s altar with twelve stones, one for each tribe, and had it soaked, four jars three times over, until the trench ran full. At the hour of the offering he prayed, and the fire of the LORD fell. It consumed the offering, the wood, the stones, and the dust, and dried up the water in the trench. The people fell on their faces and confessed that the LORD is God, and at Elijah’s word Baal’s prophets were seized and taken down to the brook Kishon.',

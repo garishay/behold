@@ -107,8 +107,12 @@ export const strings = {
   whoIsWho: 'Who is who',
   who: 'who?',
   whatHappenedFirst: 'What happened first',
-  // The pictures are never shown in the order they happened, and the line says so (#118).
-  orderHint: 'The pictures below are shuffled. Tap one, then tap First, Then, or Last.',
+  // The pictures are never shown in the order they happened, and the line says so in the story's
+  // terms, since "shuffled" went the way "out of order" did (#118, #123).
+  orderHint: 'These pictures aren’t in story order. Tap one, then tap First, Then, or Last.',
+  // The last picture that would leave the order as the tray lists it is refused, as a blank refuses
+  // the wrong kind of word (#123).
+  listed: 'That’s how they’re listed, not how the story went.',
   first: 'First',
   then: 'Then',
   last: 'Last',

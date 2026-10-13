@@ -478,12 +478,13 @@ describe('the case screen explored (#6, 03b; #24)', () => {
 
   // The mountain is the first case with more than one picture, and a picker's dot says more waits
   // there: its card says so under the brief, in the case's own words, and the valley's doesn't
-  // (#77). Four testers took its listed order for the answer, so the card says they're shuffled
-  // (#118).
-  it('the mountain’s card says its pictures are shuffled and what a dot means, and the valley’s does not', async () => {
+  // (#77). Four testers took its listed order for the answer, so the card said they're shuffled
+  // (#118), and a fifth placed them as listed under "shuffled", so it says it in the story's terms
+  // (#123).
+  it('the mountain’s card says its pictures aren’t in story order and what a dot means, and the valley’s does not', async () => {
     start(<App />, laterStarted)
     openCase(/The valley/)
-    const note = 'Three pictures this time, shuffled. A dot means more to find there.'
+    const note = 'Three pictures this time, not in story order. A dot means more to find there.'
     expect(screen.getByRole('dialog', { name: 'The valley' })).not.toHaveTextContent(note)
     menu('Cases')
     fireEvent.click(await screen.findByRole('button', { name: /The mountain/ }))
@@ -492,19 +493,37 @@ describe('the case screen explored (#6, 03b; #24)', () => {
 
   // A case's pictures are never shown in the order they happened (#77), and the vineyard round's
   // tester 1 placed the vineyard's as listed too (#23), so in every case with an order the line
-  // under its question says they're shuffled (#118).
+  // under its question said they're shuffled (#118). Tester 3 placed both cases' as listed under
+  // it, so it says they aren't in story order (#123).
   it.each(['mountain', 'vineyard', 'battle'])(
-    'the %s’s order says under its question that the pictures are shuffled',
+    'the %s’s order says under its question that the pictures aren’t in story order',
     (name) => {
       start(<App />, laterStarted)
       openCase(new RegExp(`The ${name}`))
       tab(/Solve/)
       const question = screen.getByRole('heading', { name: 'What happened first' })
       expect(question.nextElementSibling).toHaveTextContent(
-        /^The pictures below are shuffled\. Tap one, then tap First, Then, or Last\.$/,
+        /^These pictures aren’t in story order\. Tap one, then tap First, Then, or Last\.$/,
       )
     },
   )
+
+  // The mountain introduces the order, so it is where a player meets its refusal (#123): the last
+  // picture that would leave the pictures as listed is refused in the bank's head, on a first try,
+  // as a blank refuses the wrong kind of word, and it stays picked up.
+  it('in the mountain, the last picture that would leave the order as listed is refused', () => {
+    start(<App />, laterStarted)
+    openCase(/The mountain/)
+    tab(/Solve/)
+    for (const [i, name] of ['The water', 'The fire', 'Baal’s altar'].entries()) {
+      tile(name)
+      orderSlot(i)
+    }
+    expect(result()).toHaveTextContent(/^That’s how they’re listed, not how the story went\.$/)
+    const places = [...document.querySelectorAll('.oslot')].map((e) => e.textContent)
+    expect(places).toEqual(['The water', 'The fire', '—'])
+    expect(document.querySelector('.tile.is-on')).toHaveTextContent('Baal’s altar')
+  })
 
   it('the brief’s card goes with the first tap, and the menu holds the brief, a hint, Cases, Restart, and the switches', () => {
     start(<App />, laterStarted)
@@ -1377,10 +1396,10 @@ describe('the tutorial’s marks (#25)', () => {
     expect(coach()).toBeNull()
     tab(/Solve/)
     await waitFor(() => expect(at()).toBe('.tiles'))
-    expect(said()).toBe('These are shuffled. Which happened first?')
+    expect(said()).toBe('These aren’t in story order. Which happened first?')
     tile('Baal’s altar')
     expect(at()).toBe('.order')
-    expect(said()).toBe('These are shuffled. Which happened first?')
+    expect(said()).toBe('These aren’t in story order. Which happened first?')
     orderSlot(0)
     expect(coach()).toBeNull()
     menu('Cases')
