@@ -4,7 +4,7 @@ import { carmel } from '../cases/carmel/case.ts'
 import { valley } from '../cases/valley/case.ts'
 import { vineyard } from '../cases/vineyard/case.ts'
 import type { Box, CaseStructure } from '../cases/types.ts'
-import { aim, broad, firstWrong, half, stranded } from './hints.ts'
+import { aim, broad, firstWrong, half, settles, stranded } from './hints.ts'
 import { fresh, tap, type Progress } from './state.ts'
 
 /** A case with every spot tapped. */
@@ -48,6 +48,32 @@ describe('what a hint points at (#29)', () => {
     expect(evidence[firstWrong(carmel, p)!]).toBe('mocker')
     expect(firstWrong(carmel, { ...p, faces: { c1: 'ahab', c2: 'ahab' } })).toBe('c1')
     expect(firstWrong(carmel, { ...p, order: ['baal', 'water', 'fire'] })).toBe('a1')
+  })
+})
+
+describe('after a failed close: what pays its look, and what each hint names (#123)', () => {
+  /** The vineyard swept and every answer in, then the faces, order, and blanks given put instead. */
+  const closed = (faces = {}, order: string[] = [...vineyard.order], fills = {}) => ({
+    ...swept(vineyard),
+    faces: { p1: 'ahab', p2: 'jezebel', p3: 'naboth', ...faces },
+    order,
+    fills: {
+      ...Object.fromEntries(vineyard.blocks.flatMap((b) => Object.entries(b.blanks))),
+      ...fills,
+    },
+  })
+  const paying = (at: Progress) =>
+    vineyard.moments
+      .flatMap((m) => m.spots.map((x) => x.id))
+      .filter((id) => settles(vineyard, at, id))
+
+  // Only evidence pays the owed look: the thing a hint would ring for an answer the close found
+  // wrong, one whose found words give its right word, and for the order what dates each picture out
+  // of place. The window yields "vineyard", which is a moment's id as well, and dates nothing.
+  it('a thing pays when it settles an answer the close found wrong', () => {
+    const at = closed({}, ['bedchamber', 'vineyard', 'gate'], { s4: 'ahab' })
+    expect(paying(at)).toEqual(['stain', 'balcony', 'seal', 'stones'])
+    expect(paying(closed())).toEqual([])
   })
 })
 

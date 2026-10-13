@@ -62,6 +62,20 @@ export const firstWrong = (s: CaseStructure, p: Progress) =>
   things(s, p).find(([, put, answer]) => put !== answer)?.[0]
 
 /**
+ * Whether a thing settles an answer a failed close found wrong, kept as `at` (#123): it is the
+ * thing a hint would ring for it, or, for a face or a blank, its found words give the right word;
+ * for the order, it dates a picture out of place. Opening it pays the look the close owes.
+ */
+export function settles(s: CaseStructure, at: Progress, spot: string) {
+  const words = s.moments.flatMap((m) => m.spots).find((x) => x.id === spot)?.words ?? []
+  return things(s, at).some(
+    ([id, put, answer]) =>
+      put !== answer &&
+      (s.evidence[id] === spot || (!s.order?.includes(id) && words.includes(answer))),
+  )
+}
+
+/**
  * How a hint names the answer it is for (#102), and the reveal a miss (#107): a face by its line,
  * a blank by the three words before it in its sentence, or after it when it opens one, and the
  * order, which a hint asks about by one of its moments, as the order, and the reveal, whose line

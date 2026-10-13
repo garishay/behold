@@ -68,6 +68,9 @@ export default function App({ passages = fetchedPassages }: AppProps) {
   )
   const [nudge, setNudge] = useState(0)
   const [restarts, setRestarts] = useState(0)
+  // The close each case owes a look for, kept for the session and never stored: leaving a case and
+  // coming back keeps it, and a reload or Restart clears it (#123).
+  const [due, setDue] = useState<Readonly<Record<string, Progress | null>>>({})
   useEffect(() => save(saved), [saved])
   useEffect(() => {
     const onPop = (e: PopStateEvent) => {
@@ -124,8 +127,11 @@ export default function App({ passages = fetchedPassages }: AppProps) {
             history.back()
           }
           set(fresh(found.structure))
+          setDue({ ...due, [open]: null })
           setRestarts(restarts + 1)
         }}
+        due={due[open] ?? null}
+        onDue={(close) => setDue({ ...due, [open]: close })}
         passages={passages}
       />
     )

@@ -111,10 +111,10 @@ export const strings = {
   last: 'Last',
   emptySlot: '—',
   closeCase: 'Close the case',
-  // From the vineyard on, Close's place after a failed close, until something is tapped on Look
-  // (#118). It says why the look comes first, not that the player guessed; "anything", since
-  // "something" echoed "There’s still something to find here." as if more were left (118b).
-  closeAfterLook: 'Check the evidence: tap anything on Look.',
+  // From the vineyard on, Close's place after a failed close, until a thing tapped on Look settles
+  // an answer the close found wrong (#118, #123). It says why Close waits and what brings it back,
+  // with the verb the game uses for its tabs; it never says the player guessed.
+  closeAfterLook: 'To close again, open Look and find a clue.',
   // Once the account is full, what's left is rung with what it wants: a face, or the order (#114).
   owedFace: 'Who is this? A face takes a name.',
   owedOrder: 'What happened first? Order the pictures too.',

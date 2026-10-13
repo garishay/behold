@@ -14,6 +14,7 @@ import {
   firstWrong,
   half,
   named as nameOf,
+  settles,
   stranded,
   stuck,
   type Aim,
@@ -58,6 +59,12 @@ interface PlayerProps {
   onProgress: (p: Progress) => void
   onCases: () => void
   onRestart: () => void
+  /**
+   * The close a look is owed for, kept by the app for the session and never stored, so leaving
+   * the case and coming back leaves Close waiting, while a reload or Restart clears it (#123).
+   */
+  due: Progress | null
+  onDue: (close: Progress | null) => void
   passages: PassageService
 }
 
@@ -94,7 +101,8 @@ const clock = (seconds: number, fire: () => void) => () => {
  * case keeps the two it had. What the player has done is `progress`, kept by the app; what they
  * are in the middle of is this screen's.
  */
-export function Player({ entry, progress, onProgress, onCases, onRestart, passages }: PlayerProps) {
+export function Player(props: PlayerProps) {
+  const { entry, progress, onProgress, onCases, onRestart, due, onDue, passages } = props
   const { structure: s } = entry
   const text = entry.text.en
   // A solved case mounts on its reveal when that is the entry on top, else on Solve, where its
@@ -136,17 +144,21 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const [fits, setFits] = useState<readonly string[]>([])
   const [orderFits, setOrderFits] = useState(false)
   const told = asking && s.ask !== undefined ? [...fits, s.ask] : fits
-  // A failed close with something still unfound rings Look until it opens (#95).
+  // A failed close with something still unfound rings Look until it opens (#95), and so does a tap
+  // on Close while a look is owed (#123).
   const [seek, setSeek] = useState(false)
-  // From the vineyard on, a failed close owes a look: Close the case comes back once a thing is
-  // opened on Look, and says so in its place, so a guess never costs less than a look (#118).
-  const [owe, setOwe] = useState(false)
+  // From the vineyard on, a failed close owes a look: Close the case comes back once a thing tapped
+  // on Look settles an answer the close found wrong, and its place says so, so only evidence brings
+  // it back (#118, #123). The look stays owed when the case is left and opened again.
+  const owe = due !== null
+  // What the last failed close found, kept from it (#29 A4): what pays the look it owes (#123).
+  const [failed, setFailed] = useState<Progress | null>(due)
   // The bank's head: a refused word's message, or how far off a close was (07c, #24 [3]).
   const [note, setNote] = useState('')
   // The stuck signals (#29): taps on the picture that find nothing new while something is unfound,
-  // a stay on a moment with something left, a wait on Solve with nothing left to place (#65), and
-  // failed closes, each keeping the first thing it found wrong. A new find starts the first three
-  // over, and a hint taken starts all four.
+  // or pay nothing while a look is owed (#123), a stay on a moment with something left, a wait on
+  // Solve with nothing left to place (#65), and failed closes, each keeping the first thing it found
+  // wrong. A new find starts the first three over, and a hint taken starts all four.
   const [run, setRun] = useState(0)
   const [stayed, setStayed] = useState(false)
   // The placements a fired wait belongs to: a word placed, emptied, or found starts it over, after
@@ -294,10 +306,10 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     close(o.progress)
   }
   // A tap that found nothing new, on a spot found before or on no spot, runs toward a hint while
-  // something is still unfound. A guided step holds the picture to its ring, so none runs under one
-  // (#77).
+  // something is still unfound, or while a look is owed (#123). A guided step holds the picture to
+  // its ring, so none runs under one (#77).
   const nothingNew = () => {
-    if (unfound(spots)) setRun(run + 1)
+    if (unfound(spots) || owe) setRun(run + 1)
   }
   const onTap = (spotId: string) => {
     const { progress: next, added } = tap(s, progress, spotId)
@@ -309,14 +321,18 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     // A spot's first tap is found, or paper when it copies one; a spot tapped again is silent.
     if (opened !== undefined) play('paper')
     else if (next.tapped.length > progress.tapped.length) play('found')
-    if (next.tapped.length > progress.tapped.length) {
+    // A look owed is paid by a thing tapped that settles an answer the close found wrong, its paper
+    // too, since it opens on the tap, as a find starts the signals over; any other runs toward a
+    // hint (#118, #123). Papers on Solve pays nothing.
+    const pays = owe && failed !== null && settles(s, failed, spotId)
+    if (next.tapped.length > progress.tapped.length || pays) {
       setRun(0)
       setStayed(false)
       setWaited(null)
     } else nothingNew()
-    // A hint has done its work once its thing is tapped (#29), and a look owed is paid (#118).
+    // A hint has done its work once its thing is tapped (#29).
     if (hint?.spot === spotId) setHint(null)
-    setOwe(false)
+    if (pays) onDue(null)
     setFresh([...fresh, ...added])
     if (spot?.paper !== undefined) setPaper(spot.paper)
     onProgress(next)
@@ -327,6 +343,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     const left = spots.filter((x) => !progress.tapped.includes(x.id)).length
     const rest = left > 0 ? ` ${strings.toFind(left, s.moments.length)}` : ''
     setNote(off === 0 ? '' : strings.noMatch(off) + rest)
+    setFailed(off > 0 ? progress : null)
     if (off > 0) {
       const first = firstWrong(s, progress) ?? null
       play('notYet')
@@ -362,7 +379,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
         bring(document.querySelector(order ? '.order' : `[data-slot="${first}"]`))
       } else if (!s.marks) {
         // A case that doesn't mark owes a look before it closes again (#118).
-        setOwe(true)
+        onDue(progress)
         if (fails + 1 >= stuck.closes) setHint(null)
       }
     }
@@ -695,7 +712,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
               has the row, or a hint on offer has it alone (#24, Solve's room). */}
           {closable(s, progress) && (full || offer) && (
             <div className="submit-row">
-              {/* While a look is owed, Close's place says what brings it back (#118). */}
+              {/* Owed a look, Close says what brings it back; a tap rings Look (#118, #123). */}
               {full && (
                 <button
                   type="button"
@@ -703,7 +720,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
                   data-close
                   disabled={progress.solved}
                   aria-disabled={owe || undefined}
-                  onClick={owe ? undefined : onSubmit}
+                  onClick={owe ? () => setSeek(true) : onSubmit}
                 >
                   {owe ? strings.closeAfterLook : strings.closeCase}
                 </button>
