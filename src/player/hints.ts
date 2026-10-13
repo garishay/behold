@@ -75,6 +75,42 @@ export function settles(s: CaseStructure, at: Progress, spot: string) {
   )
 }
 
+/** Where an answer sits in Solve's order: the faces, then the order as one, then the blanks. */
+const rank = (s: CaseStructure, id: string | null) =>
+  id === null
+    ? -1
+    : [
+        ...s.faces.map((f) => f.id),
+        'order',
+        ...s.blocks.flatMap((b) => Object.keys(b.blanks)),
+      ].indexOf(s.order?.includes(id) ? 'order' : id)
+
+/**
+ * Whether an answer a failed close found wrong, kept as `at`, still holds what it found, so a hint
+ * can say it doesn't fit (#123): a face or a blank its word, the order every place.
+ */
+export function holds(s: CaseStructure, at: Progress, p: Progress, id: string) {
+  const [, put, answer] = things(s, at).find(([x]) => x === id) ?? []
+  const kept = s.order?.includes(id)
+    ? p.order.join() === at.order.join()
+    : put === (p.faces[id] ?? p.fills[id])
+  return put !== answer && kept
+}
+
+/**
+ * The answer the next hint after a failed close names (#123): the first, after the one the last
+ * hint named and round again, of those the close found wrong, the order as one by its first place
+ * out of order. They are kept from the close, as A4 keeps a close's aim (#29), so a changed answer
+ * can't ask the hints what is right.
+ */
+export function next(s: CaseStructure, at: Progress, last: string | null) {
+  const order = s.order?.find((m, i) => at.order[i] !== m)
+  const found = things(s, at)
+    .filter(([id, put, answer]) => put !== answer && (!s.order?.includes(id) || id === order))
+    .map(([id]) => id)
+  return found.find((id) => rank(s, id) > rank(s, last)) ?? found[0]
+}
+
 /**
  * How a hint names the answer it is for (#102), and the reveal a miss (#107): a face by its line,
  * a blank by the three words before it in its sentence, or after it when it opens one, and the

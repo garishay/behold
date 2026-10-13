@@ -4,7 +4,7 @@ import { carmel } from '../cases/carmel/case.ts'
 import { valley } from '../cases/valley/case.ts'
 import { vineyard } from '../cases/vineyard/case.ts'
 import type { Box, CaseStructure } from '../cases/types.ts'
-import { aim, broad, firstWrong, half, settles, stranded } from './hints.ts'
+import { aim, broad, firstWrong, half, next, settles, stranded } from './hints.ts'
 import { fresh, tap, type Progress } from './state.ts'
 
 /** A case with every spot tapped. */
@@ -74,6 +74,16 @@ describe('after a failed close: what pays its look, and what each hint names (#1
     const at = closed({}, ['bedchamber', 'vineyard', 'gate'], { s4: 'ahab' })
     expect(paying(at)).toEqual(['stain', 'balcony', 'seal', 'stones'])
     expect(paying(closed())).toEqual([])
+  })
+
+  // Tester 3's first close (#23): the seated man, the order as listed, and "First you ___". Each
+  // hint names the next after the one named last, the order as one, and round again.
+  it('each hint names the next answer the close found wrong, the order as one', () => {
+    const at = closed({ p3: 'elijah' }, ['vineyard', 'bedchamber', 'gate'], { v1: 'cursed' })
+    expect(next(vineyard, at, null)).toBe('p3')
+    expect(next(vineyard, at, 'p3')).toBe('bedchamber')
+    expect(next(vineyard, at, 'gate')).toBe('v1')
+    expect(next(vineyard, at, 'v1')).toBe('p3')
   })
 })
 

@@ -29,6 +29,9 @@ const counted = [
 ]
 /** What a case shows: its one picture, or its pictures. */
 const shown = (pictures: number) => (pictures > 1 ? 'pictures' : 'picture')
+/** An answer, named as a hint names it, that a close found wrong: it leads its sentence (#123). */
+const misfit = (answer: string) =>
+  `“${answer.charAt(0).toUpperCase()}${answer.slice(1)}” doesn’t fit the story.`
 
 export const strings = {
   title: 'Behold',
@@ -163,6 +166,12 @@ export const strings = {
     answer === undefined
       ? `Open ${moment}: there’s more to find.`
       : `Open ${moment} to settle “${answer}”.`,
+  // A hint for an answer a failed close found wrong, while it still holds what the close found,
+  // says first that it doesn't fit, in the close's words, then where its clue is: on a button, in
+  // the half of the picture, or the thing itself (#123).
+  misfitOpen: (button: string, answer: string) => `${misfit(answer)} Open ${button} for a clue.`,
+  misfitHere: (answer: string) => `${misfit(answer)} There’s a clue here.`,
+  misfitThing: (answer: string) => `${misfit(answer)} Here’s a clue. Tap it.`,
   blankMark: '___',
 
   // The reveal.
