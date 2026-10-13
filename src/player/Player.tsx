@@ -166,6 +166,9 @@ export function Player(props: PlayerProps) {
   const [last, setLast] = useState<string | null>(null)
   // The bank's head: a refused word's message, or how far off a close was (07c, #24 [3]).
   const [note, setNote] = useState('')
+  // The order's refusal of the pictures as listed, a mark at the order, where the next tap is, until
+  // the next move; counted, so a refusal again shows it again (#123, the owner's phone check).
+  const [refused, setRefused] = useState(0)
   // The stuck signals (#29): taps on the picture that find nothing new while something is unfound,
   // or pay nothing while a look is owed (#123), a stay on a moment with something left, a wait on
   // Solve with nothing left to place (#65), and failed closes. A new find starts the first three
@@ -301,16 +304,12 @@ export function Player(props: PlayerProps) {
     const kind = o.wants
     const found = progress.bank.some((w) => s.words[w] === kind)
     const face = s.faces.some((f) => f.id === o.by)
-    // The order refuses the pictures as listed, as a slot refuses the wrong kind (#123).
     setNote(
-      o.listed
-        ? strings.listed
-        : kind === undefined
-          ? ''
-          : face
-            ? strings.faceWants(found)
-            : strings.blankWants(kind, found),
+      kind === undefined ? '' : face ? strings.faceWants(found) : strings.blankWants(kind, found),
     )
+    // The order refuses the pictures as listed at the order, not in the bank's head, which keeps the
+    // count or the legend, and the next move takes the mark away (#123, the owner's phone check).
+    setRefused(o.listed ? refused + 1 : 0)
     if (placed(progress, o.progress)) play('place')
     // A wrong word set in the slot a question asks about asks again, words, dim, and all (#77).
     const word = asked && put(o.progress, asked)
@@ -414,10 +413,12 @@ export function Player(props: PlayerProps) {
    */
   const land = (v: 'look' | 'solve') => {
     // The rings clear when Solve is left, not when its own tab is tapped again (review round 1),
-    // and what was picked up or waiting is let go (#24, Solve's room).
+    // and what was picked up or waiting is let go (#24, Solve's room), the order's refusal of the
+    // picture picked up with it (#123).
     if (view === 'solve' && v !== 'solve') {
       setFresh([])
       setSelection(nothing)
+      setRefused(0)
       kept.current = document.querySelector('.solve')?.scrollTop ?? 0
     }
     // Look's caption closes with the dock when Solve opens.
@@ -466,10 +467,12 @@ export function Player(props: PlayerProps) {
    * thing's half would take most of the picture, its first hint is the second tier: tier 1 would
    * ring the same box and say less (#102 [1]). On Solve both tiers ring Look's button, so a hint
    * showing there is shown again, and its second tier waits for Look (#118). After a failed close,
-   * each new hint names the next answer it found wrong after the last one named (#123).
+   * each new hint names the next answer it found wrong after the last one named (#123). A hint asked
+   * for while the order's refusal shows takes its place, as the next move would (#123).
    */
   const take = () => {
     setSaidAt(null)
+    setRefused(0)
     if (guided || hint?.tier === 2 || hint?.why === 'close' || (hint && view !== 'look'))
       return nudge()
     const target = aim(s, progress, (failed && nextOf(s, failed, last)) ?? asked ?? null)
@@ -609,6 +612,9 @@ export function Player(props: PlayerProps) {
     misfit === undefined
       ? [strings.hintSettles, strings.hintSettlesThing]
       : [strings.misfitHere, strings.misfitThing]
+  // The order's refusal, at the order until the next move; nothing is marked under a sheet or a
+  // paper (#123).
+  const refusal = refused > 0 && sheet === null && paper === null
   const hinted = hintAt()
   const at = hinted ?? markAt()
   // A step that leads with its slot says what comes next once the slot waits (#102).
@@ -782,6 +788,8 @@ export function Player(props: PlayerProps) {
         <PapersSheet text={text} papers={progress.papers} onClose={() => setSheet(null)} />
       )}
       {paper !== null && <PaperModal text={text} paper={paper} onClose={() => setPaper(null)} />}
+      {/* The order rung with its refusal, as the mountain's lesson rings it (#123). */}
+      {refusal && <CoachMark key={refused} at=".order" label={strings.listed} />}
       {hinted && hint && (
         <CoachMark
           key={nudges}
