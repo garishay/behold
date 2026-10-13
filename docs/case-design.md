@@ -11,6 +11,9 @@ found the opposite: players tapped every spot without reading and filled the bla
 words they had collected, because the blanks fell to grammar and to the kind a blank takes. The
 rules below are the answer, ruled on #26.
 
+Behold's difficulty target is Monday for the valley, Tuesday for the mountain, and Wednesday from
+the vineyard on: hard because you have to look, never because you have to be clever (#125).
+
 ## The rules
 
 1. **Looking is cheaper than guessing.** Every blank has at least two plausible rivals of its own
@@ -42,11 +45,11 @@ rules below are the answer, ruled on #26.
    valley and the mountain mark the answers too, because they teach the loop: from the valley's
    first failed close and the mountain's second, a ✓ on each answer that fits and a ring on each
    that doesn't, which says which answer, never what it is, and the first ring is brought into view
-   (#95, #102). From the vineyard on, a failed close says only how many, and marks no answer (#106),
-   and the next close waits for a look: Close the case comes back once a thing tapped on Look
-   settles an answer the close found wrong, and its place says so, so only evidence brings it back
-   and a guess never costs less than a look. Papers on Solve pays nothing, and the look stays owed
-   when the case is left and opened again, until a reload or Restart (#118, #123). The bank lights
+   (#95, #102). From the vineyard on, a failed close marks no answer (#106), and its count shows
+   only once the player is close: one or two answers that don't fit are counted, and three or more
+   read "More than two answers don't fit the story.", so no guess climbs the count (#125). Close the
+   case comes back at once. The step up is told twice: under the vineyard's brief on its card, and
+   by a mark on the bank's head at its first failed close. The bank lights
    only a slot's kind, so there a ringed answer would fall to its rivals in a few closes, every ring
    at once, without a look at what settles it: guessing would be cheaper than looking (rule 1), and
    the rings would name every wrong answer for free, where a hint names one and the reveal counts

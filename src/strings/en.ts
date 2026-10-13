@@ -118,10 +118,6 @@ export const strings = {
   last: 'Last',
   emptySlot: '—',
   closeCase: 'Close the case',
-  // From the vineyard on, Close's place after a failed close, until a thing tapped on Look settles
-  // an answer the close found wrong (#118, #123). It says why Close waits and what brings it back,
-  // with the verb the game uses for its tabs; it never says the player guessed.
-  closeAfterLook: 'To close again, open Look and find a clue.',
   // Once the account is full, what's left is rung with what it wants: a face, or the order (#114).
   owedFace: 'Who is this? A face takes a name.',
   owedOrder: 'What happened first? Order the pictures too.',
@@ -137,6 +133,9 @@ export const strings = {
   // answers that don't fit the story.
   noMatch: (n: number) =>
     `${counted[n].charAt(0).toUpperCase()}${counted[n].slice(1)} ${n === 1 ? 'answer doesn’t' : 'answers don’t'} fit the story.`,
+  // From the vineyard on, a close that finds three or more says only that, so the count shows
+  // once the player is close (#125).
+  overTwo: 'More than two answers don’t fit the story.',
   // A failed close with something still unfound says how much (#95).
   toFind: (n: number, pictures: number) =>
     `There ${n === 1 ? 'is' : 'are'} ${counted[n]} more to find in the ${shown(pictures)}.`,

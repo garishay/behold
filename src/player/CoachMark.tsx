@@ -17,6 +17,12 @@ interface CoachMarkProps {
    * plays nothing and pulses the ring once.
    */
   hold?: boolean
+  /**
+   * Whether its words sit under the ring, wherever that is: the step up's, whose ring is the bank's
+   * head under Close's row, so a tap on them lands on the bank, a word and the next move, and never
+   * on Close the case (#125).
+   */
+  under?: boolean
 }
 
 /** Half a label's widest, and the gutter it keeps from the screen's edge. */
@@ -94,7 +100,7 @@ function ringFor(el: Element | null): Box | null {
  * takes no focus, and pulses only to answer a tap its hold refuses (#77). Open Solve, where a step
  * carries it, is the one part of a mark that takes a tap, and a button a keyboard reaches (#77).
  */
-export function CoachMark({ at, label, onTap, onNext, hold }: CoachMarkProps) {
+export function CoachMark({ at, label, onTap, onNext, hold, under }: CoachMarkProps) {
   const [ring, setRing] = useState<Box | null>(null)
   const [floor, setFloor] = useState(innerHeight)
   const [lines, setLines] = useState<Span>()
@@ -172,6 +178,8 @@ export function CoachMark({ at, label, onTap, onNext, hold }: CoachMarkProps) {
   const centre =
     ring &&
     Math.min(Math.max((ring.left + ring.right) / 2, half + gutter), innerWidth - half - gutter)
+  // Under the ring when the mark asks for it (#125), and else where `labelAt` puts them.
+  const room = ring && (under ? { top: ring.bottom + 8 } : labelAt(ring, floor, innerHeight, lines))
   return (
     <div className="coach" data-at={at}>
       {ring && (
@@ -189,10 +197,7 @@ export function CoachMark({ at, label, onTap, onNext, hold }: CoachMarkProps) {
             {pulse > 0 && <i key={pulse} className="pulse" onAnimationEnd={() => setPulse(0)} />}
           </div>
           {label && (
-            <div
-              className="label"
-              style={{ left: centre ?? 0, ...labelAt(ring, floor, innerHeight, lines) }}
-            >
+            <div className="label" style={{ left: centre ?? 0, ...room }}>
               <span aria-hidden>{label}</span>
               {onNext && (
                 <button ref={next} type="button" className="next" onClick={onNext}>

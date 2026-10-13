@@ -180,9 +180,15 @@ export type CaseText<S extends CaseStructure> = {
   readonly brief: string
   /**
    * A line under the brief, on its card only, for what the case's screen adds that the brief
-   * doesn't say: the mountain's dots (#77).
+   * doesn't say: the mountain's dots (#77), and the vineyard's step up (#125).
    */
   readonly note?: string
+  /**
+   * The step up, told again where it bites: the words of a mark on the bank's head at the case's
+   * first failed close, shown once, so out of a lesson's eight words. The vineyard's, where the
+   * count starts to show only once two or fewer answers are wrong (#125).
+   */
+  readonly harder?: string
   readonly passages: Labels<S['passages']>
   readonly moments: Keyed<S['moments'][number]['id'], string>
   readonly captions: Keyed<SpotOf<S>['id'], string>
