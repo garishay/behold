@@ -37,7 +37,8 @@ rules below are the answer, ruled on #26.
    the loop the game is built on, and the Playtests Issue's second criterion watches for it.
 
 5. **The check converges.** Close the case says how many answers don't fit the story, as a number,
-   and everywhere but the valley the count stays in the bank's head until the next close (#123). The
+   and everywhere but the valley the count stays in the bank's head until the next close, even
+   when the case is left and opened again; a reload or Restart clears it (#123, #12 [Q20]). The
    valley and the mountain mark the answers too, because they teach the loop: from the valley's
    first failed close and the mountain's second, a ✓ on each answer that fits and a ring on each
    that doesn't, which says which answer, never what it is, and the first ring is brought into view
