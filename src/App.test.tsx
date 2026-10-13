@@ -490,6 +490,16 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     expect(screen.getByRole('dialog', { name: 'The mountain' })).toHaveTextContent(note)
   })
 
+  // The owner's ruling on Gate 31 (#125): from the vineyard on, Close the case tells less, and the
+  // step up is told twice, first on the vineyard's card, under its brief.
+  it('the vineyard’s card says Close the case tells you less from here', () => {
+    start(<App />, laterStarted)
+    openCase(/The vineyard/)
+    expect(screen.getByRole('dialog', { name: 'The vineyard' })).toHaveTextContent(
+      'From here on, Close the case tells you less. Take your time with the pictures.',
+    )
+  })
+
   // A case's pictures are never shown in the order they happened (#77), and the vineyard round's
   // tester 1 placed the vineyard's as listed too (#23), so in every case with an order the line
   // under its question said they're shuffled (#118). Tester 3 placed both cases' as listed under
@@ -2912,11 +2922,11 @@ describe('the close converges (#95)', () => {
     }
   })
 
-  // The owner's direction (#125): from the vineyard on, the count shows only when the player is
-  // close. A failed close that finds three or more says only "more than two", and one or two are
-  // counted as before, what's left to find after it as now. Wednesday is hard because you have to
-  // look, never because you have to be clever. The mountain teaches the loop, so it keeps its
-  // numbers, as the valley does.
+  // The owner's ruling on Gate 31 (#125): from the vineyard on, the count shows only when the
+  // player is close. A failed close that finds three or more says only "more than two", and one or
+  // two are counted as before, what's left to find after it as now. Wednesday is hard because you
+  // have to look, never because you have to be clever. The mountain teaches the loop, so it keeps
+  // its numbers, as the valley does.
   const three = {
     faces: { c1: 'elijah', c2: 'baal' },
     fills: { a1: 'cried-aloud', a3: 'prophets' },
@@ -2993,9 +3003,9 @@ describe('the close converges (#95)', () => {
     expect(result()).not.toHaveTextContent(/fit the story/)
   })
 
-  // The owner's direction (#125) retires the owed look, and with it the taps that ran toward a hint
-  // while one was owed (#123): once everything is found, a tap that finds nothing new runs nothing,
-  // as before (#29 A1), and the offer comes after the second failed close.
+  // The owner's ruling on Gate 31 (#125) retires the owed look, and with it the taps that ran toward
+  // a hint while one was owed (#123): once everything is found, a tap that finds nothing new runs
+  // nothing, as before (#29 A1), and the offer comes after the second failed close.
   it('after a failed close with everything found, taps that find nothing new bring no offer', async () => {
     start(<App />, offBy(vineyard, { v1: 'stoned' }))
     openCase(/The vineyard/)
@@ -3005,6 +3015,46 @@ describe('the close converges (#95)', () => {
     await waitFor(() => expect(history.state).toEqual({ case: 'vineyard' }))
     for (let i = 0; i < stuck.taps; i++) tapSpot('cord')
     expect(document.querySelector('.offer')).toBeNull()
+  })
+
+  // The owner's ruling on Gate 31 (#125): the step up is told twice, on the vineyard's card and at
+  // its first failed close, where a mark rings the bank's head once, until the next move. It shows
+  // once, so its words are out of a lesson's eight. The second close rings nothing there.
+  const stepUp = 'The cases are harder from here: the count shows only when one or two don’t fit.'
+  it('the vineyard’s first failed close rings the bank’s head once with the step up', () => {
+    start(<App />, offBy(vineyard, { s4: 'ahab', s5: 'the-elders', v1: 'stoned' }))
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    const close = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    close()
+    expect([at(), said()]).toEqual(['.bank-head', stepUp])
+    expect(result()).toHaveTextContent(/^More than two answers don’t fit the story\.$/)
+    chip('Jezebel')
+    expect(coach()).toBeNull()
+    slot('s4')
+    close()
+    expect(result()).toHaveTextContent(/^Two answers don’t fit the story\.$/)
+    expect(coach()).toBeNull()
+  })
+
+  // The owner's ruling on Gate 31 (#125): the step up's words sat over Close's row, so the tap that
+  // would clear them pressed Close the case and took them away unread. They sit under the bank's
+  // head, over the bank, where a tap picks a word, the next move, and never presses Close.
+  it('the step up’s words sit under the bank’s head, off Close’s row', async () => {
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: Element,
+    ) {
+      return this.matches('.bank-head')
+        ? new DOMRect(16, 477, 328, 24)
+        : new DOMRect(10, 10, 100, 40)
+    })
+    start(<App />, offBy(vineyard, { s4: 'ahab', s5: 'the-elders', v1: 'stoned' }))
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    await waitFor(() => expect(document.querySelector('.coach .label')).not.toBeNull())
+    const words = document.querySelector<HTMLElement>('.coach .label')!
+    expect([words.style.top, words.style.bottom]).toEqual(['513px', ''])
   })
 
   // The vineyard round's tester 3 (#23): every failed close showed its count, but the first tap on

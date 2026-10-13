@@ -53,6 +53,8 @@ import { Think } from './Think.tsx'
 
 type View = 'look' | 'solve' | 'reveal'
 type Sheet = 'menu' | 'papers' | null
+/** A mark that answers a move: where it rings, its words, and whether they sit under it (#125). */
+type Notice = { at: string; label: string; n: number; under?: boolean }
 
 interface PlayerProps {
   entry: CaseEntry
@@ -157,9 +159,11 @@ export function Player(props: PlayerProps) {
   const [last, setLast] = useState<string | null>(null)
   // The bank's head: a refused word's message, or how far off a close was (07c, #24 [3]).
   const [note, setNote] = useState('')
-  // The order's refusal of the pictures as listed, a mark at the order, where the next tap is, until
-  // the next move; counted, so a refusal again shows it again (#123, the owner's phone check).
-  const [refused, setRefused] = useState(0)
+  // A mark that answers a move at what it's about, until the next move: the order's refusal of the
+  // pictures as listed, at the order, where the next tap is (#123), and the step up, at the bank's
+  // head on the vineyard's first failed close, its words under it, off Close's row (#125). Counted,
+  // so a refusal again shows it again.
+  const [notice, setNotice] = useState<Notice | null>(null)
   // The stuck signals (#29): taps on the picture that find nothing new while something is unfound,
   // a stay on a moment with something left, a wait on Solve with nothing left to place (#65), and
   // failed closes. A new find starts the first three over, and a hint taken starts all four.
@@ -299,7 +303,8 @@ export function Player(props: PlayerProps) {
     )
     // The order refuses the pictures as listed at the order, not in the bank's head, which keeps the
     // count or the legend, and the next move takes the mark away (#123, the owner's phone check).
-    setRefused(o.listed ? refused + 1 : 0)
+    const n = (notice?.n ?? 0) + 1
+    setNotice(o.listed ? { at: '.order', label: strings.listed, n } : null)
     if (placed(progress, o.progress)) play('place')
     // A wrong word set in the slot a question asks about asks again, words, dim, and all (#77).
     const word = asked && put(o.progress, asked)
@@ -354,6 +359,10 @@ export function Player(props: PlayerProps) {
     setNote(off === 0 || quiet ? '' : strings.noMatch(off) + rest)
     // Kept until the next close, and the one that ends the case clears it ([Q20] on #12).
     onLastClose(off > 0 ? progress : null)
+    // The case's first failed close says the step up at the bank's head, once: the vineyard's. Its
+    // words sit under the head, over the bank, where a tap picks a word, never Close (#125).
+    const harder = off > 0 && Object.keys(progress.misses).length === 0 ? text.harder : undefined
+    setNotice(harder ? { at: '.bank-head', label: harder, n: 1, under: true } : null)
     if (off > 0) {
       const first = firstWrong(s, progress) ?? null
       play('notYet')
@@ -397,12 +406,12 @@ export function Player(props: PlayerProps) {
    */
   const land = (v: 'look' | 'solve') => {
     // The rings clear when Solve is left, not when its own tab is tapped again (review round 1),
-    // and what was picked up or waiting is let go (#24, Solve's room), the order's refusal of the
-    // picture picked up with it (#123).
+    // and what was picked up or waiting is let go (#24, Solve's room), a mark that answered a move
+    // with it (#123, #125).
     if (view === 'solve' && v !== 'solve') {
       setFresh([])
       setSelection(nothing)
-      setRefused(0)
+      setNotice(null)
       kept.current = document.querySelector('.solve')?.scrollTop ?? 0
     }
     // Look's caption closes with the dock when Solve opens.
@@ -452,11 +461,11 @@ export function Player(props: PlayerProps) {
    * ring the same box and say less (#102 [1]). On Solve both tiers ring Look's button, so a hint
    * showing there is shown again, and its second tier waits for Look (#118). After a failed close,
    * each new hint names the next answer it found wrong after the last one named (#123). A hint asked
-   * for while the order's refusal shows takes its place, as the next move would (#123).
+   * for while a mark answers a move takes its place, as the next move would (#123, #125).
    */
   const take = () => {
     setSaidAt(null)
-    setRefused(0)
+    setNotice(null)
     if (guided || hint?.tier === 2 || hint?.why === 'close' || (hint && view !== 'look'))
       return nudge()
     const target = aim(s, progress, (failed && nextOf(s, failed, last)) ?? asked ?? null)
@@ -596,11 +605,11 @@ export function Player(props: PlayerProps) {
     misfit === undefined
       ? [strings.hintSettles, strings.hintSettlesThing]
       : [strings.misfitHere, strings.misfitThing]
-  // The order's refusal is Solve's one mark while it shows: a hint's, a lesson's, what's left's, and
-  // Look's ring come back after it, as they were (#123).
-  const refusal = refused > 0 && sheet === null && paper === null
-  const hinted = refusal ? undefined : hintAt()
-  const at = refusal ? '.order' : (hinted ?? markAt())
+  // A mark that answers a move is Solve's one mark while it shows: a hint's, a lesson's, what's
+  // left's, and Look's ring come back after it, as they were (#123, #125).
+  const noticed = sheet === null && paper === null ? notice : null
+  const hinted = noticed ? undefined : hintAt()
+  const at = noticed ? noticed.at : (hinted ?? markAt())
   // A step that leads with its slot says what comes next once the slot waits (#102).
   const forms = current && text.steps?.[current.id]
   const waits = current?.slotFirst === true && selection.target === current.until.filled
@@ -770,8 +779,10 @@ export function Player(props: PlayerProps) {
         <PapersSheet text={text} papers={progress.papers} onClose={() => setSheet(null)} />
       )}
       {paper !== null && <PaperModal text={text} paper={paper} onClose={() => setPaper(null)} />}
-      {/* The order rung with its refusal, as the mountain's lesson rings it (#123). */}
-      {refusal && <CoachMark key={refused} at=".order" label={strings.listed} />}
+      {/* The order rung with its refusal (#123), or the bank's head with the step up (#125). */}
+      {noticed && (
+        <CoachMark key={noticed.n} at={noticed.at} label={noticed.label} under={noticed.under} />
+      )}
       {hinted && hint && (
         <CoachMark
           key={nudges}
@@ -792,7 +803,7 @@ export function Player(props: PlayerProps) {
           onTap={() => setSaidAt(hinted)}
         />
       )}
-      {!hinted && !refusal && at && current && (
+      {!hinted && !noticed && at && current && (
         <CoachMark
           key={nudges}
           at={at}

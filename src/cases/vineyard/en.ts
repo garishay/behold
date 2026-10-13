@@ -7,6 +7,8 @@ export const en = {
   subtitle: 'Case two',
   brief:
     'A man walks a vineyard as if it were his, and a prophet has come to meet him. Whose vineyard was it, and what became of its owner?',
+  note: 'From here on, Close the case tells you less. Take your time with the pictures.',
+  harder: 'The cases are harder from here: the count shows only when one or two don’t fit.',
   passages: ['1 Kings 21'],
   moments: { vineyard: 'The vineyard', bedchamber: 'Bedchamber', gate: 'The gate' },
   captions: {
