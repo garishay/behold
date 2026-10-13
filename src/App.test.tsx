@@ -74,13 +74,15 @@ const menu = (item: string) => {
 const result = () => document.querySelector('.bank-head')
 const coach = () => document.querySelector('.coach')
 /**
- * The look a failed close owes from the vineyard on (#118): Look, a thing tapped there, its paper
- * closed if it opens one, and back to Solve. Look's button from Solve steps back in the history,
- * and jsdom lands the step on a later task, so the look waits for it before Solve opens again.
+ * The look a failed close owes from the vineyard on (#118): Look, the picture named opened if one
+ * is, a thing tapped there, its paper closed if it opens one, and back to Solve. Look's button from
+ * Solve steps back in the history, and jsdom lands the step on a later task, so the look waits for
+ * it before Solve opens again.
  */
-const lookAgain = async (id: string, spot: string) => {
+const lookAgain = async (id: string, spot: string, picture?: string) => {
   tab(/Look/)
   await waitFor(() => expect(history.state).toEqual({ case: id }))
+  if (picture) moment(picture)
   tapSpot(spot)
   const paper = screen.queryByRole('button', { name: 'Close' })
   if (paper) fireEvent.click(paper)
@@ -476,12 +478,13 @@ describe('the case screen explored (#6, 03b; #24)', () => {
 
   // The mountain is the first case with more than one picture, and a picker's dot says more waits
   // there: its card says so under the brief, in the case's own words, and the valley's doesn't
-  // (#77). Four testers took its listed order for the answer, so the card says they're shuffled
-  // (#118).
-  it('the mountain’s card says its pictures are shuffled and what a dot means, and the valley’s does not', async () => {
+  // (#77). Four testers took its listed order for the answer, so the card said they're shuffled
+  // (#118), and a fifth placed them as listed under "shuffled", so it says it in the story's terms
+  // (#123).
+  it('the mountain’s card says its pictures aren’t in story order and what a dot means, and the valley’s does not', async () => {
     start(<App />, laterStarted)
     openCase(/The valley/)
-    const note = 'Three pictures this time, shuffled. A dot means more to find there.'
+    const note = 'Three pictures this time, not in story order. A dot means more to find there.'
     expect(screen.getByRole('dialog', { name: 'The valley' })).not.toHaveTextContent(note)
     menu('Cases')
     fireEvent.click(await screen.findByRole('button', { name: /The mountain/ }))
@@ -490,19 +493,37 @@ describe('the case screen explored (#6, 03b; #24)', () => {
 
   // A case's pictures are never shown in the order they happened (#77), and the vineyard round's
   // tester 1 placed the vineyard's as listed too (#23), so in every case with an order the line
-  // under its question says they're shuffled (#118).
+  // under its question said they're shuffled (#118). Tester 3 placed both cases' as listed under
+  // it, so it says they aren't in story order (#123).
   it.each(['mountain', 'vineyard', 'battle'])(
-    'the %s’s order says under its question that the pictures are shuffled',
+    'the %s’s order says under its question that the pictures aren’t in story order',
     (name) => {
       start(<App />, laterStarted)
       openCase(new RegExp(`The ${name}`))
       tab(/Solve/)
       const question = screen.getByRole('heading', { name: 'What happened first' })
       expect(question.nextElementSibling).toHaveTextContent(
-        /^The pictures below are shuffled\. Tap one, then tap First, Then, or Last\.$/,
+        /^These pictures aren’t in story order\. Tap one, then tap First, Then, or Last\.$/,
       )
     },
   )
+
+  // The mountain introduces the order, so it is where a player meets its refusal (#123): the last
+  // picture that would leave the pictures as listed is refused in the bank's head, on a first try,
+  // as a blank refuses the wrong kind of word, and it stays picked up.
+  it('in the mountain, the last picture that would leave the order as listed is refused', () => {
+    start(<App />, laterStarted)
+    openCase(/The mountain/)
+    tab(/Solve/)
+    for (const [i, name] of ['The water', 'The fire', 'Baal’s altar'].entries()) {
+      tile(name)
+      orderSlot(i)
+    }
+    expect(result()).toHaveTextContent(/^That’s how they’re listed, not how the story went\.$/)
+    const places = [...document.querySelectorAll('.oslot')].map((e) => e.textContent)
+    expect(places).toEqual(['The water', 'The fire', '—'])
+    expect(document.querySelector('.tile.is-on')).toHaveTextContent('Baal’s altar')
+  })
 
   it('the brief’s card goes with the first tap, and the menu holds the brief, a hint, Cases, Restart, and the switches', () => {
     start(<App />, laterStarted)
@@ -1263,8 +1284,8 @@ describe('the tutorial’s marks (#25)', () => {
 
   // On Look the question rings only Solve's button, so a hint is offered there as in any case (#29),
   // and takes the ring's place: it points at the evidence for the blank asked about, the giant
-  // (#77), and names the blank. His half would take 80% of the picture, so the first hint is the
-  // second tier, at him (#102 [1]).
+  // (#77), and says that blank doesn't fit (#123). His half would take 80% of the picture, so the
+  // first hint is the second tier, at him (#102 [1]).
   it('a hint asked for on Look during the question points at the giant', async () => {
     start()
     openCase(/The valley/)
@@ -1278,7 +1299,7 @@ describe('the tutorial’s marks (#25)', () => {
     menu('Hint')
     expect([at(), said()]).toEqual([
       '[data-spot="giant"]',
-      'This settles “the sword of ___”. Tap it.',
+      '“The sword of ___” doesn’t fit the story. Here’s a clue. Tap it.',
     ])
   })
 
@@ -1375,10 +1396,10 @@ describe('the tutorial’s marks (#25)', () => {
     expect(coach()).toBeNull()
     tab(/Solve/)
     await waitFor(() => expect(at()).toBe('.tiles'))
-    expect(said()).toBe('These are shuffled. Which happened first?')
+    expect(said()).toBe('These aren’t in story order. Which happened first?')
     tile('Baal’s altar')
     expect(at()).toBe('.order')
-    expect(said()).toBe('These are shuffled. Which happened first?')
+    expect(said()).toBe('These aren’t in story order. Which happened first?')
     orderSlot(0)
     expect(coach()).toBeNull()
     menu('Cases')
@@ -2063,7 +2084,7 @@ describe('hints (#29)', () => {
     menu('Hint')
     expect([at(), said()]).toEqual([
       '[data-view="look"]',
-      'Open Look to settle “loaves for his ___”.',
+      '“Loaves for his ___” doesn’t fit the story. Open Look for a clue.',
     ])
     tab(/Look/)
     fireEvent.click(screen.getByRole('button', { name: 'Still stuck? Show me' }))
@@ -2103,15 +2124,17 @@ describe('hints (#29)', () => {
   // The next round's first tester (#102): all three of his hints were for the giant's face, and none
   // said so. A hint for an answer names it, a blank by the words beside it, those after it when it
   // opens its sentence, and its second tier names it again; from Solve, Look's button says to open
-  // it (#118).
-  it('a hint names the answer it is for, at both tiers', async () => {
+  // it (#118). The vineyard round's tester 3 never read "Open Look to settle “the seated man”." as
+  // "the seated man is wrong", so each says first that it doesn't fit (#123).
+  it('a hint names the answer it is for and says it doesn’t fit, at both tiers', async () => {
     await missOne('t2', 'David')
     menu('Hint')
-    expect(said()).toBe('Open Look to settle “___ dressed the boy”.')
+    const misfit = '“___ dressed the boy” doesn’t fit the story.'
+    expect(said()).toBe(`${misfit} Open Look for a clue.`)
     tab(/Look/)
-    expect(said()).toBe('Something here settles “___ dressed the boy”.')
+    expect(said()).toBe(`${misfit} There’s a clue here.`)
     fireEvent.click(screen.getByRole('button', { name: 'Still stuck? Show me' }))
-    expect(said()).toBe('This settles “___ dressed the boy”. Tap it.')
+    expect(said()).toBe(`${misfit} Here’s a clue. Tap it.`)
   })
 
   // The owner's ruling [1] (#102): where a thing's half would take most of the picture, its first
@@ -2120,11 +2143,11 @@ describe('hints (#29)', () => {
   it('a hint whose half would take most of the picture starts at its second tier', async () => {
     await missOne('d2', 'Saul')
     menu('Hint')
-    expect(said()).toBe('Open Look to settle “the fallen giant”.')
+    expect(said()).toBe('“The fallen giant” doesn’t fit the story. Open Look for a clue.')
     tab(/Look/)
     expect([at(), said()]).toEqual([
       '[data-spot="giant"]',
-      'This settles “the fallen giant”. Tap it.',
+      '“The fallen giant” doesn’t fit the story. Here’s a clue. Tap it.',
     ])
     expect(screen.queryByRole('button', { name: /Show me/ })).toBeNull()
   })
@@ -2137,16 +2160,11 @@ describe('hints (#29)', () => {
   it('from Solve, a hint says to open Look, and its second tier waits for Look', async () => {
     await missOne('t1', 'spear')
     menu('Hint')
-    expect([at(), said()]).toEqual([
-      '[data-view="look"]',
-      'Open Look to settle “loaves for his ___”.',
-    ])
+    const opens = '“Loaves for his ___” doesn’t fit the story. Open Look for a clue.'
+    expect([at(), said()]).toEqual(['[data-view="look"]', opens])
     expect(offer()).toBeNull()
     menu('Hint')
-    expect([at(), said()]).toEqual([
-      '[data-view="look"]',
-      'Open Look to settle “loaves for his ___”.',
-    ])
+    expect([at(), said()]).toEqual(['[data-view="look"]', opens])
     tab(/Look/)
     expect(at()).toBe('[data-half]')
     fireEvent.click(screen.getByRole('button', { name: 'Still stuck? Show me' }))
@@ -2179,8 +2197,8 @@ describe('hints (#29)', () => {
   })
 
   // From the vineyard on, the hint after a failed close is how a stuck player learns which answer
-  // doesn't fit (#106): on the moment's button that leads to its evidence, it names the moment and
-  // the answer, and says to open it.
+  // doesn't fit (#106): on the moment's button that leads to its evidence, it names the answer, says
+  // it doesn't fit, and says to open the moment for a clue (#123).
   it('on a moment’s button, a hint for an answer names it and the answer, and says to open it', () => {
     const kept = closedCase(vineyard)
     start(<App />, { vineyard: { ...kept, fills: { ...kept.fills, s4: 'ahab' }, solved: false } })
@@ -2188,14 +2206,15 @@ describe('hints (#29)', () => {
     tab(/Solve/)
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     menu('Hint')
-    expect(said()).toBe('Open Look to settle “but written by ___”.')
+    const misfit = '“But written by ___” doesn’t fit the story.'
+    expect(said()).toBe(`${misfit} Open Look for a clue.`)
     tab(/Look/)
     expect([at(), said()]).toEqual([
       '[data-moment="bedchamber"]',
-      'Open Bedchamber to settle “but written by ___”.',
+      `${misfit} Open Bedchamber for a clue.`,
     ])
     moment('Bedchamber')
-    expect([at(), said()]).toEqual(['[data-half]', 'Something here settles “but written by ___”.'])
+    expect([at(), said()]).toEqual(['[data-half]', `${misfit} There’s a clue here.`])
   })
 
   // The ruling on F3's words (#106 [1]): a stranded player's hint points at a spot not yet found,
@@ -2230,13 +2249,13 @@ describe('hints (#29)', () => {
       tab(/Solve/)
       const close = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
       close()
-      await lookAgain('vineyard', 'cord')
+      await lookAgain('vineyard', 'seal', 'Bedchamber')
       close()
       expect(offer()).toHaveTextContent(/^Where to look$/)
       fireEvent.click(offer()!)
       expect([at(), said()]).toEqual([
         '[data-view="look"]',
-        'Open Look to settle “but written by ___”.',
+        '“But written by ___” doesn’t fit the story. Open Look for a clue.',
       ])
     },
   )
@@ -2816,11 +2835,12 @@ describe('the close converges (#95)', () => {
     tab(/Solve/)
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     menu('Hint')
-    expect([at(), said()]).toEqual(['[data-view="look"]', 'Open Look to settle “the order”.'])
+    const misfit = '“The order” doesn’t fit the story.'
+    expect([at(), said()]).toEqual(['[data-view="look"]', `${misfit} Open Look for a clue.`])
     tab(/Look/)
     expect([at(), said()]).toEqual([
       '[data-moment="baal"]',
-      'Open Baal’s altar to settle “the order”.',
+      `${misfit} Open Baal’s altar for a clue.`,
     ])
   })
 
@@ -2834,16 +2854,16 @@ describe('the close converges (#95)', () => {
   // marks no answer. Rings would let an answer fall to its rivals without a look at what settles
   // it; the valley and the mountain keep their marks, since they teach the loop.
   it.each([
-    ['vineyard', vineyard, { s4: 'ahab', v1: 'stoned' }, 'cord'],
-    ['battle', micaiah, { b1: 'thirty-two', b3: 'micaiah' }, 'robed'],
+    ['vineyard', vineyard, { s4: 'ahab', v1: 'stoned' }, 'prophet', undefined],
+    ['battle', micaiah, { b1: 'thirty-two', b3: 'micaiah' }, 'prophets', 'The thrones'],
   ] as const)(
     'in the %s, every failed close counts and marks no answer',
-    async (name, s, off, spot) => {
+    async (name, s, off, spot, picture) => {
       start(<App />, offBy(s, off))
       openCase(new RegExp(`The ${name}`))
       tab(/Solve/)
       for (let i = 0; i < 3; i++) {
-        if (i > 0) await lookAgain(s.id, spot)
+        if (i > 0) await lookAgain(s.id, spot, picture)
         fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
         expect(result()).toHaveTextContent(/^Two answers don’t fit the story\.$/)
         expect(document.querySelectorAll('.is-wrong, .is-right')).toHaveLength(0)
@@ -2853,22 +2873,26 @@ describe('the close converges (#95)', () => {
 
   // The vineyard round's tester 2 (#23) closed 38 times in eight minutes, 32 of his 37 re-closes
   // straight from Solve, and each answer he fixed fell to the count: a guess cost less than a look.
-  // From the vineyard on, a failed close owes a look. Close's place says so and keeps its focus,
-  // and does nothing, until a thing is tapped on Look, found before or not; a trip to Look alone
-  // pays nothing. The valley and the mountain close as often as the player likes (#118).
+  // From the vineyard on, a failed close owes a look. Close's place says so and keeps its focus
+  // (#118). Tester 3 paid it as a toll, a tap on whatever was under his thumb, so only a thing that
+  // settles an answer the close found wrong pays it: the cord and the robed king settle nothing in
+  // question, Elijah's words and Zedekiah's horns do; a trip to Look alone pays nothing (#123). The
+  // valley and the mountain close as often as the player likes.
   it.each([
-    ['vineyard', vineyard, { s4: 'ahab', v1: 'stoned' }, 'cord'],
-    ['battle', micaiah, { b1: 'thirty-two', b3: 'micaiah' }, 'robed'],
+    ['vineyard', vineyard, { s4: 'ahab', v1: 'stoned' }, 'cord', 'prophet', undefined],
+    ['battle', micaiah, { b1: 'thirty-two', b3: 'micaiah' }, 'robed', 'horns', 'The thrones'],
   ] as const)(
-    'in the %s, a failed close owes a look before the next',
-    async (name, s, off, spot) => {
+    'in the %s, a failed close owes a look, paid only by what settles an answer it found wrong',
+    async (name, s, off, idle, clue, picture) => {
       start(<App />, offBy(s, off))
       openCase(new RegExp(`The ${name}`))
       tab(/Solve/)
       const close = () => screen.getByRole('button', { name: 'Close the case' })
       close().focus()
       fireEvent.click(close())
-      const owed = screen.getByRole('button', { name: 'Check the evidence: tap anything on Look.' })
+      const owed = screen.getByRole('button', {
+        name: 'To close again, open Look and find a clue.',
+      })
       expect(owed).toHaveAttribute('aria-disabled', 'true')
       expect(owed).toHaveFocus()
       fireEvent.click(owed)
@@ -2877,28 +2901,262 @@ describe('the close converges (#95)', () => {
       await waitFor(() => expect(history.state).toEqual({ case: s.id }))
       tab(/Solve/)
       expect(screen.queryByRole('button', { name: 'Close the case' })).toBeNull()
-      await lookAgain(s.id, spot)
+      await lookAgain(s.id, idle)
+      expect(screen.queryByRole('button', { name: 'Close the case' })).toBeNull()
+      await lookAgain(s.id, clue, picture)
       fireEvent.click(close())
-      expect(screen.getByRole('button', { name: /^Check the evidence/ })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /^To close again/ })).toBeInTheDocument()
     },
   )
 
   // #106: where no close marks, the hint offered after the second failed close is how a stuck
-  // player learns which answer doesn't fit, one at a time, as it was; from Solve it says to open
-  // Look (#118).
+  // player learns which answer doesn't fit, one at a time, as it was; from Solve it says so, and to
+  // open Look for a clue (#118, #123).
   it('in the vineyard, the hint after the second failed close names the first answer that doesn’t fit', async () => {
     start(<App />, offBy(vineyard, { s4: 'ahab', v1: 'stoned' }))
     openCase(/The vineyard/)
     tab(/Solve/)
     const close = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     close()
-    await lookAgain('vineyard', 'cord')
+    await lookAgain('vineyard', 'seal', 'Bedchamber')
     close()
     fireEvent.click(screen.getByRole('button', { name: 'Where to look' }))
     expect([at(), said()]).toEqual([
       '[data-view="look"]',
-      'Open Look to settle “but written by ___”.',
+      '“But written by ___” doesn’t fit the story. Open Look for a clue.',
     ])
+  })
+
+  // The vineyard round's tester 3 (#23) tapped Close's waiting place at once and, with nothing
+  // happening, changed answers on Solve for a minute before going to Look. A tap on it rings Look's
+  // button, as a hint's ring does, with no words, since its place says them, until Look opens
+  // (#123).
+  it('a tap on Close while a look is owed rings Look’s button until Look opens', async () => {
+    start(<App />, offBy(vineyard, { v1: 'stoned' }))
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(at()).toBeUndefined()
+    fireEvent.click(screen.getByRole('button', { name: /^To close again/ }))
+    expect([at(), said()]).toEqual(['[data-view="look"]', ''])
+    tab(/Look/)
+    await waitFor(() => expect(history.state).toEqual({ case: 'vineyard' }))
+    tab(/Solve/)
+    expect(at()).toBeUndefined()
+  })
+
+  // The owner's ruling on Gate 30 (#123): Papers pays nothing, and only a thing tapped on Look pays,
+  // as Close's place says. Papers settle six of the vineyard's ten answers, every face among them,
+  // so opening it on Solve would pay after most failed closes with no trip to Look: here the letter
+  // settles "swore he had cursed God and ___", and Close still waits.
+  it('in the vineyard, Papers opened on Solve leaves Close waiting', () => {
+    start(<App />, offBy(vineyard, { s5: 'the-elders' }))
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    fireEvent.click(screen.getByRole('button', { name: /^Papers/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+    expect(screen.getByRole('button', { name: /^To close again/ })).toBeInTheDocument()
+  })
+
+  // The owner's ruling on Gate 30 (#123): an owed look survives leaving the case, since leaving and
+  // coming back would clear it in a few taps, cheaper than finding a clue. It is kept with the close
+  // it's kept from, in memory for the session and never stored, so a reload or Restart clears it.
+  it('in the vineyard, an owed look survives leaving the case, and a reload or Restart clears it', async () => {
+    const owed = () => screen.queryByRole('button', { name: /^To close again/ })
+    const { unmount } = start(<App />, offBy(vineyard, { v1: 'stoned' }))
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(owed()).toBeInTheDocument()
+    menu('Cases')
+    fireEvent.click(await screen.findByRole('button', { name: /The vineyard/ }))
+    tab(/Solve/)
+    expect(owed()).toBeInTheDocument()
+    expect(result()).toHaveTextContent(/^One answer doesn’t fit the story\.$/)
+    // A reload: the app opened afresh over what the device keeps.
+    unmount()
+    history.replaceState(null, '')
+    start()
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    expect(owed()).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    menu('Restart')
+    confirm.mockRestore()
+    tab(/Solve/)
+    expect(result()).not.toHaveTextContent(/fit the story/)
+  })
+
+  // A stuck player still gets through (#123): while a look is owed, a tap that settles nothing runs
+  // toward a hint, as a tap that finds nothing new does, so the offer comes on Look; its hint says
+  // which answer doesn't fit, and its thing pays the look.
+  it('while a look is owed, taps that settle nothing bring the offer, and its thing pays', async () => {
+    start(<App />, offBy(vineyard, { v1: 'stoned' }))
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    tab(/Look/)
+    await waitFor(() => expect(history.state).toEqual({ case: 'vineyard' }))
+    for (let i = 1; i < stuck.taps; i++) tapSpot('cord')
+    expect(document.querySelector('.offer')).toBeNull()
+    tapSpot('cord')
+    fireEvent.click(screen.getByRole('button', { name: 'Stuck? Where to look' }))
+    expect([at(), said()]).toEqual([
+      '[data-half]',
+      '“First you ___” doesn’t fit the story. There’s a clue here.',
+    ])
+    tapSpot('prophet')
+    tab(/Solve/)
+    expect(screen.getByRole('button', { name: 'Close the case' })).toBeInTheDocument()
+  })
+
+  // The vineyard round's tester 3 (#23): every failed close showed its count, but the first tap on
+  // a word or a slot cleared it, so most of the time Close's place stood with nothing beside it.
+  // From the vineyard on, the count stays in the bank's head until the next close; a refusal
+  // borrows the line, and the next move gives it back (#123).
+  it('in the vineyard, the count stays in the bank’s head until the next close', async () => {
+    start(<App />, offBy(vineyard, { s4: 'ahab', v1: 'stoned' }))
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    const two = /^Two answers don’t fit the story\.$/
+    expect(result()).toHaveTextContent(two)
+    chip('cursed')
+    slot('v1')
+    expect(result()).toHaveTextContent(two)
+    chip('Ahab')
+    slot('v1')
+    expect(result()).toHaveTextContent(/^That blank wants something that happened\.$/)
+    chip('killed')
+    expect(result()).toHaveTextContent(two)
+    await lookAgain('vineyard', 'prophet')
+    chip('killed')
+    slot('v1')
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(result()).toHaveTextContent(/^One answer doesn’t fit the story\.$/)
+  })
+
+  // The count's line says what's left to find as it is now, so a find shrinks it (#123).
+  it('in the vineyard, the count’s line counts what is left to find as it is now', async () => {
+    const kept = offBy(vineyard, { v1: 'stoned' }).vineyard
+    const tapped = kept.tapped.filter((id) => !['stain', 'purse'].includes(id))
+    start(<App />, { vineyard: { ...kept, tapped } })
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(result()).toHaveTextContent(
+      /^One answer doesn’t fit the story\. There are two more to find in the pictures\.$/,
+    )
+    tab(/Look/)
+    await waitFor(() => expect(history.state).toEqual({ case: 'vineyard' }))
+    tapSpot('stain')
+    tab(/Solve/)
+    expect(result()).toHaveTextContent(
+      /^One answer doesn’t fit the story\. There is one more to find in the pictures\.$/,
+    )
+  })
+
+  // The owner's ruling on Gate 30 (#123): the mountain's count stays too. Its first failed close
+  // rings nothing, as tester 3's didn't (11:33), so its count stays in the bank's head until the
+  // next close. The valley's close stays as it is.
+  it('in the mountain, the count stays in the bank’s head until the next close', () => {
+    start(<App />, mountain(everything, { ...right, faces: { c1: 'elijah', c2: 'baal' } }))
+    openCase(/The mountain/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    const one = /^One answer doesn’t fit the story\.$/
+    expect(result()).toHaveTextContent(one)
+    chip('stones')
+    expect(result()).toHaveTextContent(one)
+  })
+
+  // The owner's ruling on [Q20] (#12), from Codex's review on open (#124): the last failed close is
+  // kept for the session whether or not it owes a look, so its count stays until the next close
+  // when the case is left and opened again: the mountain's, which owes none.
+  it('in the mountain, the count survives leaving the case', async () => {
+    start(<App />, mountain(everything, { ...right, faces: { c1: 'elijah', c2: 'baal' } }))
+    openCase(/The mountain/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    menu('Cases')
+    fireEvent.click(await screen.findByRole('button', { name: /The mountain/ }))
+    tab(/Solve/)
+    expect(result()).toHaveTextContent(/^One answer doesn’t fit the story\.$/)
+  })
+
+  // The owner's ruling on [Q20] (#12): the close that ends the case clears the last failed close
+  // kept for it, so a closed case opened again from the cards shows no count.
+  it('in the mountain, a closed case opened again shows no count', async () => {
+    start(<App />, mountain(everything, { ...right, faces: { c1: 'elijah', c2: 'baal' } }))
+    openCase(/The mountain/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    chip('Ahab')
+    slot('c2')
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Back to cases' }))
+    fireEvent.click(await screen.findByRole('button', { name: /The mountain/ }))
+    expect(screen.getByRole('heading', { name: 'The case is closed.' })).toBeInTheDocument()
+    history.back()
+    await waitFor(() =>
+      expect(screen.getByRole('tab', { name: /Solve/ })).toHaveAttribute('aria-selected', 'true'),
+    )
+    expect(result()).not.toHaveTextContent(/fit the story/)
+  })
+
+  // The count goes with the close that ends the case: back on Solve from the reveal, a closed
+  // case's bank shows no count (#123).
+  it('once the vineyard closes, its Solve shows no count', async () => {
+    start(<App />, offBy(vineyard, { v1: 'stoned' }))
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    await lookAgain('vineyard', 'prophet')
+    chip('killed')
+    slot('v1')
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(screen.getByRole('heading', { name: 'The case is closed.' })).toBeInTheDocument()
+    history.back()
+    await waitFor(() =>
+      expect(screen.getByRole('tab', { name: /Solve/ })).toHaveAttribute('aria-selected', 'true'),
+    )
+    expect(result()).not.toHaveTextContent(/fit the story/)
+  })
+
+  // The vineyard round's tester 3 (#23): all four of his hints named the seated man, and the
+  // prophet's words, where most of his wrong answers went, never got one. Each new hint after a
+  // failed close names the next answer it found wrong after the last one named, and round again
+  // (#123).
+  it('each new hint names the next answer the close found wrong, and round again', async () => {
+    start(<App />, offBy(vineyard, { s4: 'ahab', v1: 'stoned' }))
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    const named = () => said()?.split(' doesn’t fit')[0]
+    menu('Hint')
+    expect(named()).toBe('“But written by ___”')
+    await lookAgain('vineyard', 'seal', 'Bedchamber')
+    menu('Hint')
+    expect(named()).toBe('“First you ___”')
+    await lookAgain('vineyard', 'prophet', 'The vineyard')
+    menu('Hint')
+    expect(named()).toBe('“But written by ___”')
+  })
+
+  // A hint says an answer doesn't fit only while it holds what the close found: changed since, it
+  // says what settles it, as a hint for an answer still empty does (#123).
+  it('a hint says an answer doesn’t fit only while it holds what the close found', () => {
+    start(<App />, offBy(vineyard, { s4: 'ahab' }))
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    menu('Hint')
+    expect(said()).toBe('“But written by ___” doesn’t fit the story. Open Look for a clue.')
+    chip('Naboth')
+    slot('s4')
+    expect(said()).toBe('Open Look to settle “but written by ___”.')
   })
 })
 
@@ -3043,11 +3301,11 @@ describe('the case solved (#6, 03c; #24)', () => {
     tab(/Solve/)
     const close = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     close()
-    await lookAgain('vineyard', 'cord')
+    await lookAgain('vineyard', 'seal', 'Bedchamber')
     chip('Naboth')
     slot('s4')
     close()
-    await lookAgain('vineyard', 'cord')
+    await lookAgain('vineyard', 'seal', 'Bedchamber')
     for (const [id, word] of [
       ['p1', 'Ahab'],
       ['s4', 'Jezebel'],

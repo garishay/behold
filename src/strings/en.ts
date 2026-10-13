@@ -29,6 +29,9 @@ const counted = [
 ]
 /** What a case shows: its one picture, or its pictures. */
 const shown = (pictures: number) => (pictures > 1 ? 'pictures' : 'picture')
+/** An answer, named as a hint names it, that a close found wrong: it leads its sentence (#123). */
+const misfit = (answer: string) =>
+  `“${answer.charAt(0).toUpperCase()}${answer.slice(1)}” doesn’t fit the story.`
 
 export const strings = {
   title: 'Behold',
@@ -104,17 +107,21 @@ export const strings = {
   whoIsWho: 'Who is who',
   who: 'who?',
   whatHappenedFirst: 'What happened first',
-  // The pictures are never shown in the order they happened, and the line says so (#118).
-  orderHint: 'The pictures below are shuffled. Tap one, then tap First, Then, or Last.',
+  // The pictures are never shown in the order they happened, and the line says so in the story's
+  // terms, since "shuffled" went the way "out of order" did (#118, #123).
+  orderHint: 'These pictures aren’t in story order. Tap one, then tap First, Then, or Last.',
+  // The last picture that would leave the order as the tray lists it is refused, as a blank refuses
+  // the wrong kind of word (#123).
+  listed: 'That’s how they’re listed, not how the story went.',
   first: 'First',
   then: 'Then',
   last: 'Last',
   emptySlot: '—',
   closeCase: 'Close the case',
-  // From the vineyard on, Close's place after a failed close, until something is tapped on Look
-  // (#118). It says why the look comes first, not that the player guessed; "anything", since
-  // "something" echoed "There’s still something to find here." as if more were left (118b).
-  closeAfterLook: 'Check the evidence: tap anything on Look.',
+  // From the vineyard on, Close's place after a failed close, until a thing tapped on Look settles
+  // an answer the close found wrong (#118, #123). It says why Close waits and what brings it back,
+  // with the verb the game uses for its tabs; it never says the player guessed.
+  closeAfterLook: 'To close again, open Look and find a clue.',
   // Once the account is full, what's left is rung with what it wants: a face, or the order (#114).
   owedFace: 'Who is this? A face takes a name.',
   owedOrder: 'What happened first? Order the pictures too.',
@@ -163,6 +170,12 @@ export const strings = {
     answer === undefined
       ? `Open ${moment}: there’s more to find.`
       : `Open ${moment} to settle “${answer}”.`,
+  // A hint for an answer a failed close found wrong, while it still holds what the close found,
+  // says first that it doesn't fit, in the close's words, then where its clue is: on a button, in
+  // the half of the picture, or the thing itself (#123).
+  misfitOpen: (button: string, answer: string) => `${misfit(answer)} Open ${button} for a clue.`,
+  misfitHere: (answer: string) => `${misfit(answer)} There’s a clue here.`,
+  misfitThing: (answer: string) => `${misfit(answer)} Here’s a clue. Tap it.`,
   blankMark: '___',
 
   // The reveal.
