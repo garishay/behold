@@ -2916,6 +2916,42 @@ describe('the close converges (#95)', () => {
     },
   )
 
+  // The owner's ruling on Gate 31 (#125): from the vineyard on, the count shows only when the
+  // player is close. A failed close that finds three or more says only "more than two", and one or
+  // two are counted as before, what's left to find after it as now. Wednesday is hard because you
+  // have to look, never because you have to be clever. The mountain teaches the loop, so it keeps
+  // its numbers, as the valley does.
+  const three = {
+    faces: { c1: 'elijah', c2: 'baal' },
+    fills: { a1: 'cried-aloud', a3: 'prophets' },
+  }
+  it.each([
+    [
+      'The vineyard',
+      'More than two',
+      offBy(vineyard, { s4: 'ahab', s5: 'the-elders', v1: 'stoned' }),
+    ],
+    [
+      'The battle',
+      'More than two',
+      offBy(micaiah, { b1: 'thirty-two', b2: 'refrain', b3: 'micaiah' }),
+    ],
+    [
+      'The mountain',
+      'Three',
+      mountain(everything, { ...right, ...three, fills: { ...right.fills, ...three.fills } }),
+    ],
+  ] as const)(
+    '%s: a close of three or more says “%s answers don’t fit the story.”',
+    (name, many, kept) => {
+      start(<App />, kept)
+      openCase(new RegExp(name))
+      tab(/Solve/)
+      fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+      expect(result()).toHaveTextContent(new RegExp(`^${many} answers don’t fit the story\\.$`))
+    },
+  )
+
   // The vineyard round's tester 2 (#23) closed 38 times in eight minutes, 32 of his 37 re-closes
   // straight from Solve, and each answer he fixed fell to the count: a guess cost less than a look.
   // From the vineyard on, a failed close owes a look. Close's place says so and keeps its focus

@@ -137,6 +137,9 @@ export const strings = {
   // answers that don't fit the story.
   noMatch: (n: number) =>
     `${counted[n].charAt(0).toUpperCase()}${counted[n].slice(1)} ${n === 1 ? 'answer doesn’t' : 'answers don’t'} fit the story.`,
+  // From the vineyard on, a close that finds three or more says only that, so the count shows
+  // once the player is close (#125).
+  overTwo: 'More than two answers don’t fit the story.',
   // A failed close with something still unfound says how much (#95).
   toFind: (n: number, pictures: number) =>
     `There ${n === 1 ? 'is' : 'are'} ${counted[n]} more to find in the ${shown(pictures)}.`,

@@ -357,9 +357,12 @@ export function Player(props: PlayerProps) {
   const left = spots.filter((x) => !progress.tapped.includes(x.id)).length
   const rest = left > 0 ? ` ${strings.toFind(left, s.moments.length)}` : ''
   // Everywhere but the valley, the last failed close's count stays in the bank's head until the
-  // next close, what's left to find counted as it is now, and a refusal borrows the line (#123).
+  // next close, what's left to find counted as it is now, and a word's refusal borrows the line
+  // (#123). From the vineyard on, the count shows only once two or fewer answers are wrong, and
+  // above that a close says only "more than two" (#125).
   const quiet = s.steps === undefined
-  const held = quiet && failed !== null ? strings.noMatch(wrong(s, failed)) + rest : ''
+  const count = (n: number) => (n > 2 && !s.marks ? strings.overTwo : strings.noMatch(n))
+  const held = quiet && failed !== null ? count(wrong(s, failed)) + rest : ''
   const onSubmit = () => {
     const off = wrong(s, progress)
     // How many don't match, as a number, and how many things are still to find (#95).
