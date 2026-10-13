@@ -31,6 +31,15 @@ describe('the privacy page (#9)', () => {
     for (const line of [policy.effective, said, policy.back].flatMap((s) => s.split('\n')))
       expect(html).toContain(line)
   })
+
+  // Gate 19 A9: the page's tab shows the icon the app's own page links, so 10a's favicon (#10,
+  // Gate 18 A5) moves both.
+  it('links the icon the app’s page links', () => {
+    const icon = /<link rel="icon"[^>]*href="\/?([^"]+)"/
+    const app = icon.exec(readFileSync('index.html', 'utf8'))?.[1]
+    expect(app).toBe('icons/favicon-48.png')
+    expect(icon.exec(html)?.[1]).toBe(app)
+  })
 })
 
 /*
