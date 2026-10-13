@@ -1,6 +1,6 @@
 # World rules
 
-The accuracy and art constraints every picture and every case in Behold is checked against. Read before writing a case or generating a picture. Checked at two points: when a picture is accepted into a case, and when a case is reviewed against its passage. What makes a case a puzzle — the rules a case is designed to — is `docs/case-design.md`. The title screen's picture is not a scene: a view of the land with a moment from each of the first four cases in it, held to §2–§6 as a scene is but for its shape, a tall portrait. Its record is `docs/title.md`.
+The accuracy and art constraints every picture and every case in Behold is checked against. Read before writing a case or generating a picture. Checked at two points: when a picture is accepted into a case, and when a case is reviewed against its passage. What makes a case a puzzle — the rules a case is designed to — is `docs/case-design.md`. The title screen's picture is not a scene: a view of the land with a moment from each of the first four cases in it, held to §2–§6 as a scene is but for its shape, a tall portrait. Its record is `docs/title.md`. The app's icon is the game's sign, not a scene: its lens and its two-roller scroll are later than Ahab's day, accepted as such at Gate 18 (#10), and its record is `docs/icon.md`.
 
 Two principles sit above everything here.
 
@@ -20,7 +20,7 @@ Two principles sit above everything here.
 
 **Architecture.** Fieldstone foundations and mudbrick walls, plastered; flat roofs with parapets and an outside stair; upper rooms on the roof (2 Kings 4:10). Pillared houses with a central court. City walls with casemates and towers; gates with side chambers, a heavy timber lintel, and wooden doors. Royal buildings in dressed ashlar with ivory-inlaid furniture. Balconies and latticed windows on upper stories (2 Kings 1:2; 9:30).
 
-**Furniture and objects.** Low tables, stools, benches, couches with cushions; a wealthy guest room holds a bed, a table, a chair, and a lamp — the four items 2 Kings 4:10 lists. Oil lamps are shallow clay saucers with a pinched spout (the Behold icon). Storage jars, wineskins, baskets, woven mats, bronze bowls. Writing on papyrus with a reed pen, or on potsherds; letters folded and sealed with a clay bulla pressed by a stamp seal (many carried the owner's name); scrolls, never bound books.
+**Furniture and objects.** Low tables, stools, benches, couches with cushions; a wealthy guest room holds a bed, a table, a chair, and a lamp — the four items 2 Kings 4:10 lists. Oil lamps are shallow clay saucers with a pinched spout. Storage jars, wineskins, baskets, woven mats, bronze bowls. Writing on papyrus with a reed pen, or on potsherds; letters folded and sealed with a clay bulla pressed by a stamp seal (many carried the owner's name); scrolls, never bound books.
 
 **Money and weight.** No coins — coinage begins two and a half centuries later. Silver is weighed: cut pieces, rings, and small bars in a pouch, with a balance scale and stone weights nearby. "Its worth in money" in a caption means weighed silver in the picture. A talent is a load a man carries with effort; two talents in two bags need two men (2 Kings 5:23).
 
@@ -77,7 +77,7 @@ Prophets are men in ordinary dress with their markers. Kings are men in fine dre
 
 The look is locked from the first accepted pictures: flat, clean illustration with bold shapes and strong contrast, "a picture book for adults." Scenes are portrait, 4:5. Warm daylight for day scenes, one warm lamp against blue night for interiors. No text anywhere in an image.
 
-Every generation prompt begins with this header, verbatim, with the period clause swapped per season (the tutorial's reads "Ancient Israel around 1000 BC: wool tunics, sandals, bronze armor"):
+Every generation prompt begins with this header, verbatim, with the period clause swapped per season (the tutorial's reads "Ancient Israel around 1000 BC: wool tunics, sandals, bronze armor"), and for a picture that isn't a scene, the orientation clause swapped for its shape: "Square." for the icon, "Landscape, twice as wide as it is tall." for the store's feature graphic:
 
 > Match the style of the attached image exactly: flat, clean illustration with bold shapes and strong contrast, like a picture book for adults. Portrait orientation. No text or lettering anywhere. Ninth-century-BC Israel: wool robes, sandals, mudbrick and stone. No crosses, nothing Greek or Roman.
 

@@ -48,7 +48,7 @@ npm run lint                    # ESLint
 npm run format:check            # Prettier
 npm run typecheck               # tsc --noEmit, the Worker's project included
 npm run test                    # Vitest — the app's tests and the Worker's
-npm run icons                   # regenerate the placeholder icons
+npm run icons                   # frame the icons from the master, assets/icon.png
 npm run review:threads -- <pr>  # list a PR's unresolved review threads
 npm run check -w worker         # bundle the Worker without deploying, as CI's build job does
 npm run dev -w worker           # the Worker at http://localhost:8787 (see worker/README.md)

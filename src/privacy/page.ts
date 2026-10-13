@@ -27,7 +27,7 @@ export function page(base: string, css: string) {
     '<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">',
     '<meta name="theme-color" content="#232A3D">',
     `<title>${escape(policy.tab)}</title>`,
-    `<link rel="icon" type="image/png" sizes="192x192" href="${base}icons/icon-192.png">`,
+    `<link rel="icon" type="image/png" sizes="48x48" href="${base}icons/favicon-48.png">`,
     `<style>${css.replace(/\/\*[\s\S]*?\*\/\s*/g, '')}</style>`,
     '</head>',
     '<body>',

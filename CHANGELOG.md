@@ -3,6 +3,19 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.28.0 — Gate 18, the icon (#10)
+
+- **10a — the icon** (#128): the scroll under the lens, with one word missing in gold, takes the
+  placeholder lamp's place wherever the game shows an icon. `scripts/generate-icons.ts` frames each
+  file on the night from the master, `assets/icon.png`, with its own PNG reader and no library: the
+  192 and the 512, the store's icon, at 75%; the 1024, at 75%, from which Bubblewrap will draw its
+  splash; the maskable 512 at 59.3%, so the whole art sits inside the launcher's circle; and a 48
+  favicon, which the app's page and the privacy page both link. A test holds every file to the
+  master and the master to its record in `docs/icon.md`. The precache keeps only the two icons the
+  pages link; the manifest's 512s and 1024 are read when the app is installed. The store's feature
+  graphic, as accepted, joins the assets with its record, and the world rules say the icon is the
+  game's sign, not a scene.
+
 ## v0.27.0 — Gate 31, Wednesday from the vineyard on (#125)
 
 - **125a — the count when close, the owed look retired** (#127): Behold's difficulty target is
