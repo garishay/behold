@@ -509,20 +509,65 @@ describe('the case screen explored (#6, 03b; #24)', () => {
   )
 
   // The mountain introduces the order, so it is where a player meets its refusal (#123): the last
-  // picture that would leave the pictures as listed is refused in the bank's head, on a first try,
-  // as a blank refuses the wrong kind of word, and it stays picked up.
-  it('in the mountain, the last picture that would leave the order as listed is refused', () => {
-    start(<App />, laterStarted)
-    openCase(/The mountain/)
-    tab(/Solve/)
+  // picture that would leave the pictures as listed is refused, on a first try, and it stays picked
+  // up. The owner's phone check found the refusal easy to miss in red in the bank's head, at Solve's
+  // foot, with the order at its top, so its words ring the order, as the mountain's lesson does, and
+  // the bank's head keeps its legend (#123).
+  const listed = 'That’s how they’re listed, not how the story went.'
+  const mark = () => [
+    coach()?.getAttribute('data-at'),
+    coach()?.querySelector('[role="status"]')?.textContent,
+  ]
+  const asListed = () => {
     for (const [i, name] of ['The water', 'The fire', 'Baal’s altar'].entries()) {
       tile(name)
       orderSlot(i)
     }
-    expect(result()).toHaveTextContent(/^That’s how they’re listed, not how the story went\.$/)
+  }
+  it('in the mountain, the last picture that would leave the order as listed is refused at the order', () => {
+    start(<App />, laterStarted)
+    openCase(/The mountain/)
+    tab(/Solve/)
+    asListed()
+    expect(mark()).toEqual(['.order', listed])
+    expect(result()).not.toHaveTextContent(/listed/)
     const places = [...document.querySelectorAll('.oslot')].map((e) => e.textContent)
     expect(places).toEqual(['The water', 'The fire', '—'])
     expect(document.querySelector('.tile.is-on')).toHaveTextContent('Baal’s altar')
+  })
+
+  // The refusal's mark leaves on the next move, with Solve, or for a hint asked for, and a refusal
+  // again shows it again; under the menu, as every mark, it waits (#123).
+  it('the order’s refusal leaves on the next move, with Solve, or for a hint, and comes again with a refusal', async () => {
+    start(<App />, laterStarted)
+    openCase(/The mountain/)
+    fireEvent.click(screen.getByRole('button', { name: 'Start' }))
+    tab(/Solve/)
+    asListed()
+    const shown = coach()
+    orderSlot(2)
+    expect(mark()).toEqual(['.order', listed])
+    expect(coach()).not.toBe(shown)
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }))
+    expect(coach()).toBeNull()
+    fireEvent.click(document.querySelector('.modal')!)
+    expect(mark()).toEqual(['.order', listed])
+    // The next move: Baal's altar first, and the water back to the tray.
+    orderSlot(0)
+    expect(coach()).toBeNull()
+    tile('The water')
+    orderSlot(0)
+    tile('Baal’s altar')
+    orderSlot(2)
+    expect(mark()).toEqual(['.order', listed])
+    tab(/Look/)
+    await waitFor(() => expect(history.state).toEqual({ case: 'carmel' }))
+    tab(/Solve/)
+    expect(coach()).toBeNull()
+    tile('Baal’s altar')
+    orderSlot(2)
+    menu('Hint')
+    expect(mark()[0]).toBe('[data-view="look"]')
   })
 
   it('the brief’s card goes with the first tap, and the menu holds the brief, a hint, Cases, Restart, and the switches', () => {
@@ -3158,6 +3203,71 @@ describe('the close converges (#95)', () => {
     slot('s4')
     expect(said()).toBe('Open Look to settle “but written by ___”.')
   })
+
+  /**
+   * The vineyard with every answer in but the order, put the gate, the bedchamber, then the
+   * vineyard, and its two moves to the pictures as listed: the vineyard first, then the gate last,
+   * which is refused (#123).
+   */
+  const ordered = {
+    ...closedCase(vineyard),
+    order: ['gate', 'bedchamber', 'vineyard'],
+    solved: false,
+  }
+  const asListed = () => {
+    tile('The vineyard')
+    orderSlot(0)
+    tile('The gate')
+    orderSlot(2)
+  }
+  const listed = 'That’s how they’re listed, not how the story went.'
+
+  // The owner's phone check (#123): after a failed close the count stays in the bank's head until
+  // the next close, and the order's refusal rings the order with its words, so the count is still
+  // there beside it.
+  it('in the vineyard, the order’s refusal after a failed close leaves the count in the bank’s head', () => {
+    start(<App />, { vineyard: ordered })
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    const one = /^One answer doesn’t fit the story\.$/
+    expect(result()).toHaveTextContent(one)
+    asListed()
+    expect([at(), said()]).toEqual(['.order', listed])
+    expect(result()).toHaveTextContent(one)
+  })
+
+  // The owner's phone check (#123): the order's refusal is Solve's one mark while it shows, and the
+  // mark it takes the place of comes back on the next move, here the gate let go: the vineyard's
+  // lesson at the man on the bed, what's left at the order (#114), a hint's ring on Look's button,
+  // and Look's ring after a tap on the waiting Close.
+  it.each([
+    ['the lesson’s mark', false, () => {}, '[data-face="p1"]'],
+    ['what’s left’s mark', true, () => {}, '.tiles'],
+    ['a hint’s mark', true, () => menu('Hint'), '[data-view="look"]'],
+    [
+      'Look’s ring after a tap on the waiting Close',
+      true,
+      () => fireEvent.click(screen.getByRole('button', { name: /^To close again/ })),
+      '[data-view="look"]',
+    ],
+  ] as const)(
+    'the order’s refusal takes the place of %s until the next move',
+    (_, closes, then, back) => {
+      const faces = Object.entries(ordered.faces).filter(([id]) => closes || id !== 'p1')
+      start(<App />, { vineyard: { ...ordered, faces: Object.fromEntries(faces) } })
+      openCase(/The vineyard/)
+      tab(/Solve/)
+      if (closes) fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+      then()
+      asListed()
+      expect(document.querySelectorAll('.coach')).toHaveLength(1)
+      expect([at(), said()]).toEqual(['.order', listed])
+      tile('The gate')
+      expect(document.querySelectorAll('.coach')).toHaveLength(1)
+      expect(at()).toBe(back)
+    },
+  )
 })
 
 describe('the case solved (#6, 03c; #24)', () => {

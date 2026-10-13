@@ -111,7 +111,7 @@ export const strings = {
   // terms, since "shuffled" went the way "out of order" did (#118, #123).
   orderHint: 'These pictures aren’t in story order. Tap one, then tap First, Then, or Last.',
   // The last picture that would leave the order as the tray lists it is refused, as a blank refuses
-  // the wrong kind of word (#123).
+  // the wrong kind of word, and these words ring the order, where the next tap is (#123).
   listed: 'That’s how they’re listed, not how the story went.',
   first: 'First',
   then: 'Then',

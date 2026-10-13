@@ -3,6 +3,16 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.26.1 — Gate 30's amendment, the order's refusal at the order (#123)
+
+- **123b — the order's refusal at the order** (#126): the owner's phone check of 123a found the
+  order's refusal of the pictures as listed easy to miss. "That's how they're listed, not how the
+  story went." showed in red in the bank's head at Solve's foot, while the order sits at its top.
+  It now rings the order in the gold mark the mountain's lesson uses, with its words, until the
+  next move, and while it shows it is Solve's one mark: a hint's ring, a lesson's mark, what's
+  left's, and Look's ring come back after it. The bank's head keeps the count or the legend, and a
+  blank's or a face's refusal stays there, where the next tap is.
+
 ## v0.26.0 — Gate 30, only evidence brings Close back (#123)
 
 - **123a — only evidence brings Close back** (#124): the vineyard round's tester 3 paid the owed
