@@ -55,6 +55,9 @@ import { Think } from './Think.tsx'
 type View = 'look' | 'solve' | 'reveal'
 type Sheet = 'menu' | 'papers' | null
 
+/** A case's last failed close, and whether the look it owes is still owed (#123). */
+export type LastClose = { readonly close: Progress; readonly owed: boolean }
+
 interface PlayerProps {
   entry: CaseEntry
   progress: Progress
@@ -62,11 +65,12 @@ interface PlayerProps {
   onCases: () => void
   onRestart: () => void
   /**
-   * The close a look is owed for, kept by the app for the session and never stored, so leaving
-   * the case and coming back leaves Close waiting, while a reload or Restart clears it (#123).
+   * The last failed close, kept by the app for the session and never stored, so leaving the case
+   * and coming back keeps its count, and Close waiting while it owes a look; a reload, Restart, or
+   * the close that ends the case clears it (#123, [Q20] on #12).
    */
-  due: Progress | null
-  onDue: (close: Progress | null) => void
+  lastClose: LastClose | null
+  onLastClose: (close: LastClose | null) => void
   passages: PassageService
 }
 
@@ -104,7 +108,8 @@ const clock = (seconds: number, fire: () => void) => () => {
  * are in the middle of is this screen's.
  */
 export function Player(props: PlayerProps) {
-  const { entry, progress, onProgress, onCases, onRestart, due, onDue, passages } = props
+  const { entry, progress, onProgress, onCases, onRestart, lastClose, onLastClose, passages } =
+    props
   const { structure: s } = entry
   const text = entry.text.en
   // A solved case mounts on its reveal when that is the entry on top, else on Solve, where its
@@ -152,11 +157,11 @@ export function Player(props: PlayerProps) {
   // From the vineyard on, a failed close owes a look: Close the case comes back once a thing tapped
   // on Look settles an answer the close found wrong, and its place says so, so only evidence brings
   // it back (#118, #123). The look stays owed when the case is left and opened again.
-  const owe = due !== null
-  // What the last failed close found, kept from it (#29 A4): what pays the look it owes, its
-  // count, which stays in the bank's head everywhere but the valley, and the answers its hints
-  // name (#123).
-  const [failed, setFailed] = useState<Progress | null>(due)
+  const owe = lastClose?.owed ?? false
+  // What the last failed close found, kept from it (#29 A4) when the case is left too ([Q20] on
+  // #12): what pays the look it owes, its count, which stays in the bank's head everywhere but the
+  // valley, and the answers its hints name (#123).
+  const failed = lastClose?.close ?? null
   // The answer the last hint named: the next names the one after it (#123).
   const [last, setLast] = useState<string | null>(null)
   // The bank's head: a refused word's message, or how far off a close was (07c, #24 [3]).
@@ -344,7 +349,7 @@ export function Player(props: PlayerProps) {
     } else nothingNew()
     // A hint has done its work once its thing is tapped (#29).
     if (hint?.spot === spotId) setHint(null)
-    if (pays) onDue(null)
+    if (pays) onLastClose({ close: failed, owed: false })
     setFresh([...fresh, ...added])
     if (spot?.paper !== undefined) setPaper(spot.paper)
     onProgress(next)
@@ -360,7 +365,8 @@ export function Player(props: PlayerProps) {
     const off = wrong(s, progress)
     // How many don't match, as a number, and how many things are still to find (#95).
     setNote(off === 0 || quiet ? '' : strings.noMatch(off) + rest)
-    setFailed(off > 0 ? progress : null)
+    // Kept until the next close, and the one that ends the case clears it ([Q20] on #12).
+    onLastClose(off > 0 ? { close: progress, owed: false } : null)
     if (off > 0) {
       const first = firstWrong(s, progress) ?? null
       play('notYet')
@@ -395,7 +401,7 @@ export function Player(props: PlayerProps) {
         bring(document.querySelector(order ? '.order' : `[data-slot="${first}"]`))
       } else if (!s.marks) {
         // A case that doesn't mark owes a look before it closes again (#118).
-        onDue(progress)
+        onLastClose({ close: progress, owed: true })
         if (fails + 1 >= stuck.closes) setHint(null)
       }
     }

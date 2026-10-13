@@ -3072,6 +3072,40 @@ describe('the close converges (#95)', () => {
     expect(result()).toHaveTextContent(one)
   })
 
+  // The owner's ruling on [Q20] (#12), from Codex's review on open (#124): the last failed close is
+  // kept for the session whether or not it owes a look, so its count stays until the next close
+  // when the case is left and opened again: the mountain's, which owes none.
+  it('in the mountain, the count survives leaving the case', async () => {
+    start(<App />, mountain(everything, { ...right, faces: { c1: 'elijah', c2: 'baal' } }))
+    openCase(/The mountain/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    menu('Cases')
+    fireEvent.click(await screen.findByRole('button', { name: /The mountain/ }))
+    tab(/Solve/)
+    expect(result()).toHaveTextContent(/^One answer doesn’t fit the story\.$/)
+  })
+
+  // The owner's ruling on [Q20] (#12): the close that ends the case clears the last failed close
+  // kept for it, so a closed case opened again from the cards shows no count.
+  it('in the mountain, a closed case opened again shows no count', async () => {
+    start(<App />, mountain(everything, { ...right, faces: { c1: 'elijah', c2: 'baal' } }))
+    openCase(/The mountain/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    chip('Ahab')
+    slot('c2')
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Back to cases' }))
+    fireEvent.click(await screen.findByRole('button', { name: /The mountain/ }))
+    expect(screen.getByRole('heading', { name: 'The case is closed.' })).toBeInTheDocument()
+    history.back()
+    await waitFor(() =>
+      expect(screen.getByRole('tab', { name: /Solve/ })).toHaveAttribute('aria-selected', 'true'),
+    )
+    expect(result()).not.toHaveTextContent(/fit the story/)
+  })
+
   // The count goes with the close that ends the case: back on Solve from the reveal, a closed
   // case's bank shows no count (#123).
   it('once the vineyard closes, its Solve shows no count', async () => {
