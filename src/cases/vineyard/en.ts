@@ -14,7 +14,7 @@ export const en = {
       'A man in a wine-red robe and a gold circlet, hands behind his back, walking the rows as if they were his.',
     cord: 'Servants stretching a cord and driving stakes, laying out straight beds where the vines were pulled up.',
     prophet:
-      'A wild-haired man in a cloak of hair and a leather belt, a staff in his hand, at the gap in the wall. One hand is raised at the man in the rows.',
+      'A wild-haired man raises a hand at the man in the rows, as if to accuse him. He wears a cloak of hair and a leather belt.',
     stain:
       'Outside the town, past the vineyard wall: two lean dogs at a dark stain among scattered stones.',
     balcony:
