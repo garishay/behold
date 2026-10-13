@@ -3,6 +3,59 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.27.0 — Gate 31, Wednesday from the vineyard on (#125)
+
+- **125a — the count when close, the owed look retired** (#127): Behold's difficulty target is
+  Monday for the valley, Tuesday for the mountain, and Wednesday from the vineyard on: hard because
+  you have to look, never because you have to be clever. From the vineyard on, a failed close
+  counts only when the player is close: three or more wrong read "More than two answers don’t fit
+  the story.", and one or two are counted as before, with what's left to find after them and the
+  line kept until the next close. Close the case comes back at once, and the look a failed close
+  owed is retired: its words, the tap on its place, what paid it, its survival across leaving, and
+  the taps that ran toward a hint while it was owed. The step up is told twice: under the
+  vineyard's brief on its card, "From here on, Close the case tells you less. Take your time with
+  the pictures.", and by a mark on the bank's head at its first failed close, "The cases are harder
+  from here: the count shows only when one or two don’t fit.", its words under the head, where a
+  tap picks a word and never presses Close. The valley and the mountain keep their counts and rings.
+
+## v0.26.1 — Gate 30's amendment, the order's refusal at the order (#123)
+
+- **123b — the order's refusal at the order** (#126): the owner's phone check of 123a found the
+  order's refusal of the pictures as listed easy to miss. "That's how they're listed, not how the
+  story went." showed in red in the bank's head at Solve's foot, while the order sits at its top.
+  It now rings the order in the gold mark the mountain's lesson uses, with its words, until the
+  next move, and while it shows it is Solve's one mark: a hint's ring, a lesson's mark, what's
+  left's, and Look's ring come back after it. The bank's head keeps the count or the legend, and a
+  blank's or a face's refusal stays there, where the next tap is.
+
+## v0.26.0 — Gate 30, only evidence brings Close back (#123)
+
+- **123a — only evidence brings Close back** (#124): the vineyard round's tester 3 paid the owed
+  look as a toll, one tap on whatever was under his thumb, and only 2 of his 7 fixes came from a
+  look. From the vineyard on, Close the case's place after a failed close says "To close again,
+  open Look and find a clue.", and only a thing tapped on Look that settles an answer the close
+  found wrong brings it back. Papers on Solve pays nothing, a tap on the waiting Close rings Look's
+  button, taps that settle nothing bring a hint's offer, and the owed look survives leaving the
+  case until a reload or Restart. Everywhere but the valley, a failed close's count stays in the
+  bank's head until the next close, even when the case is left and opened again (#12 [Q20]). A hint
+  for an answer a close found wrong says it doesn't fit and where its clue is, and each new hint
+  names the next answer. The order says its pictures aren't in story order and refuses them as
+  listed, and the vineyard's prophet raises a hand "as if to accuse him".
+
+## v0.25.0 — Gate 19, the privacy page (#9)
+
+- **9a — the privacy policy** (#121): its own page at play.beholdgame.com/privacy/, written whole
+  at build time from the strings module, so it reads without JavaScript, and precached, so it reads
+  offline; linked at the cases page's foot, under the credit. It says what the game keeps on the
+  device — progress with the hints asked for and the answers a close found wrong, the two sound
+  switches, and the copies of the game's files, pictures, passages, and music, each with its limit
+  — what it sends and who sees it — the site to GitHub Pages, and a passage's reference to the
+  passage service on Cloudflare, which answers from its own copy, so nothing about a player
+  reaches Crossway — how long each is kept, who makes the game, Shay House, and where to write. A
+  test holds what it says to the code: the storage keys, the caches' limits, the sites the game
+  asks or links to, and the modules that ask ([G13]); another builds the game and finds the page
+  emitted and precached (#12 [Q19]).
+
 ## v0.24.1 — Gate 29's amendment, check the evidence (#118)
 
 - **118b — check the evidence** (#120): from the vineyard on, Close the case's place after a

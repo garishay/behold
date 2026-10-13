@@ -65,11 +65,18 @@ describe('the service worker’s configuration (Gate 03 A3)', () => {
   })
 })
 
-describe('the stylesheet’s one ruled measure (Gate 03 [6])', () => {
+describe('the stylesheet’s ruled measure, a margin above the inset (Gate 03 [6])', () => {
   // The bar is the case screen's foot since #24, so the margin moves from the bank to it.
   it('keeps the bar clear of the gesture zone: a margin above the safe-area inset', () => {
     const bar = /\.bar \{([^}]*)\}/.exec(css)?.[1] ?? ''
     expect(bar).toMatch(/padding:[^;]*calc\(24px \+ env\(safe-area-inset-bottom\)\)/)
+  })
+
+  // The privacy policy's link is the cases page's last tap target, so the page's foot keeps its
+  // margin above the inset, where `max()` let a phone's inset swallow it (Gate 19 A4, #9).
+  it('keeps the cases page’s foot clear of the gesture zone, its link 16 px above the inset', () => {
+    const screen = /\.screen \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    expect(screen).toMatch(/padding:[^;]*calc\(16px \+ env\(safe-area-inset-bottom\)\)/)
   })
 })
 

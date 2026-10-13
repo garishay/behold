@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { carmel } from '../cases/carmel/case.ts'
 import { valley } from '../cases/valley/case.ts'
 import { vineyard } from '../cases/vineyard/case.ts'
 import {
@@ -128,6 +129,20 @@ describe('the model (#6)', () => {
       null,
       null,
     ])
+  })
+
+  // The vineyard round's tester 3 (#23) placed both cases' pictures as listed, under "shuffled". The
+  // last picture that would leave the order as the tray lists it is refused, as a blank refuses the
+  // wrong kind, and stays picked up, by a slot first or the picture first; check (p) keeps the
+  // listed order from being the story's, so it blocks no one (#123).
+  it('refuses the last picture that would leave the order as listed, and keeps it picked up', () => {
+    const place = (p: Progress, moment: string, slot: number) =>
+      chooseOrderSlot(carmel, p, { ...nothing, moment }, slot).progress
+    const two = place(place(fresh(carmel), 'water', 0), 'fire', 1)
+    const refused = { progress: two, selection: { ...nothing, moment: 'baal' }, listed: true }
+    expect(chooseOrderSlot(carmel, two, { ...nothing, moment: 'baal' }, 2)).toEqual(refused)
+    expect(chooseMoment(carmel, two, { ...nothing, slot: 2 }, 'baal')).toEqual(refused)
+    expect(place(place(two, 'baal', 0), 'water', 2).order).toEqual(['baal', 'fire', 'water'])
   })
 
   it('counts what is filled and what is wrong, the order as one', () => {

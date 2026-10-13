@@ -51,7 +51,8 @@ button:focus-visible {
 }
 
 /* The cases page: one portrait column, the header at the top and the notice pushed to the foot,
-   the cases first and the epigraph under them (#75). */
+   the cases first and the epigraph under them (#75). Its last tap target, the privacy policy's
+   link, keeps 16 px above a phone's inset, Gate 03 [6]'s rule, as the toast does (#9). */
 .screen {
   display: flex;
   flex-direction: column;
@@ -60,7 +61,7 @@ button:focus-visible {
   min-height: 100dvh;
   margin: 0 auto;
   padding: max(24px, env(safe-area-inset-top)) max(var(--inset), env(safe-area-inset-right))
-    max(16px, env(safe-area-inset-bottom)) max(var(--inset), env(safe-area-inset-left));
+    calc(16px + env(safe-area-inset-bottom)) max(var(--inset), env(safe-area-inset-left));
   background: var(--night);
 }
 
@@ -278,6 +279,20 @@ button:focus-visible {
 }
 
 .credit a {
+  color: var(--gold);
+}
+
+/* The privacy policy's link (#9), last at the foot, held close under the credit as the credit is
+   under the notice, a whole tap target tall. */
+.privacy {
+  margin: -24px 0 0;
+  font-size: 13px;
+}
+
+.privacy a {
+  display: inline-block;
+  min-height: 44px;
+  line-height: 44px;
   color: var(--gold);
 }
 

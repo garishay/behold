@@ -7,6 +7,8 @@ export const en = {
   subtitle: 'Case two',
   brief:
     'A man walks a vineyard as if it were his, and a prophet has come to meet him. Whose vineyard was it, and what became of its owner?',
+  note: 'From here on, Close the case tells you less. Take your time with the pictures.',
+  harder: 'The cases are harder from here: the count shows only when one or two don’t fit.',
   passages: ['1 Kings 21'],
   moments: { vineyard: 'The vineyard', bedchamber: 'Bedchamber', gate: 'The gate' },
   captions: {
@@ -14,7 +16,7 @@ export const en = {
       'A man in a wine-red robe and a gold circlet, hands behind his back, walking the rows as if they were his.',
     cord: 'Servants stretching a cord and driving stakes, laying out straight beds where the vines were pulled up.',
     prophet:
-      'A wild-haired man in a cloak of hair and a leather belt, a staff in his hand, at the gap in the wall. One hand is raised at the man in the rows.',
+      'A wild-haired man raises a hand at the man in the rows, as if to accuse him. He wears a cloak of hair and a leather belt.',
     stain:
       'Outside the town, past the vineyard wall: two lean dogs at a dark stain among scattered stones.',
     balcony:

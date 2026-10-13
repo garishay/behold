@@ -4,7 +4,7 @@ import { carmel } from '../cases/carmel/case.ts'
 import { valley } from '../cases/valley/case.ts'
 import { vineyard } from '../cases/vineyard/case.ts'
 import type { Box, CaseStructure } from '../cases/types.ts'
-import { aim, broad, firstWrong, half, stranded } from './hints.ts'
+import { aim, broad, firstWrong, half, next, stranded } from './hints.ts'
 import { fresh, tap, type Progress } from './state.ts'
 
 /** A case with every spot tapped. */
@@ -48,6 +48,28 @@ describe('what a hint points at (#29)', () => {
     expect(evidence[firstWrong(carmel, p)!]).toBe('mocker')
     expect(firstWrong(carmel, { ...p, faces: { c1: 'ahab', c2: 'ahab' } })).toBe('c1')
     expect(firstWrong(carmel, { ...p, order: ['baal', 'water', 'fire'] })).toBe('a1')
+  })
+})
+
+describe('after a failed close: what each hint names (#123)', () => {
+  /** The vineyard swept and every answer in, then the faces, order, and blanks given put instead. */
+  const closed = (faces = {}, order: string[] = [...vineyard.order], fills = {}) => ({
+    ...swept(vineyard),
+    faces: { p1: 'ahab', p2: 'jezebel', p3: 'naboth', ...faces },
+    order,
+    fills: {
+      ...Object.fromEntries(vineyard.blocks.flatMap((b) => Object.entries(b.blanks))),
+      ...fills,
+    },
+  })
+  // Tester 3's first close (#23): the seated man, the order as listed, and "First you ___". Each
+  // hint names the next after the one named last, the order as one, and round again.
+  it('each hint names the next answer the close found wrong, the order as one', () => {
+    const at = closed({ p3: 'elijah' }, ['vineyard', 'bedchamber', 'gate'], { v1: 'cursed' })
+    expect(next(vineyard, at, null)).toBe('p3')
+    expect(next(vineyard, at, 'p3')).toBe('bedchamber')
+    expect(next(vineyard, at, 'gate')).toBe('v1')
+    expect(next(vineyard, at, 'v1')).toBe('p3')
   })
 })
 

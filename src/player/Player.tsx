@@ -13,7 +13,9 @@ import {
   broad,
   firstWrong,
   half,
+  holds as standing,
   named as nameOf,
+  next as nextOf,
   stranded,
   stuck,
   type Aim,
@@ -51,6 +53,8 @@ import { Think } from './Think.tsx'
 
 type View = 'look' | 'solve' | 'reveal'
 type Sheet = 'menu' | 'papers' | null
+/** A mark that answers a move: where it rings, its words, and whether they sit under it (#125). */
+type Notice = { at: string; label: string; n: number; under?: boolean }
 
 interface PlayerProps {
   entry: CaseEntry
@@ -58,6 +62,13 @@ interface PlayerProps {
   onProgress: (p: Progress) => void
   onCases: () => void
   onRestart: () => void
+  /**
+   * The last failed close, kept by the app for the session and never stored, so leaving the case
+   * and coming back keeps its count and the answers its hints name; a reload, Restart, or the
+   * close that ends the case clears it (#123, [Q20] on #12).
+   */
+  lastClose: Progress | null
+  onLastClose: (close: Progress | null) => void
   passages: PassageService
 }
 
@@ -94,7 +105,9 @@ const clock = (seconds: number, fire: () => void) => () => {
  * case keeps the two it had. What the player has done is `progress`, kept by the app; what they
  * are in the middle of is this screen's.
  */
-export function Player({ entry, progress, onProgress, onCases, onRestart, passages }: PlayerProps) {
+export function Player(props: PlayerProps) {
+  const { entry, progress, onProgress, onCases, onRestart, lastClose, onLastClose, passages } =
+    props
   const { structure: s } = entry
   const text = entry.text.en
   // A solved case mounts on its reveal when that is the entry on top, else on Solve, where its
@@ -138,22 +151,28 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
   const told = asking && s.ask !== undefined ? [...fits, s.ask] : fits
   // A failed close with something still unfound rings Look until it opens (#95).
   const [seek, setSeek] = useState(false)
-  // From the vineyard on, a failed close owes a look: Close the case comes back once a thing is
-  // opened on Look, and says so in its place, so a guess never costs less than a look (#118).
-  const [owe, setOwe] = useState(false)
+  // What the last failed close found, kept from it (#29 A4) when the case is left too ([Q20] on
+  // #12): its count, which stays in the bank's head everywhere but the valley, and the answers its
+  // hints name (#123). From the vineyard on, Close the case comes back at once (#125).
+  const failed = lastClose
+  // The answer the last hint named: the next names the one after it (#123).
+  const [last, setLast] = useState<string | null>(null)
   // The bank's head: a refused word's message, or how far off a close was (07c, #24 [3]).
   const [note, setNote] = useState('')
+  // A mark that answers a move at what it's about, until the next move: the order's refusal of the
+  // pictures as listed, at the order, where the next tap is (#123), and the step up, at the bank's
+  // head on the vineyard's first failed close, its words under it, off Close's row (#125). Counted,
+  // so a refusal again shows it again.
+  const [notice, setNotice] = useState<Notice | null>(null)
   // The stuck signals (#29): taps on the picture that find nothing new while something is unfound,
   // a stay on a moment with something left, a wait on Solve with nothing left to place (#65), and
-  // failed closes, each keeping the first thing it found wrong. A new find starts the first three
-  // over, and a hint taken starts all four.
+  // failed closes. A new find starts the first three over, and a hint taken starts all four.
   const [run, setRun] = useState(0)
   const [stayed, setStayed] = useState(false)
   // The placements a fired wait belongs to: a word placed, emptied, or found starts it over, after
   // it has fired too (review round 2).
   const [waited, setWaited] = useState<string | null>(null)
   const [fails, setFails] = useState(0)
-  const [missed, setMissed] = useState<string | null>(null)
   // The hint showing, what it points at and its tier; it stays until its thing is tapped (#29).
   const [hint, setHint] = useState<(Aim & { readonly tier: Tier }) | null>(null)
   // A hint's words leave on the next tap, as the last step's do (#24 [3]), so they never sit over a
@@ -282,6 +301,10 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     setNote(
       kind === undefined ? '' : face ? strings.faceWants(found) : strings.blankWants(kind, found),
     )
+    // The order refuses the pictures as listed at the order, not in the bank's head, which keeps the
+    // count or the legend, and the next move takes the mark away (#123, the owner's phone check).
+    const n = (notice?.n ?? 0) + 1
+    setNotice(o.listed ? { at: '.order', label: strings.listed, n } : null)
     if (placed(progress, o.progress)) play('place')
     // A wrong word set in the slot a question asks about asks again, words, dim, and all (#77).
     const word = asked && put(o.progress, asked)
@@ -314,26 +337,38 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
       setStayed(false)
       setWaited(null)
     } else nothingNew()
-    // A hint has done its work once its thing is tapped (#29), and a look owed is paid (#118).
+    // A hint has done its work once its thing is tapped (#29).
     if (hint?.spot === spotId) setHint(null)
-    setOwe(false)
     setFresh([...fresh, ...added])
     if (spot?.paper !== undefined) setPaper(spot.paper)
     onProgress(next)
   }
+  // How many things are still to find, as a failed close says it (#95).
+  const left = spots.filter((x) => !progress.tapped.includes(x.id)).length
+  const rest = left > 0 ? ` ${strings.toFind(left, s.moments.length)}` : ''
+  // Everywhere but the valley, the last failed close's count stays in the bank's head until the
+  // next close, what's left to find counted as it is now, and a word's refusal borrows the line
+  // (#123). From the vineyard on, the count shows only once two or fewer answers are wrong, and
+  // above that a close says only "more than two" (#125).
+  const quiet = s.steps === undefined
+  const count = (n: number) => (n > 2 && !s.marks ? strings.overTwo : strings.noMatch(n))
+  const held = quiet && failed !== null ? count(wrong(s, failed)) + rest : ''
   const onSubmit = () => {
     const off = wrong(s, progress)
     // How many don't match, as a number, and how many things are still to find (#95).
-    const left = spots.filter((x) => !progress.tapped.includes(x.id)).length
-    const rest = left > 0 ? ` ${strings.toFind(left, s.moments.length)}` : ''
-    setNote(off === 0 ? '' : strings.noMatch(off) + rest)
+    setNote(off === 0 || quiet ? '' : strings.noMatch(off) + rest)
+    // Kept until the next close, and the one that ends the case clears it ([Q20] on #12).
+    onLastClose(off > 0 ? progress : null)
+    // The case's first failed close says the step up at the bank's head, once: the vineyard's. Its
+    // words sit under the head, over the bank, where a tap picks a word, never Close (#125).
+    const harder = off > 0 && Object.keys(progress.misses).length === 0 ? text.harder : undefined
+    setNotice(harder ? { at: '.bank-head', label: harder, n: 1, under: true } : null)
     if (off > 0) {
       const first = firstWrong(s, progress) ?? null
       play('notYet')
       setFails(fails + 1)
       setMisses(misses + 1)
       setSeek(left > 0)
-      setMissed(first)
       // In the tutorial the last step's mark comes back, dim and all, with its retry (#25), or as
       // the question at the slot the case asks about when this close found it wrong; every other
       // slot it found wrong is ringed, every one that fits takes its ✓, and with no question to
@@ -360,11 +395,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
         setOrderFits(s.order?.every((m, i) => progress.order[i] === m) ?? false)
         const order = first !== null && s.order?.includes(first)
         bring(document.querySelector(order ? '.order' : `[data-slot="${first}"]`))
-      } else if (!s.marks) {
-        // A case that doesn't mark owes a look before it closes again (#118).
-        setOwe(true)
-        if (fails + 1 >= stuck.closes) setHint(null)
-      }
+      } else if (!s.marks && fails + 1 >= stuck.closes) setHint(null)
     }
     if (hint?.why === 'close') setHint(null)
     close(submit(s, progress))
@@ -375,10 +406,12 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
    */
   const land = (v: 'look' | 'solve') => {
     // The rings clear when Solve is left, not when its own tab is tapped again (review round 1),
-    // and what was picked up or waiting is let go (#24, Solve's room).
+    // and what was picked up or waiting is let go (#24, Solve's room), a mark that answered a move
+    // with it (#123, #125).
     if (view === 'solve' && v !== 'solve') {
       setFresh([])
       setSelection(nothing)
+      setNotice(null)
       kept.current = document.querySelector('.solve')?.scrollTop ?? 0
     }
     // Look's caption closes with the dock when Solve opens.
@@ -426,13 +459,17 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
    * last tier, the hint's mark is shown again, and under a guided step the step's is. Where a
    * thing's half would take most of the picture, its first hint is the second tier: tier 1 would
    * ring the same box and say less (#102 [1]). On Solve both tiers ring Look's button, so a hint
-   * showing there is shown again, and its second tier waits for Look (#118).
+   * showing there is shown again, and its second tier waits for Look (#118). After a failed close,
+   * each new hint names the next answer it found wrong after the last one named (#123). A hint asked
+   * for while a mark answers a move takes its place, as the next move would (#123, #125).
    */
   const take = () => {
     setSaidAt(null)
+    setNotice(null)
     if (guided || hint?.tier === 2 || hint?.why === 'close' || (hint && view !== 'look'))
       return nudge()
-    const target = aim(s, progress, missed ?? asked ?? null)
+    const target = aim(s, progress, (failed && nextOf(s, failed, last)) ?? asked ?? null)
+    if (!hint && target.why === 'evidence') setLast(target.for)
     const box = spots.find((x) => x.id === target.spot)?.box
     const next = hint
       ? { ...hint, tier: 2 as const }
@@ -442,7 +479,6 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     setStayed(false)
     setWaited(null)
     setFails(0)
-    setMissed(null)
     onProgress({ ...progress, hints: [...progress.hints, next.tier] })
   }
   // The menu: the one piece of chrome on every view, the reveal's included.
@@ -558,10 +594,22 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
     if (away !== undefined) return `[data-moment="${away.id}"]`
     return halved ? '[data-half]' : `[data-spot="${hint.spot}"]`
   }
-  // A hint for an answer says which (#102).
+  // A hint for an answer says which (#102), and for one the last failed close found wrong, while it
+  // still holds what the close found, that it doesn't fit (#123).
   const named = (id: string) => nameOf(s, text, id)
-  const hinted = hintAt()
-  const at = hinted ?? markAt()
+  const misfit =
+    hint?.why === 'evidence' && failed !== null && standing(s, failed, progress, hint.for)
+      ? named(hint.for)
+      : undefined
+  const [here, thing] =
+    misfit === undefined
+      ? [strings.hintSettles, strings.hintSettlesThing]
+      : [strings.misfitHere, strings.misfitThing]
+  // A mark that answers a move is Solve's one mark while it shows: a hint's, a lesson's, what's
+  // left's, and Look's ring come back after it, as they were (#123, #125).
+  const noticed = sheet === null && paper === null ? notice : null
+  const hinted = noticed ? undefined : hintAt()
+  const at = noticed ? noticed.at : (hinted ?? markAt())
   // A step that leads with its slot says what comes next once the slot waits (#102).
   const forms = current && text.steps?.[current.id]
   const waits = current?.slotFirst === true && selection.target === current.until.filled
@@ -695,17 +743,15 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
               has the row, or a hint on offer has it alone (#24, Solve's room). */}
           {closable(s, progress) && (full || offer) && (
             <div className="submit-row">
-              {/* While a look is owed, Close's place says what brings it back (#118). */}
               {full && (
                 <button
                   type="button"
                   className="submit"
                   data-close
                   disabled={progress.solved}
-                  aria-disabled={owe || undefined}
-                  onClick={owe ? undefined : onSubmit}
+                  onClick={onSubmit}
                 >
-                  {owe ? strings.closeAfterLook : strings.closeCase}
+                  {strings.closeCase}
                 </button>
               )}
               {offer}
@@ -717,7 +763,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
             progress={progress}
             selection={selection}
             fresh={fresh}
-            note={note}
+            note={note || held}
             onWord={(id) => apply(chooseWord(s, progress, selection, id))}
           />
         </>
@@ -733,6 +779,10 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
         <PapersSheet text={text} papers={progress.papers} onClose={() => setSheet(null)} />
       )}
       {paper !== null && <PaperModal text={text} paper={paper} onClose={() => setPaper(null)} />}
+      {/* The order rung with its refusal (#123), or the bank's head with the step up (#125). */}
+      {noticed && (
+        <CoachMark key={noticed.n} at={noticed.at} label={noticed.label} under={noticed.under} />
+      )}
       {hinted && hint && (
         <CoachMark
           key={nudges}
@@ -741,11 +791,11 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
             saidAt === hinted
               ? ''
               : door !== undefined
-                ? strings.hintOpen(door, hint.why === 'evidence' ? named(hint.for) : undefined)
+                ? misfit !== undefined
+                  ? strings.misfitOpen(door, misfit)
+                  : strings.hintOpen(door, hint.why === 'evidence' ? named(hint.for) : undefined)
                 : hint.why === 'evidence'
-                  ? (hint.tier === 2 ? strings.hintSettlesThing : strings.hintSettles)(
-                      named(hint.for),
-                    )
+                  ? (hint.tier === 2 ? thing : here)(named(hint.for))
                   : hint.tier === 2
                     ? strings.hintThing
                     : strings.hintSays[hint.why]
@@ -753,7 +803,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
           onTap={() => setSaidAt(hinted)}
         />
       )}
-      {!hinted && at && current && (
+      {!hinted && !noticed && at && current && (
         <CoachMark
           key={nudges}
           at={at}
@@ -782,7 +832,7 @@ export function Player({ entry, progress, onProgress, onCases, onRestart, passag
       {owedAt && <CoachMark at={owedAt} label={leftWords} />}
       {/* A failed close with something unfound rings Look, with no words, until it opens; the
           tutorial's last step rings it instead (#95). */}
-      {seek && view === 'solve' && !current && !hinted && (
+      {seek && view === 'solve' && !current && !at && (
         <CoachMark at='[data-view="look"]' label="" />
       )}
     </div>
