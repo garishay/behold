@@ -135,11 +135,12 @@ export function named(s: CaseStructure, text: CaseText<CaseStructure>, id: strin
 }
 
 /**
- * What the next hint points at. After a failed close, the evidence for the first thing it found
- * wrong, `missed`, kept from that close so a changed answer can't ask the hints what is right.
- * Otherwise the smallest spot still unfound, on the moment on stage first, and for a stranded
- * player the smallest that yields a word they are missing; then the evidence for the first thing
- * still empty; and once everything is filled, Close the case.
+ * What the next hint points at. After a failed close, the evidence for `missed`, the answer `next`
+ * names: the next one the close found wrong after the one the last hint named, kept from that
+ * close so a changed answer can't ask the hints what is right (#123). Otherwise the smallest spot
+ * still unfound, on the moment on stage first, and for a stranded player the smallest that yields
+ * a word they are missing; then the evidence for the first thing still empty; and once everything
+ * is filled, Close the case.
  */
 export function aim(s: CaseStructure, p: Progress, missed: string | null): Aim {
   if (missed !== null) return { spot: s.evidence[missed], why: 'evidence', for: missed }
