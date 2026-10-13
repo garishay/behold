@@ -308,7 +308,21 @@ describe('the cases page (Gate 01 A6, #6, #75)', () => {
     ])
     expect(cards()[0]).toHaveTextContent('Learn to play')
     expect(screen.queryByText('In progress')).not.toBeInTheDocument()
-    expect(screen.getAllByRole('link').map((l) => l.textContent)).toEqual(['CC BY 4.0'])
+    expect(screen.getAllByRole('link').map((l) => l.textContent)).toEqual([
+      'CC BY 4.0',
+      'Privacy policy',
+    ])
+  })
+
+  // Play asks for the policy linked from inside the app (Gate 17 A8): its own page on the site,
+  // opened in place, so an installed app shows it in its own window. It sits under the credit, at
+  // the foot of the cases page, which holds the game's small print since the title split (#75).
+  it('links the privacy policy under the credit, the page at privacy/ under the base (#9)', () => {
+    start()
+    const link = screen.getByRole('link', { name: 'Privacy policy' })
+    expect(link).toHaveAttribute('href', '/privacy/')
+    expect(link).not.toHaveAttribute('target')
+    expect(link.parentElement?.previousElementSibling).toHaveClass('credit')
   })
 
   // Playtest 2's second session (#77): the valley teaches the game and the cases after it are one

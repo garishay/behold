@@ -51,6 +51,9 @@ export const strings = {
   // file to a name here.
   credit: 'Music: “Desert City” and “Lamentation” by Kevin MacLeod (incompetech.com), edited,',
   creditLicence: { text: 'CC BY 4.0', href: 'https://creativecommons.org/licenses/by/4.0/' },
+  // The privacy policy's link, at the cases page's foot under the credit (#9). The policy's own
+  // words are `policy`, below.
+  privacy: 'Privacy policy',
   updateAvailable: 'Update available',
   update: 'Update',
 
@@ -192,3 +195,109 @@ export const strings = {
   off: 'Off',
   silentMode: 'Silent mode mutes the game on iPhone.',
 } as const satisfies Record<string, Copy>
+
+/** A link, by its words and its address. */
+export interface Link {
+  readonly text: string
+  readonly href: string
+}
+
+/** The privacy policy's words: the tab's title, the heading, its date, and its sections in order. */
+export interface Policy {
+  readonly tab: string
+  readonly title: string
+  readonly effective: string
+  readonly intro: string
+  readonly sections: readonly {
+    readonly heading: string
+    readonly points: readonly string[]
+    readonly links?: readonly Link[]
+  }[]
+  readonly back: string
+}
+
+/**
+ * The privacy policy (#9), its own page at `privacy/`, written whole at build time so it reads
+ * without JavaScript (`src/privacy/page.ts`). What it says the game keeps and sends is held to the
+ * code by `src/privacy/page.test.ts`: a change to either changes both (Gate 17 A7, [G13]).
+ */
+export const policy: Policy = {
+  tab: 'Behold: Privacy policy',
+  title: 'Privacy policy',
+  effective: 'Takes effect 13 October 2026.',
+  intro:
+    'Behold is a Bible mystery game that runs in your web browser, at play.beholdgame.com or installed on your device. This page says what the game keeps, what it sends, and who sees it.',
+  sections: [
+    {
+      heading: 'In short',
+      points: [
+        'Behold has no accounts, no ads, and no analytics, and it collects nothing about you.',
+        'Your progress stays on your device, and the game never sends it anywhere.',
+        'Like any website, the services the game uses see your device’s internet (IP) address. What each one does with it is below.',
+      ],
+    },
+    {
+      heading: 'What stays on your device',
+      points: [
+        'Your progress in each case: where you left off, what you’ve found, the words you’ve placed, the order you’ve set, the hints you asked for, the answers a close found wrong, and whether the case is closed. Your browser keeps it for this site, under behold.progress.',
+        'Whether Music and Effects are on, under behold.music and behold.effects, each kept once you first switch it.',
+        'Copies that let the game work offline: its own files; the title’s and the cases’ pictures as the game loads them, up to 200; the passages shown when a case closes, up to 11, each for up to 30 days; and the music you hear, up to 8 pieces. The game notes when each copy was last used, so that the one used longest ago goes first.',
+        'None of this leaves your device, and the game sets no cookies.',
+      ],
+    },
+    {
+      heading: 'What leaves your device',
+      points: [
+        'Your browser asks the game’s site for its pages, pictures, and sound, as it does for any website.',
+        'When a closed case shows its passages, the game asks its passage service for them, unless your device already has them. Each request names a passage and its translation, such as 1 Kings 21 in the ESV, and nothing about you.',
+        'Like any request a browser makes, each one carries your device’s IP address and the usual details a browser sends, such as its type and language.',
+        'Nothing else is sent: no analytics, no ads, no tracking, and no scripts or fonts from other sites.',
+        'Links to other sites, such as www.esv.org when a case closes and the music’s licence at creativecommons.org, open in your browser only if you tap them.',
+      ],
+    },
+    {
+      heading: 'Who sees what',
+      points: [
+        'GitHub hosts the game’s site, on GitHub Pages. GitHub logs and stores each visitor’s IP address “for security purposes”.',
+        'Cloudflare runs the passage service, at behold-esv.garishay.workers.dev. The service sees the passage asked for. Cloudflare receives your device’s IP address with each request, as any host does, and the service never reads it. It keeps no log, and stores nothing about you.',
+        'The service gets the passages’ text from the ESV API, run by Crossway, the ESV’s publisher, on a schedule of its own, and keeps a copy. It answers your requests from that copy, so they go no further than Cloudflare, and it sends nothing about you to Crossway.',
+        'The game’s developer receives nothing about you from the game, except while fixing a fault, when the developer may watch the passage service’s requests as they arrive and keeps none of them.',
+      ],
+      links: [
+        {
+          text: 'GitHub’s privacy statement',
+          href: 'https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement',
+        },
+        { text: 'Cloudflare’s privacy policy', href: 'https://www.cloudflare.com/privacypolicy/' },
+      ],
+    },
+    {
+      heading: 'How long things are kept',
+      points: [
+        'What the game keeps on your device stays until you clear it, within the limits above. Restart, in a case’s menu, clears that case’s progress. To clear everything, clear the stored data for play.beholdgame.com in your browser’s settings.',
+        'The passage service keeps no record of your requests. GitHub and Cloudflare keep what their own policies say.',
+        'If you write to the address below, your message reaches the developer’s own inbox. It stays in the developer’s inbox, and is deleted if you ask.',
+      ],
+    },
+    {
+      heading: 'Keeping it safe',
+      points: [
+        'Everything the game sends and receives travels encrypted, over HTTPS.',
+        'What the game keeps on your device belongs to this site alone, and other sites can’t read it.',
+        'Beyond your device, the game keeps nothing about you, so there’s nothing of yours for it to lose.',
+      ],
+    },
+    {
+      heading: 'Changes',
+      points: [
+        'When the game changes what it keeps or sends, this page changes in the same update, with a new date.',
+      ],
+    },
+    {
+      heading: 'Contact',
+      points: ['Behold is made by Shay House.', 'Write with any question about privacy:'],
+      links: [{ text: 'hello@beholdgame.com', href: 'mailto:hello@beholdgame.com' }],
+    },
+  ],
+  back: 'Back to Behold',
+}

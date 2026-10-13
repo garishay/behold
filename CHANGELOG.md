@@ -3,6 +3,20 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.25.0 — Gate 19, the privacy page (#9)
+
+- **9a — the privacy policy** (#121): its own page at play.beholdgame.com/privacy/, written whole
+  at build time from the strings module, so it reads without JavaScript, and precached, so it reads
+  offline; linked at the cases page's foot, under the credit. It says what the game keeps on the
+  device — progress with the hints asked for and the answers a close found wrong, the two sound
+  switches, and the copies of the game's files, pictures, passages, and music, each with its limit
+  — what it sends and who sees it — the site to GitHub Pages, and a passage's reference to the
+  passage service on Cloudflare, which answers from its own copy, so nothing about a player
+  reaches Crossway — how long each is kept, who makes the game, Shay House, and where to write. A
+  test holds what it says to the code: the storage keys, the caches' limits, the sites the game
+  asks or links to, and the modules that ask ([G13]); another builds the game and finds the page
+  emitted and precached (#12 [Q19]).
+
 ## v0.24.1 — Gate 29's amendment, check the evidence (#118)
 
 - **118b — check the evidence** (#120): from the vineyard on, Close the case's place after a
