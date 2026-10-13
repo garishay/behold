@@ -612,11 +612,11 @@ export function Player(props: PlayerProps) {
     misfit === undefined
       ? [strings.hintSettles, strings.hintSettlesThing]
       : [strings.misfitHere, strings.misfitThing]
-  // The order's refusal, at the order until the next move; nothing is marked under a sheet or a
-  // paper (#123).
+  // The order's refusal is Solve's one mark while it shows: a hint's, a lesson's, what's left's, and
+  // Look's ring come back after it, as they were (#123).
   const refusal = refused > 0 && sheet === null && paper === null
-  const hinted = hintAt()
-  const at = hinted ?? markAt()
+  const hinted = refusal ? undefined : hintAt()
+  const at = refusal ? '.order' : (hinted ?? markAt())
   // A step that leads with its slot says what comes next once the slot waits (#102).
   const forms = current && text.steps?.[current.id]
   const waits = current?.slotFirst === true && selection.target === current.until.filled
@@ -810,7 +810,7 @@ export function Player(props: PlayerProps) {
           onTap={() => setSaidAt(hinted)}
         />
       )}
-      {!hinted && at && current && (
+      {!hinted && !refusal && at && current && (
         <CoachMark
           key={nudges}
           at={at}
@@ -839,7 +839,7 @@ export function Player(props: PlayerProps) {
       {owedAt && <CoachMark at={owedAt} label={leftWords} />}
       {/* A failed close with something unfound rings Look, with no words, until it opens; the
           tutorial's last step rings it instead (#95). */}
-      {seek && view === 'solve' && !current && !hinted && (
+      {seek && view === 'solve' && !current && !at && (
         <CoachMark at='[data-view="look"]' label="" />
       )}
     </div>

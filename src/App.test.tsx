@@ -3236,6 +3236,38 @@ describe('the close converges (#95)', () => {
     expect([at(), said()]).toEqual(['.order', listed])
     expect(result()).toHaveTextContent(one)
   })
+
+  // The owner's phone check (#123): the order's refusal is Solve's one mark while it shows, and the
+  // mark it takes the place of comes back on the next move, here the gate let go: the vineyard's
+  // lesson at the man on the bed, what's left at the order (#114), a hint's ring on Look's button,
+  // and Look's ring after a tap on the waiting Close.
+  it.each([
+    ['the lesson’s mark', false, () => {}, '[data-face="p1"]'],
+    ['what’s left’s mark', true, () => {}, '.tiles'],
+    ['a hint’s mark', true, () => menu('Hint'), '[data-view="look"]'],
+    [
+      'Look’s ring after a tap on the waiting Close',
+      true,
+      () => fireEvent.click(screen.getByRole('button', { name: /^To close again/ })),
+      '[data-view="look"]',
+    ],
+  ] as const)(
+    'the order’s refusal takes the place of %s until the next move',
+    (_, closes, then, back) => {
+      const faces = Object.entries(ordered.faces).filter(([id]) => closes || id !== 'p1')
+      start(<App />, { vineyard: { ...ordered, faces: Object.fromEntries(faces) } })
+      openCase(/The vineyard/)
+      tab(/Solve/)
+      if (closes) fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+      then()
+      asListed()
+      expect(document.querySelectorAll('.coach')).toHaveLength(1)
+      expect([at(), said()]).toEqual(['.order', listed])
+      tile('The gate')
+      expect(document.querySelectorAll('.coach')).toHaveLength(1)
+      expect(at()).toBe(back)
+    },
+  )
 })
 
 describe('the case solved (#6, 03c; #24)', () => {
