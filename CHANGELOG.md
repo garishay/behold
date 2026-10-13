@@ -3,6 +3,21 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.27.0 — Gate 31, Wednesday from the vineyard on (#125)
+
+- **125a — the count when close, the owed look retired** (#127): Behold's difficulty target is
+  Monday for the valley, Tuesday for the mountain, and Wednesday from the vineyard on: hard because
+  you have to look, never because you have to be clever. From the vineyard on, a failed close
+  counts only when the player is close: three or more wrong read "More than two answers don’t fit
+  the story.", and one or two are counted as before, with what's left to find after them and the
+  line kept until the next close. Close the case comes back at once, and the look a failed close
+  owed is retired: its words, the tap on its place, what paid it, its survival across leaving, and
+  the taps that ran toward a hint while it was owed. The step up is told twice: under the
+  vineyard's brief on its card, "From here on, Close the case tells you less. Take your time with
+  the pictures.", and by a mark on the bank's head at its first failed close, "The cases are harder
+  from here: the count shows only when one or two don’t fit.", its words under the head, where a
+  tap picks a word and never presses Close. The valley and the mountain keep their counts and rings.
+
 ## v0.26.1 — Gate 30's amendment, the order's refusal at the order (#123)
 
 - **123b — the order's refusal at the order** (#126): the owner's phone check of 123a found the
