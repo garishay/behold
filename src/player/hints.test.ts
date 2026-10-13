@@ -4,7 +4,7 @@ import { carmel } from '../cases/carmel/case.ts'
 import { valley } from '../cases/valley/case.ts'
 import { vineyard } from '../cases/vineyard/case.ts'
 import type { Box, CaseStructure } from '../cases/types.ts'
-import { aim, broad, firstWrong, half, next, settles, stranded } from './hints.ts'
+import { aim, broad, firstWrong, half, next, stranded } from './hints.ts'
 import { fresh, tap, type Progress } from './state.ts'
 
 /** A case with every spot tapped. */
@@ -51,7 +51,7 @@ describe('what a hint points at (#29)', () => {
   })
 })
 
-describe('after a failed close: what pays its look, and what each hint names (#123)', () => {
+describe('after a failed close: what each hint names (#123)', () => {
   /** The vineyard swept and every answer in, then the faces, order, and blanks given put instead. */
   const closed = (faces = {}, order: string[] = [...vineyard.order], fills = {}) => ({
     ...swept(vineyard),
@@ -62,20 +62,6 @@ describe('after a failed close: what pays its look, and what each hint names (#1
       ...fills,
     },
   })
-  const paying = (at: Progress) =>
-    vineyard.moments
-      .flatMap((m) => m.spots.map((x) => x.id))
-      .filter((id) => settles(vineyard, at, id))
-
-  // Only evidence pays the owed look: the thing a hint would ring for an answer the close found
-  // wrong, one whose found words give its right word, and for the order what dates each picture out
-  // of place. The window yields "vineyard", which is a moment's id as well, and dates nothing.
-  it('a thing pays when it settles an answer the close found wrong', () => {
-    const at = closed({}, ['bedchamber', 'vineyard', 'gate'], { s4: 'ahab' })
-    expect(paying(at)).toEqual(['stain', 'balcony', 'seal', 'stones'])
-    expect(paying(closed())).toEqual([])
-  })
-
   // Tester 3's first close (#23): the seated man, the order as listed, and "First you ___". Each
   // hint names the next after the one named last, the order as one, and round again.
   it('each hint names the next answer the close found wrong, the order as one', () => {

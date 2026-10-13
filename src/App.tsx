@@ -3,7 +3,7 @@ import { cases } from './cases/index.ts'
 import { fetchedPassages } from './passages/proxy.ts'
 import type { PassageService } from './passages/service.ts'
 import { picture } from './player/pictures.ts'
-import { Player, type LastClose } from './player/Player.tsx'
+import { Player } from './player/Player.tsx'
 import { fresh, type Progress } from './player/state.ts'
 import { load, save, type Saved } from './player/storage.ts'
 import { path as privacy } from './privacy/page.ts'
@@ -68,10 +68,10 @@ export default function App({ passages = fetchedPassages }: AppProps) {
   )
   const [nudge, setNudge] = useState(0)
   const [restarts, setRestarts] = useState(0)
-  // The last failed close of each case, and whether it owes a look, kept for the session and never
-  // stored: leaving a case and coming back keeps it, and a reload, Restart, or the close that ends
-  // the case clears it (#123, [Q20] on #12).
-  const [closes, setCloses] = useState<Readonly<Record<string, LastClose | null>>>({})
+  // The last failed close of each case, kept for the session and never stored: leaving a case and
+  // coming back keeps it, and a reload, Restart, or the close that ends the case clears it (#123,
+  // [Q20] on #12).
+  const [closes, setCloses] = useState<Readonly<Record<string, Progress | null>>>({})
   useEffect(() => save(saved), [saved])
   useEffect(() => {
     const onPop = (e: PopStateEvent) => {
