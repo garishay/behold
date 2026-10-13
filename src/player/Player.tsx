@@ -151,7 +151,8 @@ export function Player(props: PlayerProps) {
   // on Look settles an answer the close found wrong, and its place says so, so only evidence brings
   // it back (#118, #123). The look stays owed when the case is left and opened again.
   const owe = due !== null
-  // What the last failed close found, kept from it (#29 A4): what pays the look it owes (#123).
+  // What the last failed close found, kept from it (#29 A4): what pays the look it owes, and its
+  // count, which stays in the bank's head everywhere but the valley (#123).
   const [failed, setFailed] = useState<Progress | null>(due)
   // The bank's head: a refused word's message, or how far off a close was (07c, #24 [3]).
   const [note, setNote] = useState('')
@@ -337,12 +338,17 @@ export function Player(props: PlayerProps) {
     if (spot?.paper !== undefined) setPaper(spot.paper)
     onProgress(next)
   }
+  // How many things are still to find, as a failed close says it (#95).
+  const left = spots.filter((x) => !progress.tapped.includes(x.id)).length
+  const rest = left > 0 ? ` ${strings.toFind(left, s.moments.length)}` : ''
+  // Everywhere but the valley, the last failed close's count stays in the bank's head until the
+  // next close, what's left to find counted as it is now, and a refusal borrows the line (#123).
+  const quiet = s.steps === undefined
+  const held = quiet && failed !== null ? strings.noMatch(wrong(s, failed)) + rest : ''
   const onSubmit = () => {
     const off = wrong(s, progress)
     // How many don't match, as a number, and how many things are still to find (#95).
-    const left = spots.filter((x) => !progress.tapped.includes(x.id)).length
-    const rest = left > 0 ? ` ${strings.toFind(left, s.moments.length)}` : ''
-    setNote(off === 0 ? '' : strings.noMatch(off) + rest)
+    setNote(off === 0 || quiet ? '' : strings.noMatch(off) + rest)
     setFailed(off > 0 ? progress : null)
     if (off > 0) {
       const first = firstWrong(s, progress) ?? null
@@ -734,7 +740,7 @@ export function Player(props: PlayerProps) {
             progress={progress}
             selection={selection}
             fresh={fresh}
-            note={note}
+            note={note || held}
             onWord={(id) => apply(chooseWord(s, progress, selection, id))}
           />
         </>

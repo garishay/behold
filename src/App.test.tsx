@@ -2943,8 +2943,8 @@ describe('the close converges (#95)', () => {
 
   // The owner's ruling on Gate 30 (#123): an owed look survives leaving the case, since leaving and
   // coming back would clear it in a few taps, cheaper than finding a clue. It is kept with the close
-  // it's kept from, in memory for the session and never stored, so a reload clears it.
-  it('in the vineyard, an owed look survives leaving the case, and a reload clears it', async () => {
+  // it's kept from, in memory for the session and never stored, so a reload or Restart clears it.
+  it('in the vineyard, an owed look survives leaving the case, and a reload or Restart clears it', async () => {
     const owed = () => screen.queryByRole('button', { name: /^To close again/ })
     const { unmount } = start(<App />, offBy(vineyard, { v1: 'stoned' }))
     openCase(/The vineyard/)
@@ -2955,6 +2955,7 @@ describe('the close converges (#95)', () => {
     fireEvent.click(await screen.findByRole('button', { name: /The vineyard/ }))
     tab(/Solve/)
     expect(owed()).toBeInTheDocument()
+    expect(result()).toHaveTextContent(/^One answer doesn’t fit the story\.$/)
     // A reload: the app opened afresh over what the device keeps.
     unmount()
     history.replaceState(null, '')
@@ -2962,6 +2963,12 @@ describe('the close converges (#95)', () => {
     openCase(/The vineyard/)
     tab(/Solve/)
     expect(owed()).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    menu('Restart')
+    confirm.mockRestore()
+    tab(/Solve/)
+    expect(result()).not.toHaveTextContent(/fit the story/)
   })
 
   // A stuck player still gets through (#123): while a look is owed, a tap that settles nothing runs
@@ -2982,6 +2989,85 @@ describe('the close converges (#95)', () => {
     tapSpot('prophet')
     tab(/Solve/)
     expect(screen.getByRole('button', { name: 'Close the case' })).toBeInTheDocument()
+  })
+
+  // The vineyard round's tester 3 (#23): every failed close showed its count, but the first tap on
+  // a word or a slot cleared it, so most of the time Close's place stood with nothing beside it.
+  // From the vineyard on, the count stays in the bank's head until the next close; a refusal
+  // borrows the line, and the next move gives it back (#123).
+  it('in the vineyard, the count stays in the bank’s head until the next close', async () => {
+    start(<App />, offBy(vineyard, { s4: 'ahab', v1: 'stoned' }))
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    const two = /^Two answers don’t fit the story\.$/
+    expect(result()).toHaveTextContent(two)
+    chip('cursed')
+    slot('v1')
+    expect(result()).toHaveTextContent(two)
+    chip('Ahab')
+    slot('v1')
+    expect(result()).toHaveTextContent(/^That blank wants something that happened\.$/)
+    chip('killed')
+    expect(result()).toHaveTextContent(two)
+    await lookAgain('vineyard', 'prophet')
+    chip('killed')
+    slot('v1')
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(result()).toHaveTextContent(/^One answer doesn’t fit the story\.$/)
+  })
+
+  // The count's line says what's left to find as it is now, so a find shrinks it (#123).
+  it('in the vineyard, the count’s line counts what is left to find as it is now', async () => {
+    const kept = offBy(vineyard, { v1: 'stoned' }).vineyard
+    const tapped = kept.tapped.filter((id) => !['stain', 'purse'].includes(id))
+    start(<App />, { vineyard: { ...kept, tapped } })
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(result()).toHaveTextContent(
+      /^One answer doesn’t fit the story\. There are two more to find in the pictures\.$/,
+    )
+    tab(/Look/)
+    await waitFor(() => expect(history.state).toEqual({ case: 'vineyard' }))
+    tapSpot('stain')
+    tab(/Solve/)
+    expect(result()).toHaveTextContent(
+      /^One answer doesn’t fit the story\. There is one more to find in the pictures\.$/,
+    )
+  })
+
+  // The owner's ruling on Gate 30 (#123): the mountain's count stays too. Its first failed close
+  // rings nothing, as tester 3's didn't (11:33), so its count stays in the bank's head until the
+  // next close. The valley's close stays as it is.
+  it('in the mountain, the count stays in the bank’s head until the next close', () => {
+    start(<App />, mountain(everything, { ...right, faces: { c1: 'elijah', c2: 'baal' } }))
+    openCase(/The mountain/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    const one = /^One answer doesn’t fit the story\.$/
+    expect(result()).toHaveTextContent(one)
+    chip('stones')
+    expect(result()).toHaveTextContent(one)
+  })
+
+  // The count goes with the close that ends the case: back on Solve from the reveal, a closed
+  // case's bank shows no count (#123).
+  it('once the vineyard closes, its Solve shows no count', async () => {
+    start(<App />, offBy(vineyard, { v1: 'stoned' }))
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    await lookAgain('vineyard', 'prophet')
+    chip('killed')
+    slot('v1')
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(screen.getByRole('heading', { name: 'The case is closed.' })).toBeInTheDocument()
+    history.back()
+    await waitFor(() =>
+      expect(screen.getByRole('tab', { name: /Solve/ })).toHaveAttribute('aria-selected', 'true'),
+    )
+    expect(result()).not.toHaveTextContent(/fit the story/)
   })
 })
 
