@@ -3,6 +3,17 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.29.0 — Gate 32, a find says what it's for (#131)
+
+- **131a — the cases' words, from tester 4's session** (#132): the vineyard's prophet's words tell
+  "killed", since stoned makes his question just as true: "First you killed him, and now you have
+  ___?". The Law leads with the land law, in the account's own phrase, "Every man of Israel is to
+  keep the inheritance of his fathers.", and the witness law follows it. The mountain's three time
+  captions read as a clock, in the passage's phrases: the sun at noon, "Midday has passed; the hour
+  of the offering is near.", and "It is the hour of the offering, mid-afternoon.", so the water and
+  the fire share their anchor. A vineyard kept from before drops its word for "First you ___" and
+  keeps its place.
+
 ## v0.28.0 — Gate 18, the icon (#10)
 
 - **10a — the icon** (#128): the scroll under the lens, with one word missing in gold, takes the
