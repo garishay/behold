@@ -3,6 +3,16 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.28.1 — The launcher at the store's 75% (#129)
+
+- **129a — the launcher at the store's 75%** (#130): the owner's phone check of 10a found the art
+  smaller on the home screen than in the store, about 69% of the icon's width against the 75%
+  ruled. The maskable 512 was framed at 59.3% for Bubblewrap, which lays it over 91 dp of the
+  launcher's 108, but Chrome's install lays it over 82.5 dp: it pads a maskable icon so the spec's
+  80% safe circle meets Android's 66 dp one. It is now framed at 65.5%, so the launcher Chrome
+  installs shows the art at 75%, inside the circle no mask clips, and a test holds it there. The
+  other icons don't change, and 68b gives Bubblewrap its own file at 59.3%.
+
 ## v0.28.0 — Gate 18, the icon (#10)
 
 - **10a — the icon** (#128): the scroll under the lens, with one word missing in gold, takes the
