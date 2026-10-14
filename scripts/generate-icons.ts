@@ -38,9 +38,9 @@ const STORE = 0.75
  * also the store's icon. Bubblewrap draws its splash at 300 dp from the largest `any` icon, up to
  * 1,200 px, so the 1024 gives it the art rather than the 512 enlarged (Gate 18's ruling). Chrome's
  * install lays the maskable image over 82.5 dp of the launcher's 108, padding it so the spec's 80%
- * safe circle meets Android's 66 dp one, and shows the middle 72, so the launcher shows the store's
- * framing, and the whole art sits inside the 66 dp circle no mask clips (#129). A browser's tab
- * draws the favicon at 16 px, unmasked.
+ * safe circle meets Android's 66 dp one, and the launcher shows the middle 72: so it shows the
+ * store's framing, and the whole art sits inside the 66 dp circle no mask clips (#129). A browser's
+ * tab draws the favicon at 16 px, unmasked.
  */
 export const ICONS = [
   { file: 'icon-192.png', size: 192, share: STORE },
