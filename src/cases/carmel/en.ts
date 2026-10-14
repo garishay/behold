@@ -25,7 +25,7 @@ export const en = {
     trench:
       'A trench dug all the way around the altar, wide enough to hold two measures of seed. It is full of water.',
     spent:
-      'Across the ground, men in tall caps and saffron robes sit by their own cold altar, worn out. Midday has passed; the hour of the offering is near.',
+      'Across the ground, men in tall caps and saffron robes sit by their cold altar, worn out. Midday has passed; the hour of the offering is near.',
     fire: 'Fire falls on the altar and burns all of it: the bull, the wood, the very stones, and the dust around them.',
     dry: 'The trench is dry. Steam rises where the water stood.',
     faces: 'The people are down on their faces, saying over and over that the LORD is God.',
