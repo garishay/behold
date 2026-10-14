@@ -62,14 +62,14 @@ describe('after a failed close: what each hint names (#123)', () => {
       ...fills,
     },
   })
-  // Tester 3's first close (#23): the seated man, the order as listed, and "First you ___". Each
-  // hint names the next after the one named last, the order as one, and round again.
+  // Tester 3's first close (#23): the seated man, the order as listed, and the prophet's words.
+  // Each hint names the next after the one named last, the order as one, and round again.
   it('each hint names the next answer the close found wrong, the order as one', () => {
-    const at = closed({ p3: 'elijah' }, ['vineyard', 'bedchamber', 'gate'], { v1: 'cursed' })
+    const at = closed({ p3: 'elijah' }, ['vineyard', 'bedchamber', 'gate'], { v2: 'cursed' })
     expect(next(vineyard, at, null)).toBe('p3')
     expect(next(vineyard, at, 'p3')).toBe('bedchamber')
-    expect(next(vineyard, at, 'gate')).toBe('v1')
-    expect(next(vineyard, at, 'v1')).toBe('p3')
+    expect(next(vineyard, at, 'gate')).toBe('v2')
+    expect(next(vineyard, at, 'v2')).toBe('p3')
   })
 })
 
