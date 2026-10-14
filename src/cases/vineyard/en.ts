@@ -72,7 +72,7 @@ export const en = {
     },
     law: {
       title: 'The Law',
-      body: 'One witness is not enough to put a man to death. A charge stands only on the word of two or three witnesses.\n\nThe land is not to be sold for good, for the land belongs to the LORD. A family’s inheritance stays with the family.',
+      body: 'Every man of Israel is to keep the inheritance of his fathers. The land is not to be sold for good, for the land belongs to the LORD.\n\nOne witness is not enough to put a man to death. A charge stands only on the word of two or three witnesses.',
     },
     note: {
       title: 'The note',

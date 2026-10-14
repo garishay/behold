@@ -169,9 +169,9 @@ A spot's `cites` names the verses that put the thing in the picture: `17:40`, or
 run of verses, always within one of the case's passages. When a case's passages span more than
 one book, every cite carries its book in front — `1KI 21:1` — and when they do not, none does.
 The cite is optional for a document that quotes scripture from outside the passage, as the
-vineyard's Law scroll paraphrases Deuteronomy and Leviticus: it carries none, and the reviewer
-reads it by hand. A thing no verse names at all is not a spot; it stays in the picture as set
-dressing (`docs/world-rules.md`, _The text decides_). Whether every spot must cite is the
+vineyard's Law scroll paraphrases Numbers, Leviticus, and Deuteronomy: it carries none, and the
+reviewer reads it by hand. A thing no verse names at all is not a spot; it stays in the picture
+as set dressing (`docs/world-rules.md`, _The text decides_). Whether every spot must cite is the
 authoring gate's rule (#5).
 
 The account is the reason the tutorial has three passages: the champion's name and height are
