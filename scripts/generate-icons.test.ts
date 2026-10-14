@@ -40,6 +40,13 @@ function read(file: Buffer): { size: number; pixels: Uint8Array } {
 const fromGround = (pixels: Uint8Array, at: number) =>
   Math.max(...GROUND.map((level, k) => Math.abs(pixels[at + k] - level)))
 
+/**
+ * The dp of a launcher icon's 108 that Chrome's install lays a maskable icon over: it pads the icon
+ * so the spec's 80% safe circle meets Android's 66 dp one (Chromium's `WebappsIconUtils`, 4/5
+ * against 66/108), and the middle 72 dp show (#129).
+ */
+const CHROME = 82.5
+
 const master = decode(await readFile(MASTER))
 
 describe('generate-icons (Gate 18, #10)', () => {
@@ -106,9 +113,19 @@ describe('generate-icons (Gate 18, #10)', () => {
       if (fromGround(pixels, at * 4) <= 12) continue
       art++
       const [x, y] = [(at % size) + 0.5, Math.floor(at / size) + 0.5]
-      expect(Math.hypot(x - centre, y - centre)).toBeLessThanOrEqual((33 / 91) * size)
+      expect(Math.hypot(x - centre, y - centre)).toBeLessThanOrEqual((33 / CHROME) * size)
     }
     expect(art).toBeGreaterThan(size * size * 0.2)
+  })
+
+  it('shows the maskable art at the store’s 75% in the launcher Chrome installs', () => {
+    const { size, share } = ICONS.find((icon) => icon.file === 'icon-512-maskable.png')!
+    const pixels = frame(master, size, share)
+    let [left, right] = [Infinity, -1]
+    for (let at = 0; at < size * size; at++)
+      if (fromGround(pixels, at * 4) > 12)
+        [left, right] = [Math.min(left, at % size), Math.max(right, at % size)]
+    expect((((right + 1 - left) / size) * CHROME) / 72).toBeCloseTo(0.75, 2)
   })
 
   it('reads all five of PNG’s row filters', () => {
