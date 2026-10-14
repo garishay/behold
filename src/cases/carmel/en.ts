@@ -2,7 +2,9 @@ import type { CaseText } from '../types.ts'
 import type { carmel } from './case.ts'
 
 // Case two's English text, keyed by the ids in case.ts. Captions describe by marker and carry the
-// passage's detail; every sentence is the game's own voice, never the translation's.
+// passage's detail; every sentence is the game's own voice, never the translation's. The three
+// that date the moments read as a clock too, in the passage's phrases: noon, the hour of the
+// offering near, and that hour, mid-afternoon, so the water and the fire share their anchor (#131).
 export const en = {
   title: 'The mountain',
   subtitle: 'Case one',
@@ -23,12 +25,12 @@ export const en = {
     trench:
       'A trench dug all the way around the altar, wide enough to hold two measures of seed. It is full of water.',
     spent:
-      'Across the ground, men in tall caps and saffron robes sit by their own cold altar, worn out. Midday has passed.',
+      'Across the ground, men in tall caps and saffron robes sit by their own cold altar, worn out. Midday has passed; the hour of the offering is near.',
     fire: 'Fire falls on the altar and burns all of it: the bull, the wood, the very stones, and the dust around them.',
     dry: 'The trench is dry. Steam rises where the water stood.',
     faces: 'The people are down on their faces, saying over and over that the LORD is God.',
     praying:
-      'The man in the hair cloak stands at the altar with his arms lifted. It is the hour of the offering.',
+      'The man in the hair cloak stands at the altar with his arms lifted. It is the hour of the offering, mid-afternoon.',
     prophets:
       'A crowd of men in tall caps and saffron robes circles an altar with a bull on its wood, crying aloud to Baal. No fire has come. Four hundred and fifty of them, by the prophet’s count.',
     mocker:
