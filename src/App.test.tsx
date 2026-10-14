@@ -1169,7 +1169,6 @@ describe('the tutorial’s marks (#25)', () => {
           s3: 'silver',
           s4: 'jezebel',
           s5: 'the-king',
-          v1: 'killed',
           v2: 'taken-possession',
         },
       },
@@ -2586,7 +2585,7 @@ describe('the faces and the order are part of the job (#114)', () => {
   // that face is what is left, its mark is brought into view again.
   it('brings the lesson’s face into view again once the account is full', async () => {
     const fills = { s1: 'garden', s3: 'inheritance', s4: 'jezebel' }
-    const kept = { ...fills, s5: 'the-king', v1: 'killed' }
+    const kept = { ...fills, s5: 'the-king' }
     const order = [...vineyard.order!]
     start(<App />, { ...laterStarted, vineyard: found(vineyard, { order, fills: kept }) })
     openCase(/The vineyard/)
@@ -2909,7 +2908,7 @@ describe('the close converges (#95)', () => {
   // direction (#125) retires the look a failed close owed (#118, #123): Close the case comes back
   // at once, so the case closes again as often as the player likes.
   it.each([
-    ['vineyard', vineyard, { s4: 'ahab', v1: 'stoned' }],
+    ['vineyard', vineyard, { s4: 'ahab', v2: 'stoned' }],
     ['battle', micaiah, { b1: 'thirty-two', b3: 'micaiah' }],
   ] as const)('in the %s, every failed close counts and marks no answer', (name, s, off) => {
     start(<App />, offBy(s, off))
@@ -2935,7 +2934,7 @@ describe('the close converges (#95)', () => {
     [
       'The vineyard',
       'More than two',
-      offBy(vineyard, { s4: 'ahab', s5: 'the-elders', v1: 'stoned' }),
+      offBy(vineyard, { s4: 'ahab', s5: 'the-elders', v2: 'stoned' }),
     ],
     [
       'The battle',
@@ -2962,7 +2961,7 @@ describe('the close converges (#95)', () => {
   // player learns which answer doesn't fit, one at a time, as it was; from Solve it says so, and to
   // open Look for a clue (#118, #123).
   it('in the vineyard, the hint after the second failed close names the first answer that doesn’t fit', () => {
-    start(<App />, offBy(vineyard, { s4: 'ahab', v1: 'stoned' }))
+    start(<App />, offBy(vineyard, { s4: 'ahab', v2: 'stoned' }))
     openCase(/The vineyard/)
     tab(/Solve/)
     const close = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
@@ -2979,7 +2978,7 @@ describe('the close converges (#95)', () => {
   // never stored, so its count survives leaving the case, and a reload or Restart clears it.
   it('in the vineyard, the count survives leaving the case, and a reload or Restart clears it', async () => {
     const counted = /^One answer doesn’t fit the story\.$/
-    const { unmount } = start(<App />, offBy(vineyard, { v1: 'stoned' }))
+    const { unmount } = start(<App />, offBy(vineyard, { v2: 'stoned' }))
     openCase(/The vineyard/)
     tab(/Solve/)
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
@@ -3007,7 +3006,7 @@ describe('the close converges (#95)', () => {
   // a hint while one was owed (#123): once everything is found, a tap that finds nothing new runs
   // nothing, as before (#29 A1), and the offer comes after the second failed close.
   it('after a failed close with everything found, taps that find nothing new bring no offer', async () => {
-    start(<App />, offBy(vineyard, { v1: 'stoned' }))
+    start(<App />, offBy(vineyard, { v2: 'stoned' }))
     openCase(/The vineyard/)
     tab(/Solve/)
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
@@ -3022,7 +3021,7 @@ describe('the close converges (#95)', () => {
   // once, so its words are out of a lesson's eight. The second close rings nothing there.
   const stepUp = 'The cases are harder from here: the count shows only when one or two don’t fit.'
   it('the vineyard’s first failed close rings the bank’s head once with the step up', () => {
-    start(<App />, offBy(vineyard, { s4: 'ahab', s5: 'the-elders', v1: 'stoned' }))
+    start(<App />, offBy(vineyard, { s4: 'ahab', s5: 'the-elders', v2: 'stoned' }))
     openCase(/The vineyard/)
     tab(/Solve/)
     const close = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
@@ -3048,7 +3047,7 @@ describe('the close converges (#95)', () => {
         ? new DOMRect(16, 477, 328, 24)
         : new DOMRect(10, 10, 100, 40)
     })
-    start(<App />, offBy(vineyard, { s4: 'ahab', s5: 'the-elders', v1: 'stoned' }))
+    start(<App />, offBy(vineyard, { s4: 'ahab', s5: 'the-elders', v2: 'stoned' }))
     openCase(/The vineyard/)
     tab(/Solve/)
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
@@ -3062,28 +3061,28 @@ describe('the close converges (#95)', () => {
   // From the vineyard on, the count stays in the bank's head until the next close; a word's refusal
   // borrows the line, and the next move gives it back (#123).
   it('in the vineyard, the count stays in the bank’s head until the next close', () => {
-    start(<App />, offBy(vineyard, { s4: 'ahab', v1: 'stoned' }))
+    start(<App />, offBy(vineyard, { s4: 'ahab', v2: 'stoned' }))
     openCase(/The vineyard/)
     tab(/Solve/)
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     const two = /^Two answers don’t fit the story\.$/
     expect(result()).toHaveTextContent(two)
     chip('cursed')
-    slot('v1')
+    slot('v2')
     expect(result()).toHaveTextContent(two)
     chip('Ahab')
-    slot('v1')
+    slot('v2')
     expect(result()).toHaveTextContent(/^That blank wants something that happened\.$/)
-    chip('killed')
+    chip('taken possession')
     expect(result()).toHaveTextContent(two)
-    slot('v1')
+    slot('v2')
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     expect(result()).toHaveTextContent(/^One answer doesn’t fit the story\.$/)
   })
 
   // The count's line says what's left to find as it is now, so a find shrinks it (#123).
   it('in the vineyard, the count’s line counts what is left to find as it is now', async () => {
-    const kept = offBy(vineyard, { v1: 'stoned' }).vineyard
+    const kept = offBy(vineyard, { v2: 'stoned' }).vineyard
     const tapped = kept.tapped.filter((id) => !['stain', 'purse'].includes(id))
     start(<App />, { vineyard: { ...kept, tapped } })
     openCase(/The vineyard/)
@@ -3152,12 +3151,12 @@ describe('the close converges (#95)', () => {
   // The count goes with the close that ends the case: back on Solve from the reveal, a closed
   // case's bank shows no count (#123).
   it('once the vineyard closes, its Solve shows no count', async () => {
-    start(<App />, offBy(vineyard, { v1: 'stoned' }))
+    start(<App />, offBy(vineyard, { v2: 'stoned' }))
     openCase(/The vineyard/)
     tab(/Solve/)
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
-    chip('killed')
-    slot('v1')
+    chip('taken possession')
+    slot('v2')
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     expect(screen.getByRole('heading', { name: 'The case is closed.' })).toBeInTheDocument()
     history.back()
@@ -3172,7 +3171,7 @@ describe('the close converges (#95)', () => {
   // failed close names the next answer it found wrong after the last one named, and round again
   // (#123).
   it('each new hint names the next answer the close found wrong, and round again', async () => {
-    start(<App />, offBy(vineyard, { s4: 'ahab', v1: 'stoned' }))
+    start(<App />, offBy(vineyard, { s4: 'ahab', v2: 'stoned' }))
     openCase(/The vineyard/)
     tab(/Solve/)
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
@@ -3181,8 +3180,8 @@ describe('the close converges (#95)', () => {
     expect(named()).toBe('“But written by ___”')
     await lookAgain('vineyard', 'seal', 'Bedchamber')
     menu('Hint')
-    expect(named()).toBe('“First you ___”')
-    await lookAgain('vineyard', 'prophet', 'The vineyard')
+    expect(named()).toBe('“Now you have ___”')
+    await lookAgain('vineyard', 'man-rows', 'The vineyard')
     menu('Hint')
     expect(named()).toBe('“But written by ___”')
   })
@@ -3397,7 +3396,7 @@ describe('the case solved (#6, 03c; #24)', () => {
   it('the reveal leads with what the closes found wrong, each with a link to its verse', async () => {
     const kept = closedCase(vineyard)
     const faces = { ...kept.faces, p1: 'naboth' }
-    const fills = { ...kept.fills, s4: 'ahab', v1: 'stoned' }
+    const fills = { ...kept.fills, s4: 'ahab', v2: 'stoned' }
     const { unmount } = start(<App passages={versed} />, {
       vineyard: { ...kept, solved: false, faces, fills },
     })
@@ -3411,7 +3410,7 @@ describe('the case solved (#6, 03c; #24)', () => {
     for (const [id, word] of [
       ['p1', 'Ahab'],
       ['s4', 'Jezebel'],
-      ['v1', 'killed'],
+      ['v2', 'taken possession'],
     ]) {
       chip(word)
       slot(id)
@@ -3420,7 +3419,7 @@ describe('the case solved (#6, 03c; #24)', () => {
     const said = [
       '“but written by ___”: Jezebel. You put Ahab, then Naboth. 21:8',
       '“the man on the bed”: Ahab. You put Naboth. 21:4',
-      '“First you ___”: killed. You put stoned. 21:19',
+      '“now you have ___”: taken possession. You put stoned. 21:19',
     ]
     expect(missed()).toEqual(said)
     const story = screen.getByText(/^The man on the bed was Ahab/)
@@ -3453,7 +3452,7 @@ describe('the case solved (#6, 03c; #24)', () => {
       p3: ['ahab'],
       order: ['gate bedchamber vineyard'],
       s4: ['ahab', 'naboth'],
-      v1: ['stoned'],
+      v2: ['stoned'],
     }
     start(<App passages={versed} />, { vineyard: { ...closedCase(vineyard), misses } })
     openCase(/The vineyard/)
@@ -3465,7 +3464,7 @@ describe('the case solved (#6, 03c; #24)', () => {
     fireEvent.click(screen.getByRole('button', { name: '2 more' }))
     expect(missed().slice(3)).toEqual([
       '“What happened first”: Bedchamber, then The gate, then The vineyard. You put The gate, Bedchamber, The vineyard. 21:8',
-      '“First you ___”: killed. You put stoned. 21:19',
+      '“now you have ___”: taken possession. You put stoned. 21:19',
     ])
     expect(screen.queryByRole('button', { name: /more$/ })).toBeNull()
   })
@@ -3531,7 +3530,6 @@ describe('the case solved (#6, 03c; #24)', () => {
       ['s3', 'silver'],
       ['s4', 'Jezebel'],
       ['s5', 'the king'],
-      ['v1', 'killed'],
       ['v2', 'taken possession'],
     ]
     for (const [id, word] of fills) {

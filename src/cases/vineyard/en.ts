@@ -104,13 +104,7 @@ export const en = {
     },
     verdict: {
       heading: 'The prophet’s words',
-      parts: [
-        { t: 'First you ' },
-        { b: 'v1' },
-        { t: ' him, and now you have ' },
-        { b: 'v2' },
-        { t: '?' },
-      ],
+      parts: [{ t: 'First you killed him, and now you have ' }, { b: 'v2' }, { t: '?' }],
     },
   },
   teach: 'Who is he? Find what bears his name.',

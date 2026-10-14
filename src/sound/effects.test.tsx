@@ -153,7 +153,6 @@ describe('the effects, each beside what the screen shows (Gate 10 A3, A5)', () =
       ['s3', 'silver'],
       ['s4', 'Jezebel'],
       ['s5', 'the king'],
-      ['v1', 'killed'],
       ['v2', 'taken possession'],
     ]) {
       chip(word)

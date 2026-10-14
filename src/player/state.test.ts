@@ -32,7 +32,7 @@ describe('the model (#6)', () => {
     expect(p.moment).toBe('vineyard')
     expect(p.order).toEqual([null, null, null])
     expect(filled(vineyard, p)).toBe(0)
-    expect(total(vineyard)).toBe(3 + 1 + 6)
+    expect(total(vineyard)).toBe(3 + 1 + 5)
     expect(total(valley)).toBe(2 + 5)
   })
 
@@ -154,14 +154,14 @@ describe('the model (#6)', () => {
       fills: { s1: 'silver' },
     }
     expect(filled(vineyard, p)).toBe(3)
-    expect(wrong(vineyard, p)).toBe(2 + 0 + 6)
+    expect(wrong(vineyard, p)).toBe(2 + 0 + 5)
     // A partial order is nothing filled and one thing wrong — never a thing filled at the first
     // tile, or the submit could open with the order half done (the owner's note at 03a's open).
     const partial = { ...fresh(vineyard), order: ['bedchamber', null, null] }
     expect(filled(vineyard, partial)).toBe(0)
-    expect(wrong(vineyard, partial)).toBe(3 + 1 + 6)
+    expect(wrong(vineyard, partial)).toBe(3 + 1 + 5)
     p = { ...p, order: ['gate', 'bedchamber', 'vineyard'] }
-    expect(wrong(vineyard, p)).toBe(2 + 1 + 6)
+    expect(wrong(vineyard, p)).toBe(2 + 1 + 5)
   })
 
   // The tutorial goes all the way to rule 5 (#26 [4]): it steps on as each until is met, marks
@@ -270,7 +270,6 @@ describe('the model (#6)', () => {
         s3: 'inheritance',
         s4: 'jezebel',
         s5: 'the-king',
-        v1: 'killed',
         v2: 'taken-possession',
       },
     }
@@ -295,7 +294,6 @@ describe('the model (#6)', () => {
         s3: 'inheritance',
         s4: 'jezebel',
         s5: 'the-king',
-        v1: 'killed',
         v2: 'taken-possession',
       },
     }
@@ -309,13 +307,13 @@ describe('the model (#6)', () => {
     const swapped = ['gate', 'bedchamber', 'vineyard']
     let p = submit(vineyard, off(fresh(vineyard), { p1: 'naboth' }, swapped, { s4: 'ahab' }))
     expect(p.misses).toEqual({ p1: ['naboth'], order: ['gate bedchamber vineyard'], s4: ['ahab'] })
-    p = submit(vineyard, off(p, {}, right.order, { s4: 'ahab', v1: 'stoned' }))
-    p = submit(vineyard, off(p, {}, right.order, { s4: 'jezebel', v1: 'stoned' }))
-    p = submit(vineyard, off(p, {}, right.order, { s4: 'naboth', v1: 'stoned' }))
+    p = submit(vineyard, off(p, {}, right.order, { s4: 'ahab', v2: 'stoned' }))
+    p = submit(vineyard, off(p, {}, right.order, { s4: 'jezebel', v2: 'stoned' }))
+    p = submit(vineyard, off(p, {}, right.order, { s4: 'naboth', v2: 'stoned' }))
     const kept = { p1: ['naboth'], order: ['gate bedchamber vineyard'], s4: ['ahab', 'naboth'] }
-    expect(p.misses).toEqual({ ...kept, v1: ['stoned'] })
+    expect(p.misses).toEqual({ ...kept, v2: ['stoned'] })
     p = submit(vineyard, { ...p, ...right })
-    expect([p.solved, p.misses]).toEqual([true, { ...kept, v1: ['stoned'] }])
+    expect([p.solved, p.misses]).toEqual([true, { ...kept, v2: ['stoned'] }])
   })
 })
 

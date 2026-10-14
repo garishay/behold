@@ -118,7 +118,9 @@ export const vineyard = {
   ],
   order: ['bedchamber', 'gate', 'vineyard'],
   // The offer of a better vineyard is told, not asked: no picture shows it, so its blank fell to
-  // guessing (#118). The blanks keep their ids, so a kept vineyard keeps its words.
+  // guessing (#118). So is the prophet's "killed", since stoned makes his question just as true
+  // (#131; docs/case-design.md, writing step 2). The blanks keep their ids, so a kept vineyard
+  // keeps its words.
   blocks: [
     {
       id: 'account',
@@ -129,7 +131,7 @@ export const vineyard = {
         s5: 'the-king',
       },
     },
-    { id: 'verdict', blanks: { v1: 'killed', v2: 'taken-possession' } },
+    { id: 'verdict', blanks: { v2: 'taken-possession' } },
   ],
   teach: { face: 'p1' },
   // What settles each face and blank, and what dates each moment, for a hint (#29): the letters
@@ -142,7 +144,6 @@ export const vineyard = {
     s3: 'law',
     s4: 'seal',
     s5: 'letter',
-    v1: 'prophet',
     v2: 'man-rows',
     bedchamber: 'sheets',
     gate: 'stones',
@@ -158,7 +159,6 @@ export const vineyard = {
     s3: '21:3',
     s4: '21:8',
     s5: '21:13',
-    v1: '21:19',
     v2: '21:19',
     bedchamber: '21:8',
     gate: '21:13',

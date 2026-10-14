@@ -110,10 +110,10 @@ describe('progress on the device (#6, A6)', () => {
     expect(load(cases)).toEqual({})
   })
 
-  // The vineyard's "a better ___" is told in its account now (#118). A fill kept for a blank the
-  // case no longer has is dropped alone, as a miss is (#107), so a vineyard closed with it stays
-  // closed, and one in progress keeps its other words; its word for a blank still there is still
-  // checked against the case.
+  // The vineyard's "a better ___" is told in its account now (#118), and so is the prophet's
+  // "killed" (#131). A fill kept for a blank the case no longer has is dropped alone, as a miss is
+  // (#107), so a vineyard closed with it stays closed, and one in progress keeps its other words;
+  // its word for a blank still there is still checked against the case.
   it('drops alone a fill whose blank the case no longer has, and the case keeps its place', () => {
     const fills = Object.fromEntries(vineyard.blocks.flatMap((b) => Object.entries(b.blanks)))
     const closed = {
@@ -123,15 +123,18 @@ describe('progress on the device (#6, A6)', () => {
       fills,
       solved: true,
     }
+    const told = { s2: 'vineyard', v1: 'killed' }
     localStorage.setItem(
       key,
-      JSON.stringify({ vineyard: { ...closed, fills: { ...fills, s2: 'vineyard' } } }),
+      JSON.stringify({ vineyard: { ...closed, fills: { ...fills, ...told } } }),
     )
     expect(load(cases)).toEqual({ vineyard: closed })
     const open = { ...fresh(vineyard), fills: { s1: 'garden' } }
     localStorage.setItem(
       key,
-      JSON.stringify({ vineyard: { ...open, fills: { s1: 'garden', s2: 'silver' } } }),
+      JSON.stringify({
+        vineyard: { ...open, fills: { s1: 'garden', s2: 'silver', v1: 'stoned' } },
+      }),
     )
     expect(load(cases)).toEqual({ vineyard: open })
   })
