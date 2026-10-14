@@ -37,9 +37,9 @@ PNG.
   clips the 66 dp circle at its centre. How much of the 108 the maskable image spans depends on
   what installs it, so the store's framing there is 75% × 72 over the dp it spans.
   - **Chrome's install** pads the image so the spec's safe circle, 80% of its width, meets
-    Android's 66 dp one: Chromium's `WebappsIconUtils` pads it by the ratio of
-    `MASKABLE_SAFE_ZONE_RATIO`, 4/5, to `ADAPTIVE_SAFE_ZONE_RATIO`, 66/108. The image spans 82.5
-    dp, so 75% × 72 / 82.5 = 65.5% shows the store's framing (#129). The art's farthest pixel, the
+    Android's 66 dp one, by the ratio of `MASKABLE_SAFE_ZONE_RATIO`, 4/5, to
+    `ADAPTIVE_SAFE_ZONE_RATIO`, 66/108, in Chromium's `WebappsIconUtils`. The image spans 82.5 dp,
+    so 75% × 72 / 82.5 = 65.5% shows the store's framing (#129). The art's farthest pixel, the
     top-left knob, is 39.1% of the width from the centre, inside the 40% (33 / 82.5) the 66 dp
     circle takes there.
   - **Bubblewrap,** which builds the Play app (68b), insets the image 8.5 dp a side in its
