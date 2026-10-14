@@ -25,7 +25,7 @@ PNG.
 | `icon-512.png`          | 512  | 75%                          | the manifest's `any` icon; the store's icon                       |
 | `icon-1024.png`         | 1024 | 75%                          | the manifest's largest `any` icon; Bubblewrap's splash, at 300 dp |
 | `icon-192.png`          | 192  | 75%                          | the manifest's `any` icon; the page's `apple-touch-icon`          |
-| `icon-512-maskable.png` | 512  | 59.3%                        | the launcher                                                      |
+| `icon-512-maskable.png` | 512  | 65.5%                        | the launcher                                                      |
 | `favicon-48.png`        | 48   | 90%                          | a browser's tab, at 16 px                                         |
 
 - **75%** is the framing the owner approved and ruled (Gate 18, issuecomment-5932066607): the
@@ -33,9 +33,19 @@ PNG.
 - **The splash.** Bubblewrap draws it at 300 dp from the largest `any` icon, 900 px at xxhdpi and
   1,200 at xxxhdpi, so the 1024 gives it the art rather than the 512 enlarged (the ruling's fifth
   file). The 512 stays the store's icon.
-- **The launcher.** Bubblewrap lays the maskable image over 91 dp of the launcher's 108 dp icon and
-  shows the middle 72 dp, so 75% × 72 / 91 shows the store's framing there. Every pixel of the art
-  then lies inside the 66 dp circle no launcher's mask clips.
+- **The launcher.** Android draws a launcher icon at 108 dp and shows the middle 72 dp, and no mask
+  clips the 66 dp circle at its centre. How much of the 108 the maskable image spans depends on
+  what installs it, so the store's framing there is 75% × 72 over the dp it spans.
+  - **Chrome's install** pads the image so the spec's safe circle, 80% of its width, meets
+    Android's 66 dp one: Chromium's `WebappsIconUtils` pads it by the ratio of
+    `MASKABLE_SAFE_ZONE_RATIO`, 4/5, to `ADAPTIVE_SAFE_ZONE_RATIO`, 66/108. The image spans 82.5
+    dp, so 75% × 72 / 82.5 = 65.5% shows the store's framing (#129). The art's farthest pixel, the
+    top-left knob, is 39.1% of the width from the centre, inside the 40% (33 / 82.5) the 66 dp
+    circle takes there.
+  - **Bubblewrap,** which builds the Play app (68b), insets the image 8.5 dp a side in its
+    `ic_launcher.xml`, so it spans 91 dp. This file would show the art at 83% there, past the 66
+    dp circle, so 68b gives Bubblewrap its own file at 75% × 72 / 91 = 59.3%. 10a framed this
+    file at 59.3% for Bubblewrap, and Chrome's install showed the art at about 69% (#129).
 - **The favicon** is drawn unmasked at 16 px, so the art fills it.
 - **What a first visit downloads.** The service worker precaches the two icons the game's page
   links, the favicon and the 192. The manifest's 512s and 1024 are read when the app is installed, never
