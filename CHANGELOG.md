@@ -11,9 +11,11 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   keep the inheritance of his fathers.", and the witness law follows it. The mountain's three time
   captions read as a clock, in the passage's phrases: the sun at noon, "Midday has passed; the hour
   of the offering is near.", and "It is the hour of the offering, mid-afternoon.", so the water and
-  the fire share their anchor. The water's caption sits the prophets "by their cold altar", a word
-  shorter, so it keeps to three lines with its clock whole (#12 [Q22]). A vineyard kept from
-  before drops its word for "First you ___" and keeps its place.
+  the fire share their anchor. The water's caption and the mocker's are cut, words deleted only, so
+  each clock shows whole in three lines at 360 wide in Noto Serif, Android's serif, as well as in
+  this machine's font: the spent prophets begin "Men in tall caps", by "their cold altar", and the
+  mocker loses his belt and staff (#12 [Q22], [Q24]). A vineyard kept from before drops its word
+  for "First you ___" and keeps its place.
 
 ## v0.28.1 — The launcher at the store's 75% (#129)
 

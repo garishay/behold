@@ -5,6 +5,8 @@ import type { carmel } from './case.ts'
 // passage's detail; every sentence is the game's own voice, never the translation's. The three
 // that date the moments read as a clock too, in the passage's phrases: noon, the hour of the
 // offering near, and that hour, mid-afternoon, so the water and the fire share their anchor (#131).
+// Each shows whole in three lines at 360 wide in Noto Serif, Android's serif, as well as in this
+// machine's font, so the clock is never behind More (#12 [Q24]).
 export const en = {
   title: 'The mountain',
   subtitle: 'Case one',
@@ -25,7 +27,7 @@ export const en = {
     trench:
       'A trench dug all the way around the altar, wide enough to hold two measures of seed. It is full of water.',
     spent:
-      'Across the ground, men in tall caps and saffron robes sit by their cold altar, worn out. Midday has passed; the hour of the offering is near.',
+      'Men in tall caps and saffron robes sit by their cold altar, worn out. Midday has passed; the hour of the offering is near.',
     fire: 'Fire falls on the altar and burns all of it: the bull, the wood, the very stones, and the dust around them.',
     dry: 'The trench is dry. Steam rises where the water stood.',
     faces: 'The people are down on their faces, saying over and over that the LORD is God.',
@@ -34,7 +36,7 @@ export const en = {
     prophets:
       'A crowd of men in tall caps and saffron robes circles an altar with a bull on its wood, crying aloud to Baal. No fire has come. Four hundred and fifty of them, by the prophet’s count.',
     mocker:
-      'A wild-haired man in a cloak of hair and a leather belt, leaning on his staff, a hand cupped to his ear, calling out to them with a grin. The sun stands at noon.',
+      'A wild-haired man in a cloak of hair, a hand cupped to his ear, calling out to them with a grin. The sun stands at noon.',
     crowd:
       'The people of Israel, watching from the slope. Asked how long they would waver between the LORD and Baal, they said not a word.',
     king: 'A man in a wine-red robe and a gold circlet, seated under an awning among his guards, watching.',

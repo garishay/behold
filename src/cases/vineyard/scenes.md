@@ -120,8 +120,8 @@ the foreground, seen from behind.
 - `letter` [64, 27, 18, 26], right: the first elder on the bench, holding an opened letter, its red
   seal broken (21:8–10).
 - `law` [80, 36, 20, 12], right: an open scroll on the elders' bench, the Law, whose sources are
-  Deuteronomy and Leviticus, so the spot carries no cite. The scroll lies from 84% to 96% of the
-  width, 2.6% of the height; its box takes in the elders' hands and the bench around it.
+  Numbers, Leviticus, and Deuteronomy, so the spot carries no cite. The scroll lies from 84% to
+  96% of the width, 2.6% of the height; its box takes in the elders' hands and the bench around it.
 
 **What stays clear.** The two empty chairs are set dressing, not a spot, since no verse names them
 (#26). The letter and the scroll carry faint marks and no letters that read. The picture came
