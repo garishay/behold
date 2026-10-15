@@ -21,9 +21,9 @@ interface DockProps {
 
 /**
  * The caption, docked under the picture at a fixed height (#24): the last tap's caption, or the
- * prompt before one, and right under it a line of what it found (ruling [2]). A caption longer
- * than the dock shows More, which opens it whole, rising over the picture's foot from where the
- * caption ends.
+ * prompt before one, and right under it a line of what it found (ruling [2]), which wraps only
+ * between its parts (#131). A caption longer than the dock shows More, which opens it whole,
+ * rising over the picture's foot from where the caption ends.
  */
 export function Dock({ structure, text, caption, offer, onMore }: DockProps) {
   // Opened for one caption, from the line where it ends; the next tap's caption opens closed.
@@ -56,6 +56,11 @@ export function Dock({ structure, text, caption, offer, onMore }: DockProps) {
     spot?.person !== undefined && (late && !named ? strings.aFaceNoName : strings.aFace),
     structure.order?.some((m) => structure.evidence[m] === spot?.id) && strings.clueToOrder,
   ].filter(Boolean)
+  // Each part kept whole, its dot with it, so a line that wraps breaks only between parts (#131).
+  const parts = notes.flatMap((n, i) => [
+    i > 0 && ' ',
+    <span key={i}>{i < notes.length - 1 ? `${n} ·` : n}</span>,
+  ])
   const line = caption ? text.captions[caption.spot] : strings.tapPrompt
   const more = (
     <button type="button" className="more" aria-expanded={open} onClick={toggle}>
@@ -74,7 +79,7 @@ export function Dock({ structure, text, caption, offer, onMore }: DockProps) {
           {more}
         </div>
       )}
-      {offer ?? <span className="found">{notes.join(' · ')}</span>}
+      {offer ?? <span className="found">{parts}</span>}
     </div>
   )
 }

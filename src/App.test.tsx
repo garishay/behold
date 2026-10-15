@@ -603,7 +603,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     guide()
     tab(/Look/)
     await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
-    const found = () => screen.getByText(/Found:/)
+    const found = () => document.querySelector('.dock .found')
     tapSpot('giant')
     tapSpot('giant')
     expect(found()).toHaveTextContent('Found: Goliath, six, spear, sword · a face in Solve')
@@ -659,12 +659,29 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     expect(finds()).toBe('')
   })
 
+  // The owner's ruling on the redrafted part 3 (#131): a line of finds that wraps breaks only
+  // between its parts, never inside one. Each part is kept whole, with the dot after it, so a
+  // break falls after a dot; the page draws it (jsdom lays nothing out), and this holds its parts.
+  it('a line of finds keeps each part whole, its dot with it', async () => {
+    start(<App />, laterStarted)
+    openCase(/The battle/)
+    tapSpot('rider')
+    const parts = [...document.querySelectorAll('.dock .found > span')].map((p) => p.textContent)
+    expect(parts).toEqual([
+      'Found: armor, breastplate ·',
+      'a face in Solve, but no name ·',
+      'a clue to the order',
+    ])
+  })
+
   it('a tap shows the caption and what it found, and its words wait on Solve, ringed', () => {
     start()
     openCase(/The valley/)
     tapSpot('boy')
     expect(screen.getByText(/A shepherd boy in a plain tunic/)).toBeInTheDocument()
-    expect(screen.getByText(/Found:/)).toHaveTextContent('Found: David, sling · a face in Solve')
+    expect(document.querySelector('.dock .found')).toHaveTextContent(
+      'Found: David, sling · a face in Solve',
+    )
     expect(screen.getByRole('tab', { name: /Look/ })).toHaveTextContent('Look1/6')
     expect(coach()).toHaveTextContent('That tap found his name, David, and sling.')
     expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('Solve0/7+2')
@@ -825,7 +842,9 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     expect(screen.getByRole('dialog', { name: 'The seal' })).toHaveTextContent(
       'BELONGING TO AHAB, KING.',
     )
-    expect(screen.getByText(/Found:/)).toHaveTextContent('Found: Ahab, seal · copied to Papers')
+    expect(document.querySelector('.dock .found')).toHaveTextContent(
+      'Found: Ahab, seal · copied to Papers',
+    )
     fireEvent.click(screen.getByRole('button', { name: 'Close' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     tab(/Solve/)

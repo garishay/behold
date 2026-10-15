@@ -97,7 +97,8 @@ the vineyard on: hard because you have to look, never because you have to be cle
    each one is. A person's tap says they are "a face in Solve", and from the vineyard on, one that
    gives no name says so in that part of the line of finds, "a face in Solve, but no name", where
    the surprise is: a note of its own would read as one of the things found (#131). In every case
-   with an order, the thing that tells when a moment happened says it is "a clue to the order".
+   with an order, the thing that tells when a moment happened says it is "a clue to the order". A
+   line of finds that wraps breaks only between its parts, never inside one (#131).
 
    The season plays in order: each case opens when the one before it is closed, and a case the
    player has already started stays open (#75). The valley teaches the game; the cases after it
