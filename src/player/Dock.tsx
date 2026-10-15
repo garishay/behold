@@ -45,10 +45,16 @@ export function Dock({ structure, text, caption, offer, onMore }: DockProps) {
   // A tap that finds nothing new says what its spot holds, so a second tap names who is there (#102).
   const held = caption?.added.length ? caption.added : (spot?.words ?? [])
   const words = held.map((w) => text.words[w]).join(', ')
+  // A person's tap says they are a face in Solve. From the vineyard on, a name comes from what
+  // bears it, so one that gives none says so in that part; and in a case with an order, what dates
+  // a moment says it is a clue to the order (#131).
+  const named = spot?.words.some((w) => structure.words[w] === 'name')
+  const late = !structure.steps && !structure.marks
   const notes = [
     words && `${strings.found} ${words}`,
     caption?.paper !== undefined && strings.copiedToPapers,
-    spot?.person !== undefined && strings.oneOfTheFaces,
+    spot?.person !== undefined && (late && !named ? strings.aFaceNoName : strings.aFace),
+    structure.order?.some((m) => structure.evidence[m] === spot?.id) && strings.clueToOrder,
   ].filter(Boolean)
   const line = caption ? text.captions[caption.spot] : strings.tapPrompt
   const more = (

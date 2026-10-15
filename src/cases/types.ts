@@ -86,9 +86,11 @@ export type Step =
 /**
  * A case's one new idea, marked on Solve where the player first meets it (docs/case-design.md,
  * rule 6): the order (#30), its pictures ringed and then its slots until a moment is placed; or a
- * face, ringed until a name is placed in it, as the battle's disguised man is (#53).
+ * face, ringed until a name is placed in it, as the battle's disguised man is (#53), and where it
+ * names the spot that `bears` the face's name, until that spot is opened too, so a name placed
+ * before it is found doesn't take the mark away: the vineyard's man on the bed and the seal (#131).
  */
-export type Teach = 'order' | { readonly face: string }
+export type Teach = 'order' | { readonly face: string; readonly bears?: string }
 
 /** Verses within one chapter, by USFM book code; without `from` and `to`, the whole chapter. */
 export interface Passage {
