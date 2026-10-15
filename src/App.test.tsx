@@ -3319,6 +3319,65 @@ describe('the close converges (#95)', () => {
     expect(named()).toBe('“But written by ___”')
   })
 
+  // Tester 4 (#23) took Where to look five times for "the ___ of his fathers": each new hint for it
+  // started over at the half of the picture. A new hint for an answer already hinted starts at
+  // Show me, the thing itself (#131).
+  it('a new hint for an answer already hinted starts at Show me', async () => {
+    start(<App />, offBy(vineyard, { s3: 'blood' }))
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    const close = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    const toLook = async () => {
+      tab(/Look/)
+      await waitFor(() => expect(history.state).toEqual({ case: 'vineyard' }))
+    }
+    close()
+    menu('Hint')
+    await toLook()
+    moment('The gate')
+    expect(at()).toBe('[data-half]')
+    tapSpot('law')
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+    tab(/Solve/)
+    close()
+    menu('Hint')
+    await toLook()
+    expect([at(), said()]).toEqual([
+      '[data-spot="law"]',
+      '“Vineyard was the ___” doesn’t fit the story. Here’s a clue. Tap it.',
+    ])
+  })
+
+  // The order is one answer, whichever of its moments a hint names it by: a new hint for it starts
+  // at Show me too, though its first place out of order has moved since (#131).
+  it('a new hint for the order starts at Show me, whichever moment it names', async () => {
+    const kept = offBy(vineyard, {}).vineyard
+    start(<App />, { vineyard: { ...kept, order: ['gate', 'bedchamber', 'vineyard'] } })
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    const close = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    const toLook = async () => {
+      tab(/Look/)
+      await waitFor(() => expect(history.state).toEqual({ case: 'vineyard' }))
+    }
+    close()
+    menu('Hint')
+    await toLook()
+    moment('Bedchamber')
+    expect(at()).toBe('[data-half]')
+    tapSpot('sheets')
+    tab(/Solve/)
+    for (const [i, name] of ['Bedchamber', 'The vineyard', 'The gate'].entries()) {
+      tile(name)
+      orderSlot(i)
+    }
+    close()
+    menu('Hint')
+    await toLook()
+    moment('The gate')
+    expect(at()).toBe('[data-spot="stones"]')
+  })
+
   // A hint says an answer doesn't fit only while it holds what the close found: changed since, it
   // says what settles it, as a hint for an answer still empty does (#123).
   it('a hint says an answer doesn’t fit only while it holds what the close found', () => {

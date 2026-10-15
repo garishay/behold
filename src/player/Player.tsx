@@ -158,8 +158,10 @@ export function Player(props: PlayerProps) {
   // #12): its count, which stays in the bank's head everywhere but the valley, and the answers its
   // hints name (#123). From the vineyard on, Close the case comes back at once (#125).
   const failed = lastClose
-  // The answer the last hint named: the next names the one after it (#123).
+  // The answer the last hint named: the next names the one after it (#123). And the answers hinted
+  // on this visit, the order as one: a new hint for one of them starts at Show me (#131).
   const [last, setLast] = useState<string | null>(null)
+  const [given, setGiven] = useState<readonly string[]>([])
   // The bank's head: a refused word's message, or how far off a close was (07c, #24 [3]).
   const [note, setNote] = useState('')
   // A mark that answers a move at what it's about: the order's refusal of the pictures as listed, at
@@ -464,8 +466,10 @@ export function Player(props: PlayerProps) {
    * thing's half would take most of the picture, its first hint is the second tier: tier 1 would
    * ring the same box and say less (#102 [1]). On Solve both tiers ring Look's button, so a hint
    * showing there is shown again, and its second tier waits for Look (#118). After a failed close,
-   * each new hint names the next answer it found wrong after the last one named (#123). A hint asked
-   * for while a mark answers a move takes its place, as the next move would (#123, #125).
+   * each new hint names the next answer it found wrong after the last one named (#123). A new hint
+   * for an answer already hinted on this visit starts at its second tier, Show me, as a broad
+   * thing's does: tier 1 was already given (#131). A hint asked for while a mark answers a move
+   * takes its place, as the next move would (#123, #125).
    */
   const take = () => {
     setSaidAt(null)
@@ -473,11 +477,18 @@ export function Player(props: PlayerProps) {
     if (guided || hint?.tier === 2 || hint?.why === 'close' || (hint && view !== 'look'))
       return nudge()
     const target = aim(s, progress, (failed && nextOf(s, failed, last)) ?? asked ?? null)
-    if (!hint && target.why === 'evidence') setLast(target.for)
+    // The order is one answer, whichever of its moments a hint names.
+    const about =
+      target.why === 'evidence' && (s.order?.includes(target.for) ? 'order' : target.for)
+    if (!hint && about) {
+      setLast(target.for)
+      setGiven([...given, about])
+    }
     const box = spots.find((x) => x.id === target.spot)?.box
+    const again = about && given.includes(about)
     const next = hint
       ? { ...hint, tier: 2 as const }
-      : { ...target, tier: box && broad(box) ? (2 as const) : (1 as const) }
+      : { ...target, tier: (box && broad(box)) || again ? (2 as const) : (1 as const) }
     setHint(next)
     setRun(0)
     setStayed(false)
