@@ -1,7 +1,7 @@
 /**
- * A passage, from the request to the ESV and back: the reference read from a query, the ESV's
- * URL for it, and its text parsed into verses — the reply side of the app's contract (Gate 03
- * [2]). Pure functions, so the test drives them without a Worker.
+ * A passage, from the request to API.Bible and back: the reference read from a query, its name,
+ * API.Bible's URL for it, and its text parsed into verses — the reply side of the app's contract
+ * (Gate 03 [2]). Pure functions, so the test drives them without a Worker.
  */
 import { books } from './books.ts'
 
@@ -38,47 +38,42 @@ export function reference(params: URLSearchParams): Reference | undefined {
   return { book, chapter, from, to }
 }
 
-/** The ESV's own name for a reference: `1 Kings 21`, `1 Samuel 17:17-18`. */
-export const query = (r: Reference) =>
+/** A reference's name, the store's key for its passage: `1 Kings 21`, `1 Samuel 17:17-18`. */
+export const cite = (r: Reference) =>
   `${books[r.book][0]} ${r.chapter}` + (r.from === undefined ? '' : `:${r.from}-${r.to}`)
 
 /**
- * The text endpoint's URL for a reference: verse numbers on, and everything else off — the
- * reference line, the headings, the footnotes and their bodies, the short copyright, the
- * horizontal lines, every indent, and the line wrapping — so the text is the verses alone,
- * each behind its bracketed number, and nothing needs stripping after.
+ * API.Bible's URL for a reference in one of its Bibles (Gate 33 A1): a whole chapter by its chapter
+ * ID, `1KI.21`, and a range as a passage from one verse ID to another, `1SA.17.17-1SA.17.18`. The
+ * text comes plain, with its verse numbers and no titles, notes, or chapter numbers, so nothing
+ * needs stripping after; and FUMS's third version puts in the reply the token that each view of
+ * the passage is reported with (`fums.ts`).
  */
-export function esvUrl(r: Reference): string {
-  const url = new URL('https://api.esv.org/v3/passage/text/')
+export function bibleUrl(r: Reference, bible: string): string {
+  const chapter = `${r.book}.${r.chapter}`
+  const path =
+    r.from === undefined
+      ? `chapters/${chapter}`
+      : `passages/${chapter}.${r.from}-${chapter}.${r.to}`
+  const url = new URL(`https://rest.api.bible/v1/bibles/${bible}/${path}`)
   url.search = new URLSearchParams({
-    q: query(r),
-    'include-passage-references': 'false',
+    'content-type': 'text',
     'include-verse-numbers': 'true',
-    'include-first-verse-numbers': 'true',
-    'include-footnotes': 'false',
-    'include-footnote-body': 'false',
-    'include-headings': 'false',
-    'include-short-copyright': 'false',
-    'include-copyright': 'false',
-    'include-passage-horizontal-lines': 'false',
-    'include-heading-horizontal-lines': 'false',
-    'indent-paragraphs': '0',
-    'indent-poetry': 'false',
-    'indent-poetry-lines': '0',
-    'indent-declares': '0',
-    'indent-psalm-doxology': '0',
-    'line-length': '0',
+    'include-titles': 'false',
+    'include-notes': 'false',
+    'include-chapter-numbers': 'false',
+    'fums-version': '3',
   }).toString()
   return url.toString()
 }
 
 /**
- * The verses in the ESV's text: each begins at its bracketed number — `[16]`, or `[21:1]` where
- * a chapter starts — and runs to the next. Whitespace inside a verse, a line break included, is
- * one space; a verse left with no words is not one.
+ * The verses in API.Bible's text: each begins at its bracketed number, `[16]`, and runs to the
+ * next. Whitespace inside a verse, a line break or a paragraph's indent included, is one space; a
+ * verse left with no words is not one. No word is changed.
  */
 export function parse(text: string): Verse[] {
-  const starts = [...text.matchAll(/\[(?:\d+:)?(\d+)\]/g)]
+  const starts = [...text.matchAll(/\[(\d+)\]/g)]
   const verses: Verse[] = []
   starts.forEach((m, i) => {
     const end = starts[i + 1]?.index ?? text.length

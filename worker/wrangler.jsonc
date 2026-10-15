@@ -1,12 +1,13 @@
-// The ESV proxy's Worker (#3): its name gives its address, behold-esv.<subdomain>.workers.dev; its
-// code is src/index.ts, bundled by wrangler at deploy. The ESV token is not here — it is a secret
-// in the Worker's own store, put there once by hand (CLAUDE.md, Guardrails) — and nothing here
-// is: the origins the Worker answers, its store, and its schedule are configuration. It has no
-// rate limit since 04c: a player's request reads the store and never reaches the ESV, and a
-// request a limit refused would count against the free plan's 100,000 a day all the same.
+// The passage service's Worker (#138, after #3): its name gives its address,
+// behold-passages.<subdomain>.workers.dev; its code is src/index.ts, bundled by wrangler at deploy.
+// The API.Bible key is not here — it is a secret in the Worker's own store, put there once by hand
+// (CLAUDE.md, Guardrails) — and nothing here is: the origins the Worker answers, the Bible it
+// reads, its store, and its schedule are configuration. It has no rate limit since 04c: a player's
+// request reads the store and never reaches API.Bible, and a request a limit refused would count
+// against the free plan's 100,000 a day all the same.
 {
   "$schema": "../node_modules/wrangler/config-schema.json",
-  "name": "behold-esv",
+  "name": "behold-passages",
   "main": "src/index.ts",
   "compatibility_date": "2026-09-01",
   // The account, from `wrangler whoami` after the owner's login — an identifier, not a secret.
@@ -17,15 +18,17 @@
   // shows a live session when one is needed.
   "observability": { "enabled": false },
   "vars": {
-    // The origins served, space-parted: the game's own (Gate 17 A4, as amended); its old
-    // address, for a copy installed there, whose reveal still asks from it (A4); and the dev
-    // server (Gate 04 A2).
-    "ORIGINS": "https://play.beholdgame.com https://garishay.github.io http://localhost:5173",
+    // The origins served, space-parted: the game's own (Gate 17 A4, as amended), and its old
+    // address, for a copy installed there, whose reveal still asks from it (A4). The dev server
+    // is not one (Gate 33 A9): a dev shell names it to a local Worker in worker/.dev.vars.
+    "ORIGINS": "https://play.beholdgame.com https://garishay.github.io",
+    // The NIV at API.Bible, from the owner's dashboard (#138) — an identifier, not a secret.
+    "BIBLE_ID": "78a9f6124f344018-01",
   },
-  // The store (04c): every registered passage's verses, under one key in this KV namespace, made
+  // The store (04c): every registered passage's copy, under one key in this KV namespace, made
   // once by the owner with `wrangler kv namespace create` — its id an identifier, not a secret.
-  "kv_namespaces": [{ "binding": "STORE", "id": "b1275de0b7464b4d82e4816138718713" }],
-  // The fill, every ten minutes, UTC: a passage the store lacks, or has kept a day, is asked of
-  // the ESV here, and only here.
+  "kv_namespaces": [{ "binding": "STORE", "id": "2fd4c7d5264f4a1dacc6d5391bfdc625" }],
+  // The fill, every ten minutes, UTC: a passage the store lacks, or has kept a week, is asked of
+  // API.Bible here, and only here.
   "triggers": { "crons": ["*/10 * * * *"] },
 }

@@ -262,13 +262,10 @@ describe('the game at play.beholdgame.com (68a, #68)', () => {
     expect(upload.slice(0, upload.indexOf('\n\n'))).toMatch(/^\s+include-hidden-files: true$/m)
   })
 
+  // The dev server is not one since Gate 33 A9: a dev shell names it to a local Worker.
   it('is answered by the Worker, as is its old address, for a copy installed there', () => {
     const origins = /"ORIGINS": "([^"]*)"/.exec(wrangler)?.[1].split(' ')
-    expect(origins).toEqual([
-      'https://play.beholdgame.com',
-      'https://garishay.github.io',
-      'http://localhost:5173',
-    ])
+    expect(origins).toEqual(['https://play.beholdgame.com', 'https://garishay.github.io'])
   })
 })
 
