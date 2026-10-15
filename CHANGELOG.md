@@ -26,7 +26,8 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   and from where, under a new date. The four cases' words follow the NIV where Gate 33 A8 ruled
   them: shouted louder, fell prostrate, seized his property, sulked, refused to eat, murdered, and
   attack, with the captions, accounts, and reveals beside them. Every id stays, so a kept game
-  stays where it was. The dev server answers the reveal with stand-ins, each verse its reference.
+  stays where it was. The world rules spell the season's places as the NIV does: Ramoth Gilead,
+  and the Kishon Valley. The dev server answers the reveal with stand-ins, each verse its reference.
 
 ## v0.30.0 — Gate 33, the reveal reads the NIV (#138)
 

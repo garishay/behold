@@ -86,7 +86,7 @@ export const en = {
   },
   teach: 'He’s in disguise. Name him by what happens.',
   reveal: [
-    'The man in plain armor was Ahab, king of Israel, in disguise. He sent Jehoshaphat, king of Judah, into the battle in his own royal robes, and the Aramean captains, sent after the king of Israel alone, took Jehoshaphat for him, chased him, and turned back. The man in undyed wool was Micaiah son of Imlah, the one prophet who would say only what the LORD told him.',
+    'The man in plain armor was Ahab, king of Israel, in disguise. He sent Jehoshaphat, king of Judah, into the battle in his own royal robes, and the Aramean commanders, sent after the king of Israel alone, took Jehoshaphat for him, chased him, and turned back. The man in undyed wool was Micaiah son of Imlah, the one prophet who would say only what the LORD told him.',
     'About four hundred prophets told the king to attack Ramoth Gilead and win. Micaiah first answered as they had; then, held to the truth, he told of Israel scattered like sheep with no shepherd, and of a spirit the LORD sent to put lies in the prophets’ mouths. Zedekiah, who had made himself iron horns, slapped him in the face, and the king sent him to prison on bread and water. In the battle an arrow shot at no one in particular found the gap between the sections of the king’s armor. Held upright in his chariot to face the Arameans, he died at evening. His chariot was washed out at the pool of Samaria, where dogs lapped up his blood, as the LORD had said.',
   ],
 } satisfies CaseText<typeof micaiah>

@@ -1,6 +1,6 @@
 import type { CaseStructure } from '../types.ts'
 
-// Case four: Micaiah and the four hundred, and the battle at Ramoth-gilead (1 Kings 22:1–40, #53).
+// Case four: Micaiah and the four hundred, and the battle at Ramoth Gilead (1 Kings 22:1–40, #53).
 // Its one new idea is a disguise: the king of Israel goes into battle without his marker, and the
 // player names him by what the pictures show happening, never by his face. The first-encounter mark
 // rings his face on Solve (`teach`). The case has no paper: the faces' names come from other
