@@ -75,14 +75,14 @@ export default defineConfig({
     // "Update available" toast, never reloading mid-case — `autoUpdate` would reload the app the
     // moment a deploy lands. The manifest's start_url and scope default to the base, `/`; the
     // icons are framed from the master by `npm run icons` (#10). The two the page links, the
-    // favicon and the 192, are precached with the bundle, and the manifest's 512s and 1024 are not:
-    // they are read when the app is installed, never offline, and would more than double the shell
-    // (Gate 18). The sound effects are precached too (Gate 10 A6), so the first tap sounds offline;
-    // a precached file's revision is its hash, so a changed effect reaches the phone with the next
-    // update at the same address.
+    // favicon and the iPhone's 180, are precached with the bundle, and the manifest's icons are
+    // not: they are read when the app is installed, never offline, and would more than double the
+    // shell (Gate 18, #133). The sound effects are precached too (Gate 10 A6), so the first tap
+    // sounds offline; a precached file's revision is its hash, so a changed effect reaches the
+    // phone with the next update at the same address.
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['icons/favicon-48.png', 'icons/icon-192.png', 'audio/*.m4a'],
+      includeAssets: ['icons/favicon-48.png', 'icons/apple-touch-icon-180.png', 'audio/*.m4a'],
       includeManifestIcons: false,
       // The case pictures are fetched when a case opens and kept from then on (Gate 02 A5), so a
       // played case stays offline; they are not precached, so the install stays the shell. The

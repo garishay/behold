@@ -2,10 +2,10 @@
  * Writes Behold's icons (Gate 18, #10) from the master, `assets/icon.png`: a scroll on two rollers
  * under a lens, with a blank in gold under the glass, generated in ChatGPT Images and retouched in
  * code (`docs/icon.md`). The master's ground is the manifest's background colour to every edge, so
- * each file frames it on that colour — the art at a share of the width, centred on the art's box —
- * and averages it down to the file's size. No image library: the script reads the one PNG it is
- * given and writes its own, so the files' provenance is the master and this script, and a test
- * holds the committed pixels to the function that made them.
+ * each file frames it on that colour — the art at a share of the width, about a point of the
+ * master — and averages it down to the file's size. No image library: the script reads the one
+ * PNG it is given and writes its own, so the files' provenance is the master and this script, and
+ * a test holds the committed pixels to the function that made them.
  *
  * Run: `npm run icons`
  */
@@ -26,28 +26,51 @@ export const ART = { left: 53, top: 146, right: 1199, bottom: 1129 } as const
  * The master's outer band, in its pixels, that fades to the ground exactly. The master's ground
  * sits up to a level below #1B2033 at its edges, and a level's step in that dark blue would show as
  * a square on the splash. Nothing in the band is more than 5 levels off the ground, and the art is
- * 53 px in at its nearest.
+ * 53 px in at its nearest. The fade eases in, as the square of the way across the band, so a file
+ * whose edge falls inside the band still meets the ground there: the iPhone's, the store's, and
+ * the favicon reach 12 px into it, across a shadow's faint tail at the master's bottom right
+ * (#133).
  */
 const FADE = 40
 
-/** The art's share of the store's icon, as the owner approved it and ruled: the master at 82%. */
-const STORE = 0.75
+/** The art's share of an unmasked icon, as the owner approved it and ruled: the master at 82%. */
+const UNMASKED = 0.75
+
+/** The art's share of what a mask shows, the launcher's middle 72 dp or a whole square (#133). */
+const MASKED = 0.88
 
 /**
- * The files the manifest and the page name, each with the art's share of its width. The 512 is
- * also the store's icon. Bubblewrap draws its splash at 300 dp from the largest `any` icon, up to
- * 1,200 px, so the 1024 gives it the art rather than the 512 enlarged (Gate 18's ruling). Chrome's
- * install lays the maskable image over 82.5 dp of the launcher's 108, padding it so the spec's 80%
- * safe circle meets Android's 66 dp one, and the launcher shows the middle 72: so it shows the
- * store's framing, and the whole art sits inside the 66 dp circle no mask clips (#129). A browser's
- * tab draws the favicon at 16 px, unmasked.
+ * The master's point at a file's centre, in its pixels (#133). Unmasked, the art's mass, the mean
+ * of its pixels' places: y 605, and the box's middle across, since the mass's x, 642.6, is the
+ * handle's pull. Masked, the scroll and the lens, at x 622, y 590 as the owner ruled: the lens and
+ * the blank stay inside the circle no mask clips, and the knobs, the rollers' ends, and the
+ * handle's end run past it.
+ */
+const MASS = { x: (ART.left + ART.right + 1) / 2, y: 605 }
+const MIDDLE = { x: 622, y: 590 }
+
+/**
+ * The files, each with the art's share of its width and the master's point at its centre. The
+ * manifest's `any` icons, the 1024 that Bubblewrap draws its splash from at 300 dp (Gate 18's
+ * ruling), and the favicon, which a browser's tab draws at 16 px, show the whole art unmasked.
+ * The launcher, the iPhone, and Play mask it. Chrome's install lays the maskable image over 82.5
+ * dp of the launcher's 108, padding it so the spec's 80% safe circle meets Android's 66 dp one,
+ * and the launcher shows the middle 72 (#129); the iPhone and Play show the whole square under
+ * their own corners. The store's icon is uploaded to Play, not served, so it sits in `assets/`.
  */
 export const ICONS = [
-  { file: 'icon-192.png', size: 192, share: STORE },
-  { file: 'icon-512.png', size: 512, share: STORE },
-  { file: 'icon-1024.png', size: 1024, share: STORE },
-  { file: 'icon-512-maskable.png', size: 512, share: STORE * (72 / 82.5) },
-  { file: 'favicon-48.png', size: 48, share: 0.9 },
+  { file: 'public/icons/icon-192.png', size: 192, share: UNMASKED, centre: MASS },
+  { file: 'public/icons/icon-512.png', size: 512, share: UNMASKED, centre: MASS },
+  { file: 'public/icons/icon-1024.png', size: 1024, share: UNMASKED, centre: MASS },
+  { file: 'public/icons/favicon-48.png', size: 48, share: 0.9, centre: MASS },
+  {
+    file: 'public/icons/icon-512-maskable.png',
+    size: 512,
+    share: MASKED * (72 / 82.5),
+    centre: MIDDLE,
+  },
+  { file: 'public/icons/apple-touch-icon-180.png', size: 180, share: MASKED, centre: MIDDLE },
+  { file: 'assets/store-icon.png', size: 512, share: MASKED, centre: MIDDLE },
 ] as const
 
 export interface Raster {
@@ -113,15 +136,20 @@ function spans(size: number, start: number, step: number) {
 
 /**
  * The master framed for one file: a square on the ground whose width the art fills at `share`,
- * centred on the art's box, each output pixel the average of the master's pixels it covers — the
- * ground beyond the master's edges, and its outer band faded to the ground. RGBA, opaque: the
- * store asks for a 32-bit PNG.
+ * with the master's `centre` at its centre, each output pixel the average of the master's pixels
+ * it covers — the ground beyond the master's edges, and its outer band faded to the ground. RGBA,
+ * opaque: the store asks for a 32-bit PNG.
  */
-export function frame(master: Raster, size: number, share: number): Uint8Array {
+export function frame(
+  master: Raster,
+  size: number,
+  share: number,
+  centre: { x: number; y: number },
+): Uint8Array {
   const side = (ART.right + 1 - ART.left) / share
   const step = side / size
-  const columns = spans(size, (ART.left + ART.right + 1 - side) / 2, step)
-  const rows = spans(size, (ART.top + ART.bottom + 1 - side) / 2, step)
+  const columns = spans(size, centre.x - side / 2, step)
+  const rows = spans(size, centre.y - side / 2, step)
   const pixels = new Uint8Array(size * size * 4)
   for (let y = 0; y < size; y++)
     for (let x = 0; x < size; x++) {
@@ -134,7 +162,7 @@ export function frame(master: Raster, size: number, share: number): Uint8Array {
             master.height - 1 - row.at,
             master.width - 1 - column.at,
           )
-          const fade = Math.min(1, Math.max(0, (edge + 1) / FADE))
+          const fade = Math.min(1, Math.max(0, (edge + 1) / FADE)) ** 2
           const at = (row.at * master.width + column.at) * 3
           for (let k = 0; k < 3; k++) {
             const value =
@@ -189,9 +217,9 @@ export function png(size: number, pixels: Uint8Array): Buffer {
 
 async function main(): Promise<void> {
   const master = decode(await readFile(MASTER))
-  for (const { file, size, share } of ICONS) {
-    await writeFile(`public/icons/${file}`, png(size, frame(master, size, share)))
-    process.stdout.write(`wrote public/icons/${file}\n`)
+  for (const { file, size, share, centre } of ICONS) {
+    await writeFile(file, png(size, frame(master, size, share, centre)))
+    process.stdout.write(`wrote ${file}\n`)
   }
 }
 

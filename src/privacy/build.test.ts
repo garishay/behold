@@ -30,9 +30,10 @@ describe('the privacy page as the build ships it (#9, [Q19])', () => {
 })
 
 describe('the icons as the build precaches them (#10, Gate 18 A5)', () => {
-  it('precaches the two the pages link, and none of the manifest’s larger ones', () => {
+  it('precaches the two the pages link, and none of the manifest’s', () => {
     const sw = readFileSync(join(out, 'sw.js'), 'utf8')
     const icons = [...sw.matchAll(/["']icons\/([\w.-]+)["']/g)].map((m) => m[1])
-    expect(icons.sort()).toEqual(['favicon-48.png', 'icon-192.png'])
+    // The favicon, and since #133 the iPhone's 180 in the 192's place.
+    expect(icons.sort()).toEqual(['apple-touch-icon-180.png', 'favicon-48.png'])
   })
 })
