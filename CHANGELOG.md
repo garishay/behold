@@ -3,6 +3,18 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.29.3 — npm audit, fixed within range (#135)
+
+- **135a — eight advisories in dev-only packages** (#136): `npm audit fix`, without `--force`,
+  moves 15 installed packages within the ranges the lockfile already allowed:
+  - brace-expansion, fast-uri, serialize-javascript, source-map-js, sharp, and miniflare's undici;
+  - wrangler, from 4.131.2 to 4.151.0;
+  - miniflare, workerd, esbuild, and wrangler's unenv preset.
+
+  Nothing is added or removed, and `npm audit` reports none. The game's build comes out byte for
+  byte as before, and so does the Worker's bundle. `package.json` approves esbuild's and workerd's
+  install scripts at their new versions, so they run on install as they did (#12 [Q25]).
+
 ## v0.29.1 — Gate 32, what a tap is for (#131)
 
 - **131b — what a tap is for** (#137): a person's tap says they are "a face in Solve", where it
