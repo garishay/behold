@@ -9,47 +9,71 @@ and the cases, not the icon.
 The master, `assets/icon.png`: 1,254 × 1,254, 24-bit RGB, SHA-256 `08b2c28c37ea86c35fc828507f51261fbdce85eb5c93b83aeb27e442bff05718`.
 
 `scripts/generate-icons.ts` (`npm run icons`) frames it for each use and writes the files in
-`public/icons/`. Its test holds every file to the master and the master to the hash above, so
-neither changes without this record.
+`public/icons/`, and the store's icon in `assets/`. Its test holds every file to the master and
+the master to the hash above, so neither changes without this record.
 
 ## The files
 
-Each file is the master on `#1B2033`, the manifest's background colour, to every edge, centred on
-the art's box (x 53–1199, y 146–1129 of the master), each pixel the average of the master's pixels
-it covers. The master's outer 40 px, where nothing is more than 5 levels off `#1B2033`, fade to it
-exactly, so no edge of the master shows; the art is 53 px in at its nearest. Every file is a 32-bit
-PNG.
+Each file is the master on `#1B2033`, the manifest's background colour, to every edge, with a point
+of the master at its centre, each pixel the average of the master's pixels it covers. The art's box
+is x 53–1199, y 146–1129 of the master: the knobs, the rollers, and the lens's handle. A file's
+share is the box's width over its own. The master's outer 40 px, where nothing is more than 5
+levels off `#1B2033`, fade to it exactly, so no edge of the master shows and every file meets the
+ground at every edge; the art is 53 px in at its nearest. Every file is a 32-bit PNG.
 
-| file                    | size | the art's share of the width | where it shows                                                    |
-| ----------------------- | ---- | ---------------------------- | ----------------------------------------------------------------- |
-| `icon-512.png`          | 512  | 75%                          | the manifest's `any` icon; the store's icon                       |
-| `icon-1024.png`         | 1024 | 75%                          | the manifest's largest `any` icon; Bubblewrap's splash, at 300 dp |
-| `icon-192.png`          | 192  | 75%                          | the manifest's `any` icon; the page's `apple-touch-icon`          |
-| `icon-512-maskable.png` | 512  | 65.5%                        | the launcher                                                      |
-| `favicon-48.png`        | 48   | 90%                          | a browser's tab, at 16 px                                         |
+| file                       | size | the art's share of the width | the master's point at the centre | where it shows                                                    |
+| -------------------------- | ---- | ---------------------------- | -------------------------------- | ----------------------------------------------------------------- |
+| `icon-192.png`             | 192  | 75%                          | x 626.5, y 605                   | the manifest's `any` icon                                         |
+| `icon-512.png`             | 512  | 75%                          | x 626.5, y 605                   | the manifest's `any` icon                                         |
+| `icon-1024.png`            | 1024 | 75%                          | x 626.5, y 605                   | the manifest's largest `any` icon; Bubblewrap's splash, at 300 dp |
+| `favicon-48.png`           | 48   | 90%                          | x 626.5, y 605                   | a browser's tab, at 16 px                                         |
+| `icon-512-maskable.png`    | 512  | 76.8%                        | x 622, y 590                     | the launcher, from Chrome's install                               |
+| `apple-touch-icon-180.png` | 180  | 88%                          | x 622, y 590                     | the iPhone's home screen: the page's `apple-touch-icon`           |
+| `assets/store-icon.png`    | 512  | 88%                          | x 622, y 590                     | Play's listing, uploaded at 68b; the site doesn't serve it        |
 
-- **75%** is the framing the owner approved and ruled (Gate 18, issuecomment-5932066607): the
-  master at 82%, the art at 75% of the width.
+- **Unmasked** (#133). The manifest's `any` icons, the splash drawn from the 1024, and the favicon
+  show the whole art at Gate 18's shares: 75%, the framing the owner approved and ruled
+  (issuecomment-5932066607), the master at 82%; and 90% for the favicon, which a tab draws at 16
+  px. Each is centred on the art's mass, the mean of its pixels' places, y 605.0. Gate 18 centred
+  them on the box's middle, y 638, which left the mass 2.2% of the width above the centre. Across,
+  each keeps the box's middle, x 626.5: the mass's x, 642.6, is the handle's pull, and centring on
+  it would set the scroll 16 px left.
+- **Masked** (#133). Where a platform masks the icon — the launcher, the iPhone, and Play — the
+  art's box fills 88% of what the mask shows, with the owner's point, x 622, y 590, at the centre:
+  the scroll and the lens.
+  - **What stays inside.** The lens, out to its ring's outer edge (275 to 283 px from x 622, y 577
+    along seven rays, held as a circle of 284), and the blank (x 522–712, y 596–626, as retouched)
+    stay inside the 66 dp circle no mask clips: 16.4 and 5.9 dp from the centre, of its 33. The
+    knobs (35.8 to 36.9 dp), the rollers' ends (36.1), and the handle's end (39.3) run past it,
+    which retires Gate 18's whole art inside it. One UI's mask, fitted to the owner's phone (a
+    superellipse, n = 2.65), takes 0.14 dp off the handle's tip. A round mask, 72 dp across, takes
+    up to 3.3 dp off the handle's end and 0.9 off the bottom-right knob. Play's corners and the
+    iPhone's take nothing.
+  - **The launcher.** Android draws a launcher icon at 108 dp and shows the middle 72 dp, and no
+    mask clips the 66 dp circle at its centre. How much of the 108 the maskable image spans
+    depends on what installs it, so its share is 88% × 72 over the dp it spans. **Chrome's
+    install** pads the image so the spec's safe circle, 80% of its width, meets Android's 66 dp
+    one, by the ratio of `MASKABLE_SAFE_ZONE_RATIO`, 4/5, to `ADAPTIVE_SAFE_ZONE_RATIO`, 66/108,
+    in Chromium's `WebappsIconUtils` (#129). The image spans 82.5 dp, so 88% × 72 / 82.5 = 76.8%.
+    The owner's screenshots of 10a's and 129a's checks match that layout best of the spans tried,
+    78 to 91 dp. **Bubblewrap,** which builds the Play app (68b), insets the image 8.5 dp a side in
+    its `ic_launcher.xml`, so it spans 91 dp, and 68b gives it its own file at 88% × 72 / 91 =
+    69.6%.
+  - **The iPhone and Play** show the whole square under their own corners, Play's at 30% of the
+    side, so each file is the launcher's view: 88% of the square. The iPhone's is 180, Apple's size
+    for it. The store's is Play's full-square 512, a "32-bit PNG (with alpha)" of at most 1024 KB.
+    Play takes it by upload, so it sits beside the feature graphic, and the site doesn't serve it.
 - **The splash.** Bubblewrap draws it at 300 dp from the largest `any` icon, 900 px at xxhdpi and
-  1,200 at xxxhdpi, so the 1024 gives it the art rather than the 512 enlarged (the ruling's fifth
-  file). The 512 stays the store's icon.
-- **The launcher.** Android draws a launcher icon at 108 dp and shows the middle 72 dp, and no mask
-  clips the 66 dp circle at its centre. How much of the 108 the maskable image spans depends on
-  what installs it, so the store's framing there is 75% × 72 over the dp it spans.
-  - **Chrome's install** pads the image so the spec's safe circle, 80% of its width, meets
-    Android's 66 dp one, by the ratio of `MASKABLE_SAFE_ZONE_RATIO`, 4/5, to
-    `ADAPTIVE_SAFE_ZONE_RATIO`, 66/108, in Chromium's `WebappsIconUtils`. The image spans 82.5 dp,
-    so 75% × 72 / 82.5 = 65.5% shows the store's framing (#129). The art's farthest pixel, the
-    top-left knob, is 39.1% of the width from the centre, inside the 40% (33 / 82.5) the 66 dp
-    circle takes there.
-  - **Bubblewrap,** which builds the Play app (68b), insets the image 8.5 dp a side in its
-    `ic_launcher.xml`, so it spans 91 dp. This file would show the art at 83% there, past the 66
-    dp circle, so 68b gives Bubblewrap its own file at 75% × 72 / 91 = 59.3%. 10a framed this
-    file at 59.3% for Bubblewrap, and Chrome's install showed the art at about 69% (#129).
-- **The favicon** is drawn unmasked at 16 px, so the art fills it.
+  1,200 at xxxhdpi, so the 1024 gives it the art rather than the 512 enlarged (Gate 18's ruling,
+  its fifth file).
 - **What a first visit downloads.** The service worker precaches the two icons the game's page
-  links, the favicon and the 192. The manifest's 512s and 1024 are read when the app is installed, never
-  offline, so they aren't precached.
+  links, the favicon and the iPhone's 180. The manifest's icons are read when the app is
+  installed, never offline, so they aren't precached.
+- **The fade eases in** (#133), as the square of the way across the band. The iPhone's file, the
+  store's, and the favicon reach 12 px into the band at the master's bottom, across a shadow's
+  faint tail at its right. Faded in a straight line, as Gate 18 had it, their bottom edges came out
+  a level off the ground in 1 to 7 pixels. Eased in, every edge of every file meets it exactly, and
+  each file moved at most a level, in 0.5% to 1.3% of its pixels, all in the band.
 
 ## How it was made
 
