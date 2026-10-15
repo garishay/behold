@@ -3,6 +3,17 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.29.1 — Gate 32, what a tap is for (#131)
+
+- **131b — what a tap is for** (#137): a person's tap says they are "a face in Solve", where it
+  said "one of the faces in Solve", and from the vineyard on, where a name comes from what bears
+  it, one that gives no name reads "a face in Solve, but no name". In every case with an order,
+  the thing that tells when a moment happened says "a clue to the order". A line of finds that
+  wraps breaks only between its parts, never inside one. The vineyard's lesson rings the man on the
+  bed until he is named and the seal that bears his name has been opened, so a name placed before
+  the seal no longer takes it away; the validator holds what bears a taught face's name to the
+  case's spots.
+
 ## v0.29.0 — Gate 32, a find says what it's for (#131)
 
 - **131a — the cases' words, from tester 4's session** (#132): the vineyard's prophet's words tell
