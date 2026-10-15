@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import { deflateSync, inflateSync } from 'node:zlib'
 import { describe, expect, it } from 'vitest'
-import { GROUND, ICONS, MASTER, decode, frame, png } from './generate-icons.ts'
+import { ART, GROUND, ICONS, MASTER, decode, frame, png } from './generate-icons.ts'
 
 const SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]
 
@@ -47,7 +47,63 @@ const fromGround = (pixels: Uint8Array, at: number) =>
  */
 const CHROME = 82.5
 
+/**
+ * The files a platform masks, each with the dp its width spans of the 72 the mask shows (#133): the
+ * launcher shows the middle 72 of the maskable's 82.5, and the iPhone and Play show the whole
+ * square, read as the same 72.
+ */
+const MASKED: Record<string, number> = {
+  'public/icons/icon-512-maskable.png': CHROME,
+  'public/icons/apple-touch-icon-180.png': 72,
+  'assets/store-icon.png': 72,
+}
+const masked = ICONS.filter((icon) => icon.file in MASKED)
+const unmasked = ICONS.filter((icon) => !(icon.file in MASKED))
+
+/**
+ * The lens, out to its ring's outer edge, and the blank as retouched, in the master's pixels
+ * (`docs/icon.md`): the art the circle no mask clips must hold (#133).
+ */
+const LENS = { x: 622, y: 577, radius: 284 }
+const BLANK = { left: 522, top: 596, right: 712, bottom: 626 }
+const inLens = (x: number, y: number) =>
+  Math.hypot(x + 0.5 - LENS.x, y + 0.5 - LENS.y) <= LENS.radius
+const inBlank = (x: number, y: number) =>
+  x >= BLANK.left && x < BLANK.right && y >= BLANK.top && y < BLANK.bottom
+
+/**
+ * The art in a file's pixels, each pixel more than 12 levels off the ground, as Gate 18 measured
+ * it: its box's width and middle across, its mass (the mean of its pixels' places), and its
+ * farthest pixel from the centre.
+ */
+function art(pixels: Uint8Array, size: number) {
+  let [left, right, count, x0, y0, farthest] = [size, -1, 0, 0, 0, 0]
+  for (let at = 0; at < size * size; at++) {
+    if (fromGround(pixels, at * 4) <= 12) continue
+    const [x, y] = [(at % size) + 0.5, Math.floor(at / size) + 0.5]
+    ;[left, right, count, x0, y0] = [
+      Math.min(left, x),
+      Math.max(right, x),
+      count + 1,
+      x0 + x,
+      y0 + y,
+    ]
+    farthest = Math.max(farthest, Math.hypot(x - size / 2, y - size / 2))
+  }
+  const mass = { x: x0 / count, y: y0 / count }
+  return { width: right + 1 - left, middle: (left + right) / 2, mass, count, farthest }
+}
+
 const master = decode(await readFile(MASTER))
+
+/** The master with only the pixels `kept` names left, and the ground everywhere else. */
+function only(kept: (x: number, y: number) => boolean) {
+  const pixels = new Uint8Array(master.pixels)
+  for (let y = 0; y < master.height; y++)
+    for (let x = 0; x < master.width; x++)
+      if (!kept(x, y)) pixels.set(GROUND, (y * master.width + x) * 3)
+  return { ...master, pixels }
+}
 
 describe('generate-icons (Gate 18, #10)', () => {
   it('reads the master the record names: its SHA-256 is the one docs/icon.md records', async () => {
@@ -58,13 +114,14 @@ describe('generate-icons (Gate 18, #10)', () => {
   })
 
   it.each(ICONS)('$file is the master framed at $size — not a hand edit', async (icon) => {
-    const { size, pixels } = read(await readFile(`public/icons/${icon.file}`))
+    const { size, pixels } = read(await readFile(icon.file))
     expect(size).toBe(icon.size)
-    expect(Buffer.from(pixels).equals(frame(master, icon.size, icon.share))).toBe(true)
+    const framed = frame(master, icon.size, icon.share, icon.centre)
+    expect(Buffer.from(pixels).equals(framed)).toBe(true)
   })
 
   it('writes the store’s icon as Play asks: a 32-bit PNG, 512 square, opaque, within 1024 KB', async () => {
-    const file = await readFile('public/icons/icon-512.png')
+    const file = await readFile('assets/store-icon.png')
     const { size, pixels } = read(file)
     expect(size).toBe(512)
     expect(pixels.filter((_, i) => i % 4 === 3).every((alpha) => alpha === 255)).toBe(true)
@@ -91,8 +148,8 @@ describe('generate-icons (Gate 18, #10)', () => {
   it.each(ICONS)(
     'meets the ground exactly at every edge of $file, so the splash shows no square',
     (icon) => {
-      const { size, share } = icon
-      const pixels = frame(master, size, share)
+      const { size, share, centre } = icon
+      const pixels = frame(master, size, share, centre)
       for (let i = 0; i < size; i++)
         for (const [x, y] of [
           [i, 0],
@@ -104,28 +161,46 @@ describe('generate-icons (Gate 18, #10)', () => {
     },
   )
 
-  it('keeps the whole maskable art inside the 66 dp circle no launcher’s mask clips', () => {
-    const { size, share } = ICONS.find((icon) => icon.file === 'icon-512-maskable.png')!
-    const pixels = frame(master, size, share)
-    const centre = size / 2
-    let art = 0
-    for (let at = 0; at < size * size; at++) {
-      if (fromGround(pixels, at * 4) <= 12) continue
-      art++
-      const [x, y] = [(at % size) + 0.5, Math.floor(at / size) + 0.5]
-      expect(Math.hypot(x - centre, y - centre)).toBeLessThanOrEqual((33 / CHROME) * size)
-    }
-    expect(art).toBeGreaterThan(size * size * 0.2)
+  // Under a mask, the lens and the blank stay inside the circle no mask clips, and the knobs, the
+  // rollers' ends, and the handle's end may run past it (#133, which retires Gate 18's whole art
+  // inside it). The master is framed with only the lens and the blank kept, as the file frames it.
+  it.each(masked)('keeps the lens and the blank of $file inside the 66 dp circle', (icon) => {
+    const { size, share, centre } = icon
+    const lensAndBlank = only((x, y) => inLens(x, y) || inBlank(x, y))
+    const { count, farthest } = art(frame(lensAndBlank, size, share, centre), size)
+    expect(count).toBeGreaterThan(size * size * 0.05)
+    expect(farthest).toBeLessThanOrEqual((33 / MASKED[icon.file]) * size)
   })
 
-  it('shows the maskable art at the store’s 75% in the launcher Chrome installs', () => {
-    const { size, share } = ICONS.find((icon) => icon.file === 'icon-512-maskable.png')!
-    const pixels = frame(master, size, share)
-    let [left, right] = [Infinity, -1]
-    for (let at = 0; at < size * size; at++)
-      if (fromGround(pixels, at * 4) > 12)
-        [left, right] = [Math.min(left, at % size), Math.max(right, at % size)]
-    expect((((right + 1 - left) / size) * CHROME) / 72).toBeCloseTo(0.75, 2)
+  // The owner's point, x 622, y 590 of the master, is the middle of each masked file (#133): the
+  // blank, framed alone as the file frames the master, lands where that point puts it.
+  it.each(masked)('sets the master’s x 622, y 590 at the middle of $file', (icon) => {
+    const { size, share, centre } = icon
+    const { mass } = art(frame(only(inBlank), size, share, centre), size)
+    const scale = (size * share) / (ART.right + 1 - ART.left)
+    expect(mass.x).toBeCloseTo(size / 2 + ((BLANK.left + BLANK.right) / 2 - 622) * scale, 0)
+    expect(mass.y).toBeCloseTo(size / 2 + ((BLANK.top + BLANK.bottom) / 2 - 590) * scale, 0)
+  })
+
+  it.each(masked)(
+    'shows the art’s box across 88% of what the mask over $file shows',
+    async (icon) => {
+      const { size, pixels } = read(await readFile(icon.file))
+      expect(((art(pixels, size).width / size) * MASKED[icon.file]) / 72).toBeCloseTo(0.88, 2)
+    },
+  )
+
+  it.each(unmasked)('centres $file on the art’s mass down and on its box across', async (icon) => {
+    const { size, pixels } = read(await readFile(icon.file))
+    const { middle, mass } = art(pixels, size)
+    expect(Math.abs(mass.y - size / 2) / size).toBeLessThan(0.005)
+    expect(Math.abs(middle - size / 2) / size).toBeLessThan(0.005)
+  })
+
+  it('links the iPhone’s icon from the app’s page: a file framed for its mask', async () => {
+    const html = await readFile('index.html', 'utf8')
+    const link = /<link rel="apple-touch-icon" href="\/([^"]+)"/.exec(html)?.[1]
+    expect(MASKED[`public/${link}`]).toBe(72)
   })
 
   it('reads all five of PNG’s row filters', () => {
