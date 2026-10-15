@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest'
 import { books } from './books.ts'
-import { esvUrl, parse, query, reference } from './passage.ts'
+import { bibleUrl, cite, parse, reference } from './passage.ts'
 
 const params = (q: string) => new URLSearchParams(q)
 
@@ -47,45 +47,43 @@ describe('a reference read from a query', () => {
   })
 })
 
-describe('the ESV asked', () => {
-  it('names the passage as the ESV does', () => {
-    expect(query({ book: '1KI', chapter: 21 })).toBe('1 Kings 21')
-    expect(query({ book: '1SA', chapter: 17, from: 17, to: 18 })).toBe('1 Samuel 17:17-18')
+describe('API.Bible asked (Gate 33 A1)', () => {
+  it('names a passage as the store keys it', () => {
+    expect(cite({ book: '1KI', chapter: 21 })).toBe('1 Kings 21')
+    expect(cite({ book: '1SA', chapter: 17, from: 17, to: 18 })).toBe('1 Samuel 17:17-18')
   })
 
-  it('asks the text endpoint for verse numbers and nothing else', () => {
-    const url = new URL(esvUrl({ book: '1KI', chapter: 21 }))
-    expect(url.origin + url.pathname).toBe('https://api.esv.org/v3/passage/text/')
-    expect(url.searchParams.get('q')).toBe('1 Kings 21')
-    expect(url.searchParams.get('include-verse-numbers')).toBe('true')
-    expect(url.searchParams.get('include-first-verse-numbers')).toBe('true')
-    const off = [
-      'include-passage-references',
-      'include-footnotes',
-      'include-footnote-body',
-      'include-headings',
-      'include-short-copyright',
-      'include-copyright',
-      'include-passage-horizontal-lines',
-      'include-heading-horizontal-lines',
-      'indent-poetry',
-    ]
-    for (const name of off) expect(url.searchParams.get(name), name).toBe('false')
-    const zero = [
-      'indent-paragraphs',
-      'indent-poetry-lines',
-      'indent-declares',
-      'indent-psalm-doxology',
-      'line-length',
-    ]
-    for (const name of zero) expect(url.searchParams.get(name), name).toBe('0')
+  it('asks for a whole chapter by its ID, and a range as a passage of two verse IDs', () => {
+    const path = (r: Parameters<typeof bibleUrl>[0]) => new URL(bibleUrl(r, 'the-bible')).pathname
+    expect(path({ book: '1KI', chapter: 21 })).toBe('/v1/bibles/the-bible/chapters/1KI.21')
+    expect(path({ book: '1SA', chapter: 17, from: 17, to: 18 })).toBe(
+      '/v1/bibles/the-bible/passages/1SA.17.17-1SA.17.18',
+    )
+    expect(path({ book: '1SA', chapter: 17, from: 4, to: 4 })).toBe(
+      '/v1/bibles/the-bible/passages/1SA.17.4-1SA.17.4',
+    )
+    expect(new URL(bibleUrl({ book: '1KI', chapter: 21 }, 'the-bible')).origin).toBe(
+      'https://rest.api.bible',
+    )
+  })
+
+  it('asks for the text with its verse numbers, no titles, notes, or chapter numbers, and a FUMS token', () => {
+    const url = new URL(bibleUrl({ book: '1KI', chapter: 21 }, 'the-bible'))
+    expect(Object.fromEntries(url.searchParams)).toEqual({
+      'content-type': 'text',
+      'include-verse-numbers': 'true',
+      'include-titles': 'false',
+      'include-notes': 'false',
+      'include-chapter-numbers': 'false',
+      'fums-version': '3',
+    })
   })
 })
 
-// The ESV's shape around made-up sentences — never a verse (CLAUDE.md, Guardrails).
+// API.Bible's text shape around made-up sentences — never a verse (CLAUDE.md, Guardrails).
 describe('the text parsed into verses', () => {
-  it('splits at each bracketed number, a chapter start included, and folds whitespace', () => {
-    expect(parse('[21:1] One thing\nhappened.  [2] Another\n\n[3] A third. ')).toEqual([
+  it('splits at each bracketed number, and folds whitespace, a paragraph’s indent included', () => {
+    expect(parse('     [1] One thing\nhappened.  [2] Another\n\n     [3] A third. \n')).toEqual([
       { number: 1, text: 'One thing happened.' },
       { number: 2, text: 'Another' },
       { number: 3, text: 'A third.' },

@@ -1,8 +1,9 @@
 /**
- * The one book table (#3): each USFM book code, the name the ESV knows the book by, and its
- * chapter count. The Worker reads it to name a passage for the ESV and to refuse a chapter a book
- * lacks; the registry test holds every registered case's passages against it, so a case whose
- * passage the Worker could not serve fails in CI, not at the reveal. The app carries no copy.
+ * The one book table (#3): each USFM book code, which API.Bible's IDs use too, the book's name,
+ * and its chapter count. The Worker reads it to name a passage in its store and to refuse a
+ * chapter a book lacks; the registry test holds every registered case's passages against it, so a
+ * case whose passage the Worker could not serve fails in CI, not at the reveal. The app carries no
+ * copy.
  */
 export const books: Readonly<Record<string, readonly [name: string, chapters: number]>> = {
   GEN: ['Genesis', 50],
