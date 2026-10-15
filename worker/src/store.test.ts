@@ -94,6 +94,13 @@ describe('the Worker’s store (#3, 04c; Gate 33 A1)', () => {
       'answers with no token to report a view with',
       () => Promise.resolve(Response.json({ data: { content: '[1] Made up.' }, meta: {} })),
     ],
+    [
+      'answers with an empty token',
+      () =>
+        Promise.resolve(
+          Response.json({ data: { content: '[1] Made up.' }, meta: { fumsToken: '' } }),
+        ),
+    ],
   ])(
     'keeps a passage’s last copy when API.Bible %s, and notes when it asked',
     async (_, fetcher) => {
