@@ -19,10 +19,13 @@ describe('the copyright page (Gate 33 A3)', () => {
   })
 
   // API.Bible's terms (§7): the translation's name and abbreviation, its holder's notice, and the
-  // holder's site, linked; and the Starter plan's citation of API.Bible, linked.
+  // holder's site, linked; and the Starter plan's citation of API.Bible, linked. The notice is the
+  // one API.Bible gives for the NIV, word for word (#138, hand step 4).
   it('names the NIV, gives Biblica’s notice and site, and links API.Bible', () => {
     expect(html).toContain('New International Version (NIV)')
-    expect(html).toContain('Copyright © 1973, 1978, 1984, 2011 by Biblica, Inc.®')
+    expect(html).toContain(
+      '<p>The Holy Bible, New International Version® NIV® Copyright © 1973, 1978, 1984, 2011 by Biblica, Inc.® Used by Permission of Biblica, Inc.® All rights reserved worldwide. To learn more, visit http://biblica.com and http://facebook.com/Biblica.</p>',
+    )
     expect(html).toContain('<a href="https://biblica.com">biblica.com</a>')
     expect(html).toContain('<a href="https://api.bible">api.bible</a>')
     expect(html).toContain('Berean Standard Bible (BSB), which is in the public domain')
