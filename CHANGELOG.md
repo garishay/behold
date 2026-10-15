@@ -3,6 +3,15 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.30.2 — Gate 33, the NIV's own spaces (#138)
+
+- **138c — the NIV's narrow no-break spaces, kept** (#141): API.Bible's NIV sets a narrow no-break
+  space between nested quotation marks, ’ and ”, and “ and ‘, in six of the registered verses. The
+  Worker's parse folded every kind of space to a plain one, so a line could break between the two
+  marks. It now folds and trims only spaces, tabs, and line breaks, and keeps every other character
+  as API.Bible gives it (#12 [Q27]). Once it deploys, the store is emptied once, and the next fill
+  brings the six passages back with the NIV's spaces. v0.30.1 stays 138b's, as Gate 33 A10 set it.
+
 ## v0.30.0 — Gate 33, the reveal reads the NIV (#138)
 
 - **138a — the passage service, on API.Bible** (#140): a new Worker, `behold-passages`, beside the
