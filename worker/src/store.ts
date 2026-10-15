@@ -65,7 +65,10 @@ export const read = async (kv: KV) => ((await kv.get('passages', 'json')) ?? {})
 const field = (x: unknown, key: string): unknown =>
   typeof x === 'object' && x !== null ? (x as Record<string, unknown>)[key] : undefined
 
-/** A reference's copy as API.Bible gives it, or none when it fails, is slow, or has no verse or token. */
+/**
+ * A reference's copy as API.Bible gives it, or none when it fails, is slow, or answers with no
+ * verse or no token.
+ */
 async function ask(ref: Reference, key: string, bible: string, now: number, fetcher: Fetcher) {
   const reply = await fetcher(bibleUrl(ref, bible), {
     headers: { 'api-key': key },
@@ -81,12 +84,12 @@ async function ask(ref: Reference, key: string, bible: string, now: number, fetc
 }
 
 /**
- * One fill, on the schedule (wrangler.jsonc): each registered passage with no copy, or a copy a week
- * old, is asked of API.Bible, at most twenty a fill, unless an ask for it failed in the last six
- * hours. One API.Bible doesn't answer keeps its last copy until thirty days from when it was given;
- * one no longer registered goes; and a copy that would take the store past 500 verses is not kept.
- * With no key, the fill asks no one and leaves the store as it is. The store is written only when
- * it changed.
+ * One fill, on the schedule (wrangler.jsonc): each registered passage with no copy, or a copy a
+ * week old, is asked of API.Bible, at most twenty a fill, unless an ask for it failed in the last
+ * six hours. One API.Bible doesn't answer keeps its last copy until thirty days from when it was
+ * given; one no longer registered goes; and a copy that would take the store past 500 verses is not
+ * kept. With no key, the fill asks no one and leaves the store as it is. The store is written only
+ * when it changed.
  */
 export async function fill(
   kv: KV,

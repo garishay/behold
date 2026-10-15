@@ -46,7 +46,7 @@ const env = (over: Partial<Env> = {}): Env => ({
   ...over,
 })
 
-/** A request's context: the work it leaves running after the reply, kept for the test to wait on. */
+/** A request's context: the work it leaves running after its reply, kept for the test to await. */
 const context = () => {
   const work: Promise<unknown>[] = []
   return { work, waitUntil: vi.fn<Context['waitUntil']>((p) => void work.push(p)) }
