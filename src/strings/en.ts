@@ -40,23 +40,23 @@ export const strings = {
   begin: 'Begin',
   bestWithSound: 'Best with sound on.',
   // The epigraph ships in the bundle by Gate 01 A6's exception, on the cases page under the cases
-  // (#75); it is app copy, not a component's sentence, and its notice is Crossway's, verbatim. The
-  // reveal shows the notice again under the passages (#3).
-  epigraph:
-    'It is the glory of God to conceal things, but the glory of kings is to search things out.',
-  epigraphReference: 'Proverbs 25:2, ESV',
+  // (#75); it is app copy, not a component's sentence. It is the Berean Standard Bible's, which is
+  // in the public domain, so it needs no notice (Gate 33 A4).
+  epigraph: 'It is the glory of God to conceal a matter and the glory of kings to search it out.',
+  epigraphReference: 'Proverbs 25:2, BSB',
   line: "Look closer. There's more to every story.",
   status: 'Season one is being written.',
-  notice:
-    'Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), © 2001 by Crossway, a publishing ministry of Good News Publishers. ESV Text Edition: 2025. The ESV text may not be quoted in any publication made available to the public by a Creative Commons license. The ESV may not be translated in whole or in part into any other language. Used by permission. All rights reserved.',
-  // The music's credit, under the notice (Gate 10 A1): each CC BY piece by name, its author, its
-  // source, that it was edited, and the licence, linked. The register's test holds every CC BY
-  // file to a name here.
+  // The music's credit, at the cases page's foot (Gate 10 A1): each CC BY piece by name, its
+  // author, its source, that it was edited, and the licence, linked. The register's test holds
+  // every CC BY file to a name here.
   credit: 'Music: “Desert City” and “Lamentation” by Kevin MacLeod (incompetech.com), edited,',
   creditLicence: { text: 'CC BY 4.0', href: 'https://creativecommons.org/licenses/by/4.0/' },
   // The privacy policy's link, at the cases page's foot under the credit (#9). The policy's own
   // words are `policy`, below.
   privacy: 'Privacy policy',
+  // The copyright page's link, beside the privacy policy's (Gate 33 A3). Its words are
+  // `copyrightPage`, below.
+  copyright: 'Copyright',
   updateAvailable: 'Update available',
   update: 'Update',
 
@@ -197,10 +197,11 @@ export const strings = {
   loadingPassage: (label: string) => `Loading ${label}…`,
   passageUnavailable: (label: string) =>
     `The passage couldn’t be fetched. Read ${label} in your own Bible.`,
-  // The translation's mark beside each passage's label, and the link the ESV's conditions of
-  // use ask for on every page that shows its text (#3).
-  translations: { ESV: 'ESV' },
-  esvLink: { text: 'www.esv.org', href: 'https://www.esv.org' },
+  // The citation by each passage's label, linked to the copyright page, as API.Bible's terms ask
+  // (§7); and under the passages, the Starter plan's citation of API.Bible, linked (Gate 33 A3).
+  translations: { NIV: '(NIV)' },
+  bibleText: 'Bible text from',
+  apiBible: { text: 'API.Bible', href: 'https://api.bible' },
   backToCases: 'Back to cases',
 
   // The sound switches, on the cases page and in the menu (Gate 10 A4), and under them on an
@@ -240,7 +241,7 @@ export interface Policy {
 export const policy: Policy = {
   tab: 'Behold: Privacy policy',
   title: 'Privacy policy',
-  effective: 'Takes effect 13 October 2026.',
+  effective: 'Takes effect 15 October 2026.',
   intro:
     'Behold is a Bible mystery game that runs in your web browser, at play.beholdgame.com or installed on your device. This page says what the game keeps, what it sends, and who sees it.',
   sections: [
@@ -265,18 +266,19 @@ export const policy: Policy = {
       heading: 'What leaves your device',
       points: [
         'Your browser asks the game’s site for its pages, pictures, and sound, as it does for any website.',
-        'When a closed case shows its passages, the game asks its passage service for them, unless your device already has them. Each request names a passage and its translation, such as 1 Kings 21 in the ESV, and nothing about you.',
+        'When a closed case shows its passages, the game asks its passage service for them, and shows your device’s own copy when the service can’t be reached. Each request names a passage and its translation, such as 1 Kings 21 in the NIV, and nothing about you.',
         'Like any request a browser makes, each one carries your device’s IP address and the usual details a browser sends, such as its type and language.',
         'Nothing else is sent: no analytics, no ads, no tracking, and no scripts or fonts from other sites.',
-        'Links to other sites, such as www.esv.org when a case closes and the music’s licence at creativecommons.org, open in your browser only if you tap them.',
+        'Links to other sites, such as api.bible when a case closes, biblica.com on the copyright page, and the music’s licence at creativecommons.org, open in your browser only if you tap them.',
       ],
     },
     {
       heading: 'Who sees what',
       points: [
         'GitHub hosts the game’s site, on GitHub Pages. GitHub logs and stores each visitor’s IP address “for security purposes”.',
-        'Cloudflare runs the passage service, at behold-esv.garishay.workers.dev. The service sees the passage asked for. Cloudflare receives your device’s IP address with each request, as any host does, and the service never reads it. It keeps no log, and stores nothing about you.',
-        'The service gets the passages’ text from the ESV API, run by Crossway, the ESV’s publisher, on a schedule of its own, and keeps a copy. It answers your requests from that copy, so they go no further than Cloudflare, and it sends nothing about you to Crossway.',
+        'Cloudflare runs the passage service, at behold-passages.garishay.workers.dev. The service sees the passage asked for. Cloudflare receives your device’s IP address with each request, as any host does, and the service never reads it. It keeps no log, and stores nothing about you.',
+        'The service gets the passages’ text from API.Bible, run by the American Bible Society, on a schedule of its own, and keeps a copy. It answers your requests from that copy.',
+        'Each time it shows a passage, it tells API.Bible’s Fair Use Management System, at fums.api.bible, which passage was shown, as API.Bible asks of every app that shows its text. That report comes from Cloudflare, not your device. It carries two random numbers made for that one view, and nothing about you.',
         'The game’s developer receives nothing about you from the game, except while fixing a fault, when the developer may watch the passage service’s requests as they arrive and keeps none of them.',
       ],
       links: [
@@ -317,3 +319,38 @@ export const policy: Policy = {
   ],
   back: 'Back to Behold',
 }
+
+/**
+ * The copyright page (Gate 33 A3), its own page at `copyright/`, written whole at build time as the
+ * privacy policy is (`src/copyright/page.ts`). API.Bible's terms (§7) ask for it, linked from the
+ * citation by each passage, with the translation's name, its abbreviation, its holder's notice,
+ * and the holder's site; the notice is the one API.Bible gives for the NIV, verbatim (#138, hand
+ * step 4). The Starter plan asks for a citation of API.Bible, linked.
+ */
+export const copyrightPage = {
+  tab: 'Behold: Copyright',
+  title: 'Copyright',
+  intro:
+    'When a case closes, Behold shows its passage from the New International Version (NIV), fetched from API.Bible as it is read.',
+  sections: [
+    {
+      heading: 'The New International Version',
+      points: [
+        'The Holy Bible, New International Version® NIV® Copyright © 1973, 1978, 1984, 2011 by Biblica, Inc.® Used by Permission of Biblica, Inc.® All rights reserved worldwide. To learn more, visit http://biblica.com and http://facebook.com/Biblica.',
+      ],
+      links: [{ text: 'biblica.com', href: 'https://biblica.com' }],
+    },
+    {
+      heading: 'API.Bible',
+      points: ['The passages come from API.Bible, a service of the American Bible Society.'],
+      links: [{ text: 'api.bible', href: 'https://api.bible' }],
+    },
+    {
+      heading: 'The epigraph',
+      points: [
+        'Proverbs 25:2, on the cases page, is from the Berean Standard Bible (BSB), which is in the public domain.',
+      ],
+    },
+  ],
+  back: 'Back to Behold',
+} satisfies Omit<Policy, 'effective'>

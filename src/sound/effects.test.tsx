@@ -238,9 +238,10 @@ describe('the music by screen (Gate 10 A2)', () => {
     await waitFor(() => expect(cue()).toBe('title'))
   })
 
-  it('credits the music under the notice, each piece by name, with the licence linked', () => {
+  // The credit is the foot's first line since the notice went with the ESV (Gate 33 A4).
+  it('credits the music under the switches, each piece by name, with the licence linked', () => {
     start()
-    const credit = document.querySelector('.notice + .credit')
+    const credit = document.querySelector('.switches + .credit')
     expect(credit).toHaveTextContent(
       'Music: “Desert City” and “Lamentation” by Kevin MacLeod (incompetech.com), edited, CC BY 4.0',
     )

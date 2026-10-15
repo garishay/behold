@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from 'react'
 import { cases } from './cases/index.ts'
+import { path as copyright } from './copyright/page.ts'
 import { fetchedPassages } from './passages/proxy.ts'
 import type { PassageService } from './passages/service.ts'
 import { picture } from './player/pictures.ts'
@@ -52,10 +53,10 @@ interface AppProps {
 
 /**
  * The cases page (#6), with the title over it when the app opens there (#75): the header, the
- * case cards, each opening its case in the player, then the epigraph and its notice (Gate 01
- * A6). Progress is kept on the device and restored on the next visit. An open case is a history
- * entry — no route, no URL — so back returns to the cards, and leaves the app only from them; the
- * title adds none. The season plays in order: a case waits for the one before it.
+ * case cards, each opening its case in the player, then the epigraph (Gate 01 A6), the BSB's
+ * since Gate 33 A4, which needs no notice. Progress is kept on the device and restored on the
+ * next visit. An open case is a history entry — no route, no URL — so back returns to the cards,
+ * and leaves the app only from them; the title adds none. The season plays in order: a case waits for the one before it.
  */
 export default function App({ passages = fetchedPassages }: AppProps) {
   const [saved, setSaved] = useState<Saved>(() => load(cases))
@@ -215,16 +216,17 @@ export default function App({ passages = fetchedPassages }: AppProps) {
         <footer>{strings.epigraphReference}</footer>
       </blockquote>
       <Switches />
-      <p className="notice">{strings.notice}</p>
       <p className="credit">
         {strings.credit}{' '}
         <a href={strings.creditLicence.href} target="_blank" rel="noreferrer">
           {strings.creditLicence.text}
         </a>
       </p>
-      {/* The privacy policy, its own page on the site, opened in place (#9). */}
+      {/* The privacy policy and the copyright page, each its own page on the site, opened in
+          place (#9, Gate 33 A3). */}
       <p className="privacy">
         <a href={`${import.meta.env.BASE_URL}${privacy}`}>{strings.privacy}</a>
+        <a href={`${import.meta.env.BASE_URL}${copyright}`}>{strings.copyright}</a>
       </p>
       <p className={nudge > 0 ? 'nudge toast' : 'nudge'} role="status">
         {nudge > 0 &&

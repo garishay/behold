@@ -283,20 +283,20 @@ describe('the title (#75)', () => {
 })
 
 describe('the cases page (Gate 01 A6, #6, #75)', () => {
-  it('keeps the name in its header, then the cases, then the epigraph with its notice', () => {
+  // The epigraph is the BSB's since Gate 33 A4, in the public domain, so no notice goes with it.
+  it('keeps the name in its header, then the cases, then the epigraph, with no notice', () => {
     start()
     expect(screen.getByRole('heading', { level: 1, name: 'Behold' })).toBeInTheDocument()
     const order = [...document.querySelectorAll('.screen > *')].map((e) => e.className)
     expect(order.indexOf('case-list')).toBeLessThan(order.indexOf('epigraph'))
     expect(
       screen.getByText(
-        'It is the glory of God to conceal things, but the glory of kings is to search things out.',
+        'It is the glory of God to conceal a matter and the glory of kings to search it out.',
       ),
     ).toBeInTheDocument()
-    expect(screen.getByText('Proverbs 25:2, ESV')).toBeInTheDocument()
-    expect(
-      screen.getByText(/Scripture quotations are from the ESV® Bible .* All rights reserved\./),
-    ).toBeInTheDocument()
+    expect(screen.getByText('Proverbs 25:2, BSB')).toBeInTheDocument()
+    expect(document.querySelector('.notice')).toBeNull()
+    expect(screen.queryByText(/Crossway|ESV/)).not.toBeInTheDocument()
     // The line lives on the title now.
     expect(document.querySelector('.line')).toBeNull()
     expect(screen.getByText('Season one is being written.')).toBeInTheDocument()
@@ -315,6 +315,7 @@ describe('the cases page (Gate 01 A6, #6, #75)', () => {
     expect(screen.getAllByRole('link').map((l) => l.textContent)).toEqual([
       'CC BY 4.0',
       'Privacy policy',
+      'Copyright',
     ])
   })
 
@@ -327,6 +328,16 @@ describe('the cases page (Gate 01 A6, #6, #75)', () => {
     expect(link).toHaveAttribute('href', '/privacy/')
     expect(link).not.toHaveAttribute('target')
     expect(link.parentElement?.previousElementSibling).toHaveClass('credit')
+  })
+
+  // The copyright page the reveal's citations link to (Gate 33 A3) sits beside the privacy policy,
+  // opened in place as the policy is.
+  it('links the copyright page beside the privacy policy, the page at copyright/ (Gate 33)', () => {
+    start()
+    const link = screen.getByRole('link', { name: 'Copyright' })
+    expect(link).toHaveAttribute('href', '/copyright/')
+    expect(link).not.toHaveAttribute('target')
+    expect(link.previousElementSibling).toBe(screen.getByRole('link', { name: 'Privacy policy' }))
   })
 
   // Playtest 2's second session (#77): the valley teaches the game and the cases after it are one
@@ -3563,16 +3574,23 @@ describe('the case solved (#6, 03c; #24)', () => {
     expect(screen.getByText(/The boy was David/)).toBeInTheDocument()
     expect(screen.queryByRole('tab')).not.toBeInTheDocument()
     expect(document.querySelector('.bank')).toBeNull()
-    // Each passage under its label, marked with its translation; the notice and its link beneath
-    // them (#3).
-    expect(screen.getByRole('heading', { name: '1 Samuel 17:4 ESV' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '1 Samuel 17:17–18 ESV' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '1 Samuel 17:38–51 ESV' })).toBeInTheDocument()
-    expect(screen.getByText(/^Scripture quotations are from the ESV/)).toHaveClass('attribution')
-    expect(screen.getByRole('link', { name: 'www.esv.org' })).toHaveAttribute(
+    // Each passage under its label, cited with "(NIV)", which opens the copyright page in a new
+    // tab, so the reveal stays put; and API.Bible's citation, linked, beneath them (Gate 33 A3).
+    expect(screen.getByRole('heading', { name: '1 Samuel 17:4 (NIV)' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '1 Samuel 17:17–18 (NIV)' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '1 Samuel 17:38–51 (NIV)' })).toBeInTheDocument()
+    const citations = screen.getAllByRole('link', { name: '(NIV)' })
+    expect(citations).toHaveLength(3)
+    for (const c of citations) {
+      expect(c).toHaveAttribute('href', '/copyright/')
+      expect(c).toHaveAttribute('target', '_blank')
+    }
+    expect(screen.getByText(/^Bible text from/)).toHaveClass('attribution')
+    expect(screen.getByRole('link', { name: 'API.Bible' })).toHaveAttribute(
       'href',
-      'https://www.esv.org',
+      'https://api.bible',
     )
+    expect(screen.queryByText(/Crossway|ESV/)).not.toBeInTheDocument()
     expect(await screen.findAllByText('38')).toHaveLength(3)
     const numberless = screen.getAllByText('A line with no number.')
     expect(numberless).toHaveLength(3)

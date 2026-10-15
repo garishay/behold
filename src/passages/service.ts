@@ -6,8 +6,8 @@
  */
 import type { Passage } from '../cases/types.ts'
 
-/** The translations the service serves, by the Worker's ids; one today. */
-export type Translation = 'ESV'
+/** The translations the service serves, by the Worker's ids; one today (Gate 33). */
+export type Translation = 'NIV'
 
 /** One verse of the reply: its words, and its number when the source gives one. */
 export interface Verse {
