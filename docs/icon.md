@@ -55,10 +55,10 @@ ground at every edge; the art is 53 px in at its nearest. Every file is a 32-bit
     install** pads the image so the spec's safe circle, 80% of its width, meets Android's 66 dp
     one, by the ratio of `MASKABLE_SAFE_ZONE_RATIO`, 4/5, to `ADAPTIVE_SAFE_ZONE_RATIO`, 66/108,
     in Chromium's `WebappsIconUtils` (#129). The image spans 82.5 dp, so 88% × 72 / 82.5 = 76.8%.
-    The owner's screenshots of 10a's and 129a's checks match that layout best of the spans tried,
-    78 to 91 dp. **Bubblewrap,** which builds the Play app (68b), insets the image 8.5 dp a side in
-    its `ic_launcher.xml`, so it spans 91 dp, and 68b gives it its own file at 88% × 72 / 91 =
-    69.6%.
+    Laid out that way, 10a's file and 129a's match the owner's screenshots of their checks within
+    a pixel; laid out over 91 dp, they differ from them twice as much or more. **Bubblewrap,**
+    which builds the Play app (68b), insets the image 8.5 dp a side in its `ic_launcher.xml`, so it
+    spans 91 dp, and 68b gives it its own file at 88% × 72 / 91 = 69.6%.
   - **The iPhone and Play** show the whole square under their own corners, Play's at 30% of the
     side, so each file is the launcher's view: 88% of the square. The iPhone's is 180, Apple's size
     for it. The store's is Play's full-square 512, a "32-bit PNG (with alpha)" of at most 1024 KB.
