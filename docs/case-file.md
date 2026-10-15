@@ -127,7 +127,7 @@ The type is computed from the structure, so the keys below are exactly the struc
 | `subtitle` | the card's second line                                                                                                                                                                   |
 | `brief`    | the case's opening question: its card over the picture when a fresh case opens, and the menu's sheet after (#24)                                                                         |
 | `note`     | optional: a line under the brief, on its card only, for what the screen adds that the brief doesn't say — the mountain's dots (#77), the vineyard's step up (#125)                       |
-| `harder`   | optional: the step up's words, on a mark at the bank's head at the case's first failed close, under it; shown once, so not held to a lesson's eight — the vineyard's (#125)              |
+| `harder`   | optional: the step up's words, under a mark on the bank's head at the case's first failed close, held until tapped; shown once, out of a lesson's eight — the vineyard's (#125, #131)    |
 | `passages` | one label per passage, in the language's own book names — `1 Samuel 17:38–51`                                                                                                            |
 | `moments`  | moment id → its name                                                                                                                                                                     |
 | `captions` | spot id → what the player reads on a tap                                                                                                                                                 |

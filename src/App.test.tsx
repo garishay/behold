@@ -73,6 +73,9 @@ const menu = (item: string) => {
 // A close's result, like a refused word's message, takes the bank's head (07c, #24 [3]).
 const result = () => document.querySelector('.bank-head')
 const coach = () => document.querySelector('.coach')
+// The vineyard's first failed close holds the screen with the step up until a tap on the bank's
+// head, its ring, lets it go (#131).
+const letGo = () => fireEvent.click(result()!)
 /**
  * A trip to Look: the picture named opened if one is, a thing tapped there, its paper closed if it
  * opens one, and back to Solve. Look's button from Solve steps back in the history, and jsdom lands
@@ -2379,6 +2382,7 @@ describe('hints (#29)', () => {
       tab(/Solve/)
       const close = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
       close()
+      letGo()
       close()
       expect(offer()).toHaveTextContent(/^Where to look$/)
       fireEvent.click(offer()!)
@@ -3043,6 +3047,7 @@ describe('the close converges (#95)', () => {
     tab(/Solve/)
     const close = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     close()
+    letGo()
     close()
     fireEvent.click(screen.getByRole('button', { name: 'Where to look' }))
     expect([at(), said()]).toEqual([
@@ -3087,6 +3092,7 @@ describe('the close converges (#95)', () => {
     openCase(/The vineyard/)
     tab(/Solve/)
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    letGo()
     tab(/Look/)
     await waitFor(() => expect(history.state).toEqual({ case: 'vineyard' }))
     for (let i = 0; i < stuck.taps; i++) tapSpot('cord')
@@ -3094,28 +3100,74 @@ describe('the close converges (#95)', () => {
   })
 
   // The owner's ruling on Gate 31 (#125): the step up is told twice, on the vineyard's card and at
-  // its first failed close, where a mark rings the bank's head once, until the next move. It shows
-  // once, so its words are out of a lesson's eight. The second close rings nothing there.
+  // its first failed close, where a mark rings the bank's head once. It shows once, so its words are
+  // out of a lesson's eight. Tester 4's next tap, on a blank, took it unread (#23), so it holds the
+  // screen as the guided steps do (#131): a tap anywhere else, Close included, plays nothing and
+  // pulses its ring, and a tap on its ring, or on its words, lets it go. The second close rings
+  // nothing there.
   const stepUp = 'The cases are harder from here: the count shows only when one or two don’t fit.'
-  it('the vineyard’s first failed close rings the bank’s head once with the step up', () => {
+  it('the vineyard’s first failed close holds the step up on the bank’s head until it is tapped', async () => {
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: Element,
+    ) {
+      return this.matches('.bank-head')
+        ? new DOMRect(16, 477, 328, 24)
+        : new DOMRect(10, 10, 100, 40)
+    })
     start(<App />, offBy(vineyard, { s4: 'ahab', s5: 'the-elders', v2: 'stoned' }))
     openCase(/The vineyard/)
     tab(/Solve/)
     const close = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     close()
     expect([at(), said()]).toEqual(['.bank-head', stepUp])
-    expect(result()).toHaveTextContent(/^More than two answers don’t fit the story\.$/)
+    await waitFor(() => expect(document.querySelector('.coach .ring')).not.toBeNull())
+    slot('s4')
     chip('Jezebel')
+    close()
+    expect([at(), said(), document.querySelectorAll('.coach .ring .pulse').length]).toEqual([
+      '.bank-head',
+      stepUp,
+      1,
+    ])
+    expect(document.querySelector('[data-slot="s4"]')).not.toHaveClass('is-target')
+    expect(document.querySelector('[data-word="jezebel"]')).not.toHaveClass('is-on')
+    expect(result()).toHaveTextContent(/^More than two answers don’t fit the story\.$/)
+    letGo()
     expect(coach()).toBeNull()
+    chip('Jezebel')
     slot('s4')
     close()
     expect(result()).toHaveTextContent(/^Two answers don’t fit the story\.$/)
     expect(coach()).toBeNull()
   })
 
+  // The owner's ruling on the redrafted part 4 (#131): a tap on the step up's words lets it go, as a
+  // tap on its ring does. They are a button over the whole label, so a keyboard reaches them (#8).
+  it('a tap on the step up’s words lets it go, and a keyboard reaches them', async () => {
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: Element,
+    ) {
+      return this.matches('.bank-head')
+        ? new DOMRect(16, 477, 328, 24)
+        : new DOMRect(10, 10, 100, 40)
+    })
+    start(<App />, offBy(vineyard, { s4: 'ahab', s5: 'the-elders', v2: 'stoned' }))
+    openCase(/The vineyard/)
+    tab(/Solve/)
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    const words = await screen.findByRole('button', { name: stepUp })
+    words.focus()
+    expect(document.activeElement).toBe(words)
+    fireEvent.click(words)
+    expect(coach()).toBeNull()
+    chip('Jezebel')
+    expect(document.querySelector('[data-word="jezebel"]')).toHaveClass('is-on')
+  })
+
   // The owner's ruling on Gate 31 (#125): the step up's words sat over Close's row, so the tap that
   // would clear them pressed Close the case and took them away unread. They sit under the bank's
-  // head, over the bank, where a tap picks a word, the next move, and never presses Close.
+  // head, over the bank, never over Close, and the mark holds the screen until its ring is tapped
+  // (#131).
   it('the step up’s words sit under the bank’s head, off Close’s row', async () => {
     vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (
       this: Element,
@@ -3144,6 +3196,8 @@ describe('the close converges (#95)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     const two = /^Two answers don’t fit the story\.$/
     expect(result()).toHaveTextContent(two)
+    letGo()
+    expect(result()).toHaveTextContent(two)
     chip('cursed')
     slot('v2')
     expect(result()).toHaveTextContent(two)
@@ -3168,6 +3222,7 @@ describe('the close converges (#95)', () => {
     expect(result()).toHaveTextContent(
       /^One answer doesn’t fit the story\. There are two more to find in the pictures\.$/,
     )
+    letGo()
     tab(/Look/)
     await waitFor(() => expect(history.state).toEqual({ case: 'vineyard' }))
     tapSpot('stain')
@@ -3232,6 +3287,7 @@ describe('the close converges (#95)', () => {
     openCase(/The vineyard/)
     tab(/Solve/)
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    letGo()
     chip('taken possession')
     slot('v2')
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
@@ -3303,6 +3359,7 @@ describe('the close converges (#95)', () => {
     openCase(/The vineyard/)
     tab(/Solve/)
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    letGo()
     const one = /^One answer doesn’t fit the story\.$/
     expect(result()).toHaveTextContent(one)
     asListed()
@@ -3328,7 +3385,10 @@ describe('the close converges (#95)', () => {
       start(<App />, { vineyard: { ...ordered, tapped, faces: Object.fromEntries(faces) } })
       openCase(/The vineyard/)
       tab(/Solve/)
-      if (closes) fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+      if (closes) {
+        fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+        letGo()
+      }
       then()
       asListed()
       expect(document.querySelectorAll('.coach')).toHaveLength(1)
@@ -3481,6 +3541,7 @@ describe('the case solved (#6, 03c; #24)', () => {
     tab(/Solve/)
     const close = () => fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     close()
+    letGo()
     chip('Naboth')
     slot('s4')
     close()
@@ -3620,6 +3681,7 @@ describe('the case solved (#6, 03c; #24)', () => {
       'Two answers don’t fit the story. There are nine more to find in the pictures.',
     )
     expect(screen.queryByRole('heading', { name: 'The case is closed.' })).not.toBeInTheDocument()
+    letGo()
     slot('s1')
     chip('garden')
     slot('s1')

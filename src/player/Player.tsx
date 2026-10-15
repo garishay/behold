@@ -53,8 +53,11 @@ import { Think } from './Think.tsx'
 
 type View = 'look' | 'solve' | 'reveal'
 type Sheet = 'menu' | 'papers' | null
-/** A mark that answers a move: where it rings, its words, and whether they sit under it (#125). */
-type Notice = { at: string; label: string; n: number; under?: boolean }
+/**
+ * A mark that answers a move: where it rings, its words, whether they sit under it (#125), and
+ * whether it holds the screen until it is tapped (#131).
+ */
+type Notice = { at: string; label: string; n: number; under?: boolean; hold?: boolean }
 
 interface PlayerProps {
   entry: CaseEntry
@@ -159,10 +162,10 @@ export function Player(props: PlayerProps) {
   const [last, setLast] = useState<string | null>(null)
   // The bank's head: a refused word's message, or how far off a close was (07c, #24 [3]).
   const [note, setNote] = useState('')
-  // A mark that answers a move at what it's about, until the next move: the order's refusal of the
-  // pictures as listed, at the order, where the next tap is (#123), and the step up, at the bank's
-  // head on the vineyard's first failed close, its words under it, off Close's row (#125). Counted,
-  // so a refusal again shows it again.
+  // A mark that answers a move at what it's about: the order's refusal of the pictures as listed, at
+  // the order, where the next tap is, until the next move (#123); and the step up, at the bank's
+  // head on the vineyard's first failed close, its words under it, off Close's row (#125), until a
+  // tap on it lets it go (#131). Counted, so a refusal again shows it again.
   const [notice, setNotice] = useState<Notice | null>(null)
   // The stuck signals (#29): taps on the picture that find nothing new while something is unfound,
   // a stay on a moment with something left, a wait on Solve with nothing left to place (#65), and
@@ -360,9 +363,10 @@ export function Player(props: PlayerProps) {
     // Kept until the next close, and the one that ends the case clears it ([Q20] on #12).
     onLastClose(off > 0 ? progress : null)
     // The case's first failed close says the step up at the bank's head, once: the vineyard's. Its
-    // words sit under the head, over the bank, where a tap picks a word, never Close (#125).
+    // words sit under the head, over the bank, never on Close (#125), and it holds the screen until
+    // it is tapped, as the guided steps do: tester 4's next tap, on a blank, took it unread (#131).
     const harder = off > 0 && Object.keys(progress.misses).length === 0 ? text.harder : undefined
-    setNotice(harder ? { at: '.bank-head', label: harder, n: 1, under: true } : null)
+    setNotice(harder ? { at: '.bank-head', label: harder, n: 1, under: true, hold: true } : null)
     if (off > 0) {
       const first = firstWrong(s, progress) ?? null
       play('notYet')
@@ -785,9 +789,18 @@ export function Player(props: PlayerProps) {
         <PapersSheet text={text} papers={progress.papers} onClose={() => setSheet(null)} />
       )}
       {paper !== null && <PaperModal text={text} paper={paper} onClose={() => setPaper(null)} />}
-      {/* The order rung with its refusal (#123), or the bank's head with the step up (#125). */}
+      {/* The order rung with its refusal (#123), or the bank's head with the step up (#125), which
+          a tap on its ring or its words lets go (#131). */}
       {noticed && (
-        <CoachMark key={noticed.n} at={noticed.at} label={noticed.label} under={noticed.under} />
+        <CoachMark
+          key={noticed.n}
+          at={noticed.at}
+          label={noticed.label}
+          under={noticed.under}
+          hold={noticed.hold}
+          release={noticed.hold}
+          onTap={noticed.hold ? () => setNotice(null) : undefined}
+        />
       )}
       {hinted && hint && (
         <CoachMark
