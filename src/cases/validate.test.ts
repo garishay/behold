@@ -391,6 +391,13 @@ describe('validate (Gate 02 A6)', () => {
     ])
   })
 
+  // #131 adds what bears the face's name, which the mark waits on: it must be one of the spots.
+  it('(n) a lesson waiting on a spot the case lacks — the vineyard’s on "ring"', () => {
+    expect(validate({ ...vineyard, teach: { face: 'p1', bears: 'ring' } }, vineyardEn)).toEqual([
+      'the case teaches face "p1" by "ring", not a spot',
+    ])
+  })
+
   // (o) is #29's: a hint points at evidence, so each face and blank names a spot that settles it,
   // and each moment of an order one of its own spots, the one that tells when it happened.
   it('(o) a blank with no evidence, a face with a spot the case lacks, a moment with another’s', () => {

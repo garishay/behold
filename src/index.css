@@ -918,6 +918,11 @@ button:focus-visible {
   color: var(--gold);
 }
 
+/* A line of finds that wraps breaks only between its parts, never inside one (#131). */
+.dock .found span {
+  white-space: nowrap;
+}
+
 /* A hint on offer (#29): a quiet line in the finds' place at the foot of the dock on Look, the
    caption giving up a line to it, and a button beside Close the case on Solve. */
 .offer {

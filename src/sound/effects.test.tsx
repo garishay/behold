@@ -97,7 +97,7 @@ describe('the effects, each beside what the screen shows (Gate 10 A3, A5)', () =
     tapSpot('seal')
     expect(heard()).toEqual(['paper'])
     expect(screen.getByRole('dialog', { name: 'The seal' })).toBeInTheDocument()
-    expect(screen.getByText(/Found:/)).toHaveTextContent('copied to Papers')
+    expect(document.querySelector('.dock .found')).toHaveTextContent('copied to Papers')
     fireEvent.click(screen.getByRole('button', { name: 'Close' }))
     tapSpot('seal')
     expect(heard()).toEqual([])

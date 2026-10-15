@@ -11,10 +11,20 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   - wrangler, from 4.131.2 to 4.151.0;
   - miniflare, workerd, esbuild, and wrangler's unenv preset.
 
-  Nothing is added or removed, `package.json` doesn't change, and `npm audit` reports none. The
-  game's build comes out byte for byte as before, and so does the Worker's bundle. esbuild's and
-  workerd's install scripts are approved in `package.json` at their old versions, so they no longer
-  run; the build, the tests, and the Worker don't need them (#12 [Q25]).
+  Nothing is added or removed, and `npm audit` reports none. The game's build comes out byte for
+  byte as before, and so does the Worker's bundle. `package.json` approves esbuild's and workerd's
+  install scripts at their new versions, so they run on install as they did (#12 [Q25]).
+
+## v0.29.1 — Gate 32, what a tap is for (#131)
+
+- **131b — what a tap is for** (#137): a person's tap says they are "a face in Solve", where it
+  said "one of the faces in Solve", and from the vineyard on, where a name comes from what bears
+  it, one that gives no name reads "a face in Solve, but no name". In every case with an order,
+  the thing that tells when a moment happened says "a clue to the order". A line of finds that
+  wraps breaks only between its parts, never inside one. The vineyard's lesson rings the man on the
+  bed until he is named and the seal that bears his name has been opened, so a name placed before
+  the seal no longer takes it away; the validator holds what bears a taught face's name to the
+  case's spots.
 
 ## v0.29.0 — Gate 32, a find says what it's for (#131)
 
