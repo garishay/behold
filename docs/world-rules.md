@@ -12,7 +12,7 @@ Two principles sit above everything here.
 
 **Tutorial — the valley of Elah.** Judah, c. 1010 BC. Iron Age I/II transition. Philistine and Israelite armies; bronze armor still common, iron weapons present.
 
-**Season one — the house of Ahab.** The northern kingdom of Israel, c. 874–841 BC, Iron Age II. Places: Samaria (the capital, hilltop, ashlar masonry, the "ivory house" of 1 Kings 22:39), Jezreel (the second royal residence and its vineyard), Mount Carmel and the Kishon brook, Ramoth-gilead (east of the Jordan), Shunem (a village in the Jezreel valley), Damascus (Aram, Naaman's country), the Jordan at Jericho, and the road up to Jezreel from the Jordan valley. Assyrian records credit Ahab with a large chariot force; chariots are normal royal transport in this season.
+**Season one — the house of Ahab.** The northern kingdom of Israel, c. 874–841 BC, Iron Age II. Places: Samaria (the capital, hilltop, ashlar masonry, the "ivory house" of 1 Kings 22:39), Jezreel (the second royal residence and its vineyard), Mount Carmel and the Kishon Valley, Ramoth Gilead (east of the Jordan), Shunem (a village in the Jezreel valley), Damascus (Aram, Naaman's country), the Jordan at Jericho, and the road up to Jezreel from the Jordan valley. Assyrian records credit Ahab with a large chariot force; chariots are normal royal transport in this season.
 
 **Season two — Joseph.** Canaan and Egypt, Middle Kingdom-to-Second-Intermediate Egypt. Written when season two is designed; Egyptian material culture is a separate document.
 
@@ -46,7 +46,7 @@ Levantine skin tones and features; adult Israelite men are bearded (a shaved man
 
 | Character | Marker | Source |
 |---|---|---|
-| Ahab | deep wine-red robe with gold trim, thin gold disc circlet, short dark beard; disguised at Ramoth-gilead: plain bronze scale armor, no robe, no circlet | cast sheet; 1 Kings 22:30 |
+| Ahab | deep wine-red robe with gold trim, thin gold disc circlet, short dark beard; disguised at Ramoth Gilead: plain bronze scale armor, no robe, no circlet | cast sheet; 1 Kings 22:30 |
 | Jezebel | teal robe with gold geometric trim, gold disc headdress; painted eyes in the finale | cast sheet; 2 Kings 9:30 |
 | Elijah | a cloak of animal hair with a leather belt, a wooden staff, wild hair | 2 Kings 1:8 |
 | Elisha | bald, plain robe; carries Elijah's hair cloak after 2 Kings 2 | 2 Kings 2:13, 2:23 |

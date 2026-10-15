@@ -41,24 +41,27 @@ describe('the service worker’s configuration (Gate 03 A3)', () => {
   })
 
   // A passage read once reads offline: the rule's matcher, strategy, and the limits Gate 04 A4 set
-  // under the ESV's five hundred verses stored locally (review round 1, #31), eleven since #12
-  // [Q17], which the registry test holds to that bound with the passage coming in.
-  it('caches a passage the Worker returned, at most eleven for thirty days, and nothing else', () => {
+  // under five hundred verses (review round 1, #31), eleven since #12 [Q17], which the registry
+  // test holds to that bound with the passage coming in. The service is asked first, so each
+  // reveal online reaches it and is reported, and the copy shows when it can't answer (Gate 33 A2).
+  it('caches a passage the Worker returned, at most eleven for thirty days, asking first', () => {
     const rule = /\{\s*urlPattern: (\/[^\n]*\/),\s*handler: '(\w+)',([^}]*\}[^}]*)\}/.exec(
       config.slice(config.indexOf("cacheName: 'cases'")),
     )
     expect(rule).not.toBeNull()
     const [, pattern, handler, options] = rule!
     const matches = new RegExp(pattern.slice(1, -1))
-    const worker = 'https://behold-esv.garishay.workers.dev'
-    expect(matches.test(`${worker}/passage?translation=ESV&book=1KI&chapter=21`)).toBe(true)
-    expect(matches.test(`${worker}/passage?translation=ESV&book=1SA&chapter=17&from=4&to=4`)).toBe(
+    const worker = 'https://behold-passages.garishay.workers.dev'
+    expect(matches.test(`${worker}/passage?translation=NIV&book=1KI&chapter=21`)).toBe(true)
+    expect(matches.test(`${worker}/passage?translation=NIV&book=1SA&chapter=17&from=4&to=4`)).toBe(
       true,
     )
     expect(matches.test(`${worker}/other?book=1KI`)).toBe(false)
+    expect(matches.test('https://behold-esv.garishay.workers.dev/passage?book=1KI')).toBe(false)
     expect(matches.test('https://elsewhere.workers.dev/passage?book=1KI&chapter=21')).toBe(false)
     expect(matches.test('/cases/vineyard/gate.jpg')).toBe(false)
-    expect(handler).toBe('CacheFirst')
+    expect(handler).toBe('NetworkFirst')
+    expect(options).toMatch(/networkTimeoutSeconds: 3,/)
     expect(options).toMatch(/cacheName: 'passages'/)
     expect(options).toMatch(/maxEntries: 11,/)
     expect(options).toMatch(/maxAgeSeconds: 30 \* 24 \* 60 \* 60/)
@@ -77,6 +80,17 @@ describe('the stylesheet’s ruled measure, a margin above the inset (Gate 03 [6
   it('keeps the cases page’s foot clear of the gesture zone, its link 16 px above the inset', () => {
     const screen = /\.screen \{([^}]*)\}/.exec(css)?.[1] ?? ''
     expect(screen).toMatch(/padding:[^;]*calc\(16px \+ env\(safe-area-inset-bottom\)\)/)
+  })
+})
+
+// API.Bible's terms (§12): a passage's text can't be selected, and a print leaves it out (Gate 33
+// A5). jsdom neither selects nor prints, so the two rules are pinned as text against removal.
+describe('the passage’s text, not freely copied (Gate 33 A5)', () => {
+  it('can’t be selected, and leaves a print', () => {
+    const text = /\n\.passage p \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    const print = /@media print \{\s*\.passage p \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    expect(text).toMatch(/-webkit-user-select: none;\s+user-select: none;\s*$/)
+    expect(print).toMatch(/display: none;/)
   })
 })
 

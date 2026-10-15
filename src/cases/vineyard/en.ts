@@ -44,10 +44,10 @@ export const en = {
     jezebel: 'Jezebel',
     naboth: 'Naboth',
     elijah: 'Elijah',
-    'turned-away': 'turned away',
-    'would-not-eat': 'would not eat',
-    'taken-possession': 'taken possession',
-    killed: 'killed',
+    'turned-away': 'sulked',
+    'would-not-eat': 'refused to eat',
+    'taken-possession': 'seized his property',
+    killed: 'murdered',
     stoned: 'stoned',
     cursed: 'cursed',
     vineyard: 'vineyard',
@@ -72,7 +72,7 @@ export const en = {
     },
     law: {
       title: 'The Law',
-      body: 'Every man of Israel is to keep the inheritance of his fathers. The land is not to be sold for good, for the land belongs to the LORD.\n\nOne witness is not enough to put a man to death. A charge stands only on the word of two or three witnesses.',
+      body: 'Every Israelite is to keep the inheritance of their ancestors. The land is not to be sold for good, for the land belongs to the LORD.\n\nOne witness is not enough to put a man to death. A charge stands only on the word of two or three witnesses.',
     },
     note: {
       title: 'The note',
@@ -90,7 +90,7 @@ export const en = {
         },
         { b: 's3' },
         {
-          t: ' of his fathers. The king went home, lay down with his face turned away, and would not eat. Then letters went out to the elders of the owner’s city, sealed with the king’s seal but written by ',
+          t: ' of his ancestors. The king went home, lay down sulking, and refused to eat. Then letters went out to the elders of the owner’s city, sealed with the king’s seal but written by ',
         },
         { b: 's4' },
         {
@@ -104,12 +104,12 @@ export const en = {
     },
     verdict: {
       heading: 'The prophet’s words',
-      parts: [{ t: 'First you killed him, and now you have ' }, { b: 'v2' }, { t: '?' }],
+      parts: [{ t: 'First you murdered a man, and now you have ' }, { b: 'v2' }, { t: '?' }],
     },
   },
   teach: 'Who is he? Find what bears his name.',
   reveal: [
-    'The man on the bed was Ahab, king of Israel. The woman at the table was Jezebel, his wife. The seated man was Naboth, who owned the vineyard and would not give up his fathers’ inheritance. Jezebel wrote the letters in Ahab’s name and sealed them with his seal. The prophet at the wall was Elijah.',
-    'When Ahab heard the prophet’s words, he tore his clothes, put on sackcloth, and fasted. And the word of the LORD came again: because he has humbled himself, the disaster will not come in his days — but it will come on his house in the days of his son.',
+    'The man on the bed was Ahab, king of Israel. The woman at the table was Jezebel, his wife. The seated man was Naboth, who owned the vineyard and would not give up his ancestors’ inheritance. Jezebel wrote the letters in Ahab’s name and sealed them with his seal. The prophet at the wall was Elijah.',
+    'When Ahab heard the prophet’s words, he tore his clothes, put on sackcloth, and fasted. And the word of the LORD came again: because he has humbled himself, the disaster will not come in his day — but it will come on his house in the days of his son.',
   ],
 } satisfies CaseText<typeof vineyard>

@@ -3,8 +3,9 @@ import type { carmel } from './case.ts'
 
 // Case two's English text, keyed by the ids in case.ts. Captions describe by marker and carry the
 // passage's detail; every sentence is the game's own voice, never the translation's. The three
-// that date the moments read as a clock too, in the passage's phrases: noon, the hour of the
-// offering near, and that hour, mid-afternoon, so the water and the fire share their anchor (#131).
+// that date the moments read as a clock too, in the passage's phrases: noon, the time of
+// sacrifice near, and that time, mid-afternoon, so the water and the fire share their anchor
+// (#131, Gate 33 A8).
 // Each shows whole in three lines at 360 wide in Noto Serif, Android's serif, as well as in this
 // machine's font, so the clock is never behind More (#12 [Q24]).
 export const en = {
@@ -19,36 +20,36 @@ export const en = {
   moments: { water: 'The water', fire: 'The fire', baal: 'Baal’s altar' },
   captions: {
     altar:
-      'An altar of twelve great stones, one for each tribe, built where the LORD’s altar lay thrown down. The wood and the bull on it stream with water.',
+      'An altar of twelve great stones, one for each tribe, built where the LORD’s altar lay torn down. The wood and the bull on it stream with water.',
     pourers:
       'Four men tip four big jars over the bull and the wood, and the water runs down the stones.',
     caller:
-      'A wild-haired man in a cloak of hair and a leather belt, a staff in one hand and three fingers raised on the other: again, a third time.',
+      'A wild-haired man in a cloak of hair and a leather belt, a staff in one hand, three fingers raised: again, a third time.',
     trench:
       'A trench dug all the way around the altar, wide enough to hold two measures of seed. It is full of water.',
     spent:
-      'Men in tall caps and saffron robes sit by their cold altar, worn out. Midday has passed; the hour of the offering is near.',
-    fire: 'Fire falls on the altar and burns all of it: the bull, the wood, the very stones, and the dust around them.',
+      'Men in tall caps and saffron robes sit by their cold altar, worn out. Midday has passed; the time of sacrifice is near.',
+    fire: 'Fire falls on the altar and burns all of it: the bull, the wood, the very stones, and the soil around them.',
     dry: 'The trench is dry. Steam rises where the water stood.',
-    faces: 'The people are down on their faces, saying over and over that the LORD is God.',
+    faces: 'The people lie prostrate, crying over and over that the LORD is God.',
     praying:
-      'The man in the hair cloak stands at the altar with his arms lifted. It is the hour of the offering, mid-afternoon.',
+      'The man in the hair cloak stands at the altar with his arms lifted. It is the time of sacrifice, mid-afternoon.',
     prophets:
-      'A crowd of men in tall caps and saffron robes circles an altar with a bull on its wood, crying aloud to Baal. No fire has come. Four hundred and fifty of them, by the prophet’s count.',
+      'A crowd of men in tall caps and saffron robes circles an altar with a bull on its wood, shouting to Baal. No fire has come. Four hundred and fifty of them, by the prophet’s count.',
     mocker:
       'A wild-haired man in a cloak of hair, a hand cupped to his ear, calling out to them with a grin. The sun stands at noon.',
     crowd:
       'The people of Israel, watching from the slope. Asked how long they would waver between the LORD and Baal, they said not a word.',
     king: 'A man in a wine-red robe and a gold circlet, seated under an awning among his guards, watching.',
-    ruin: 'At the edge of the ground, the stones of an old altar lie scattered where it was thrown down.',
+    ruin: 'At the edge of the ground, the stones of an old altar lie scattered where it was torn down.',
   },
   words: {
     elijah: 'Elijah',
     ahab: 'Ahab',
     baal: 'Baal',
     'said-nothing': 'said nothing',
-    'fell-on-faces': 'fell on their faces',
-    'cried-aloud': 'cried aloud',
+    'fell-on-faces': 'fell prostrate',
+    'cried-aloud': 'shouted louder',
     stones: 'stones',
     prophets: 'prophets',
     jars: 'jars',
@@ -78,6 +79,6 @@ export const en = {
   teach: 'These aren’t in story order. Which happened first?',
   reveal: [
     'The man in the hair cloak was Elijah, the LORD’s prophet, who stood alone against Baal’s four hundred and fifty. The man under the awning was Ahab, king of Israel, who met him as the troubler of Israel and gathered the people and the prophets to Mount Carmel at his word.',
-    'Asked how long they would waver, the people said not a word. Baal’s prophets called from morning past noon, and no one answered. Elijah rebuilt the LORD’s altar with twelve stones, one for each tribe, and had it soaked, four jars three times over, until the trench ran full. At the hour of the offering he prayed, and the fire of the LORD fell. It consumed the offering, the wood, the stones, and the dust, and dried up the water in the trench. The people fell on their faces and confessed that the LORD is God, and at Elijah’s word Baal’s prophets were seized and taken down to the brook Kishon.',
+    'Asked how long they would waver, the people said not a word. Baal’s prophets called from morning past noon, and no one answered. Elijah rebuilt the LORD’s altar with twelve stones, one for each tribe, and had it soaked, four jars three times over, until the trench ran full. At the time of sacrifice he prayed, and the fire of the LORD fell. It burned up the sacrifice, the wood, the stones, and the soil, and dried up the water in the trench. The people fell prostrate and cried that the LORD is God, and at Elijah’s word Baal’s prophets were seized and taken down to the Kishon Valley.',
   ],
 } satisfies CaseText<typeof carmel>

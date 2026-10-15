@@ -7,7 +7,8 @@ store and the fill that keeps it, `src/passage.ts` the reference, API.Bible's UR
 `src/fums.ts` the report of a view, `src/books.ts` the one book table. It is deployed from Actions
 on a merge to `main` that touches it or the cases (`.github/workflows/deploy-worker.yml`), and
 lives at `https://behold-passages.garishay.workers.dev`. It took the place of the ESV proxy (Gate
-04, #3), whose last version, `behold-esv`, answers the app until 138b switches the reveal.
+04, #3): the app asks it since 138b, and `behold-esv` answers only a copy installed before, until
+Gate 33 A7 retires it.
 
 ## The request, and the reply
 
@@ -123,9 +124,11 @@ days after; removed within 24 hours of a request (§11) — the takedown below; 
 to FUMS (§14) — above; the NIV quoted up to 500 verses — the store keeps the registered passages
 only, held together within 500 by the registry test and again where the fill writes; the words
 never changed; the key never shared. The app keeps at most eleven passages on the device, which
-the registry test holds with the one coming in, twelve of the longest, within 500 (#12 [Q17]). The
-citation and the copyright page (§7), and §12's one passage at a time, are the reveal's, with
-138b (Gate 33 A3, A5).
+the registry test holds with the one coming in, twelve of the longest, within 500 (#12 [Q17]),
+asking the service first and showing its copy only when the service can't answer (Gate 33 A2).
+The reveal carries the rest: the citation by each passage, linked to the copyright page (§7), and
+API.Bible's citation (Gate 33 A3); and one passage at a time, its text neither selected nor
+printed (§12, A5).
 
 ## A takedown, within 24 hours
 
