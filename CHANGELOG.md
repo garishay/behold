@@ -3,6 +3,19 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.30.0 — Gate 33, the reveal reads the NIV (#138)
+
+- **138a — the passage service, on API.Bible** (#140): a new Worker, `behold-passages`, beside the
+  ESV proxy, which the app asks until 138b. Its store keeps each registered passage's NIV text with
+  the FUMS token it came with, asked of API.Bible on the schedule and never by a player's request:
+  again when a copy is a week old, no sooner than six hours after an ask that failed, and not at
+  all by a fill with no key. A copy goes thirty days after it came (Terms §11). A passage it answers
+  is cached nowhere, so each reveal reaches it, and each answer is reported to API.Bible's Fair Use
+  Management System from the Worker, after the reply, with the copy's token and two IDs made for
+  that one view. The report names Cloudflare's own Worker address where Cloudflare would put the
+  player's. A month's calls stay under 2,500 even with a failing key, against the Starter plan's
+  5,000. The dev server is no longer an origin it answers.
+
 ## v0.29.3 — npm audit, fixed within range (#135)
 
 - **135a — eight advisories in dev-only packages** (#136): `npm audit fix`, without `--force`,
