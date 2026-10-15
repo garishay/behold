@@ -19,18 +19,20 @@ the rulebook. Gate 02 — Case file format: the shape a case is authored in and 
 [`docs/case-file.md`](docs/case-file.md), with the tutorial and case two as the first case files
 under `src/cases/`. Gate 03 — Player port (#6): the case player — the cards on the title screen,
 each case's pictures and their spots, the word bank, the papers, who is who, what happened first,
-the account and its blanks, the close, and the reveal; progress kept on the device. Gate 04 — ESV
-proxy (#3): [`worker/`](worker/README.md), the Cloudflare Worker between the app and the ESV API —
-a registered case's passage in, its verses out, the token in the Worker's own store — deployed
-from Actions on merge, its one book table held against every case's passages in CI, and since 04c
-answering from a store it fills on a schedule, so no player's request reaches the ESV. The tutorial
-and case two play through, and the reveal reads each passage through the Worker, marked ESV, with
-Crossway's notice and a link to www.esv.org beneath; the last eleven passages read stay on the
-device, so a closed case reads offline. The world rules — the accuracy and art constraints every picture and every case is
+the account and its blanks, the close, and the reveal; progress kept on the device. Gate 04 — the
+passage service (#3), the NIV's since Gate 33 (#138): [`worker/`](worker/README.md), the
+Cloudflare Worker between the app and API.Bible — a registered case's passage in, its verses out,
+the key in the Worker's own store — deployed from Actions on merge, its one book table held
+against every case's passages in CI, answering from a store it fills on a schedule, so no
+player's request reaches API.Bible, and reporting each passage it answers to API.Bible's Fair Use
+Management System. The tutorial and the cases play through, and the reveal reads each passage
+through the Worker, cited "(NIV)" with a link to the game's copyright page, and API.Bible's
+citation beneath; the last eleven passages read stay on the device, so a closed case reads
+offline. The world rules — the accuracy and art constraints every picture and every case is
 checked against — are [`docs/world-rules.md`](docs/world-rules.md). The privacy policy (#9) is a
 page of its own, <https://play.beholdgame.com/privacy/>, written at build from the strings module
 so it reads without JavaScript, and linked from the cases page; a test holds what it says to the
-code.
+code. The copyright page, <https://play.beholdgame.com/copyright/>, is built the same way.
 
 ## Stack
 
@@ -68,6 +70,6 @@ plan gate, decision rights, lanes, and what the repository enforces rather than 
 ## License
 
 The code is MIT — see [`LICENSE`](LICENSE). The case text and the art are not: all rights
-reserved. Scripture in the reveal is fetched from its translation's service at display time and
-never lives in this repository; the ESV attribution and the Berean Standard Bible attribution are
-reserved for the About screen.
+reserved. Scripture in the reveal is the NIV, fetched from its translation's service at display
+time, and never lives in this repository; its notice, and the source of the cases page's epigraph,
+the public-domain Berean Standard Bible, are on the game's copyright page.
