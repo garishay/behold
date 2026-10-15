@@ -28,6 +28,17 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   byte as before, and so does the Worker's bundle. `package.json` approves esbuild's and workerd's
   install scripts at their new versions, so they run on install as they did (#12 [Q25]).
 
+## v0.29.2 — Gate 32, the step up held (#131)
+
+- **131c — the step up held, and a hint again at Show me** (#139): tester 4's next tap after the
+  vineyard's first failed close, on a blank, took the step up's mark 6.6 s after it showed, unread.
+  The mark stays Gate 31's, gold at the bank's head with its words under it, and now holds the
+  screen until it is tapped, as the valley's guided steps do: a tap on its ring or its words lets
+  it go, and any other tap plays nothing and pulses it once. Its words are a button over the whole
+  label, so a keyboard reaches them. The count's line stays one line. A new hint for an answer
+  already hinted on the visit starts at Show me, the thing itself, the order counting as one
+  answer, where it started over at Where to look.
+
 ## v0.29.1 — Gate 32, what a tap is for (#131)
 
 - **131b — what a tap is for** (#137): a person's tap says they are "a face in Solve", where it

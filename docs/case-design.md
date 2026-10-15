@@ -49,14 +49,17 @@ the vineyard on: hard because you have to look, never because you have to be cle
    only once the player is close: one or two answers that don't fit are counted, and three or more
    read "More than two answers don't fit the story.", so no guess climbs the count (#125). Close the
    case comes back at once. The step up is told twice: under the vineyard's brief on its card, and
-   by a mark on the bank's head at its first failed close. The bank lights
+   by a mark on the bank's head at its first failed close, which holds the screen until it is
+   tapped, as the valley's guided steps do: a tap on its ring or its words lets it go, its words a
+   button a keyboard reaches, and any other tap plays nothing and pulses it (#131). The bank lights
    only a slot's kind, so there a ringed answer would fall to its rivals in a few closes, every ring
    at once, without a look at what settles it: guessing would be cheaper than looking (rule 1), and
    the rings would name every wrong answer for free, where a hint names one and the reveal counts
    it. The hint offered after the second failed close names an answer that doesn't fit and says so,
    rings what settles it, and counts on the reveal, and each new hint names the next answer the
    close found wrong, so a stuck player learns which answers are wrong, one at a time (#29, #102,
-   #123). Once the case is closed, the reveal leads with what its closes found wrong, the most tried
+   #123). A new hint for an answer already hinted starts at Show me, the thing itself (#131). Once
+   the case is closed, the reveal leads with what its closes found wrong, the most tried
    first: each answer as a hint names it, what it was, what was put there, and a link to the verse
    that says it, so a miss is seen set right in the text (#107). A close that fails while something
    is still unfound says how much is left to find, and rings Look until it opens (#95). A miss is

@@ -623,6 +623,16 @@ button:focus-visible {
   outline-color: var(--slate-deep);
 }
 
+/* The step up's words, which let its mark go as its ring does (#131): a button over the whole
+   label, so a tap anywhere on it counts, and a keyboard reaches it, its gold focus ring around the
+   label's corners. */
+.coach .release {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: auto;
+}
+
 .coach .ring,
 .coach .label {
   animation: arrive 0.25s ease-out;
