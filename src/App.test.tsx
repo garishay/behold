@@ -603,16 +603,75 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     guide()
     tab(/Look/)
     await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
-    const found = () => screen.getByText(/Found:/)
+    const found = () => document.querySelector('.dock .found')
     tapSpot('giant')
     tapSpot('giant')
-    expect(found()).toHaveTextContent(
-      'Found: Goliath, six, spear, sword · one of the faces in Solve',
-    )
+    expect(found()).toHaveTextContent('Found: Goliath, six, spear, sword · a face in Solve')
     tapSpot('armor')
     expect(found()).toHaveTextContent(/^Found: Saul, king$/)
     tapSpot('armor')
     expect(found()).toHaveTextContent(/^Found: Saul, king, sword$/)
+  })
+
+  /** The dock's line of finds, as it reads. */
+  const finds = () => document.querySelector('.dock .found')?.textContent
+
+  // Tester 4 (#23) named the man on the bed before anything bearing his name was found (#131). A
+  // person's tap says they are a face in Solve; from the vineyard on, where a name comes from what
+  // bears it, one that gives no name says so in that same part, where the surprise is. A note of
+  // its own read as one of the things found, under the line's "Found:" (the owner's ruling, #131).
+  it('from the vineyard on, a person’s tap that gives no name says so with the face', async () => {
+    start(<App />, laterStarted)
+    openCase(/The vineyard/)
+    tapSpot('balcony')
+    expect(finds()).toBe('Found: Jezebel · copied to Papers · a face in Solve')
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+    moment('Bedchamber')
+    tapSpot('man-bed')
+    expect(finds()).toBe('Found: turned away · a face in Solve, but no name')
+    tapSpot('woman')
+    expect(finds()).toBe('a face in Solve, but no name')
+    menu('Cases')
+    fireEvent.click(await screen.findByRole('button', { name: /The mountain/ }))
+    moment('Baal’s altar')
+    tapSpot('king')
+    expect(finds()).toBe('Found: Ahab · a face in Solve')
+  })
+
+  // Tester 4 (#23) read the spots that give no word as finding nothing, and never spoke of the sun
+  // until a hint rang it (#131). In every case with an order, the thing that tells when a moment
+  // happened says it is a clue to the order, as a person's says it is a face.
+  it('in every case with an order, what dates a moment says it is a clue to the order', async () => {
+    start(<App />, laterStarted)
+    openCase(/The mountain/)
+    tapSpot('spent')
+    expect(finds()).toBe('a clue to the order')
+    moment('The fire')
+    tapSpot('praying')
+    expect(finds()).toBe('a face in Solve · a clue to the order')
+    menu('Cases')
+    fireEvent.click(await screen.findByRole('button', { name: /The battle/ }))
+    tapSpot('rider')
+    expect(finds()).toBe(
+      'Found: armor, breastplate · a face in Solve, but no name · a clue to the order',
+    )
+    tapSpot('archer')
+    expect(finds()).toBe('')
+  })
+
+  // The owner's ruling on the redrafted part 3 (#131): a line of finds that wraps breaks only
+  // between its parts, never inside one. Each part is kept whole, with the dot after it, so a
+  // break falls after a dot; the page draws it (jsdom lays nothing out), and this holds its parts.
+  it('a line of finds keeps each part whole, its dot with it', async () => {
+    start(<App />, laterStarted)
+    openCase(/The battle/)
+    tapSpot('rider')
+    const parts = [...document.querySelectorAll('.dock .found > span')].map((p) => p.textContent)
+    expect(parts).toEqual([
+      'Found: armor, breastplate ·',
+      'a face in Solve, but no name ·',
+      'a clue to the order',
+    ])
   })
 
   it('a tap shows the caption and what it found, and its words wait on Solve, ringed', () => {
@@ -620,8 +679,8 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     openCase(/The valley/)
     tapSpot('boy')
     expect(screen.getByText(/A shepherd boy in a plain tunic/)).toBeInTheDocument()
-    expect(screen.getByText(/Found:/)).toHaveTextContent(
-      'Found: David, sling · one of the faces in Solve',
+    expect(document.querySelector('.dock .found')).toHaveTextContent(
+      'Found: David, sling · a face in Solve',
     )
     expect(screen.getByRole('tab', { name: /Look/ })).toHaveTextContent('Look1/6')
     expect(coach()).toHaveTextContent('That tap found his name, David, and sling.')
@@ -783,7 +842,9 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     expect(screen.getByRole('dialog', { name: 'The seal' })).toHaveTextContent(
       'BELONGING TO AHAB, KING.',
     )
-    expect(screen.getByText(/Found:/)).toHaveTextContent('Found: Ahab, seal · copied to Papers')
+    expect(document.querySelector('.dock .found')).toHaveTextContent(
+      'Found: Ahab, seal · copied to Papers',
+    )
     fireEvent.click(screen.getByRole('button', { name: 'Close' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     tab(/Solve/)
@@ -1478,6 +1539,22 @@ describe('the tutorial’s marks (#25)', () => {
     expect(coach()).toBeNull()
     slot('p1')
     expect(at()).toBe('[data-face="p1"]')
+  })
+
+  // Tester 4 (#23) named the man on the bed Elijah before anything bearing his name was found, and
+  // the lesson's ring let go on the wrong name. It holds until the seal that bears his name has
+  // been opened, a name placed or not (#131).
+  it('holds the man on the bed’s mark until the seal is opened, a name placed or not', async () => {
+    start(<App />, laterStarted)
+    openCase(/The vineyard/)
+    tapSpot('prophet')
+    tab(/Solve/)
+    await waitFor(() => expect(at()).toBe('[data-face="p1"]'))
+    chip('Elijah')
+    slot('p1')
+    expect([at(), said()]).toEqual(['[data-face="p1"]', 'Who is he? Find what bears his name.'])
+    await lookAgain('vineyard', 'seal', 'Bedchamber')
+    expect(coach()).toBeNull()
   })
 
   // The battle's one new idea is a disguise (#53): on Solve, while the disguised man's face is

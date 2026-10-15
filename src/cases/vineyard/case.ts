@@ -5,7 +5,7 @@ import type { CaseStructure } from '../types.ts'
 // are Numbers, Leviticus, and Deuteronomy. The empty chairs at the gate are set dressing, not a
 // spot, since no verse names them (#26). Its one new idea is names worked out from what bears
 // them, so the first-encounter mark rings the face of the man on the bed on Solve, until he is
-// named (`teach`, #106).
+// named and the seal that bears his name has been opened (`teach`, #106, #131).
 export const vineyard = {
   id: 'vineyard',
   thumb: 'vineyard',
@@ -133,7 +133,7 @@ export const vineyard = {
     },
     { id: 'verdict', blanks: { v2: 'taken-possession' } },
   ],
-  teach: { face: 'p1' },
+  teach: { face: 'p1', bears: 'seal' },
   // What settles each face and blank, and what dates each moment, for a hint (#29): the letters
   // not yet written, the stones still waiting, the dogs at the stain.
   evidence: {

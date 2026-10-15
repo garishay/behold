@@ -228,11 +228,13 @@ export function validate(structure: CaseStructure, text: CaseText<CaseStructure>
     fail(`the case asks about ${q(ask)}, not a face or a blank of a guided case`)
 
   // (n) A case that teaches the order has one (#30), a face it teaches is one of its faces (#53),
-  // and the mark's words are eight at most.
+  // what bears that face's name one of its spots (#131), and the mark's words are eight at most.
   const teach = structure.teach
   if (teach === 'order' && order === undefined) fail('the case teaches an order it lacks')
   if (typeof teach === 'object' && !faceIds.has(teach.face))
     fail(`the case teaches face ${q(teach.face)}, not a face`)
+  if (typeof teach === 'object' && teach.bears !== undefined && !spotIds.has(teach.bears))
+    fail(`the case teaches face ${q(teach.face)} by ${q(teach.bears)}, not a spot`)
   const taught = text.teach?.split(/\s+/).filter(Boolean).length ?? 0
   if (taught > 8) fail(`the case's lesson says ${taught} words, not eight or fewer`)
 

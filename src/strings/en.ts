@@ -102,8 +102,12 @@ export const strings = {
   // A paper opened, and Papers.
   close: 'Close',
 
-  // Solve.
-  oneOfTheFaces: 'one of the faces in Solve',
+  // Solve. A person's tap says they are a face there; from the vineyard on, where a name comes from
+  // what bears it, one that gives none says so in the same part of the line, where the surprise
+  // is; and a thing that dates a moment says what it is for (#131).
+  aFace: 'a face in Solve',
+  aFaceNoName: 'a face in Solve, but no name',
+  clueToOrder: 'a clue to the order',
   whoIsWho: 'Who is who',
   who: 'who?',
   whatHappenedFirst: 'What happened first',

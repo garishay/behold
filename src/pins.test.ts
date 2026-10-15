@@ -107,6 +107,12 @@ describe('the words that wrap to a shape (#77)', () => {
     const how = /\n\.card \.how \{([^}]*)\}/.exec(css)?.[1] ?? ''
     expect(how).toMatch(/text-wrap: pretty;/)
   })
+
+  // The owner's ruling on the redrafted part 3 (#131): measured in Roboto and this machine's font.
+  it('a line of finds wraps only between its parts, each part kept whole', () => {
+    const part = /\n\.dock \.found span \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    expect(part).toMatch(/white-space: nowrap;/)
+  })
 })
 
 // A mark's words are placed by the room they are given, a number place.ts holds; this keeps it the
