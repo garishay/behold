@@ -17,6 +17,20 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   mocker loses his belt and staff (#12 [Q22], [Q24]). A vineyard kept from before drops its word
   for "First you ___" and keeps its place.
 
+## v0.28.2 — The launcher icon re-framed (#133)
+
+- **133a — the icon re-framed** (#134): the owner's phone check of 129a found the art larger but
+  high. Every file centred the art's box, whose bottom is the handle's tail, so the scroll and the
+  lens sat 3.4% of the icon above its middle. Where a platform masks the icon, the launcher, the
+  iPhone, and Play, the art's box now fills 88% of what the mask shows, centred on the scroll and
+  the lens: the lens and the blank stay inside the circle no mask clips, and the knobs, the
+  rollers' ends, and the handle's end may run past it. The iPhone and Play get files of their own:
+  a 180 that the page links and precaches in the 192's place, and a full-square 512 for the store,
+  kept beside the feature graphic. Where nothing masks it, in the manifest's icons, the splash, and
+  the favicon, the whole scroll keeps its share, centred on the art's mass. The master's faded
+  edge now eases in, so every file still meets the ground at every edge. 68b gives Bubblewrap's
+  launcher its own file at 69.6%.
+
 ## v0.28.1 — The launcher at the store's 75% (#129)
 
 - **129a — the launcher at the store's 75%** (#130): the owner's phone check of 10a found the art
