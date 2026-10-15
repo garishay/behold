@@ -69,8 +69,10 @@ export function bibleUrl(r: Reference, bible: string): string {
 
 /**
  * The verses in API.Bible's text: each begins at its bracketed number, `[16]`, and runs to the
- * next. Whitespace inside a verse, a line break or a paragraph's indent included, is one space; a
- * verse left with no words is not one. No word is changed.
+ * next. Spaces, tabs, and line breaks inside a verse, a paragraph's indent included, fold to one
+ * space and are trimmed from its ends; every other character stays as given, the NIV's narrow
+ * no-break space between nested quotation marks among them (#12 [Q27]). A verse left with no
+ * words is not one. No word is changed.
  */
 export function parse(text: string): Verse[] {
   const starts = [...text.matchAll(/\[(\d+)\]/g)]
@@ -79,8 +81,8 @@ export function parse(text: string): Verse[] {
     const end = starts[i + 1]?.index ?? text.length
     const words = text
       .slice(m.index + m[0].length, end)
-      .replace(/\s+/g, ' ')
-      .trim()
+      .replace(/[ \t\r\n]+/g, ' ')
+      .replace(/^ | $/g, '')
     if (words !== '') verses.push({ number: Number(m[1]), text: words })
   })
   return verses

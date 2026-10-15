@@ -95,4 +95,14 @@ describe('the text parsed into verses', () => {
     expect(parse('no markers here')).toEqual([])
     expect(parse('[4] [5] Words.')).toEqual([{ number: 5, text: 'Words.' }])
   })
+
+  // API.Bible's NIV sets a narrow no-break space, U+202F, between nested quotation marks, and
+  // JavaScript's `\s` and trim() both take it for whitespace (#12 [Q27]).
+  it('folds and trims only spaces, tabs, and line breaks, and keeps every other space as given', () => {
+    const nested = '\u201c\u202f\u2018Made up.\u2019\u202f\u201d'
+    expect(parse(`     [6] He said, ${nested}\n     [7]\t\u00a0Made\u2009up.\u202f`)).toEqual([
+      { number: 6, text: `He said, ${nested}` },
+      { number: 7, text: '\u00a0Made\u2009up.\u202f' },
+    ])
+  })
 })

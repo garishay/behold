@@ -109,10 +109,12 @@ api-key: <API_BIBLE_KEY>
 ```
 
 The text comes back plain — `[1] … [2] …`, with each paragraph's indent and line breaks — which
-`parse` splits into verses at their numbers, whitespace inside a verse folded to one space and no
-word changed; the token comes back as `meta.fumsToken`, and a reply with no token is not kept,
-since its views could not be reported. API.Bible gives at most 200 verses a passage, and the
-game's run to 40.
+`parse` splits into verses at their numbers. Inside a verse, spaces, tabs, and line breaks fold to
+one space and are trimmed from its ends, and every other character stays as API.Bible gives it:
+the NIV sets a narrow no-break space, U+202F, between nested quotation marks, which keeps the two
+marks together on a line (#12 [Q27]). No word is changed. The token comes back as
+`meta.fumsToken`, and a reply with no token is not kept, since its views could not be reported.
+API.Bible gives at most 200 verses a passage, and the game's run to 40.
 
 The terms the Worker keeps, API.Bible's and Biblica's: non-commercial, on the Starter plan's 5,000
 calls a month — at most 2,480 as above; a stored copy checked at least every thirty days, and never
