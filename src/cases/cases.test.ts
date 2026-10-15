@@ -118,7 +118,7 @@ describe('the case registry (Gate 02 A1, A5)', () => {
   })
 })
 
-// The verse counts the registry doesn't carry, for the ESV's fourth condition below: each passage
+// The verse counts the registry doesn't carry, for the 500-verse limit below: each passage
 // that is a whole chapter, by its chapter's verses, and each registered book's verses. A case that
 // registers a chapter or a book this table lacks fails until its gate adds the row.
 const chapterVerses: Readonly<Record<string, number>> = { '1KI 21': 29 }
@@ -129,12 +129,14 @@ const versesIn = (p: Passage) =>
     : p.to - p.from + 1
 const passages = cases.flatMap((c) => c.structure.passages)
 
-// The ESV's fourth condition: no more than 500 verses stored locally (#3, the ruling of
-// 2026-09-30, as #12 [Q17] amends it). The device keeps the last passages read, at most the
-// passages rule's limit, and Workbox adds a passage before it drops the oldest, so the limit and
-// the one coming in must fit, each the longest registered passage; and no book's registered verses
-// may reach half the book. A case whose passage would break either fails here, in CI.
-describe('the ESV’s limit on stored verses (#3)', () => {
+// Biblica's limit for the NIV: no more than 500 verses quoted (Gate 33 A1), as the ESV's fourth
+// condition held 500 stored before it (#3, the ruling of 2026-09-30, as #12 [Q17] amends it). The
+// device keeps the last passages read, at most the passages rule's limit, and Workbox adds a
+// passage before it drops the oldest, so the limit and the one coming in must fit, each the longest
+// registered passage; and no book's registered verses may reach half the book, the ESV's bound,
+// kept since it holds them well short of Biblica's, a whole book. A case whose passage would break
+// either fails here, in CI.
+describe('the limit on the verses kept (#3, Gate 33)', () => {
   it('counts every registered passage’s verses', () => {
     for (const p of passages) expect(versesIn(p), `${p.book} ${p.chapter}`).toBeGreaterThan(0)
   })
@@ -147,7 +149,7 @@ describe('the ESV’s limit on stored verses (#3)', () => {
     const longest = Math.max(...passages.map(versesIn))
     expect(
       held * longest,
-      `${held} passages of ${longest} verses, the one coming in counted, past the ESV’s 500 stored`,
+      `${held} passages of ${longest} verses, the one coming in counted, past Biblica’s 500`,
     ).toBeLessThanOrEqual(500)
     for (const book of new Set(passages.map((p) => p.book))) {
       const total = passages.filter((p) => p.book === book).reduce((n, p) => n + versesIn(p), 0)
@@ -164,20 +166,20 @@ describe('the ESV’s limit on stored verses (#3)', () => {
     const total = [...registered.values()].reduce((n, p) => n + versesIn(p), 0)
     expect(
       total,
-      `${total} verses registered, past the ESV’s limit on stored verses (${BOUND}): the Worker’s store keeps every registered passage`,
+      `${total} verses registered, past Biblica’s limit on verses quoted (${BOUND}): the Worker’s store keeps every registered passage`,
     ).toBeLessThanOrEqual(BOUND)
   })
 })
 
-// A fill asks the ESV for at most twenty passages (04c), so with more registered, a few that keep
+// A fill asks API.Bible for at most twenty passages (04c), so with more registered, a few that keep
 // failing would take every fill's twenty and the rest would never be asked. Held to twenty, every
 // due passage is asked at every fill (#12 [Q18]); the season that would pass it chooses at its own
 // gate, as for the 500 verses.
 describe('the Worker’s fill (04c, #12 [Q18])', () => {
-  it('registers no more passages than a fill asks the ESV for', () => {
+  it('registers no more passages than a fill asks API.Bible for', () => {
     expect(
       registered.size,
-      `${registered.size} passages registered, past the ${PER_FILL} a fill asks the ESV for: one that keeps failing could keep the rest from ever being asked`,
+      `${registered.size} passages registered, past the ${PER_FILL} a fill asks API.Bible for: one that keeps failing could keep the rest from ever being asked`,
     ).toBeLessThanOrEqual(PER_FILL)
   })
 })

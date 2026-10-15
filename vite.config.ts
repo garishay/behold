@@ -4,7 +4,8 @@ import { readdirSync, readFileSync } from 'node:fs'
 import type { Plugin } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { defineConfig } from 'vitest/config'
-import { page, path } from './src/privacy/page.ts'
+import * as copyright from './src/copyright/page.ts'
+import * as privacy from './src/privacy/page.ts'
 
 /** A file's hash, the first eight hex digits of its SHA-256: the stamp on its address. */
 export const stamp = (path: string) => hash('sha256', readFileSync(path)).slice(0, 8)
@@ -34,15 +35,19 @@ export function audioHashes(root: string) {
 }
 
 /**
- * The privacy policy (#9) as a page of its own, `privacy/index.html`, written from the strings
- * module into the build, where the precache takes it, and answered at the same address by the dev
- * server. It needs no JavaScript to read.
+ * A page of its own, `<path>index.html`, written from the strings module into the build, where the
+ * precache takes it, and answered at the same address by the dev server; it needs no JavaScript to
+ * read. The privacy policy (#9) is one, and the copyright page (Gate 33 A3) the other; both take
+ * the privacy page's stylesheet.
  */
-function privacy(): Plugin {
+function standalone(
+  name: string,
+  { page, path }: { page: (base: string, css: string) => string; path: string },
+): Plugin {
   let base = '/'
   const html = () => page(base, readFileSync('src/privacy/page.css', 'utf8'))
   return {
-    name: 'behold:privacy',
+    name: `behold:${name}`,
     configResolved: (config) => void (base = config.base),
     configureServer: (server) =>
       void server.middlewares.use((req, res, next) => {
@@ -70,7 +75,8 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    privacy(),
+    standalone('privacy', privacy),
+    standalone('copyright', copyright),
     // The PWA shell (Gate 01 A2). `prompt`: a new version waits until the player taps the
     // "Update available" toast, never reloading mid-case — `autoUpdate` would reload the app the
     // moment a deploy lands. The manifest's start_url and scope default to the base, `/`; the
@@ -101,16 +107,19 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: { cacheName: 'cases', expiration: { maxEntries: 200 } },
           },
-          // A passage the reveal fetched through the proxy (#3) is kept too, so a case once
-          // closed reads offline: at most eleven passages, a month each, so season one's ten fit
-          // (#12 [Q17]). Workbox adds a passage before it drops the oldest, so the registry test
-          // holds the eleven and the one coming in, twelve of the longest, within the ESV's
-          // allowance of five hundred verses stored locally (Gate 04 A4). An error is never
-          // cached; the rule keeps only a reply that came back whole.
+          // A passage the reveal fetched through the passage service (#3, #138) is kept too, so a
+          // case once closed reads offline: at most eleven passages, a month each, so season one's
+          // ten fit (#12 [Q17]). Workbox adds a passage before it drops the oldest, so the registry
+          // test holds the eleven and the one coming in, twelve of the longest, within Biblica's
+          // five hundred verses (Gate 04 A4). The service is asked first, so every reveal online
+          // reaches it and is reported, and its answer refreshes the copy; the copy shows when the
+          // service can't be reached, or hasn't answered in three seconds (Gate 33 A2). An error
+          // is never cached; the rule keeps only a reply that came back whole.
           {
-            urlPattern: /^https:\/\/behold-esv\.[^/]+\.workers\.dev\/passage\?/,
-            handler: 'CacheFirst',
+            urlPattern: /^https:\/\/behold-passages\.[^/]+\.workers\.dev\/passage\?/,
+            handler: 'NetworkFirst',
             options: {
+              networkTimeoutSeconds: 3,
               cacheName: 'passages',
               expiration: { maxEntries: 11, maxAgeSeconds: 30 * 24 * 60 * 60 },
             },

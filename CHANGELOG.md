@@ -12,6 +12,23 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   as API.Bible gives it (#12 [Q27]). Once it deploys, the store is emptied once, and the next fill
   brings the six passages back with the NIV's spaces. v0.30.1 stays 138b's, as Gate 33 A10 set it.
 
+## v0.30.1 — Gate 33, the switch to the NIV (#138)
+
+- **138b — the switch** (#142): the reveal reads the NIV through `behold-passages`. Each passage's
+  label is cited "(NIV)", which opens the new copyright page in a new tab, and "Bible text from
+  API.Bible" sits beneath, linked. The copyright page, at `copyright/`, gives the NIV's notice as
+  API.Bible gives it, API.Bible's own line, and the epigraph's source; it is written at build like
+  the privacy page, and reads offline. The epigraph is the Berean Standard Bible's, in the public
+  domain, so Crossway's notice leaves the cases page, and Copyright sits beside Privacy policy.
+  Every reveal online asks the service first, so each view is reported, and the device's copy
+  shows when the service can't answer in three seconds. A passage's text can't be selected, and a
+  print leaves it out. The privacy page says what goes to API.Bible's Fair Use Management System,
+  and from where, under a new date. The four cases' words follow the NIV where Gate 33 A8 ruled
+  them: shouted louder, fell prostrate, seized his property, sulked, refused to eat, murdered, and
+  attack, with the captions, accounts, and reveals beside them. Every id stays, so a kept game
+  stays where it was. The world rules spell the season's places as the NIV does: Ramoth Gilead,
+  and the Kishon Valley. The dev server answers the reveal with stand-ins, each verse its reference.
+
 ## v0.30.0 — Gate 33, the reveal reads the NIV (#138)
 
 - **138a — the passage service, on API.Bible** (#140): a new Worker, `behold-passages`, beside the

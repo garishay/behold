@@ -262,17 +262,10 @@ button:focus-visible {
   color: var(--mist-dim);
 }
 
-.notice {
+/* The music's credit (Gate 10 A1), first at the foot since the notice went (Gate 33 A4). */
+.credit {
   margin: auto 0 0;
   padding-top: 24px;
-  font-size: 11px;
-  line-height: 1.45;
-  color: var(--mist-dim);
-}
-
-/* The music's credit (Gate 10 A1), set as the notice and held close under it. */
-.credit {
-  margin: -18px 0 0;
   font-size: 11px;
   line-height: 1.45;
   color: var(--mist-dim);
@@ -282,11 +275,15 @@ button:focus-visible {
   color: var(--gold);
 }
 
-/* The privacy policy's link (#9), last at the foot, held close under the credit as the credit is
-   under the notice, a whole tap target tall. */
+/* The privacy policy's link (#9) and the copyright page's (Gate 33 A3), last at the foot, held
+   close under the credit, each a whole tap target tall. */
 .privacy {
   margin: -24px 0 0;
   font-size: 13px;
+}
+
+.privacy a + a {
+  margin-left: 24px;
 }
 
 .privacy a {
@@ -1642,9 +1639,13 @@ button:focus-visible {
   margin: 0 0 6px;
 }
 
+/* A passage's text can't be selected, and a print leaves it out (below): API.Bible's terms (§12),
+   one passage at a time and not freely copied (Gate 33 A5). */
 .passage p {
   margin: 0 0 8px;
   font-size: 16px;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .passage sup {
@@ -1659,15 +1660,27 @@ button:focus-visible {
   font-family: var(--sans);
 }
 
-/* The attribution (#3): the translation's mark at the right of each passage's label, and the
-   notice with its link under the passages, set like the cases page's notice. */
+/* The citation (Gate 33 A3): the translation's abbreviation at the right of each passage's label,
+   linked to the copyright page, a whole tap target tall; and under the passages, API.Bible's
+   citation with its link, set like the cases page's credit. */
 .passage h3 .tr {
   float: right;
+  margin: -14px 0;
+  padding: 14px 0 14px 16px;
   font-family: var(--sans);
   font-style: normal;
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  color: var(--papyrus-ink-dim);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--papyrus-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* A print leaves a passage's text out, as API.Bible's terms ask (§12, Gate 33 A5). */
+@media print {
+  .passage p {
+    display: none;
+  }
 }
 
 .reveal .attribution {

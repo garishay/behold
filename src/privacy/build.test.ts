@@ -9,6 +9,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { build } from 'vite'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { page as copyright } from '../copyright/page.ts'
 import { page } from './page.ts'
 
 const out = mkdtempSync(join(tmpdir(), 'behold-build-'))
@@ -26,6 +27,16 @@ describe('the privacy page as the build ships it (#9, [Q19])', () => {
     const html = readFileSync(join(out, 'privacy/index.html'), 'utf8')
     expect(html).toBe(page('/', readFileSync('src/privacy/page.css', 'utf8')))
     expect(readFileSync(join(out, 'sw.js'), 'utf8')).toMatch(/["']privacy\/index\.html["']/)
+  })
+})
+
+// The copyright page is built by the same plugin, from the same build (Gate 33 A3): it reads
+// offline, so a citation's tap finds it with no network.
+describe('the copyright page as the build ships it (Gate 33 A3)', () => {
+  it('is emitted at copyright/index.html, as page() writes it, and precached', () => {
+    const html = readFileSync(join(out, 'copyright/index.html'), 'utf8')
+    expect(html).toBe(copyright('/', readFileSync('src/privacy/page.css', 'utf8')))
+    expect(readFileSync(join(out, 'sw.js'), 'utf8')).toMatch(/["']copyright\/index\.html["']/)
   })
 })
 

@@ -283,20 +283,20 @@ describe('the title (#75)', () => {
 })
 
 describe('the cases page (Gate 01 A6, #6, #75)', () => {
-  it('keeps the name in its header, then the cases, then the epigraph with its notice', () => {
+  // The epigraph is the BSB's since Gate 33 A4, in the public domain, so no notice goes with it.
+  it('keeps the name in its header, then the cases, then the epigraph, with no notice', () => {
     start()
     expect(screen.getByRole('heading', { level: 1, name: 'Behold' })).toBeInTheDocument()
     const order = [...document.querySelectorAll('.screen > *')].map((e) => e.className)
     expect(order.indexOf('case-list')).toBeLessThan(order.indexOf('epigraph'))
     expect(
       screen.getByText(
-        'It is the glory of God to conceal things, but the glory of kings is to search things out.',
+        'It is the glory of God to conceal a matter and the glory of kings to search it out.',
       ),
     ).toBeInTheDocument()
-    expect(screen.getByText('Proverbs 25:2, ESV')).toBeInTheDocument()
-    expect(
-      screen.getByText(/Scripture quotations are from the ESV® Bible .* All rights reserved\./),
-    ).toBeInTheDocument()
+    expect(screen.getByText('Proverbs 25:2, BSB')).toBeInTheDocument()
+    expect(document.querySelector('.notice')).toBeNull()
+    expect(screen.queryByText(/Crossway|ESV/)).not.toBeInTheDocument()
     // The line lives on the title now.
     expect(document.querySelector('.line')).toBeNull()
     expect(screen.getByText('Season one is being written.')).toBeInTheDocument()
@@ -315,6 +315,7 @@ describe('the cases page (Gate 01 A6, #6, #75)', () => {
     expect(screen.getAllByRole('link').map((l) => l.textContent)).toEqual([
       'CC BY 4.0',
       'Privacy policy',
+      'Copyright',
     ])
   })
 
@@ -327,6 +328,16 @@ describe('the cases page (Gate 01 A6, #6, #75)', () => {
     expect(link).toHaveAttribute('href', '/privacy/')
     expect(link).not.toHaveAttribute('target')
     expect(link.parentElement?.previousElementSibling).toHaveClass('credit')
+  })
+
+  // The copyright page the reveal's citations link to (Gate 33 A3) sits beside the privacy policy,
+  // opened in place as the policy is.
+  it('links the copyright page beside the privacy policy, the page at copyright/ (Gate 33)', () => {
+    start()
+    const link = screen.getByRole('link', { name: 'Copyright' })
+    expect(link).toHaveAttribute('href', '/copyright/')
+    expect(link).not.toHaveAttribute('target')
+    expect(link.previousElementSibling).toBe(screen.getByRole('link', { name: 'Privacy policy' }))
   })
 
   // Playtest 2's second session (#77): the valley teaches the game and the cases after it are one
@@ -631,7 +642,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close' }))
     moment('Bedchamber')
     tapSpot('man-bed')
-    expect(finds()).toBe('Found: turned away · a face in Solve, but no name')
+    expect(finds()).toBe('Found: sulked · a face in Solve, but no name')
     tapSpot('woman')
     expect(finds()).toBe('a face in Solve, but no name')
     menu('Cases')
@@ -2514,7 +2525,7 @@ describe('Solve’s room (#24)', () => {
     const solve = document.querySelector('.solve')!
     // Saul's blank opens its sentence, which runs to the next stop (#96).
     const sentence = document.querySelector('[data-slot="t2"]')!.closest('.sentence')!
-    expect(sentence).toHaveTextContent(/^dressed the boy in his own armor, .* untested\.$/)
+    expect(sentence).toHaveTextContent(/^dressed the boy in his own armor, .* not used to it\.$/)
     expect(sentence.previousElementSibling).toHaveTextContent(/cubits and a span\.$/)
     vi.spyOn(solve, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 360, 300))
     vi.spyOn(sentence, 'getBoundingClientRect').mockReturnValue(new DOMRect(20, 270, 320, 92))
@@ -2628,7 +2639,7 @@ describe('the faces and the order are part of the job (#114)', () => {
     openCase(/The mountain/)
     tab(/Solve/)
     expect(coach()).toBeNull()
-    chip('fell on their faces')
+    chip('fell prostrate')
     slot('a4')
     expect([at(), said()]).toEqual(['[data-face="c1"]', 'Who is this? A face takes a name.'])
     chip('Elijah')
@@ -2657,7 +2668,7 @@ describe('the faces and the order are part of the job (#114)', () => {
     box('.solve', new DOMRect(0, 0, 360, 300))
     box('[data-face="c1"]', new DOMRect(20, -260, 160, 140))
     const scrolled = vi.spyOn(document.querySelector('.solve')!, 'scrollBy')
-    chip('fell on their faces')
+    chip('fell prostrate')
     slot('a4')
     expect(scrolled).toHaveBeenCalledWith({ top: -340, left: -80 })
   })
@@ -2675,7 +2686,7 @@ describe('the faces and the order are part of the job (#114)', () => {
     box('.solve', new DOMRect(0, 0, 360, 300))
     box('[data-face="p1"]', new DOMRect(12, -300, 100, 140))
     const scrolled = vi.spyOn(document.querySelector('.solve')!, 'scrollBy')
-    chip('taken possession')
+    chip('seized his property')
     slot('v2')
     expect(scrolled).toHaveBeenCalledWith({ top: -380, left: -118 })
     expect(said()).toBe('Who is he? Find what bears his name.')
@@ -3204,7 +3215,7 @@ describe('the close converges (#95)', () => {
     chip('Ahab')
     slot('v2')
     expect(result()).toHaveTextContent(/^That blank wants something that happened\.$/)
-    chip('taken possession')
+    chip('seized his property')
     expect(result()).toHaveTextContent(two)
     slot('v2')
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
@@ -3288,7 +3299,7 @@ describe('the close converges (#95)', () => {
     tab(/Solve/)
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     letGo()
-    chip('taken possession')
+    chip('seized his property')
     slot('v2')
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     expect(screen.getByRole('heading', { name: 'The case is closed.' })).toBeInTheDocument()
@@ -3563,16 +3574,23 @@ describe('the case solved (#6, 03c; #24)', () => {
     expect(screen.getByText(/The boy was David/)).toBeInTheDocument()
     expect(screen.queryByRole('tab')).not.toBeInTheDocument()
     expect(document.querySelector('.bank')).toBeNull()
-    // Each passage under its label, marked with its translation; the notice and its link beneath
-    // them (#3).
-    expect(screen.getByRole('heading', { name: '1 Samuel 17:4 ESV' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '1 Samuel 17:17–18 ESV' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '1 Samuel 17:38–51 ESV' })).toBeInTheDocument()
-    expect(screen.getByText(/^Scripture quotations are from the ESV/)).toHaveClass('attribution')
-    expect(screen.getByRole('link', { name: 'www.esv.org' })).toHaveAttribute(
+    // Each passage under its label, cited with "(NIV)", which opens the copyright page in a new
+    // tab, so the reveal stays put; and API.Bible's citation, linked, beneath them (Gate 33 A3).
+    expect(screen.getByRole('heading', { name: '1 Samuel 17:4 (NIV)' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '1 Samuel 17:17–18 (NIV)' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '1 Samuel 17:38–51 (NIV)' })).toBeInTheDocument()
+    const citations = screen.getAllByRole('link', { name: '(NIV)' })
+    expect(citations).toHaveLength(3)
+    for (const c of citations) {
+      expect(c).toHaveAttribute('href', '/copyright/')
+      expect(c).toHaveAttribute('target', '_blank')
+    }
+    expect(screen.getByText(/^Bible text from/)).toHaveClass('attribution')
+    expect(screen.getByRole('link', { name: 'API.Bible' })).toHaveAttribute(
       'href',
-      'https://www.esv.org',
+      'https://api.bible',
     )
+    expect(screen.queryByText(/Crossway|ESV/)).not.toBeInTheDocument()
     expect(await screen.findAllByText('38')).toHaveLength(3)
     const numberless = screen.getAllByText('A line with no number.')
     expect(numberless).toHaveLength(3)
@@ -3607,7 +3625,7 @@ describe('the case solved (#6, 03c; #24)', () => {
     for (const [id, word] of [
       ['p1', 'Ahab'],
       ['s4', 'Jezebel'],
-      ['v2', 'taken possession'],
+      ['v2', 'seized his property'],
     ]) {
       chip(word)
       slot(id)
@@ -3616,7 +3634,7 @@ describe('the case solved (#6, 03c; #24)', () => {
     const said = [
       '“but written by ___”: Jezebel. You put Ahab, then Naboth. 21:8',
       '“the man on the bed”: Ahab. You put Naboth. 21:4',
-      '“now you have ___”: taken possession. You put stoned. 21:19',
+      '“now you have ___”: seized his property. You put stoned. 21:19',
     ]
     expect(missed()).toEqual(said)
     const story = screen.getByText(/^The man on the bed was Ahab/)
@@ -3661,7 +3679,7 @@ describe('the case solved (#6, 03c; #24)', () => {
     fireEvent.click(screen.getByRole('button', { name: '2 more' }))
     expect(missed().slice(3)).toEqual([
       '“What happened first”: Bedchamber, then The gate, then The vineyard. You put The gate, Bedchamber, The vineyard. 21:8',
-      '“now you have ___”: taken possession. You put stoned. 21:19',
+      '“now you have ___”: seized his property. You put stoned. 21:19',
     ])
     expect(screen.queryByRole('button', { name: /more$/ })).toBeNull()
   })
@@ -3727,7 +3745,7 @@ describe('the case solved (#6, 03c; #24)', () => {
       ['s3', 'silver'],
       ['s4', 'Jezebel'],
       ['s5', 'the king'],
-      ['v2', 'taken possession'],
+      ['v2', 'seized his property'],
     ]
     for (const [id, word] of fills) {
       chip(word)

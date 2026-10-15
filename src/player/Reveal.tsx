@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import type { CaseStructure, CaseText, Passage } from '../cases/types.ts'
 import { parseCite, type Cite } from '../cases/validate.ts'
+import { path as copyright } from '../copyright/page.ts'
 import type { PassageService, PassageText, Translation } from '../passages/service.ts'
 import { strings } from '../strings/en.ts'
 import { named } from './hints.ts'
 import { answer } from './state.ts'
 
-/** The translation the reveal reads; one today (#3). */
-const translation: Translation = 'ESV'
+/** The translation the reveal reads; one today (#3, Gate 33). */
+const translation: Translation = 'NIV'
 /** How many misses lead the reveal before its story; the rest wait under a button (#107). */
 const leading = 3
 
@@ -103,9 +104,9 @@ export function Reveal({ structure: s, text, passages, onBack, hints, misses }: 
         />
       ))}
       <p className="attribution">
-        {strings.notice}{' '}
-        <a href={strings.esvLink.href} target="_blank" rel="noreferrer">
-          {strings.esvLink.text}
+        {strings.bibleText}{' '}
+        <a href={strings.apiBible.href} target="_blank" rel="noreferrer">
+          {strings.apiBible.text}
         </a>
       </p>
       <button type="button" className="back" onClick={onBack}>
@@ -126,7 +127,8 @@ interface PassageBlockProps {
 type Loaded = 'loading' | 'failed' | PassageText
 
 /**
- * One passage under its label, marked with its translation: loading, the verses as the service
+ * One passage under its label, cited with its translation's abbreviation, which opens the copyright
+ * page in a new tab, so the reveal stays put (Gate 33 A3): loading, the verses as the service
  * returns them — a number set as a superscript only when the verse carries one (Gate 03 [2]), and
  * the verses a miss's link asked for marked (#107) — or the line for a service that could not
  * answer.
@@ -157,7 +159,15 @@ function PassageBlock({ passage, label, service, cited }: PassageBlockProps) {
   return (
     <section ref={block} className="passage">
       <h3>
-        {label} <span className="tr">{strings.translations[translation]}</span>
+        {label}{' '}
+        <a
+          className="tr"
+          href={`${import.meta.env.BASE_URL}${copyright}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {strings.translations[translation]}
+        </a>
       </h3>
       {state === 'loading' ? (
         <p className="muted">{strings.loadingPassage(label)}</p>

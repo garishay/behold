@@ -12,16 +12,16 @@ export const en = {
   moments: { valley: 'The valley' },
   captions: {
     brook:
-      'A brook across the valley floor, smooth stones in its shallows. Five were picked from here.',
+      'A stream on the valley floor, smooth stones in its shallows. Five were picked from here.',
     giant:
       'The Philistines’ champion from Gath, face-down in the dust, a sheathed sword at his side and his spear on the ground beside him. Laid out, he is six cubits and a span.',
     bearer:
       'A shield-bearer with a tall shield, still on his feet, reaching toward the fallen man.',
-    boy: 'A shepherd boy in a plain tunic, a sling raised in one hand and a shepherd’s pouch at his hip. His other hand is empty.',
+    boy: 'A shepherd boy in a plain tunic, a sling raised in one hand and a shepherd’s bag at his hip. His other hand is empty.',
     basket:
-      'A basket from home. The ten loaves were for his brothers; the ten cheeses, for the commander over their thousand.',
+      'A basket from home. The ten loaves were for his brothers; the ten cheeses, for the commander of their unit.',
     armor:
-      'Saul the king’s armor and his sword, set down in a heap. Strapped on the boy, then taken off: he had not tested them.',
+      'Saul the king’s armor and his sword, set down in a heap. Strapped on the boy, then taken off: he was not used to them.',
   },
   words: {
     david: 'David',
@@ -52,11 +52,11 @@ export const en = {
         { t: ' cubits and a span. ' },
         { b: 't2' },
         {
-          t: ' dressed the boy in his own armor, and the boy took it off, untested. From the brook he picked five smooth stones, and he went down with a staff and a ',
+          t: ' dressed the boy in his own armor, and the boy took it off, not used to it. From the stream he picked five smooth stones, and he went down with a staff and a ',
         },
         { b: 't4' },
         {
-          t: '. One stone, and the giant fell on his face. Then the boy stood over him and cut off his head with the sword of ',
+          t: '. One stone, and the giant fell facedown. Then the boy stood over him and cut off his head with the sword of ',
         },
         { b: 't5' },
         { t: '.' },
@@ -82,7 +82,7 @@ export const en = {
   retry: 'Ringed answers don’t fit the story. Look closer.',
   ask: 'Whose sword? Look closer at the picture.',
   reveal: [
-    'The boy was David, sent by his father Jesse with ten loaves for his brothers and ten cheeses for the commander over their thousand. The fallen giant was Goliath of Gath, the Philistines’ champion, six cubits and a span tall.',
-    'Saul dressed David in his armor, and David took it off untested. He went down with his staff, five smooth stones, and his sling; one stone struck the giant’s forehead, and he fell on his face. David had no sword, so he drew Goliath’s own from its sheath and cut off his head with it.',
+    'The boy was David, sent by his father Jesse with ten loaves for his brothers and ten cheeses for the commander of their unit. The fallen giant was Goliath of Gath, the Philistines’ champion, six cubits and a span tall.',
+    'Saul dressed David in his armor, and David, not used to it, took it off. He went down with his staff, five smooth stones, and his sling; one stone struck the giant’s forehead, and he fell facedown. David had no sword, so he drew Goliath’s own from its sheath and cut off his head with it.',
   ],
 } satisfies CaseText<typeof valley>
