@@ -187,8 +187,9 @@ export type CaseText<S extends CaseStructure> = {
   readonly note?: string
   /**
    * The step up, told again where it bites: the words of a mark on the bank's head at the case's
-   * first failed close, shown once, so out of a lesson's eight words. The vineyard's, where the
-   * count starts to show only once two or fewer answers are wrong (#125).
+   * first failed close, shown once, so out of a lesson's eight words, and held until it is tapped
+   * (#131). The vineyard's, where the count starts to show only once two or fewer answers are wrong
+   * (#125).
    */
   readonly harder?: string
   readonly passages: Labels<S['passages']>
