@@ -53,17 +53,35 @@ one.
 
 ## The upload key
 
-- **Where it lives.** At `../../behold-keys/upload.keystore` from this folder, outside the
-  repository, under the alias `upload`. The keystore file, as an attachment, and its password are
-  in the password manager. Neither goes in the repository, a chat, a PR, or CI, or to anyone else.
-- **One password, for both prompts.** Bubblewrap asks "Password for the Key Store:" and then
-  "Password for the Key:", when `init` makes the key and at every build. Give the same password at
-  both: keytool's PKCS12 keystores ignore a separate key password, so a different one fails at
-  Bubblewrap's signing. Letters and digits only, and long: Bubblewrap hands it to keytool on a
-  `cmd` line, where `%` or `"` can break it.
-- **What it signs.** The bundle you upload. Play signs the app that players install with its own
-  keys (Play App Signing), so the site's asset links name Play's keys as well as this one (68c). A
-  lost upload key can be reset in Play Console.
+`bubblewrap init` made it once, on 2026-10-17, under the alias `upload`, in a keystore at
+`../../behold-keys/upload.keystore` from this folder, outside the repository. It signs the bundle
+you upload. Play signs the app that players install with its own keys (Play App Signing), so the
+site's asset links name Play's keys as well as this one (68c).
+
+1. **One password, at both prompts.** Bubblewrap asks "Password for the Key Store:" and then
+   "Password for the Key:" at every build, as `init` did when it made the key. Give the same
+   password at both: keytool's PKCS12 keystores ignore a separate key password, so a different one
+   fails at Bubblewrap's signing. It is long, in letters and digits only, since Bubblewrap hands it
+   to keytool, apksigner, and jarsigner on a `cmd` line, where `%` or `"` can break it.
+
+2. **Where it is kept.** On the PC, at the path above; and in the password manager, the keystore
+   file as an attachment, with its password. Neither the file nor the password goes in the
+   repository, a chat, a PR, or CI, or to anyone else.
+
+3. **Its fingerprint, on #68.** The key's SHA-256 is posted there (issuecomment-6240555530), for
+   the site's asset links (68c). It is a public value, not a secret. To read it again, from this
+   folder, where keytool asks for the password:
+
+   ```powershell
+   & "$HOME\.bubblewrap\jdk-x64\jdk-17.0.11+9\bin\keytool.exe" -list -v -keystore ..\..\behold-keys\upload.keystore -alias upload
+   ```
+
+   Its `SHA256:` line should read as #68's does.
+
+4. **On another PC,** save the password manager's copy as `upload.keystore` in a `behold-keys`
+   folder beside the repository's, and read its fingerprint (step 3) before the first build there.
+
+5. **If it is lost or leaked,** it can be reset in Play Console, with a new key's certificate.
 
 ## Building
 
