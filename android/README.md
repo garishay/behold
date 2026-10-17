@@ -83,7 +83,8 @@ one.
    folder beside the repository's, and read its fingerprint (step 3) before the first build there.
 
 5. **If it is lost or leaked,** it can be reset in Play Console, with a new key's certificate.
-   The new key's SHA-256 then takes this one's place in the asset links.
+   The new key's SHA-256 then takes this one's place in the asset links and in the list
+   `src/android.test.ts` pins them to, in the same PR.
 
 ## Building
 

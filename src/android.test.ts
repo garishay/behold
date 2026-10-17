@@ -58,6 +58,19 @@ interface Statement {
 const ASSET_LINKS = 'public/.well-known/assetlinks.json'
 
 /**
+ * The four certificates the asset links name, in their order (A3), pinned as posted on #68 (#12
+ * [Q29]). A key reset changes the file and this list together.
+ */
+const FINGERPRINTS = [
+  // Play's three app signing keys, as the owner posted them (issuecomment-6241826406)
+  '3C:26:07:1C:C8:E0:90:52:3C:AB:35:95:E2:42:0E:34:01:98:C6:AE:0A:DA:CA:B1:E1:B5:69:C8:C2:5A:67:60',
+  '2E:79:F9:3D:CD:5D:33:5D:BF:55:FE:88:4E:B2:24:3C:95:F2:26:97:C9:06:80:B5:67:0B:02:E0:93:97:D9:72',
+  '11:4E:98:71:FB:70:9F:B7:BA:5E:40:51:29:79:AE:AD:97:D5:99:19:EA:58:06:92:7D:17:B7:5E:D1:DE:E0:FA',
+  // the upload key's, as the owner posted it (issuecomment-6240555530)
+  '21:2E:8B:89:5D:B5:0E:6C:22:09:2F:4F:73:C5:73:29:F1:F9:76:71:16:52:F8:EB:17:0F:4B:58:C0:8A:D5:38',
+]
+
+/**
  * A1's table as amended (#68), row by row: the config `init` wrote, with the rows it writes
  * otherwise set by hand — the bars' colours, notifications, the oldest Android it installs on,
  * the version's name, and the maskable icon. Bubblewrap writes the version's name twice and reads
@@ -201,6 +214,10 @@ describe('the site’s asset links (Gate 17 A3 and A4, 68c)', () => {
     expect(new Set(target.sha256_cert_fingerprints).size).toBe(4)
     for (const fingerprint of target.sha256_cert_fingerprints)
       expect(fingerprint).toMatch(/^(?:[0-9A-F]{2}:){31}[0-9A-F]{2}$/)
+  })
+
+  it('name the four certificates posted on #68, in their order, and no other', () => {
+    expect(statements()[0].target.sha256_cert_fingerprints).toEqual(FINGERPRINTS)
   })
 
   it('are written to the site’s root by the build, as they stand', () => {
