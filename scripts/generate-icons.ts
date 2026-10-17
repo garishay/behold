@@ -55,8 +55,10 @@ const MIDDLE = { x: 622, y: 590 }
  * ruling), and the favicon, which a browser's tab draws at 16 px, show the whole art unmasked.
  * The launcher, the iPhone, and Play mask it. Chrome's install lays the maskable image over 82.5
  * dp of the launcher's 108, padding it so the spec's 80% safe circle meets Android's 66 dp one,
- * and the launcher shows the middle 72 (#129); the iPhone and Play show the whole square under
- * their own corners. The store's icon is uploaded to Play, not served, so it sits in `assets/`.
+ * and the launcher shows the middle 72 (#129). The Play app, which Bubblewrap builds, insets its
+ * own file 8.5 dp a side, so it spans 91 (#68): no manifest names that file, and the shell's
+ * config does. The iPhone and Play show the whole square under their own corners. The store's
+ * icon is uploaded to Play, not served, so it sits in `assets/`.
  */
 export const ICONS = [
   { file: 'public/icons/icon-192.png', size: 192, share: UNMASKED, centre: MASS },
@@ -67,6 +69,12 @@ export const ICONS = [
     file: 'public/icons/icon-512-maskable.png',
     size: 512,
     share: MASKED * (72 / 82.5),
+    centre: MIDDLE,
+  },
+  {
+    file: 'public/icons/icon-512-maskable-android.png',
+    size: 512,
+    share: MASKED * (72 / 91),
     centre: MIDDLE,
   },
   { file: 'public/icons/apple-touch-icon-180.png', size: 180, share: MASKED, centre: MIDDLE },

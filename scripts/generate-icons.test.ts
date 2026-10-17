@@ -48,12 +48,19 @@ const fromGround = (pixels: Uint8Array, at: number) =>
 const CHROME = 82.5
 
 /**
+ * The dp of a launcher icon's 108 that the Play app lays its own maskable icon over: Bubblewrap's
+ * `ic_launcher.xml` insets it 8.5 dp a side (68b, #68).
+ */
+const BUBBLEWRAP = 91
+
+/**
  * The files a platform masks, each with the dp its width spans of the 72 the mask shows (#133): the
- * launcher shows the middle 72 of the maskable's 82.5, and the iPhone and Play show the whole
- * square, read as the same 72.
+ * launcher shows the middle 72 of Chrome's maskable's 82.5 and of the Play app's 91, and the
+ * iPhone and Play show the whole square, read as the same 72.
  */
 const MASKED: Record<string, number> = {
   'public/icons/icon-512-maskable.png': CHROME,
+  'public/icons/icon-512-maskable-android.png': BUBBLEWRAP,
   'public/icons/apple-touch-icon-180.png': 72,
   'assets/store-icon.png': 72,
 }

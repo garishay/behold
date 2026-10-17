@@ -145,3 +145,14 @@ vite.config.ts.timestamp-*
 # wrangler's local state, and a dev shell's vars — the API.Bible key is never in a file (CLAUDE.md, Guardrails)
 .wrangler/
 .dev.vars
+
+# The Android shell (Gate 17, #68): Bubblewrap writes its whole project into android/ from
+# twa-manifest.json, so the repository keeps the config, its README, and the listing's words
+android/*
+!android/twa-manifest.json
+!android/README.md
+!android/listing.md
+
+# The upload key stays outside the repository (Gate 17 A3, #13 [G12])
+*.keystore
+*.jks

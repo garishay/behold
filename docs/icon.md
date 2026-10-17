@@ -21,15 +21,16 @@ share is the box's width over its own. The master's outer 40 px, where nothing i
 levels off `#1B2033`, fade to it exactly, so no edge of the master shows and every file meets the
 ground at every edge; the art is 53 px in at its nearest. Every file is a 32-bit PNG.
 
-| file                       | size | the art's share of the width | the master's point at the centre | where it shows                                                    |
-| -------------------------- | ---- | ---------------------------- | -------------------------------- | ----------------------------------------------------------------- |
-| `icon-192.png`             | 192  | 75%                          | x 626.5, y 605                   | the manifest's `any` icon                                         |
-| `icon-512.png`             | 512  | 75%                          | x 626.5, y 605                   | the manifest's `any` icon                                         |
-| `icon-1024.png`            | 1024 | 75%                          | x 626.5, y 605                   | the manifest's largest `any` icon; Bubblewrap's splash, at 300 dp |
-| `favicon-48.png`           | 48   | 90%                          | x 626.5, y 605                   | a browser's tab, at 16 px                                         |
-| `icon-512-maskable.png`    | 512  | 76.8%                        | x 622, y 590                     | the launcher, from Chrome's install                               |
-| `apple-touch-icon-180.png` | 180  | 88%                          | x 622, y 590                     | the iPhone's home screen: the page's `apple-touch-icon`           |
-| `assets/store-icon.png`    | 512  | 88%                          | x 622, y 590                     | Play's listing, uploaded at 68b; the site doesn't serve it        |
+| file                            | size | the art's share of the width | the master's point at the centre | where it shows                                                    |
+| ------------------------------- | ---- | ---------------------------- | -------------------------------- | ----------------------------------------------------------------- |
+| `icon-192.png`                  | 192  | 75%                          | x 626.5, y 605                   | the manifest's `any` icon                                         |
+| `icon-512.png`                  | 512  | 75%                          | x 626.5, y 605                   | the manifest's `any` icon                                         |
+| `icon-1024.png`                 | 1024 | 75%                          | x 626.5, y 605                   | the manifest's largest `any` icon; Bubblewrap's splash, at 300 dp |
+| `favicon-48.png`                | 48   | 90%                          | x 626.5, y 605                   | a browser's tab, at 16 px                                         |
+| `icon-512-maskable.png`         | 512  | 76.8%                        | x 622, y 590                     | the launcher, from Chrome's install                               |
+| `icon-512-maskable-android.png` | 512  | 69.6%                        | x 622, y 590                     | the launcher, from the Play app: the shell's `maskableIconUrl`    |
+| `apple-touch-icon-180.png`      | 180  | 88%                          | x 622, y 590                     | the iPhone's home screen: the page's `apple-touch-icon`           |
+| `assets/store-icon.png`         | 512  | 88%                          | x 622, y 590                     | Play's listing, uploaded at 68b; the site doesn't serve it        |
 
 - **Unmasked** (#133). The manifest's `any` icons, the splash drawn from the 1024, and the favicon
   show the whole art at Gate 18's shares: 75%, the framing the owner approved and ruled
