@@ -1,9 +1,10 @@
 // @vitest-environment node
 // The Android shell (Gate 17, #68): `android/twa-manifest.json`, the config Bubblewrap makes the
 // Play app from, held to the web manifest as the build writes it — the file Bubblewrap reads at
-// `init` — and to A1's table as amended (#68); and `android/listing.md`, the store listing's
-// words, held to Play's limits and to the game's own copy. The build is Vite's own, run once with
-// the app's config into a folder of its own, as the privacy page's test runs it.
+// `init` — and to A1's table as amended (#68); the site's asset links, which vouch for the app
+// (68c); and `android/listing.md`, the store listing's words, held to Play's limits and to the
+// game's own copy. The build is Vite's own, run once with the app's config into a folder of its
+// own, as the privacy page's test runs it.
 /// <reference types="node" />
 import { execFileSync } from 'node:child_process'
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
@@ -31,6 +32,7 @@ interface WebManifest {
 /** The config as Bubblewrap writes it, the fields read here by name. */
 interface Config {
   [field: string]: unknown
+  packageId: string
   host: string
   name: string
   launcherName: string
@@ -45,6 +47,15 @@ interface Config {
   fullScopeUrl: string
   signingKey: { path: string; alias: string }
 }
+
+/** A statement of the site's asset links, as Digital Asset Links reads one. */
+interface Statement {
+  relation: string[]
+  target: { namespace: string; package_name: string; sha256_cert_fingerprints: string[] }
+}
+
+/** The site's asset links, at the one address Chrome looks for them, the domain's root (A4). */
+const ASSET_LINKS = 'public/.well-known/assetlinks.json'
 
 /**
  * A1's table as amended (#68), row by row: the config `init` wrote, with the rows it writes
@@ -162,6 +173,40 @@ describe('the shell’s config against A1’s table as amended (#68)', () => {
       encoding: 'utf8',
     })
     expect(keys).toBe('')
+  })
+})
+
+describe('the site’s asset links (Gate 17 A3 and A4, 68c)', () => {
+  const statements = (): Statement[] => JSON.parse(readFileSync(ASSET_LINKS, 'utf8'))
+
+  it('vouch for the shell’s package alone, to open every page of the site', () => {
+    expect(statements()).toEqual([
+      {
+        relation: ['delegate_permission/common.handle_all_urls'],
+        target: {
+          namespace: 'android_app',
+          package_name: config.packageId,
+          sha256_cert_fingerprints: expect.any(Array),
+        },
+      },
+    ])
+  })
+
+  // Play's three app signing keys, as its App integrity page lists them, so an install from Play
+  // verifies on any Android version; and the upload key, so a build signed on the owner's PC
+  // verifies too (A3). Each is posted on #68.
+  it('name four certificates, each by its SHA-256 in pairs of upper-case hex', () => {
+    const [{ target }] = statements()
+    expect(target.sha256_cert_fingerprints).toHaveLength(4)
+    expect(new Set(target.sha256_cert_fingerprints).size).toBe(4)
+    for (const fingerprint of target.sha256_cert_fingerprints)
+      expect(fingerprint).toMatch(/^(?:[0-9A-F]{2}:){31}[0-9A-F]{2}$/)
+  })
+
+  it('are written to the site’s root by the build, as they stand', () => {
+    expect(readFileSync(join(out, '.well-known', 'assetlinks.json'), 'utf8')).toBe(
+      readFileSync(ASSET_LINKS, 'utf8'),
+    )
   })
 })
 

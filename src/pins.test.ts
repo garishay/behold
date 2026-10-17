@@ -271,7 +271,7 @@ describe('the game at play.beholdgame.com (68a, #68)', () => {
     expect(deploy).not.toMatch(/PAGES_BASE|--base/)
   })
 
-  it('keeps dot-folders in the Pages artifact, where the asset links will live (68c)', () => {
+  it('keeps dot-folders in the Pages artifact, where the asset links live (68c)', () => {
     const upload = deploy.slice(deploy.indexOf('actions/upload-pages-artifact'))
     expect(upload.slice(0, upload.indexOf('\n\n'))).toMatch(/^\s+include-hidden-files: true$/m)
   })

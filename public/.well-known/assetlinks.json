@@ -1,0 +1,15 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "house.shay.behold",
+      "sha256_cert_fingerprints": [
+        "3C:26:07:1C:C8:E0:90:52:3C:AB:35:95:E2:42:0E:34:01:98:C6:AE:0A:DA:CA:B1:E1:B5:69:C8:C2:5A:67:60",
+        "2E:79:F9:3D:CD:5D:33:5D:BF:55:FE:88:4E:B2:24:3C:95:F2:26:97:C9:06:80:B5:67:0B:02:E0:93:97:D9:72",
+        "11:4E:98:71:FB:70:9F:B7:BA:5E:40:51:29:79:AE:AD:97:D5:99:19:EA:58:06:92:7D:17:B7:5E:D1:DE:E0:FA",
+        "21:2E:8B:89:5D:B5:0E:6C:22:09:2F:4F:73:C5:73:29:F1:F9:76:71:16:52:F8:EB:17:0F:4B:58:C0:8A:D5:38"
+      ]
+    }
+  }
+]
