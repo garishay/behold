@@ -3,6 +3,21 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.31.0 — Gate 17, the Android shell (#68)
+
+- **68b — the Android shell** (#143): the Play app is a Trusted Web Activity, which opens the game
+  in the phone's browser, full screen once the site's asset links vouch for it (68c). Bubblewrap
+  1.27.0 builds it on the owner's PC from `android/twa-manifest.json`, which `init` wrote from the
+  site's manifest and which is held to Gate 17 A1's table as amended: the bars take the game's
+  colours, in dark mode too; the app asks for no permission to notify; and it installs from
+  Android 7.0, as the browser helper it is built on needs. Its launcher gets a maskable icon of its
+  own, framed at 69.6% for the 91 dp Bubblewrap lays it over; the site serves it, but no page or
+  manifest names it, and the precache leaves it out. Git ignores the project Bubblewrap writes and
+  any keystore, and the upload key lives outside the repository. `android/README.md` gives the
+  tools, the key, the build, and the upload, and `android/listing.md` the store listing's words as
+  ruled. A test holds the config to the web manifest the build writes and to A1's table, the
+  listing to Play's limits and the game's own copy, and the repository to tracking no keystore.
+
 ## v0.30.2 — Gate 33, the NIV's own spaces (#138)
 
 - **138c — the NIV's narrow no-break spaces, kept** (#141): API.Bible's NIV sets a narrow no-break
