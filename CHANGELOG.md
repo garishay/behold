@@ -3,6 +3,18 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.31.1 — Gate 17, the asset links (#68)
+
+- **68c — the asset links** (#144): the site now vouches for the Play app, so the phone's browser
+  opens it full screen, rather than in a Custom Tab with an address bar. The statement is
+  `public/.well-known/assetlinks.json`, at the one address Chrome looks for it. It lets
+  `house.shay.behold` open every page of the site, signed by any of four keys: Play's three app
+  signing keys, which sign the app players install, on any Android version, and the upload key,
+  which signs a build made on the owner's PC. The build copies it to the site's root as it stands,
+  the Pages artifact keeps it (68a), and the precache leaves it out. A test holds it to the shell's
+  package, its four fingerprints to their form, and the build's copy to the file. The Android
+  shell's README says which key is which.
+
 ## v0.31.0 — Gate 17, the Android shell (#68)
 
 - **68b — the Android shell** (#143): the Play app is a Trusted Web Activity, which opens the game
