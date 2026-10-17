@@ -15,9 +15,9 @@ folder's `twa-manifest.json`, then builds and signs it.
 - **This README.**
 
 Git ignores everything else Bubblewrap writes here: the project (`app/` and Gradle's files), its
-`manifest-checksum.txt` and `store_icon.png`, and the builds. `bubblewrap update` makes it all
-again from the config. Don't run `bubblewrap init` here again: it writes a new config over this
-one.
+`manifest-checksum.txt` and `store_icon.png`, and the builds. `bubblewrap update` makes all but the
+builds again from the config, and `bubblewrap build` makes those. Don't run `bubblewrap init` here
+again: it writes a new config over this one.
 
 ## Tools, once per PC
 
