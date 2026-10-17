@@ -56,7 +56,8 @@ again: it writes a new config over this one.
 `bubblewrap init` made it once, on 2026-10-17, under the alias `upload`, in a keystore at
 `../../behold-keys/upload.keystore` from this folder, outside the repository. It signs the bundle
 you upload. Play signs the app that players install with its own keys (Play App Signing), so the
-site's asset links name Play's keys as well as this one (68c).
+site's asset links, `public/.well-known/assetlinks.json`, name Play's three keys as well as this
+one.
 
 1. **One password, at both prompts.** Bubblewrap asks "Password for the Key Store:" and then
    "Password for the Key:" at every build, as `init` did when it made the key. Give the same
@@ -68,9 +69,9 @@ site's asset links name Play's keys as well as this one (68c).
    file as an attachment, with its password. Neither the file nor the password goes in the
    repository, a chat, a PR, or CI, or to anyone else.
 
-3. **Its fingerprint, on #68.** The key's SHA-256 is posted there (issuecomment-6240555530), for
-   the site's asset links (68c). It is a public value, not a secret. To read it again, from this
-   folder, where keytool asks for the password:
+3. **Its fingerprint, on #68.** The key's SHA-256 is posted there (issuecomment-6240555530), and
+   the asset links list it last of their four. It is a public value, not a secret. To read it
+   again, from this folder, where keytool asks for the password:
 
    ```powershell
    & "$HOME\.bubblewrap\jdk-x64\jdk-17.0.11+9\bin\keytool.exe" -list -v -keystore ..\..\behold-keys\upload.keystore -alias upload
@@ -82,6 +83,8 @@ site's asset links name Play's keys as well as this one (68c).
    folder beside the repository's, and read its fingerprint (step 3) before the first build there.
 
 5. **If it is lost or leaked,** it can be reset in Play Console, with a new key's certificate.
+   The new key's SHA-256 then takes this one's place in the asset links and in the list
+   `src/android.test.ts` pins them to, in the same PR.
 
 ## Building
 
@@ -107,7 +110,7 @@ bubblewrap build
 
 - **In Play Console,** create a release on a testing track, upload `app-release-bundle.aab`, and
   roll it out. The first upload enrols the app in Play App Signing, and its App integrity page
-  then lists the SHA-256 fingerprints of Play's keys, which the site's asset links need (68c).
+  then lists the SHA-256 fingerprints of Play's three keys, which the asset links list first.
 - **Play takes each version code once,** so each upload after the first raises it. On a branch,
   `bubblewrap update --appVersionName=<name>` raises `appVersionCode` by one, sets `appVersion` to
   the name, and saves the config in Bubblewrap's own form, so then run
