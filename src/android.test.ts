@@ -50,7 +50,8 @@ interface Config {
  * A1's table as amended (#68), row by row: the config `init` wrote, with the rows it writes
  * otherwise set by hand — the bars' colours, notifications, the oldest Android it installs on,
  * the version's name, and the maskable icon. Bubblewrap writes the version's name twice and reads
- * `appVersion`.
+ * `appVersion`. The navigation bar's divider takes the bar's own colour, so no line shows above
+ * the bar (#12 [Q28]): `init` writes it black, its transparent default's alpha dropped.
  */
 const TABLE = {
   packageId: 'house.shay.behold',
@@ -65,6 +66,8 @@ const TABLE = {
   navigationColor: '#1B2033',
   themeColorDark: '#232A3D',
   navigationColorDark: '#1B2033',
+  navigationDividerColor: '#1B2033',
+  navigationDividerColorDark: '#1B2033',
   iconUrl: 'https://play.beholdgame.com/icons/icon-1024.png',
   maskableIconUrl: 'https://play.beholdgame.com/icons/icon-512-maskable-android.png',
   monochromeIconUrl: undefined,
