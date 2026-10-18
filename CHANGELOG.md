@@ -6,12 +6,12 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
 ## v0.33.0 — Gate 34, the four words (#146)
 
 - **146a — the four words** (#147): the valley, the mountain, the vineyard, and the battle now
-  share at most four words in a row with the NIV, as the cases to come do. Gate 33 brought their
-  words to the NIV's but never ran that check, and sixteen strings ran past it, the longest twelve
-  words of the mountain's reveal. Each is reworded: four captions, the four accounts, the letter
-  and the Law, and six reveal paragraphs. Every answer and every id stays, so a kept game keeps
-  its place. One hint names its blank by the account's new words: the battle's "of Aram sent".
-  The check reads the NIV from outside the repository, which holds none of it.
+  share at most four words in a row with the NIV, as the room and the cases to come do. Gate 33
+  brought their words to the NIV's but never ran that check, and sixteen strings ran past it, the
+  longest twelve words of the mountain's reveal. Each is reworded: four captions, the four accounts,
+  the letter and the Law, and six reveal paragraphs. Every answer and every id stays, so a kept
+  game keeps its place. One hint names its blank by the account's new words: the battle's
+  "of Aram sent". The check reads the NIV from outside the repository, which holds none of it.
 
 ## v0.32.0 — Gate 13, the room (#57)
 
