@@ -33,7 +33,7 @@ export const en = {
     horns:
       'A prophet holds up a pair of iron horns, high over his head: with these, he says, the king will gore the Arameans. His other hand is still raised.',
     plain:
-      'The plainest man at the gate, in undyed wool, one hand pressed to his cheek. Asked, he first gave the prophets’ own answer; then he told of all Israel strewn over the hills like sheep, every man going home, and of the question in his vision: who will lure Ahab into attacking Ramoth Gilead, to his death there?',
+      'The plainest man at the gate, in undyed wool, one hand pressed to his cheek. Asked, he first gave the prophets’ own answer; then he told of all Israel strewn over the hills like sheep, every man going home, and of the question in his vision: who will lure Ahab to his death at Ramoth Gilead?',
     gate: 'Behind the thrones, the gate of Samaria. The kings sit before it, at the threshing floor, a broad floor of beaten earth.',
   },
   words: {
@@ -63,7 +63,7 @@ export const en = {
         { t: 'The king of Israel asked his prophets, about ' },
         { b: 'b1' },
         {
-          t: ' of them, whether to go to war for Ramoth Gilead, and every one said go. Jehoshaphat, king of Judah, asked for a prophet of the LORD besides them, and Micaiah was brought. At first he told the king to ',
+          t: ' of them, whether to go to war for Ramoth Gilead, and every one said go. Jehoshaphat, king of Judah, asked for a prophet who spoke for the LORD, and Micaiah was brought. At first he told the king to ',
         },
         { b: 'b2' },
         {
@@ -74,7 +74,7 @@ export const en = {
           t: ' slapped him in the face, and the king sent him to prison on bread and water. At Ramoth Gilead the two kings rode into battle, Jehoshaphat in his ',
         },
         { b: 'b4' },
-        { t: '. The king of Aram had sent ' },
+        { t: '. The king of Aram sent ' },
         { b: 'b5' },
         {
           t: ' chariot commanders after the king of Israel alone; they gave chase, then turned back. An Aramean loosed an arrow at no one in particular, and it found the king of Israel. Held upright in his chariot to face the enemy, he died at evening. At the ',
@@ -86,7 +86,7 @@ export const en = {
   },
   teach: 'He’s in disguise. Name him by what happens.',
   reveal: [
-    'The man in plain armor was Ahab, king of Israel, in disguise. He sent Jehoshaphat, king of Judah, into the battle in his own royal robes, and the Aramean commanders, sent after the king of Israel alone, took Jehoshaphat for him, chased him, and turned back. The man in undyed wool was Micaiah son of Imlah, the one prophet who would say only what the LORD told him.',
-    'About four hundred prophets told the king to attack Ramoth Gilead and win. Micaiah first answered as they had; then, held to the truth, he told of Israel scattered like sheep with no shepherd, and of a spirit the LORD sent to put lies in the prophets’ mouths. Zedekiah, who had made himself iron horns, slapped him in the face, and the king sent him to prison on bread and water. In the battle an arrow shot at no one in particular found the gap between the sections of the king’s armor. Held upright in his chariot to face the Arameans, he died at evening. His chariot was washed out at the pool of Samaria, where dogs lapped up his blood, as the LORD had said.',
+    'The man in plain armor was Ahab, king of Israel, in disguise. He sent Jehoshaphat, king of Judah, into the battle in his own royal robes, and the Aramean commanders, sent after the king of Israel alone, took Jehoshaphat for him, chased him, and turned back. The man in undyed wool was Micaiah son of Imlah. He was the one prophet who would say only what the LORD told him.',
+    'About four hundred prophets told the king to attack Ramoth Gilead and win. Micaiah first answered as they had; then, held to the truth, he told of Israel scattered like sheep with no shepherd, and of a spirit the LORD sent to put lies in the prophets’ mouths. Zedekiah, who had made himself iron horns, slapped him in the face, and the king sent him to prison on bread and water. In the battle an arrow shot at no one in particular found the gap between the sections of the king’s armor. Held upright in his chariot to face the Arameans, he died at evening. His chariot was washed out at the pool of Samaria, where dogs lapped up his blood, just as the LORD had said.',
   ],
 } satisfies CaseText<typeof micaiah>

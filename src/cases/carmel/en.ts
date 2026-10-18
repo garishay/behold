@@ -67,7 +67,7 @@ export const en = {
         { t: '. Baal’s prophets called on their god from morning to noon, and past noon they ' },
         { b: 'a2' },
         {
-          t: ', and no answer came. Then Elijah rebuilt the LORD’s altar, dug a trench around it, laid the bull on the wood, and had four jars of water poured over it, three times over, until the trench was full. He prayed, and fire fell. It burned the bull, the wood, even the ',
+          t: ', and no answer came. Then Elijah rebuilt the LORD’s altar, dug a trench all around it, laid the bull on the wood, and had four jars of water poured over it, three times over, until the trench was full. He prayed, and fire fell. It burned the bull, the wood, even the ',
         },
         { b: 'a3' },
         { t: ', and dried the trench. At the sight of the fire, the people ' },
@@ -79,6 +79,6 @@ export const en = {
   teach: 'These aren’t in story order. Which happened first?',
   reveal: [
     'The man in the hair cloak was Elijah, the LORD’s prophet, who stood alone against Baal’s four hundred and fifty. The man under the awning was Ahab, king of Israel, who met him as the troubler of Israel and gathered the people and the prophets to Mount Carmel at his word.',
-    'Asked how long they would waver, the people said not a word. Baal’s prophets called from morning past noon, and no one answered. Elijah rebuilt the LORD’s altar with twelve stones, one for each tribe, and had it soaked, four jars three times over, until the trench ran full. At the time of sacrifice he prayed, and the fire of the LORD fell. It burned up the sacrifice, the wood, the stones, and the soil, and dried up the water in the trench. The people fell prostrate and cried that the LORD is God, and at Elijah’s word Baal’s prophets were seized and taken down to the Kishon Valley.',
+    'Asked how long they would waver, the people said not a word. Baal’s prophets called from morning past noon, and no one answered. Elijah rebuilt the LORD’s altar with twelve stones, one for every tribe, and had it soaked, four jars three times over, until the trench ran full. When the time of sacrifice came, he prayed, and the LORD’s fire fell. It burned up the sacrifice and the wood, the very stones and the soil around them, and dried the trench. The people fell prostrate and cried that the LORD is God, and at Elijah’s word Baal’s prophets were seized and taken to the Kishon Valley.',
   ],
 } satisfies CaseText<typeof carmel>

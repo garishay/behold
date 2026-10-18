@@ -68,11 +68,11 @@ export const en = {
     seal: { title: 'The seal', body: 'Its impression reads:\nBELONGING TO AHAB, KING.' },
     letter: {
       title: 'The letter',
-      body: 'To the elders and leaders of Naboth’s city:\nCall a fast, and give Naboth the chief seat before the people. Have two scoundrels sit facing him and swear that he spoke curses against God and the king. Then lead him out and stone him.\n\nSealed: BELONGING TO AHAB, KING.',
+      body: 'To the elders and leaders of Naboth’s city:\nCall a fast, and give Naboth the chief seat before the people. Have two scoundrels sit facing him and swear that he spoke curses against God and the king. Lead him out and have him stoned.\n\nSealed: BELONGING TO AHAB, KING.',
     },
     law: {
       title: 'The Law',
-      body: 'Every Israelite is to keep the inheritance of their ancestors. The land is not to be sold for good, for the land belongs to the LORD.\n\nOne witness is not enough to put a man to death. A charge stands only on the word of two or three witnesses.',
+      body: 'Every Israelite is to keep their ancestors’ inheritance. The land is not to be sold for good, for the land belongs to the LORD.\n\nOne witness alone is not enough to put a man to death. It takes two or three witnesses to make a charge stand.',
     },
     note: {
       title: 'The note',
@@ -90,7 +90,7 @@ export const en = {
         },
         { b: 's3' },
         {
-          t: ' of his ancestors. The king went home, lay down sulking, and refused to eat. Then letters went out to the elders of the owner’s city, sealed with the king’s seal but written by ',
+          t: ' of his ancestors. The king went home and lay down sulking. He refused to eat. Then letters went out to the elders of the owner’s city, sealed with the king’s seal but written by ',
         },
         { b: 's4' },
         {
@@ -110,6 +110,6 @@ export const en = {
   teach: 'Who is he? Find what bears his name.',
   reveal: [
     'The man on the bed was Ahab, king of Israel. The woman at the table was Jezebel, his wife. The seated man was Naboth, who owned the vineyard and would not give up his ancestors’ inheritance. Jezebel wrote the letters in Ahab’s name and sealed them with his seal. The prophet at the wall was Elijah.',
-    'When Ahab heard the prophet’s words, he tore his clothes, put on sackcloth, and fasted. And the word of the LORD came again: because he has humbled himself, the disaster will not come in his day — but it will come on his house in the days of his son.',
+    'At the prophet’s words, Ahab tore his clothes and fasted in sackcloth. And the LORD’s word came again: since he has humbled himself, the disaster will not come in his day — but it will come on his house in his son’s days.',
   ],
 } satisfies CaseText<typeof vineyard>
