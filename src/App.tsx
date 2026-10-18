@@ -34,10 +34,12 @@ const entry = (state: unknown): Entry | null =>
     : null
 
 /**
- * How long the title takes to give way to the cases page, its last card risen. The page takes no
- * tap until then, so no card takes one before it can be seen (#75, Gate 21 A2 as amended).
+ * How long the title takes to give way to the cases page: until its last card has risen, each card
+ * rising for 0.45 s from 0.75 s, 0.12 s after the one before it, as `index.css` times them (#57
+ * A5). The page takes no tap until then, so no card takes one before it can be seen (#75, Gate 21
+ * A2 as amended).
  */
-const leaving = 1600
+const leaving = 750 + (cases.length - 1) * 120 + 450
 /**
  * Under reduced motion the cases page shows at once, and takes no tap for half a second, so a quick
  * second tap on Begin opens nothing beneath it (#75, Gate 21 A2 as ruled).

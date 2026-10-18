@@ -133,9 +133,10 @@ describe('the half of the picture (#29)', () => {
 
   // The next round's first tester (#102): "Where to look" rang 80% of the picture for the giant,
   // every thing in it found. A half that takes over 60% of the picture narrows little, so a hint
-  // there starts at its second tier, the thing itself (ruling [1]): six registered spots, from the
-  // giant's 80% to the altar's 64%. The next, the vineyard's cord, takes 59%.
-  it('takes most of the picture for six registered spots, so a hint there starts at tier 2', () => {
+  // there starts at its second tier, the thing itself (ruling [1]): nine registered spots, from the
+  // giant's 80% to the altar's 64%, the room's three standing or seated figures among them (#57).
+  // The next, the vineyard's cord, takes 59%.
+  it('takes most of the picture for nine registered spots, so a hint there starts at tier 2', () => {
     const wide = cases.flatMap(({ structure: s }) =>
       s.moments
         .flatMap((m) => m.spots)
@@ -149,6 +150,9 @@ describe('the half of the picture (#29)', () => {
       'carmel: prophets',
       'micaiah: chariot',
       'micaiah: horns',
+      'shunammite: prophet',
+      'shunammite: standing',
+      'shunammite: chair',
     ])
   })
 })

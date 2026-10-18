@@ -177,6 +177,10 @@ beforeEach(() => {
 const cards = () => screen.getAllByRole('button').filter((b) => b.classList.contains('case-card'))
 
 describe('the title (#75)', () => {
+  // The way out ends when the last card has risen (#57 A5): each card rises for 0.45 s from 0.75 s,
+  // 0.12 s after the one before it, as `index.css` times them.
+  const wayOut = 750 + (cases.length - 1) * 120 + 450
+
   it('shows first when the app opens on the cases page: the picture, the name, the line, and Begin', () => {
     render(<App />)
     expect(screen.getByRole('heading', { level: 1, name: 'Behold' })).toBeInTheDocument()
@@ -202,7 +206,7 @@ describe('the title (#75)', () => {
     const entries = history.length
     fireEvent.click(screen.getByRole('button', { name: 'Begin' }))
     expect(screen.queryByRole('button', { name: 'Begin' })).not.toBeInTheDocument()
-    expect(cards()).toHaveLength(4)
+    expect(cards()).toHaveLength(5)
     expect([history.length, history.state]).toEqual([entries, null])
   })
 
@@ -216,7 +220,7 @@ describe('the title (#75)', () => {
       expect(title).toHaveClass('leaving')
       expect(title).toHaveAttribute('inert')
       expect(document.querySelector('.screen')).toHaveClass('arriving')
-      act(() => vi.advanceTimersByTime(1600))
+      act(() => vi.advanceTimersByTime(wayOut))
       expect(document.querySelector('.title')).toBeNull()
       expect(document.querySelector('.screen')).not.toHaveClass('arriving')
     } finally {
@@ -234,7 +238,7 @@ describe('the title (#75)', () => {
     try {
       for (const [reduce, ms] of [
         [true, 500],
-        [false, 1600],
+        [false, wayOut],
       ] as const) {
         vi.stubGlobal('matchMedia', () => ({ matches: reduce }))
         const { unmount } = render(<App />)
@@ -260,7 +264,7 @@ describe('the title (#75)', () => {
     expect(screen.getByRole('dialog', { name: 'The valley' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Begin' })).not.toBeInTheDocument()
     menu('Cases')
-    await waitFor(() => expect(cards()).toHaveLength(4))
+    await waitFor(() => expect(cards()).toHaveLength(5))
     expect(screen.queryByRole('button', { name: 'Begin' })).not.toBeInTheDocument()
   })
 
@@ -309,6 +313,7 @@ describe('the cases page (Gate 01 A6, #6, #75)', () => {
       'The mountain',
       'The vineyard',
       'The battle',
+      'The room',
     ])
     expect(cards()[0]).toHaveTextContent('Learn to play')
     expect(screen.queryByText('In progress')).not.toBeInTheDocument()
@@ -352,6 +357,7 @@ describe('the cases page (Gate 01 A6, #6, #75)', () => {
       'The mountain',
       'The vineyard',
       'The battle',
+      'The room',
     ])
     const head = list.querySelector('.season-head')!
     expect(within(head as HTMLElement).getByRole('heading', { level: 2 })).toHaveTextContent(
@@ -365,6 +371,7 @@ describe('the cases page (Gate 01 A6, #6, #75)', () => {
       'Case one',
       'Case two',
       'Case three',
+      'Case four',
     ])
     expect(list.nextElementSibling).toHaveTextContent('Season one is being written.')
   })
@@ -386,8 +393,9 @@ describe('the season in order (#75)', () => {
       'Opens after the valley',
       'Opens after the mountain',
       'Opens after the vineyard',
+      'Opens after the battle',
     ])
-    expect(locked()).toEqual([false, true, true, true])
+    expect(locked()).toEqual([false, true, true, true, true])
     expect(cards()[0]).toHaveClass('first')
   })
 
@@ -414,7 +422,13 @@ describe('the season in order (#75)', () => {
     start(<App />, closedTo(1))
     openCase(/The battle/)
     expect(document.querySelector('.app')).toBeNull()
-    expect(cards().map((c) => c.classList.contains('lit'))).toEqual([false, true, false, false])
+    expect(cards().map((c) => c.classList.contains('lit'))).toEqual([
+      false,
+      true,
+      false,
+      false,
+      false,
+    ])
     expect(screen.getByRole('status')).toHaveTextContent(
       'Play the mountain first. The story runs in order.',
     )
@@ -430,8 +444,9 @@ describe('the season in order (#75)', () => {
       'Opens after the valley',
       'In progress',
       'Opens after the vineyard',
+      'Opens after the battle',
     ])
-    expect(locked()).toEqual([false, true, false, true])
+    expect(locked()).toEqual([false, true, false, true, true])
     expect(cards()[0]).not.toHaveClass('first')
   })
 
@@ -442,9 +457,9 @@ describe('the season in order (#75)', () => {
       unmount()
     }
     // The mountain restarted, so no longer closed: the vineyard, never opened, waits for it again,
-    // and the battle, started, stays open.
+    // and the battle, started, stays open; the room waits for the battle.
     start(<App />, { ...closedTo(1), carmel: fresh(carmel), micaiah: fresh(micaiah) })
-    expect(locked()).toEqual([false, false, true, false])
+    expect(locked()).toEqual([false, false, true, false, true])
     expect(statuses()[2]).toBe('Opens after the mountain')
   })
 })
@@ -1587,6 +1602,23 @@ describe('the tutorial’s marks (#25)', () => {
     expect(coach()).toBeNull()
     slot('m1')
     expect(at()).toBe('[data-face="m1"]')
+  })
+
+  // The room's one new idea is a place as evidence (#57): on Solve, while the blank for whose bed it
+  // was is empty, it is ringed with the lesson's words. A word placed takes the mark away, and
+  // emptying the blank brings it back.
+  it('marks the bed’s blank in the case that teaches it, until a word is placed', async () => {
+    start(<App />, laterStarted)
+    openCase(/The room/)
+    tapSpot('prophet')
+    tab(/Solve/)
+    await waitFor(() => expect(at()).toBe('[data-slot="r2"]'))
+    expect(said()).toBe('Whose bed? The room around it will tell.')
+    chip('Gehazi')
+    slot('r2')
+    expect(coach()).toBeNull()
+    slot('r2')
+    expect(at()).toBe('[data-slot="r2"]')
   })
 
   // The paid round's second session (#23, 2026-10-05): her first tap at step 1 landed on the foot
