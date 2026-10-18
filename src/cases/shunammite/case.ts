@@ -109,7 +109,8 @@ export const shunammite = {
   },
   // The verse that says each answer, and that tells each moment, where the reveal points a miss
   // (#107): the servant called by name, the room furnished, the boy laid on the man of God's bed,
-  // her ride to the mountain, the staff sent ahead, and the child waking.
+  // her ride to the mountain, the servant come to push her away, the staff sent ahead, and the
+  // child waking.
   verses: {
     f1: '4:12',
     f2: '4:12',

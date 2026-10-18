@@ -8,15 +8,15 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
 - **57a — the room** (#145): the season's fourth case, after the battle, is the Shunammite, 2 Kings
   4:8–37. Its one new idea is a place known by what's in it: the account asks whose bed the boy's
   mother laid him on, and the room around the bed tells. It has three moments to put in the order
-  they happened. In the room as she built it, a bed, a table with a lamp, and a chair, the holy man
-  resting in the chair. On Carmel she holds fast to his feet, and his servant comes to push her
-  away. On the bed, at night, the boy sits up. It has fourteen spots, two faces named from the
-  prophet's own words, and five blanks. The lesson rings the bed's blank on Solve until a word is
-  placed in it (`teach: { blank }`), and check (n) holds the blank to the case. The room's picture
-  was retouched where the woman's sleeve was drawn over the doorpost, and each moment's brief keeps
-  its prompt as sent. The way out from the title now ends when the last card has risen, 1.68 s
-  with five cards where it was 1.6 s (#57 A5). The store listing names the room, and the registry
-  counts 2 Kings 4's verses.
+  they happened. The room as she built it holds a bed, a table with a lamp, and a chair, with the
+  holy man resting in the chair. On Carmel she holds fast to his feet, and his servant comes to
+  push her away. On the bed, at night, the boy sits up. It has fourteen spots, two faces named
+  from the prophet's own words, and five blanks. The lesson rings the bed's blank on Solve until a
+  word is placed in it (`teach: { blank }`), and check (n) holds the blank to the case. The room's
+  picture was retouched where the woman's sleeve was drawn over the doorpost, and each moment's
+  brief keeps its prompt as sent. The way out from the title now ends when the last card has
+  risen, 1.68 s with five cards where it was 1.6 s (#57 A5). The store listing names the room, and
+  the registry counts 2 Kings 4's verses.
 
 ## v0.31.1 — Gate 17, the asset links (#68)
 
