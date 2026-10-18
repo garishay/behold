@@ -47,6 +47,9 @@ A man walks a vineyard as if it were his, and a prophet has come to meet him. Wh
 The battle
 A crowd of prophets tells a king to go to war, and one plain man is sent to prison. Then two kings ride into battle, and only one of them is dressed as a king. Who is the man in plain armor, and what became of his chariot?
 
+The room
+A woman builds a small room on her roof for a holy man who often comes her way. Years later she rides hard to find him, and tells all who ask that everything is all right. Whose room is it, and what happened on its bed?
+
 Stuck? Ask for a hint: Where to look, then Show me.
 
 Best with sound on.

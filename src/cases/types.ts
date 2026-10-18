@@ -88,9 +88,11 @@ export type Step =
  * rule 6): the order (#30), its pictures ringed and then its slots until a moment is placed; or a
  * face, ringed until a name is placed in it, as the battle's disguised man is (#53), and where it
  * names the spot that `bears` the face's name, until that spot is opened too, so a name placed
- * before it is found doesn't take the mark away: the vineyard's man on the bed and the seal (#131).
+ * before it is found doesn't take the mark away: the vineyard's man on the bed and the seal (#131);
+ * or a blank, ringed until a word is placed in it, as the room's bed is (#57).
  */
-export type Teach = 'order' | { readonly face: string; readonly bears?: string }
+export type Teach =
+  'order' | { readonly face: string; readonly bears?: string } | { readonly blank: string }
 
 /** Verses within one chapter, by USFM book code; without `from` and `to`, the whole chapter. */
 export interface Passage {

@@ -122,7 +122,7 @@ describe('the case registry (Gate 02 A1, A5)', () => {
 // that is a whole chapter, by its chapter's verses, and each registered book's verses. A case that
 // registers a chapter or a book this table lacks fails until its gate adds the row.
 const chapterVerses: Readonly<Record<string, number>> = { '1KI 21': 29 }
-const bookVerses: Readonly<Record<string, number>> = { '1SA': 810, '1KI': 816 }
+const bookVerses: Readonly<Record<string, number>> = { '1SA': 810, '1KI': 816, '2KI': 719 }
 const versesIn = (p: Passage) =>
   p.from === undefined || p.to === undefined
     ? chapterVerses[`${p.book} ${p.chapter}`]

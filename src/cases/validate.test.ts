@@ -3,6 +3,8 @@ import { carmel } from './carmel/case.ts'
 import { en as carmelEn } from './carmel/en.ts'
 import { micaiah } from './micaiah/case.ts'
 import { en as micaiahEn } from './micaiah/en.ts'
+import { shunammite } from './shunammite/case.ts'
+import { en as shunammiteEn } from './shunammite/en.ts'
 import type { CaseStructure, CaseText, Spot } from './types.ts'
 import { validate } from './validate.ts'
 import { valley } from './valley/case.ts'
@@ -395,6 +397,13 @@ describe('validate (Gate 02 A6)', () => {
   it('(n) a lesson waiting on a spot the case lacks — the vineyard’s on "ring"', () => {
     expect(validate({ ...vineyard, teach: { face: 'p1', bears: 'ring' } }, vineyardEn)).toEqual([
       'the case teaches face "p1" by "ring", not a spot',
+    ])
+  })
+
+  // The room adds the blank it teaches at: it must be one of the case's blanks.
+  it('(n) a lesson on a blank the case lacks — the room’s on "r9"', () => {
+    expect(validate({ ...shunammite, teach: { blank: 'r9' } }, shunammiteEn)).toEqual([
+      'the case teaches blank "r9", not a blank',
     ])
   })
 

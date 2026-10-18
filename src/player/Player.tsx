@@ -640,13 +640,15 @@ export function Player(props: PlayerProps) {
   const leftWords = leftover === 'order' ? strings.owedOrder : strings.owedFace
   // The case's one new idea, marked on Solve where it is first met: while the order is empty, the
   // pictures to place and then, once one is picked, the slots it goes in, as the tutorial marks a
-  // word and then its slot (#30); or a face, until a name is placed in it (#53), and where the
-  // case names what bears the name, until that is opened too, so a name placed before it is found
-  // doesn't take the mark away (#131). A tutorial's step comes first; nothing is marked under a
-  // sheet or a paper.
+  // word and then its slot (#30); a face, until a name is placed in it (#53), and where the case
+  // names what bears the name, until that is opened too, so a name placed before it is found
+  // doesn't take the mark away (#131); or a blank, until a word is placed in it (#57). A tutorial's
+  // step comes first; nothing is marked under a sheet or a paper.
   const lessonAt = (teach = s.teach) => {
     if (teach === undefined || view !== 'solve' || at !== undefined) return undefined
     if (sheet !== null || paper !== null) return undefined
+    if (typeof teach === 'object' && 'blank' in teach)
+      return progress.fills[teach.blank] === undefined ? `[data-slot="${teach.blank}"]` : undefined
     if (teach !== 'order') {
       const borne = teach.bears === undefined || progress.tapped.includes(teach.bears)
       return progress.faces[teach.face] !== undefined && borne
