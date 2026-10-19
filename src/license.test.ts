@@ -33,7 +33,9 @@ describe('LICENSE (Gate 35, #79)', () => {
   })
 
   it('leaves out every picture the repository tracks', () => {
-    const images = tracked.filter((file) => /\.(png|jpe?g|webp|gif|svg|ico|avif)$/i.test(file))
+    const images = tracked.filter((file) =>
+      /\.(png|jpe?g|webp|gif|svg|ico|avif|bmp|tiff?|heic|heif|jxl)$/i.test(file),
+    )
     expect(images.filter((file) => !under(pictures)(file))).toEqual([])
   })
 
