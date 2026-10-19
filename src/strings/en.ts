@@ -241,7 +241,7 @@ export interface Policy {
 export const policy: Policy = {
   tab: 'Behold: Privacy policy',
   title: 'Privacy policy',
-  effective: 'Takes effect 20 October 2026.',
+  effective: 'Takes effect 19 October 2026.',
   intro:
     'Behold is a Bible mystery game that runs in your web browser, at play.beholdgame.com or installed on your device, and in its own app from Google Play. This page says what the game keeps, what it sends, and who sees it.',
   sections: [
