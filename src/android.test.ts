@@ -204,6 +204,23 @@ describe('the shell against A1’s table as ruled for the WebView (#68)', () => 
     )
   })
 
+  // Git keeps a file's mode, and `./gradlew` runs on Linux and macOS only when it's marked
+  // executable, as Gradle writes it; cmd.exe runs `gradlew.bat` with no mark (#12 [Q31]).
+  it('marks the Unix wrapper executable, and the Windows one not', () => {
+    const index = execFileSync(
+      'git',
+      ['ls-files', '--stage', '--', 'android/gradlew', 'android/gradlew.bat'],
+      { encoding: 'utf8' },
+    )
+    const modes = Object.fromEntries(
+      Array.from(
+        index.matchAll(/^(\d{6}) \S+ \d\t(.+)$/gm),
+        ([, mode, file]) => [file, mode] as const,
+      ),
+    )
+    expect(modes).toEqual({ 'android/gradlew': '100755', 'android/gradlew.bat': '100644' })
+  })
+
   it('tracks no key in the repository', () => {
     const keys = execFileSync('git', ['ls-files', '--', '*.keystore', '*.jks'], {
       encoding: 'utf8',
