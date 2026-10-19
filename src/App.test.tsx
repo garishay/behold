@@ -1772,6 +1772,45 @@ describe('the tutorial’s marks (#25)', () => {
     }
   })
 
+  // The Play app applies a font size changed while a mark shows, and fires nothing that wakes the
+  // following: the words' box changing size wakes it, so they are placed by their new height
+  // (#152, from Codex's review of #154).
+  it('wakes a settled mark when its words change size', async () => {
+    const watched = new Map<Element, () => void>()
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        callback: () => void
+        constructor(callback: () => void) {
+          this.callback = callback
+        }
+        observe(el: Element) {
+          watched.set(el, this.callback)
+        }
+        disconnect() {}
+      },
+    )
+    // The first step's ring on the boy, on the picture over the dock, as at 360 × 548.
+    boxes = { '.dock': new DOMRect(0, 365, 360, 104), '.stage': new DOMRect(34, 0, 292, 365) }
+    const frames = vi.spyOn(window, 'requestAnimationFrame')
+    const pause = (ms: number) => new Promise((r) => setTimeout(r, ms))
+    try {
+      start()
+      openCase(/The valley/)
+      fireEvent.click(screen.getByRole('button', { name: 'Start' }))
+      await pause(1000)
+      const settled = frames.mock.calls.length
+      const label = document.querySelector('.coach .label')
+      expect(label).toHaveTextContent('Tap the boy with the sling.')
+      const resized = watched.get(label!)
+      expect(resized).toBeDefined()
+      resized!()
+      expect(frames.mock.calls.length).toBe(settled + 1)
+    } finally {
+      frames.mockRestore()
+    }
+  })
+
   // The last step's words cover the account's end on Solve and the caption from Look, so they
   // leave on the next tap after they show; its ring stays until the case closes (#24, ruling [3]),
   // on Solve's count until Close the case shows, and then on Close (#24, Solve's room).

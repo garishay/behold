@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { strings } from '../strings/en.ts'
 import { bring, labelAt, scroller, words, type Box, type Span } from './place.ts'
 
@@ -118,6 +118,8 @@ export function CoachMark({ at, label, onTap, onNext, hold, under, release }: Co
   const [tall, setTall] = useState(0)
   const said = useRef<HTMLDivElement>(null)
   const next = useRef<HTMLButtonElement>(null)
+  // What wakes the following, for the words' box to call as it changes size.
+  const waker = useRef(() => {})
   // A new target dims again.
   if (dim.at !== at) setDim({ at, on: true })
   useEffect(() => {
@@ -126,7 +128,7 @@ export function CoachMark({ at, label, onTap, onNext, hold, under, release }: Co
     // The target is followed as the account scrolls or the picture zooms. Once it has held still
     // for about half a second the following sleeps, and a tap, a click, a scroll, or a resize
     // wakes it: every way the target moves starts with one of them ([Q6] on #12), a keyboard's
-    // or a screen reader's with a click ([Q15]).
+    // or a screen reader's with a click ([Q15]). So does the words' box changing size (#152).
     let [frame, held, last] = [0, 0, '']
     const follow = () => {
       const r = ringFor(target())
@@ -144,6 +146,7 @@ export function CoachMark({ at, label, onTap, onNext, hold, under, release }: Co
       held = 0
       if (frame === 0) frame = requestAnimationFrame(follow)
     }
+    waker.current = wake
     frame = requestAnimationFrame(follow)
     for (const e of wakers) addEventListener(e, wake, true)
     return () => {
@@ -151,6 +154,19 @@ export function CoachMark({ at, label, onTap, onNext, hold, under, release }: Co
       for (const e of wakers) removeEventListener(e, wake, true)
     }
   }, [at])
+  // A font size changed while a mark shows, as the Play app applies one, resizes its words and fires
+  // nothing that wakes the following: their box changing size wakes it, so they are placed by their
+  // new height (#152).
+  const onSaid = useCallback((el: HTMLDivElement | null) => {
+    said.current = el
+    if (!el) return
+    const watch = new ResizeObserver(() => waker.current())
+    watch.observe(el)
+    return () => {
+      watch.disconnect()
+      said.current = null
+    }
+  }, [])
   useEffect(() => {
     if (hold) return
     const tap = (e: Event) => {
@@ -215,7 +231,7 @@ export function CoachMark({ at, label, onTap, onNext, hold, under, release }: Co
             {pulse > 0 && <i key={pulse} className="pulse" onAnimationEnd={() => setPulse(0)} />}
           </div>
           {label && (
-            <div className="label" ref={said} style={{ left: centre ?? 0, ...room }}>
+            <div className="label" ref={onSaid} style={{ left: centre ?? 0, ...room }}>
               <span aria-hidden>{label}</span>
               {release && (
                 <button
