@@ -3,6 +3,19 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.35.0 — Gate 35, the License (#79)
+
+- **79a — the License** (#148): `LICENSE` now names, by path, what its MIT grant leaves out. Each
+  case's own folder in `src/cases/`, with the case text wherever the repository copies it, and
+  every picture, in `public/cases/`, `public/title.jpg`, `public/icons/`, and `assets/`, are all
+  rights reserved. The sounds in `public/audio/` keep their own terms, CC0 1.0 or CC BY 4.0, as
+  `docs/sound.md` names them. The README reserves the name: "Behold" and its icon name this game,
+  and a copy may use the code under MIT, but not the name, the icon, the cases, or the art. The
+  MIT License stays word for word above the new section. A test holds it so, holds each path the
+  section names to the repository, and holds every picture and sound the repository tracks to one
+  of them. GitHub now reads the licence as Other, not MIT. The code stays MIT, and the game's
+  build is unchanged.
+
 ## v0.33.0 — Gate 34, the four words (#146)
 
 - **146a — the four words** (#147): the valley, the mountain, the vineyard, and the battle now
