@@ -21,19 +21,19 @@ share is the box's width over its own. The master's outer 40 px, where nothing i
 levels off `#1B2033`, fade to it exactly, so no edge of the master shows and every file meets the
 ground at every edge; the art is 53 px in at its nearest. Every file is a 32-bit PNG.
 
-| file                            | size | the art's share of the width | the master's point at the centre | where it shows                                                    |
-| ------------------------------- | ---- | ---------------------------- | -------------------------------- | ----------------------------------------------------------------- |
-| `icon-192.png`                  | 192  | 75%                          | x 626.5, y 605                   | the manifest's `any` icon                                         |
-| `icon-512.png`                  | 512  | 75%                          | x 626.5, y 605                   | the manifest's `any` icon                                         |
-| `icon-1024.png`                 | 1024 | 75%                          | x 626.5, y 605                   | the manifest's largest `any` icon; Bubblewrap's splash, at 300 dp |
-| `favicon-48.png`                | 48   | 90%                          | x 626.5, y 605                   | a browser's tab, at 16 px                                         |
-| `icon-512-maskable.png`         | 512  | 76.8%                        | x 622, y 590                     | the launcher, from Chrome's install                               |
-| `icon-512-maskable-android.png` | 512  | 69.6%                        | x 622, y 590                     | the launcher, from the Play app: the shell's `maskableIconUrl`    |
-| `apple-touch-icon-180.png`      | 180  | 88%                          | x 622, y 590                     | the iPhone's home screen: the page's `apple-touch-icon`           |
-| `assets/store-icon.png`         | 512  | 88%                          | x 622, y 590                     | Play's listing, uploaded at 68b; the site doesn't serve it        |
+| file                            | size | the art's share of the width | the master's point at the centre | where it shows                                                      |
+| ------------------------------- | ---- | ---------------------------- | -------------------------------- | ------------------------------------------------------------------- |
+| `icon-192.png`                  | 192  | 75%                          | x 626.5, y 605                   | the manifest's `any` icon                                           |
+| `icon-512.png`                  | 512  | 75%                          | x 626.5, y 605                   | the manifest's `any` icon                                           |
+| `icon-1024.png`                 | 1024 | 75%                          | x 626.5, y 605                   | the manifest's largest `any` icon; the Play app's launch, at 300 dp |
+| `favicon-48.png`                | 48   | 90%                          | x 626.5, y 605                   | a browser's tab, at 16 px                                           |
+| `icon-512-maskable.png`         | 512  | 76.8%                        | x 622, y 590                     | the launcher, from Chrome's install                                 |
+| `icon-512-maskable-android.png` | 512  | 69.6%                        | x 622, y 590                     | the launcher, from the Play app: the files Bubblewrap made from it  |
+| `apple-touch-icon-180.png`      | 180  | 88%                          | x 622, y 590                     | the iPhone's home screen: the page's `apple-touch-icon`             |
+| `assets/store-icon.png`         | 512  | 88%                          | x 622, y 590                     | Play's listing, uploaded at 68b; the site doesn't serve it          |
 
-- **Unmasked** (#133). The manifest's `any` icons, the splash drawn from the 1024, and the favicon
-  show the whole art at Gate 18's shares: 75%, the framing the owner approved and ruled
+- **Unmasked** (#133). The manifest's `any` icons, the Play app's launch, which is the 1024, and
+  the favicon show the whole art at Gate 18's shares: 75%, the framing the owner approved and ruled
   (issuecomment-5932066607), the master at 82%; and 90% for the favicon, which a tab draws at 16
   px. Each is centred on the art's mass, the mean of its pixels' places, y 605.0. Gate 18 centred
   them on the box's middle, y 638, which left the mass 2.2% of the width above the centre. Across,
@@ -57,16 +57,20 @@ ground at every edge; the art is 53 px in at its nearest. Every file is a 32-bit
     one, by the ratio of `MASKABLE_SAFE_ZONE_RATIO`, 4/5, to `ADAPTIVE_SAFE_ZONE_RATIO`, 66/108,
     in Chromium's `WebappsIconUtils` (#129). The image spans 82.5 dp, so 88% × 72 / 82.5 = 76.8%.
     Laid out that way, 10a's file and 129a's match the owner's screenshots of their checks within
-    a pixel; laid out over 91 dp, they differ from them twice as much or more. **Bubblewrap,**
-    which builds the Play app (68b), insets the image 8.5 dp a side in its `ic_launcher.xml`, so it
-    spans 91 dp, and 68b gives it its own file at 88% × 72 / 91 = 69.6%.
+    a pixel; laid out over 91 dp, they differ from them twice as much or more. **The Play app**
+    insets the image 8.5 dp a side in its `ic_launcher.xml`, as Bubblewrap laid it out for the TWA
+    (68b) and the WebView shell keeps it (68d), so it spans 91 dp, and 68b gives it its own file at
+    88% × 72 / 91 = 69.6%. The shell's launcher files are the ones Bubblewrap made from that file,
+    kept as built: nothing in the repository makes them again, so a new icon needs them remade.
   - **The iPhone and Play** show the whole square under their own corners, Play's at 30% of the
     side, so each file is the launcher's view: 88% of the square. The iPhone's is 180, Apple's size
     for it. The store's is Play's full-square 512, a "32-bit PNG (with alpha)" of at most 1024 KB.
     Play takes it by upload, so it sits beside the feature graphic, and the site doesn't serve it.
-- **The splash.** Bubblewrap draws it at 300 dp from the largest `any` icon, 900 px at xxhdpi and
-  1,200 at xxxhdpi, so the 1024 gives it the art rather than the 512 enlarged (Gate 18's ruling,
-  its fifth file).
+- **The launch.** The Play app opens on the 1024 at 300 dp, 900 px at xxhdpi and 1,200 at
+  xxxhdpi, as Bubblewrap drew the TWA's splash from the largest `any` icon, so the 1024 gives it
+  the art rather than the 512 enlarged (Gate 18's ruling, its fifth file). The shell keeps a copy,
+  `android/app/src/main/res/drawable-nodpi/splash.png`, which its test holds to this file byte for
+  byte (68d).
 - **What a first visit downloads.** The service worker precaches the two icons the game's page
   links, the favicon and the iPhone's 180. The manifest's icons are read when the app is
   installed, never offline, so they aren't precached.

@@ -144,7 +144,7 @@ export default defineConfig({
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-          // The largest `any` icon, so Bubblewrap draws its splash from it (Gate 18's ruling).
+          // The largest `any` icon (Gate 18's ruling), which the Play app's launch copies (68d).
           { src: 'icons/icon-1024.png', sizes: '1024x1024', type: 'image/png' },
           {
             src: 'icons/icon-512-maskable.png',
