@@ -1,0 +1,17 @@
+// The Android Gradle plugin, the version Bubblewrap 1.27.0's template builds with (68b).
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.9.1'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}

@@ -1,30 +1,31 @@
 # The Android shell
 
-Behold's app on Google Play is a Trusted Web Activity: a small Android app that opens the game,
-`https://play.beholdgame.com`, in the phone's browser, full screen and without its address bar,
-once the site's asset links vouch for the app (Gate 17, #68).
-[Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap) makes the Android project from this
-folder's `twa-manifest.json`, then builds and signs it.
+Behold's app on Google Play is a WebView shell: a small Android app, this folder's project, that
+shows the game from its site, `https://play.beholdgame.com`, in a WebView between Android's bars
+(Gate 17's A1 as amended, #68). It ships no web content, so every merge to `main` reaches it as it
+reaches the site. It keeps its own progress, apart from the browser's, and opens every link off the
+game in the browser. Until 68d it was a Trusted Web Activity, which Bubblewrap built.
 
 ## What the repository keeps here
 
-- **`twa-manifest.json`,** the app's config. `bubblewrap init` wrote it, and it is held to Gate 17
-  A1's table as amended (#68). `src/android.test.ts` holds it to that table and to the web
-  manifest the build writes, the file Bubblewrap reads.
+- **`shell.json`,** the app's config: A1's table as ruled for the shell. The Gradle build reads
+  it, and `src/android.test.ts` holds it to that table and to the web manifest the build writes.
+- **The project:** `settings.gradle`, `build.gradle`, and `gradle.properties`, and the app in
+  `app/`: its manifest, its one activity (`MainActivity.java`), its theme, its launch, and its
+  launcher files. Bubblewrap made the launcher files for the TWA (68b), and they are kept as built.
+- **Gradle's wrapper,** `gradlew`, `gradlew.bat`, and `gradle/wrapper/`: Gradle 8.11.1's own,
+  under the Apache License 2.0 its files name. The test holds its jar, and the distribution it
+  downloads, to the SHA-256s Gradle publishes.
 - **`listing.md`,** the store listing's words.
 - **This README.**
 
-Git ignores everything else Bubblewrap writes here: the project (`app/` and Gradle's files), its
-`manifest-checksum.txt` and `store_icon.png`, and the builds. `bubblewrap update` makes all but the
-builds again from the config, and `bubblewrap build` makes those. Don't run `bubblewrap init` here
-again: it writes a new config over this one.
+Git ignores Gradle's state (`.gradle/`, `build/`, and `app/build/`), `local.properties`, and the
+builds.
 
 ## Tools, once per PC
 
-1. **JDK 17, the 64-bit build.** Bubblewrap needs 17 exactly. On Windows, the JDK it downloads
-   itself is the 32-bit build, which often can't reserve the 1.5 GB heap Gradle asks for
-   ([Bubblewrap's #611](https://github.com/GoogleChromeLabs/bubblewrap/issues/611)). So download
-   Temurin 17.0.11+9 for x64 and unzip it to `$HOME\.bubblewrap\jdk-x64`:
+1. **JDK 17, the 64-bit build,** as the Android Gradle plugin needs. On Windows, download Temurin
+   17.0.11+9 for x64 and unzip it to `$HOME\.bubblewrap\jdk-x64`, the folder the TWA's builds used:
 
    ```powershell
    $ProgressPreference = 'SilentlyContinue'
@@ -37,19 +38,31 @@ again: it writes a new config over this one.
    The hash should read `FDD6664D4131370398FBC8BFBB7B46DBFEC4A22A090A511FE5C379DAE188C390`, as
    Adoptium publishes it beside the file, and the last line `JAVA_VERSION="17.0.11"`.
 
-2. **Bubblewrap 1.27.0:**
+2. **The Android SDK,** with Android 36 and build tools 35.0.0. The PC that built the TWA has the
+   one Bubblewrap installed, at `$HOME\.bubblewrap\android_sdk`. On another PC, install Android's
+   command-line tools, accept their licences with `sdkmanager --licenses`, and then run
+   `sdkmanager "platforms;android-36" "build-tools;35.0.0"`.
 
-   ```powershell
-   npm install -g @bubblewrap/cli@1.27.0
-   npm ls -g @bubblewrap/core
+3. **`local.properties`,** in this folder, naming the SDK in forward slashes:
+
+   ```properties
+   sdk.dir=C:/Users/<you>/.bubblewrap/android_sdk
    ```
 
-   The second line should list `@bubblewrap/core@1.27.0`, the part that makes the project.
+Bubblewrap itself is no longer needed.
 
-3. **`bubblewrap doctor`.** Every Bubblewrap command sets itself up on its first run, so the first
-   is this one. Decline its JDK, and give the folder from step 1, typed out in full: your home
-   folder, then `.bubblewrap\jdk-x64\jdk-17.0.11+9`. Let it install the Android SDK, once you've
-   read its terms. It ends "Your jdkpath and androidSdkPath are valid."
+## Once, in a checkout that built the TWA
+
+Bubblewrap wrote its own project into this folder, and Git ignored it: its `app/`, its Gradle
+files, `manifest-checksum.txt`, `store_icon.png`, and the TWA's builds. Its files would mix with
+this project's, and its Java would break the build, so they go. The TWA's bundle is already on
+Play. From the repository's root:
+
+- **Before pulling 68d,** while Git still ignores them, `git clean -ndX android` lists them and
+  `git clean -fdX android` deletes them.
+- **After pulling it,** Git no longer ignores the ones 68d doesn't replace.
+  `git clean -ndx android` lists every file in this folder that Git doesn't track, and
+  `git clean -fdx android` deletes them. Write `local.properties` again after it.
 
 ## The upload key
 
@@ -59,11 +72,9 @@ you upload. Play signs the app that players install with its own keys (Play App 
 site's asset links, `public/.well-known/assetlinks.json`, name Play's three keys as well as this
 one.
 
-1. **One password, at both prompts.** Bubblewrap asks "Password for the Key Store:" and then
-   "Password for the Key:" at every build, as `init` did when it made the key. Give the same
-   password at both: keytool's PKCS12 keystores ignore a separate key password, so a different one
-   fails at Bubblewrap's signing. It is long, in letters and digits only, since Bubblewrap hands it
-   to keytool, apksigner, and jarsigner on a `cmd` line, where `%` or `"` can break it.
+1. **One password.** The keystore has one password, and the key the same, since keytool's PKCS12
+   keystores ignore a separate key password. jarsigner asks for it at every signing: "Enter
+   Passphrase for keystore:". It is long, in letters and digits only.
 
 2. **Where it is kept.** On the PC, at the path above; and in the password manager, the keystore
    file as an attachment, with its password. Neither the file nor the password goes in the
@@ -91,28 +102,26 @@ one.
 In PowerShell, from this folder:
 
 ```powershell
-bubblewrap update --skipVersionUpgrade
-bubblewrap build
+$env:JAVA_HOME = "$HOME\.bubblewrap\jdk-x64\jdk-17.0.11+9"
+.\gradlew.bat bundleRelease
+& "$env:JAVA_HOME\bin\jarsigner.exe" -sigalg SHA256withRSA -digestalg SHA-256 -keystore ..\..\behold-keys\upload.keystore app\build\outputs\bundle\release\app-release.aab upload
 ```
 
-- **`update --skipVersionUpgrade`** deletes the project and makes it again from the config, so it
-  runs after a fresh checkout and after any change to the config. It fetches every icon from its
-  address on the site, so a new icon is deployed before it runs. The flag keeps the version the
-  config has.
-- **`build`** asks for the password at both prompts, then writes `app-release-bundle.aab`, for
-  Play, and `app-release-signed.apk`, for a phone by hand. The first build installs Android's
-  build tools, whose licence it asks you to accept, and Gradle downloads what it needs.
-- **If `build` offers to apply the config, or to make the project again, stop it with Ctrl+C.** A
-  yes runs its own update, without the flag, which raises the version code; a no builds the
-  project as it was. Run `update --skipVersionUpgrade`, then `build` again.
+- **`bundleRelease`** writes the bundle, unsigned, to `app\build\outputs\bundle\release\`. The
+  first build downloads the Android Gradle plugin's libraries from Google's Maven repository and
+  Maven Central. The wrapper checks the Gradle it downloads against the SHA-256 in
+  `gradle/wrapper/gradle-wrapper.properties`, and stops if it differs.
+- **jarsigner** asks for the password, then signs the bundle in place with the upload key.
 
 ## Uploading
 
-- **In Play Console,** create a release on a testing track, upload `app-release-bundle.aab`, and
-  roll it out. The first upload enrols the app in Play App Signing, and its App integrity page
-  then lists the SHA-256 fingerprints of Play's three keys, which the asset links list first.
-- **Play takes each version code once,** so each upload after the first raises it. On a branch,
-  `bubblewrap update --appVersionName=<name>` raises `appVersionCode` by one, sets `appVersion` to
-  the name, and saves the config in Bubblewrap's own form, so then run
-  `npx prettier --write twa-manifest.json`. The PR carries the config, and the test's table rows
-  for the version with it. Once it merges, build from `main`, as above.
+- **In Play Console,** create a release on a testing track, upload `app-release.aab`, and roll it
+  out. Play's App integrity page lists the SHA-256 fingerprints of Play's three app signing keys,
+  which the asset links list first.
+- **To check a build on a phone,** upload it to the internal track and install it from there, so
+  it is the build Play serves, with Play's automatic protection.
+- **Play takes each version code once,** so each upload raises it. On a branch, raise
+  `appVersionCode` in `shell.json` by one, and `appVersion` with it when the shell changes, and the
+  test's rows for them. The PR carries them. Once it merges, build from `main`, as above.
+- **Play raises the target API it requires** from time to time. `targetSdkVersion` in
+  `shell.json` rises with it, and the SDK platform with that.

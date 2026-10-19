@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The launch, as the TWA's splash was: the 1024's art at 300 dp on the background (Gate 18). -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/backgroundColor" />
+    <item
+        android:width="300dp"
+        android:height="300dp"
+        android:drawable="@drawable/splash"
+        android:gravity="center" />
+</layer-list>

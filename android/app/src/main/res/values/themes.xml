@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The window before the page paints, and Android's bars below 15, coloured as the TWA's were
+         (A1's table): the status bar the manifest's theme colour, the navigation bar and the splash
+         its background. From Android 15 the app draws edge to edge, and MainActivity colours the
+         bars' bands itself. -->
+    <style name="Base.Shell" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/backgroundColor</item>
+        <item name="android:statusBarColor">@color/themeColor</item>
+        <item name="android:navigationBarColor">@color/navigationColor</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+    <style name="Shell" parent="Base.Shell" />
+</resources>

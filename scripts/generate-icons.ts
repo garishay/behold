@@ -51,14 +51,14 @@ const MIDDLE = { x: 622, y: 590 }
 
 /**
  * The files, each with the art's share of its width and the master's point at its centre. The
- * manifest's `any` icons, the 1024 that Bubblewrap draws its splash from at 300 dp (Gate 18's
- * ruling), and the favicon, which a browser's tab draws at 16 px, show the whole art unmasked.
- * The launcher, the iPhone, and Play mask it. Chrome's install lays the maskable image over 82.5
- * dp of the launcher's 108, padding it so the spec's 80% safe circle meets Android's 66 dp one,
- * and the launcher shows the middle 72 (#129). The Play app, which Bubblewrap builds, insets its
- * own file 8.5 dp a side, so it spans 91 (#68): no manifest names that file, and the shell's
- * config does. The iPhone and Play show the whole square under their own corners. The store's
- * icon is uploaded to Play, not served, so it sits in `assets/`.
+ * manifest's `any` icons, the 1024 that the Play app's launch shows at 300 dp (Gate 18's ruling),
+ * and the favicon, which a browser's tab draws at 16 px, show the whole art unmasked. The
+ * launcher, the iPhone, and Play mask it. Chrome's install lays the maskable image over 82.5 dp of
+ * the launcher's 108, padding it so the spec's 80% safe circle meets Android's 66 dp one, and the
+ * launcher shows the middle 72 (#129). The Play app insets its own file 8.5 dp a side, as
+ * Bubblewrap laid it out, so it spans 91 (#68): no manifest names that file, and the Play app's
+ * launcher files were made from it. The iPhone and Play show the whole square under their own
+ * corners. The store's icon is uploaded to Play, not served, so it sits in `assets/`.
  */
 export const ICONS = [
   { file: 'public/icons/icon-192.png', size: 192, share: UNMASKED, centre: MASS },

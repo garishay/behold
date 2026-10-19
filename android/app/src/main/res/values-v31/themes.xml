@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12's own splash, before the app's first frame: the background alone, with no icon,
+         so the launch's art is the one picture the player sees (MainActivity). -->
+    <style name="Shell" parent="Base.Shell">
+        <item name="android:windowSplashScreenBackground">@color/backgroundColor</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@android:color/transparent</item>
+    </style>
+</resources>

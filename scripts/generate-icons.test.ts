@@ -48,8 +48,8 @@ const fromGround = (pixels: Uint8Array, at: number) =>
 const CHROME = 82.5
 
 /**
- * The dp of a launcher icon's 108 that the Play app lays its own maskable icon over: Bubblewrap's
- * `ic_launcher.xml` insets it 8.5 dp a side (68b, #68).
+ * The dp of a launcher icon's 108 that the Play app lays its own maskable icon over: its
+ * `ic_launcher.xml` insets it 8.5 dp a side, as Bubblewrap's did for the TWA (68b, 68d, #68).
  */
 const BUBBLEWRAP = 91
 
