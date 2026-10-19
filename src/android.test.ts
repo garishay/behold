@@ -1,18 +1,19 @@
 // @vitest-environment node
-// The Android shell (Gate 17, #68): `android/twa-manifest.json`, the config Bubblewrap makes the
-// Play app from, held to the web manifest as the build writes it — the file Bubblewrap reads at
-// `init` — and to A1's table as amended (#68); the site's asset links, which vouch for the app
-// (68c); and `android/listing.md`, the store listing's words, held to Play's limits and to the
-// game's own copy. The build is Vite's own, run once with the app's config into a folder of its
-// own, as the privacy page's test runs it.
+// The Android shell (Gate 17, #68): the Play app's own project in `android/`, a WebView that opens
+// the game from its site. `android/shell.json`, the config its Gradle build reads, is held to the
+// web manifest as the build writes it and to A1's table as ruled for the WebView (#68); the app's
+// Android manifest to its one permission and the flags the gate names; the site's asset links,
+// which vouch for the app (68c); and `android/listing.md`, the store listing's words, held to
+// Play's limits and to the game's own copy. The build is Vite's own, run once with the app's config
+// into a folder of its own, as the privacy page's test runs it.
 /// <reference types="node" />
 import { execFileSync } from 'node:child_process'
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import { createHash } from 'node:crypto'
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join, relative, resolve } from 'node:path'
+import { join } from 'node:path'
 import { build } from 'vite'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { ICONS } from '../scripts/generate-icons.ts'
 import { cases } from './cases/index.ts'
 import { strings } from './strings/en.ts'
 
@@ -20,32 +21,23 @@ import { strings } from './strings/en.ts'
 interface WebManifest {
   name: string
   short_name: string
-  display: string
   orientation: string
   theme_color: string
   background_color: string
   start_url: string
-  scope: string
-  icons: { src: string; sizes: string; purpose?: string }[]
 }
 
-/** The config as Bubblewrap writes it, the fields read here by name. */
+/** The shell's config as its Gradle build reads it, the fields read here by name. */
 interface Config {
   [field: string]: unknown
   packageId: string
   host: string
+  startUrl: string
   name: string
   launcherName: string
-  display: string
   orientation: string
   themeColor: string
   backgroundColor: string
-  startUrl: string
-  iconUrl: string
-  maskableIconUrl: string
-  webManifestUrl: string
-  fullScopeUrl: string
-  signingKey: { path: string; alias: string }
 }
 
 /** A statement of the site's asset links, as Digital Asset Links reads one. */
@@ -71,11 +63,9 @@ const FINGERPRINTS = [
 ]
 
 /**
- * A1's table as amended (#68), row by row: the config `init` wrote, with the rows it writes
- * otherwise set by hand — the bars' colours, notifications, the oldest Android it installs on,
- * the version's name, and the maskable icon. Bubblewrap writes the version's name twice and reads
- * `appVersion`. The navigation bar's divider takes the bar's own colour, so no line shows above
- * the bar (#12 [Q28]): `init` writes it black, its transparent default's alpha dropped.
+ * A1's table as ruled for the WebView shell (#68), row by row: the package and the address the
+ * app opens, its names, the bars' and the splash's colours as the TWA had them, the oldest Android
+ * it installs on and the one it targets, and its version, the one after the TWA's first upload.
  */
 const TABLE = {
   packageId: 'house.shay.behold',
@@ -83,36 +73,21 @@ const TABLE = {
   startUrl: '/',
   name: 'Behold: Bible Mystery Game',
   launcherName: 'Behold',
-  display: 'standalone',
   orientation: 'portrait',
   themeColor: '#232A3D',
-  backgroundColor: '#1B2033',
   navigationColor: '#1B2033',
-  themeColorDark: '#232A3D',
-  navigationColorDark: '#1B2033',
-  navigationDividerColor: '#1B2033',
-  navigationDividerColorDark: '#1B2033',
-  iconUrl: 'https://play.beholdgame.com/icons/icon-1024.png',
-  maskableIconUrl: 'https://play.beholdgame.com/icons/icon-512-maskable-android.png',
-  monochromeIconUrl: undefined,
-  fallbackType: 'customtabs',
-  enableNotifications: false,
+  backgroundColor: '#1B2033',
   minSdkVersion: 24,
-  enableSiteSettingsShortcut: true,
-  appVersionCode: 1,
-  appVersion: '1.0.0',
-  appVersionName: '1.0.0',
-  signingKey: { path: '../../behold-keys/upload.keystore', alias: 'upload' },
-  // Everything else as `init` writes it: no shortcuts, features, display override, extra
-  // origins, or fingerprints.
-  shortcuts: [],
-  features: {},
-  displayOverride: [],
-  additionalTrustedOrigins: [],
-  fingerprints: [],
+  targetSdkVersion: 36,
+  appVersionCode: 2,
+  appVersion: '1.1.0',
 }
 
-const config: Config = JSON.parse(readFileSync('android/twa-manifest.json', 'utf8'))
+const config: Config = JSON.parse(readFileSync('android/shell.json', 'utf8'))
+/** The app's Android manifest, as the project keeps it. */
+const appManifest = readFileSync('android/app/src/main/AndroidManifest.xml', 'utf8')
+/** A file's SHA-256, in lower-case hex. */
+const sha256 = (file: string) => createHash('sha256').update(readFileSync(file)).digest('hex')
 
 /** The listing's fields by heading, each the `text` block under it, as it goes into Play Console. */
 const listing = Object.fromEntries(
@@ -135,10 +110,9 @@ beforeAll(async () => {
 afterAll(() => rmSync(out, { recursive: true, force: true }))
 
 describe('the shell’s config against the web manifest the build writes (#68)', () => {
-  it('names the app and shows it as the manifest does', () => {
+  it('names the app and turns it as the manifest does', () => {
     expect(config.name).toBe(manifest.name)
     expect(config.launcherName).toBe(manifest.short_name)
-    expect(config.display).toBe(manifest.display)
     expect(config.orientation).toBe(manifest.orientation)
   })
 
@@ -147,41 +121,90 @@ describe('the shell’s config against the web manifest the build writes (#68)',
     expect(config.backgroundColor.toUpperCase()).toBe(manifest.background_color.toUpperCase())
   })
 
-  it('reads the manifest at its address on the app’s host, and starts where it starts', () => {
-    const address = new URL(config.webManifestUrl)
-    expect(address.host).toBe(config.host)
-    expect(address.pathname).toBe('/manifest.webmanifest')
-    const start = new URL(manifest.start_url, address)
+  it('opens the game where the manifest starts it, on the app’s host', () => {
+    const start = new URL(manifest.start_url, `https://${config.host}/`)
     expect(config.startUrl).toBe(start.pathname + start.search)
-    expect(config.fullScopeUrl).toBe(new URL(manifest.scope, address).href)
-  })
-
-  it('takes its icon from the manifest’s largest `any` icon, which the splash is drawn from', () => {
-    const any = manifest.icons.filter(({ purpose = 'any' }) => purpose.split(' ').includes('any'))
-    const largest = any.reduce((a, b) => (parseInt(b.sizes) > parseInt(a.sizes) ? b : a))
-    expect(config.iconUrl).toBe(new URL(largest.src, config.webManifestUrl).href)
-  })
-
-  // Bubblewrap's launcher lays the maskable image over 91 dp of the 108, where Chrome's install
-  // lays it over 82.5, so the Play app has a file of its own, framed for 91 (#68, #133).
-  it('takes its maskable icon from a file the icon script frames for it, not Chrome’s', () => {
-    const chrome = manifest.icons
-      .filter(({ purpose = 'any' }) => purpose.split(' ').includes('maskable'))
-      .map(({ src }) => new URL(src, config.webManifestUrl).href)
-    expect(chrome).not.toContain(config.maskableIconUrl)
-    const { pathname } = new URL(config.maskableIconUrl)
-    expect(ICONS.map(({ file }) => file)).toContain(`public${pathname}`)
   })
 })
 
-describe('the shell’s config against A1’s table as amended (#68)', () => {
+describe('the shell against A1’s table as ruled for the WebView (#68)', () => {
   it.each(Object.entries(TABLE))('says %s is %j', (field, value) => {
     expect(config[field]).toEqual(value)
   })
 
-  it('keeps the upload key outside the repository, and the repository tracks no key', () => {
-    const key = resolve('android', config.signingKey.path)
-    expect(relative(resolve('.'), key)).toMatch(/^\.\.[\\/]/)
+  it('names nothing in its config but the table’s rows', () => {
+    expect(Object.keys(config).sort()).toEqual(Object.keys(TABLE).sort())
+  })
+
+  it('builds the package from the config', () => {
+    const gradle = readFileSync('android/app/build.gradle', 'utf8')
+    expect(gradle).toContain("file('../shell.json')")
+    expect(gradle).toContain(`namespace '${config.packageId}'`)
+  })
+
+  it('asks for the internet alone, keeps no cloud backup, and sends WebView no diagnostics', () => {
+    const permissions = [...appManifest.matchAll(/<uses-permission android:name="([^"]+)"/g)]
+    expect(permissions.map(([, name]) => name)).toEqual(['android.permission.INTERNET'])
+    expect(appManifest).toContain('android:allowBackup="false"')
+    expect(appManifest).toMatch(
+      /android:name="android\.webkit\.WebView\.MetricsOptOut"\s+android:value="true"/,
+    )
+  })
+
+  // Android 16 ignores an app's orientation on a large screen, unless the app is a game.
+  it('says it is a game, so it stays upright on a tablet', () => {
+    expect(appManifest).toContain('android:appCategory="game"')
+    expect(appManifest).toContain('android:screenOrientation="${orientation}"')
+  })
+
+  it('takes the site’s links, which its asset links verify', () => {
+    expect(appManifest).toMatch(
+      /<intent-filter android:autoVerify="true">[^]*android:host="\$\{host\}"\s+android:scheme="https"/,
+    )
+  })
+
+  // Bubblewrap made them from the icon script's Android file and laid the maskable image over 91
+  // dp of the 108; 68b measured the result on the owner's phone (#68).
+  it('keeps the launcher icons Bubblewrap made for the TWA, at every density', () => {
+    for (const density of ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi', 'xxxhdpi'])
+      for (const icon of ['ic_launcher', 'ic_maskable'])
+        expect(existsSync(`android/app/src/main/res/mipmap-${density}/${icon}.png`), density).toBe(
+          true,
+        )
+    expect(
+      readFileSync('android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml', 'utf8'),
+    ).toContain('android:top="8.5dp"')
+  })
+
+  // Bubblewrap drew the TWA's splash at 300 dp from the 1024 (Gate 18); the shell draws the same file
+  // the same size, and Android 12's own splash before it shows the background alone.
+  it('opens on the 1024’s art at 300 dp, as the TWA’s splash did, and on no other picture', () => {
+    expect(sha256('android/app/src/main/res/drawable-nodpi/splash.png')).toBe(
+      sha256('public/icons/icon-1024.png'),
+    )
+    const launch = readFileSync('android/app/src/main/res/drawable/launch.xml', 'utf8')
+    expect(launch).toMatch(/android:width="300dp"\s+android:height="300dp"/)
+    expect(readFileSync('android/app/src/main/res/values-v31/themes.xml', 'utf8')).toContain(
+      '<item name="android:windowSplashScreenAnimatedIcon">@android:color/transparent</item>',
+    )
+  })
+
+  // The wrapper is Gradle 8.11.1's own, and the Gradle it downloads is checked before it runs: each
+  // by the SHA-256 Gradle publishes beside it at services.gradle.org.
+  it('builds with Gradle 8.11.1’s own wrapper, which checks the Gradle it downloads', () => {
+    const properties = readFileSync('android/gradle/wrapper/gradle-wrapper.properties', 'utf8')
+    expect(properties).toContain(
+      'distributionUrl=https\\://services.gradle.org/distributions/gradle-8.11.1-bin.zip',
+    )
+    expect(properties).toContain(
+      'distributionSha256Sum=f397b287023acdba1e9f6fc5ea72d22dd63669d59ed4a289a29b1a76eee151c6',
+    )
+    expect(sha256('android/gradle/wrapper/gradle-wrapper.jar')).toBe(
+      '2db75c40782f5e8ba1fc278a5574bab070adccb2d21ca5a6e5ed840888448046',
+    )
+  })
+
+  it('tracks no key in the repository', () => {
     const keys = execFileSync('git', ['ls-files', '--', '*.keystore', '*.jks'], {
       encoding: 'utf8',
     })

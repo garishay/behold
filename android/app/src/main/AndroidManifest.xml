@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Play app (Gate 17, #68): one activity, the game from its site in a WebView. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- The WebView loads the game from its site. The app asks for nothing else. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- No cloud backup, so the game's progress stays on the phone, as the privacy page says (#9).
+         A game, so Android 16 keeps it upright on a tablet too, as A1's table has it. -->
+    <application
+        android:allowBackup="false"
+        android:appCategory="game"
+        android:enableOnBackInvokedCallback="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/appName"
+        android:supportsRtl="true"
+        android:theme="@style/Shell">
+
+        <!-- WebView uploads no diagnostics from this app ("Manage WebView objects"). -->
+        <meta-data
+            android:name="android.webkit.WebView.MetricsOptOut"
+            android:value="true" />
+
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation|uiMode|density|fontScale"
+            android:exported="true"
+            android:label="@string/launcherName"
+            android:launchMode="singleTask"
+            android:screenOrientation="${orientation}">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- A link to the site opens the app, as the TWA's did: the asset links vouch for it (68c). -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="${host}"
+                    android:scheme="https" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

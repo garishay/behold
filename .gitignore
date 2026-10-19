@@ -146,12 +146,15 @@ vite.config.ts.timestamp-*
 .wrangler/
 .dev.vars
 
-# The Android shell (Gate 17, #68): Bubblewrap writes its whole project into android/ from
-# twa-manifest.json, so the repository keeps the config, its README, and the listing's words
-android/*
-!android/twa-manifest.json
-!android/README.md
-!android/listing.md
+# The Android shell (Gate 17, #68): the repository keeps its project; Gradle's state, the SDK's
+# path on this PC, and the builds stay out
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/*.aab
+android/*.apk
+android/*.idsig
 
 # The upload key stays outside the repository (Gate 17 A3, #13 [G12])
 *.keystore

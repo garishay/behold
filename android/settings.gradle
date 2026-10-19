@@ -1,0 +1,3 @@
+// The Android shell (Gate 17, #68): one module, the app.
+rootProject.name = 'behold'
+include ':app'
