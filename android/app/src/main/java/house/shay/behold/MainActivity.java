@@ -68,8 +68,8 @@ public class MainActivity extends Activity {
         web.setWebViewClient(new Pages());
         web.setWebChromeClient(new Tabs());
         setContentView(layout());
-        if (saved != null) web.restoreState(saved);
-        else web.loadUrl(address(getIntent()));
+        // After the renderer is gone, the bundle holds Android's own state but no page to restore.
+        if (saved == null || web.restoreState(saved) == null) web.loadUrl(address(getIntent()));
     }
 
     /**

@@ -86,6 +86,11 @@ const TABLE = {
 const config: Config = JSON.parse(readFileSync('android/shell.json', 'utf8'))
 /** The app's Android manifest, as the project keeps it. */
 const appManifest = readFileSync('android/app/src/main/AndroidManifest.xml', 'utf8')
+/** The app's one activity, as the project keeps it. */
+const activity = readFileSync(
+  'android/app/src/main/java/house/shay/behold/MainActivity.java',
+  'utf8',
+)
 /** A file's SHA-256, in lower-case hex. */
 const sha256 = (file: string) => createHash('sha256').update(readFileSync(file)).digest('hex')
 
@@ -226,6 +231,19 @@ describe('the shell against A1’s table as ruled for the WebView (#68)', () => 
       encoding: 'utf8',
     })
     expect(keys).toBe('')
+  })
+})
+
+// The activity runs only on a phone, and nothing here runs it. Each test holds a fix from the
+// owner's review of 68d (#149) as text, and fails on the code before it; the phone check reads
+// what the fix does.
+describe('the shell’s activity (A3, #68)', () => {
+  // Android's own state fills the bundle a restart is given, even when the activity saved no page,
+  // as after its renderer is gone; and restoring a bundle with no page in it gives null.
+  it('loads the page when a restart finds none to restore, as after its renderer is gone', () => {
+    expect(activity).toContain(
+      'if (saved == null || web.restoreState(saved) == null) web.loadUrl(address(getIntent()));',
+    )
   })
 })
 
