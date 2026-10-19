@@ -17,7 +17,13 @@ const named = rest.match(/(?:[\w.-]+\/)+(?:\w[\w.-]*\w)?|\b[\w-]+\.(?:md|jpg|png
 const under = (paths: readonly string[]) => (file: string) =>
   paths.some((path) => (path.endsWith('/') ? file.startsWith(path) : file === path))
 
-const pictures = ['public/cases/', 'public/title.jpg', 'public/icons/', 'assets/']
+const pictures = [
+  'public/cases/',
+  'public/title.jpg',
+  'public/icons/',
+  'assets/',
+  'android/app/src/main/res/',
+]
 const sounds = ['public/audio/']
 
 describe('LICENSE (Gate 35, #79)', () => {
