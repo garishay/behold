@@ -31,11 +31,21 @@ export function Title({ leaving, onBegin }: TitleProps) {
   const kicker = useRef<HTMLParagraphElement>(null)
   useEffect(() => keep([titlePicture]), [])
   // The name fits the column at any text size (#152): where it would run past it, as at a phone's
-  // largest text, it is set smaller by as much.
+  // largest text, it is set smaller by as much. The Play app applies a font size changed while it
+  // runs, with no reload, so the name is measured again whenever the kicker under it, whose text
+  // follows the font size, changes size.
   useLayoutEffect(() => {
-    const h = name.current
-    if (h && h.scrollWidth > h.clientWidth)
-      h.style.setProperty('--fit', `${Math.floor((h.clientWidth / h.scrollWidth) * 1000) / 1000}`)
+    const [h, under] = [name.current, kicker.current]
+    if (!h || !under) return
+    const fit = () => {
+      h.style.removeProperty('--fit')
+      if (h.scrollWidth > h.clientWidth)
+        h.style.setProperty('--fit', `${Math.floor((h.clientWidth / h.scrollWidth) * 1000) / 1000}`)
+    }
+    fit()
+    const watch = new ResizeObserver(fit)
+    watch.observe(under)
+    return () => watch.disconnect()
   }, [])
   useLayoutEffect(() => {
     if (!leaving) return

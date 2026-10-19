@@ -4001,6 +4001,36 @@ describe('the largest font (#152)', () => {
     expect(screen.getByRole('heading', { name: 'Behold' }).style.getPropertyValue('--fit')).toBe('')
   })
 
+  // The Play app applies a font size changed while it runs, with no reload, and the kicker under the
+  // name follows it: as the kicker changes size, the name is set smaller as the text grows, and
+  // whole again as it shrinks.
+  it('measures the title’s name again when the text size changes while it shows', () => {
+    let resized = () => {}
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: () => void) {
+          resized = callback
+        }
+        observe() {}
+        disconnect() {}
+      },
+    )
+    const wide = vi.spyOn(Element.prototype, 'scrollWidth', 'get').mockReturnValue(300)
+    vi.spyOn(Element.prototype, 'clientWidth', 'get').mockReturnValue(320)
+    render(<App />)
+    const name = screen.getByRole('heading', { name: 'Behold' })
+    expect(name.style.getPropertyValue('--fit')).toBe('')
+    wide.mockImplementation(function (this: Element) {
+      return this.tagName === 'H1' ? 390 : 0
+    })
+    resized()
+    expect(name.style.getPropertyValue('--fit')).toBe('0.82')
+    wide.mockReturnValue(300)
+    resized()
+    expect(name.style.getPropertyValue('--fit')).toBe('')
+  })
+
   // The caption ends at 488, and the picture's row starts at 52, under a picker: the caption opens
   // no taller than the 436 px between them, so the picker stays clear.
   it('opens a long caption no taller than the picture’s row above where it ends', () => {
