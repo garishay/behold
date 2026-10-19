@@ -241,9 +241,9 @@ export interface Policy {
 export const policy: Policy = {
   tab: 'Behold: Privacy policy',
   title: 'Privacy policy',
-  effective: 'Takes effect 15 October 2026.',
+  effective: 'Takes effect 20 October 2026.',
   intro:
-    'Behold is a Bible mystery game that runs in your web browser, at play.beholdgame.com or installed on your device. This page says what the game keeps, what it sends, and who sees it.',
+    'Behold is a Bible mystery game that runs in your web browser, at play.beholdgame.com or installed on your device, and in its own app from Google Play. This page says what the game keeps, what it sends, and who sees it.',
   sections: [
     {
       heading: 'In short',
@@ -256,7 +256,7 @@ export const policy: Policy = {
     {
       heading: 'What stays on your device',
       points: [
-        'Your progress in each case: where you left off, what you’ve found, the words you’ve placed, the order you’ve set, the hints you asked for, the answers a close found wrong, and whether the case is closed. Your browser keeps it for this site, under behold.progress.',
+        'Your progress in each case: where you left off, what you’ve found, the words you’ve placed, the order you’ve set, the hints you asked for, the answers a close found wrong, and whether the case is closed. Your browser keeps it for this site, under behold.progress. The Google Play app keeps its own, apart from your browser’s.',
         'Whether Music and Effects are on, under behold.music and behold.effects, each kept once you first switch it.',
         'Copies that let the game work offline: its own files; the title’s and the cases’ pictures as the game loads them, up to 200; the passages shown when a case closes, up to 11, each for up to 30 days; and the music you hear, up to 8 pieces. The game notes when each copy was last used, so that the one used longest ago goes first.',
         'None of this leaves your device, and the game sets no cookies.',
@@ -265,7 +265,8 @@ export const policy: Policy = {
     {
       heading: 'What leaves your device',
       points: [
-        'Your browser asks the game’s site for its pages, pictures, and sound, as it does for any website.',
+        'Your browser, or the Google Play app, asks the game’s site for its pages, pictures, and sound, as a browser does for any website.',
+        'In the Google Play app, Android’s WebView checks the addresses the game opens with Google Safe Browsing.',
         'When a closed case shows its passages, the game asks its passage service for them, and shows your device’s own copy when the service can’t be reached. Each request names a passage and its translation, such as 1 Kings 21 in the NIV, and nothing about you.',
         'Like any request a browser makes, each one carries your device’s IP address and the usual details a browser sends, such as its type and language.',
         'Nothing else is sent: no analytics, no ads, no tracking, and no scripts or fonts from other sites.',
@@ -292,7 +293,7 @@ export const policy: Policy = {
     {
       heading: 'How long things are kept',
       points: [
-        'What the game keeps on your device stays until you clear it, within the limits above. Restart, in a case’s menu, clears that case’s progress. To clear everything, clear the stored data for play.beholdgame.com in your browser’s settings.',
+        'What the game keeps on your device stays until you clear it, within the limits above. Restart, in a case’s menu, clears that case’s progress. To clear everything, clear the stored data for play.beholdgame.com in your browser’s settings, or the Google Play app’s storage in your phone’s settings.',
         'The passage service keeps no record of your requests. GitHub and Cloudflare keep what their own policies say.',
         'If you write to the address below, your message reaches the developer’s own inbox. It stays in the developer’s inbox, and is deleted if you ask.',
       ],
