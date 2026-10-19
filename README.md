@@ -69,7 +69,14 @@ plan gate, decision rights, lanes, and what the repository enforces rather than 
 
 ## License
 
-The code is MIT — see [`LICENSE`](LICENSE). The case text and the art are not: all rights
-reserved. Scripture in the reveal is the NIV, fetched from its translation's service at display
-time, and never lives in this repository; its notice, and the source of the cases page's epigraph,
-the public-domain Berean Standard Bible, are on the game's copyright page.
+The code is MIT — see [`LICENSE`](LICENSE), which also names, by path, what MIT does not cover.
+The cases and the art are not MIT: all rights reserved. The sounds keep their own licences,
+CC0 1.0 and CC BY 4.0, each named in [`docs/sound.md`](docs/sound.md), and the music's credit is on
+the cases page.
+
+"Behold" and its icon ([`docs/icon.md`](docs/icon.md)) name this game. A copy may use the code
+under MIT, but not the name, the icon, the cases, or the art.
+
+Scripture in the reveal is the NIV, fetched from its translation's service at display time, and
+never lives in this repository; its notice, and the source of the cases page's epigraph, the
+public-domain Berean Standard Bible, are on the game's copyright page.
