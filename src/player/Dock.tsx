@@ -26,8 +26,13 @@ interface DockProps {
  * rising over the picture's foot from where the caption ends.
  */
 export function Dock({ structure, text, caption, offer, onMore }: DockProps) {
-  // Opened for one caption, from the line where it ends; the next tap's caption opens closed.
-  const [openAt, setOpenAt] = useState<{ caption: Caption | null; end: number } | null>(null)
+  // Opened for one caption, from the line where it ends, as tall as the picture's row above that
+  // line leaves it, so the picker stays clear (#152); the next tap's caption opens closed.
+  const [openAt, setOpenAt] = useState<{
+    caption: Caption | null
+    end: number
+    room: number
+  } | null>(null)
   const [long, setLong] = useState(false)
   const open = openAt !== null && openAt.caption === caption
   const box = useRef<HTMLDivElement>(null)
@@ -37,7 +42,15 @@ export function Dock({ structure, text, caption, offer, onMore }: DockProps) {
   }
   const toggle = () => {
     const b = box.current
-    const next = open || !b ? null : { caption, end: b.offsetTop + b.offsetHeight }
+    const row = document.querySelector('.stage-wrap')?.getBoundingClientRect().top ?? 0
+    const next =
+      open || !b
+        ? null
+        : {
+            caption,
+            end: b.offsetTop + b.offsetHeight,
+            room: b.getBoundingClientRect().bottom - row,
+          }
     setOpenAt(next)
     onMore(next !== null)
   }
@@ -74,9 +87,14 @@ export function Dock({ structure, text, caption, offer, onMore }: DockProps) {
         {long && !open && more}
       </div>
       {open && (
-        <div className="whole" style={{ bottom: `calc(100% - ${openAt.end}px)` }}>
-          <p>{line}</p>
-          {more}
+        <div
+          className="whole"
+          style={{ bottom: `calc(100% - ${openAt.end}px)`, maxHeight: openAt.room }}
+        >
+          <div>
+            <p>{line}</p>
+            {more}
+          </div>
         </div>
       )}
       {offer ?? <span className="found">{parts}</span>}

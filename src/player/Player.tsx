@@ -23,7 +23,7 @@ import {
 } from './hints.ts'
 import { PaperModal, PapersSheet } from './Papers.tsx'
 import { prefetch } from './pictures.ts'
-import { bring, showEmpty } from './place.ts'
+import { bring, inside, showEmpty } from './place.ts'
 import { Reveal } from './Reveal.tsx'
 import { Stage } from './Stage.tsx'
 import {
@@ -192,6 +192,29 @@ export function Player(props: PlayerProps) {
   const kept = useRef(0)
   const keep = useCallback((el: HTMLDivElement | null) => {
     el?.scrollBy({ top: kept.current, behavior: 'instant' })
+  }, [])
+  // The brief's card keeps its gap from the screen's top and foot at any text size: moved from the
+  // middle of the picture's row by as much as its height would take it past either, again as it or
+  // the screen changes size. A card whose Start would lie past the row, under the dock, as at a
+  // phone's larger text, is raised over the dock and the bar, its dim with them; any other lies under
+  // them, as it always has (#152).
+  const onScreen = useCallback((el: HTMLDivElement | null) => {
+    if (!el) return
+    const fit = () => {
+      el.style.setProperty('--shift', '0px')
+      el.style.setProperty('--shift', `${inside(el.getBoundingClientRect(), innerHeight)}px`)
+      const start = el.querySelector(':scope > button')?.getBoundingClientRect().bottom ?? 0
+      const row = el.parentElement?.getBoundingClientRect().bottom ?? 0
+      el.style.setProperty('--z', start > row ? '1' : 'auto')
+    }
+    fit()
+    const watch = new ResizeObserver(fit)
+    watch.observe(el)
+    addEventListener('resize', fit)
+    return () => {
+      watch.disconnect()
+      removeEventListener('resize', fit)
+    }
   }, [])
   // Whether Look has opened during the sweep: until it has, the sweep holds Solve to Look's button,
   // and from then on the sweep holds nothing (#77, the addendum to the sixth amendment).
@@ -713,13 +736,15 @@ export function Player(props: PlayerProps) {
             marks={hint?.why !== 'evidence'}
           >
             {card && (
-              <div className="card" role="dialog" aria-label={text.title}>
-                <h2>{text.title}</h2>
-                <p>{text.brief}</p>
-                {/* The tutorial says how to play under its brief, and a case with a note says
-                    what its screen adds (#77). */}
-                {s.steps && <p className="how">{strings.howTo}</p>}
-                {text.note && <p className="how">{text.note}</p>}
+              <div className="card" role="dialog" aria-label={text.title} ref={onScreen}>
+                <div className="words">
+                  <h2>{text.title}</h2>
+                  <p>{text.brief}</p>
+                  {/* The tutorial says how to play under its brief, and a case with a note says
+                      what its screen adds (#77). */}
+                  {s.steps && <p className="how">{strings.howTo}</p>}
+                  {text.note && <p className="how">{text.note}</p>}
+                </div>
                 <button type="button" onClick={() => setBrief(false)}>
                   {strings.start}
                 </button>

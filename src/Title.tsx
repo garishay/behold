@@ -30,6 +30,13 @@ export function Title({ leaving, onBegin }: TitleProps) {
   const name = useRef<HTMLHeadingElement>(null)
   const kicker = useRef<HTMLParagraphElement>(null)
   useEffect(() => keep([titlePicture]), [])
+  // The name fits the column at any text size (#152): where it would run past it, as at a phone's
+  // largest text, it is set smaller by as much.
+  useLayoutEffect(() => {
+    const h = name.current
+    if (h && h.scrollWidth > h.clientWidth)
+      h.style.setProperty('--fit', `${Math.floor((h.clientWidth / h.scrollWidth) * 1000) / 1000}`)
+  }, [])
   useLayoutEffect(() => {
     if (!leaving) return
     // Each glides from its place here to its place in the header, which is laid out by now: down

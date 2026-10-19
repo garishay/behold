@@ -25,16 +25,26 @@ export interface Span {
  * words never cover its caption, and a target below the dock's top, in the bar, has its words
  * above the dock (#77). On Solve the account's lines on show split the room, so the words of a
  * target above them or below them stay that side, and a target among them has its words just
- * under them: no words cover the account (#77).
+ * under them: no words cover the account (#77). The words take `size`, the room above or, where a
+ * phone's larger text sets them taller, their own height, and never run past the screen's top or
+ * foot (#152).
  */
-export function labelAt(ring: Box, floor: number, height: number, lines?: Span) {
+export function labelAt(ring: Box, floor: number, height: number, lines?: Span, size = words) {
   const mid = (ring.top + ring.bottom) / 2
-  if (lines && mid >= lines.top && mid <= lines.bottom) return { top: lines.bottom + 8 }
+  if (lines && mid >= lines.top && mid <= lines.bottom)
+    return { top: Math.min(lines.bottom + 8, height - size) }
   const [lo, hi] = !lines ? [0, floor] : mid < lines.top ? [0, lines.top] : [lines.bottom, floor]
-  if (mid - lo < (hi - lo) / 2 && ring.bottom + 8 + words <= hi) return { top: ring.bottom + 8 }
+  if (mid - lo < (hi - lo) / 2 && ring.bottom + 8 + size <= hi) return { top: ring.bottom + 8 }
   const top = Math.min(ring.top, hi)
-  return { bottom: height - (top - 8 - words >= lo ? top : hi) + 8 }
+  return { bottom: Math.min(height - (top - 8 - size >= lo ? top : hi) + 8, height - size) }
 }
+
+/**
+ * How far a box must move to keep 12 px from the screen's top and foot: down where it runs past the
+ * top, up where it runs past the foot, and not at all where it fits (#152).
+ */
+export const inside = (box: Span, height: number) =>
+  box.top < 12 ? 12 - box.top : Math.min(0, height - 12 - box.bottom)
 
 /** The boxes a target scrolls in: the account, a zoomed picture, the bank's words (07c, #24). */
 const scrollers = '.solve, .stage, .chips'

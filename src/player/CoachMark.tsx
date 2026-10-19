@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { strings } from '../strings/en.ts'
-import { bring, labelAt, scroller, type Box, type Span } from './place.ts'
+import { bring, labelAt, scroller, words, type Box, type Span } from './place.ts'
 
 interface CoachMarkProps {
   /** The target's selector: a spot, a view's button, a word, a slot, or Close the case. */
@@ -113,6 +113,10 @@ export function CoachMark({ at, label, onTap, onNext, hold, under, release }: Co
   const [dim, setDim] = useState({ at, on: true })
   // A tap the hold refuses pulses the ring once, so it still answers with where to tap (#77).
   const [pulse, setPulse] = useState(0)
+  // The words' height as drawn, read as the ring is: a phone's larger text sets them taller than
+  // the room kept for them, and they are placed by what they take (#152).
+  const [tall, setTall] = useState(0)
+  const said = useRef<HTMLDivElement>(null)
   const next = useRef<HTMLButtonElement>(null)
   // A new target dims again.
   if (dim.at !== at) setDim({ at, on: true })
@@ -131,6 +135,7 @@ export function CoachMark({ at, label, onTap, onNext, hold, under, release }: Co
       last = now
       setRing((old) => (JSON.stringify(old) === now ? old : r))
       setFloor(floorOf())
+      setTall(said.current?.offsetHeight ?? 0)
       const span = linesOf()
       setLines((old) => (JSON.stringify(old) === JSON.stringify(span) ? old : span))
       frame = held < settle ? requestAnimationFrame(follow) : 0
@@ -185,8 +190,14 @@ export function CoachMark({ at, label, onTap, onNext, hold, under, release }: Co
   const centre =
     ring &&
     Math.min(Math.max((ring.left + ring.right) / 2, half + gutter), innerWidth - half - gutter)
-  // Under the ring when the mark asks for it (#125), and else where `labelAt` puts them.
-  const room = ring && (under ? { top: ring.bottom + 8 } : labelAt(ring, floor, innerHeight, lines))
+  // Under the ring when the mark asks for it (#125), and else where `labelAt` puts them; on the
+  // screen either way (#152).
+  const size = Math.max(words, tall)
+  const room =
+    ring &&
+    (under
+      ? { top: Math.min(ring.bottom + 8, innerHeight - size) }
+      : labelAt(ring, floor, innerHeight, lines, size))
   return (
     <div className="coach" data-at={at}>
       {ring && (
@@ -204,7 +215,7 @@ export function CoachMark({ at, label, onTap, onNext, hold, under, release }: Co
             {pulse > 0 && <i key={pulse} className="pulse" onAnimationEnd={() => setPulse(0)} />}
           </div>
           {label && (
-            <div className="label" style={{ left: centre ?? 0, ...room }}>
+            <div className="label" ref={said} style={{ left: centre ?? 0, ...room }}>
               <span aria-hidden>{label}</span>
               {release && (
                 <button
