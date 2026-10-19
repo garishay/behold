@@ -10,6 +10,10 @@
 
 * text=auto eol=lf
 
+# But a Windows batch file is CRLF in the working tree, as cmd.exe reads its labels reliably only
+# then: Gradle's wrapper, android/gradlew.bat. Prettier reads no batch file.
+*.bat text eol=crlf
+
 # Binary: never transform, never diff as text.
 *.png binary
 *.jpg binary
@@ -20,3 +24,4 @@
 *.woff2 binary
 *.pdf binary
 *.m4a binary
+*.jar binary

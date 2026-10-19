@@ -16,6 +16,25 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   of them. GitHub now reads the licence as Other, not MIT. The code stays MIT, and the game's
   build is unchanged.
 
+## v0.33.1 — Gate 17, the WebView shell (#68)
+
+- **68d — the WebView shell** (#149): the Play app is now an Android app of the repository's own
+  that shows the game in a WebView, in place of the Trusted Web Activity. It keeps the same
+  package and upload key, so an installed copy updates to it (Gate 17's A1 as amended). Tester
+  companies report that Play's review of a closed test doesn't see play in a TWA, which the
+  browser runs; the shell plays the game in its own process. It loads the game from its site, as
+  the TWA did, so every merge still reaches it, and it ships no web content. `android/shell.json`
+  holds A1's table as ruled for it, and one activity, on Android's own APIs alone, does the rest.
+  Links off the game open in the browser, and back walks the page's history. The bars keep the
+  game's colours, as bands from Android 15. The text follows the phone's font size, and a load
+  that failed for want of a connection runs again when the app returns. Its launch is the TWA's:
+  the 1024's art at 300 dp, fading as the page paints. It says it's a game, so it stays upright on
+  a tablet. Its progress is its own, apart from the browser's. The privacy page says so, and says
+  that WebView checks the addresses the game opens with Google Safe Browsing; Data safety stays
+  No. The wrapper is Gradle 8.11.1's own, held to Gradle's published SHA-256s. The test holds the
+  config, the manifest, the launch's art, and the wrapper, and `android/README.md` gives the new
+  build.
+
 ## v0.33.0 — Gate 34, the four words (#146)
 
 - **146a — the four words** (#147): the valley, the mountain, the vineyard, and the battle now

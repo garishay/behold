@@ -1,0 +1,45 @@
+import groovy.json.JsonSlurper
+
+plugins {
+    id 'com.android.application'
+}
+
+// The shell's config, android/shell.json: the package, the address the app opens, its names and
+// colours, and its version. src/android.test.ts holds it to the web manifest and to A1's table.
+def shell = new JsonSlurper().parse(file('../shell.json'))
+
+android {
+    namespace 'house.shay.behold'
+    compileSdk shell.targetSdkVersion
+
+    defaultConfig {
+        applicationId shell.packageId
+        minSdk shell.minSdkVersion
+        targetSdk shell.targetSdkVersion
+        versionCode shell.appVersionCode
+        versionName shell.appVersion
+        resValue 'string', 'appName', shell.name
+        resValue 'string', 'launcherName', shell.launcherName
+        resValue 'string', 'launchUrl', "https://${shell.host}${shell.startUrl}"
+        resValue 'color', 'themeColor', shell.themeColor
+        resValue 'color', 'navigationColor', shell.navigationColor
+        resValue 'color', 'backgroundColor', shell.backgroundColor
+        manifestPlaceholders = [host: shell.host, orientation: shell.orientation]
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    // As Bubblewrap's template builds the TWA: no lint pass in a release build.
+    lint {
+        checkReleaseBuilds false
+    }
+}
