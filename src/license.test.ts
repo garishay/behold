@@ -40,7 +40,9 @@ describe('LICENSE (Gate 35, #79)', () => {
   })
 
   it('leaves out every sound the repository tracks', () => {
-    const audio = tracked.filter((file) => /\.(m4a|mp3|wav|ogg|opus|flac|aac)$/i.test(file))
+    const audio = tracked.filter((file) =>
+      /\.(m4a|mp3|wav|ogg|opus|flac|aac|aiff?|aifc|caf|wma|oga|weba)$/i.test(file),
+    )
     expect(audio.filter((file) => !under(sounds)(file))).toEqual([])
   })
 })
