@@ -245,6 +245,20 @@ describe('the shell’s activity (A3, #68)', () => {
       'if (saved == null || web.restoreState(saved) == null) web.loadUrl(address(getIntent()));',
     )
   })
+
+  // From Android 15 the bands and the root's sides take the bars and the cutout. WebView gives the
+  // insets that reach it to the page's env(safe-area-inset-*), which the game pads for, so the page
+  // gets none of them: the types the bands are sized by, set to none, as Chromium's note on
+  // WebView's insets advises (android_webview/docs/insets.md).
+  it('gives the page none of the insets the bands take, from Android 15', () => {
+    expect(activity).toContain(
+      'return new WindowInsets.Builder(insets).setInsets(types, Insets.NONE).build();',
+    )
+    expect(activity).toContain(
+      'int types = WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout();',
+    )
+    expect(activity).toContain('Insets bars = insets.getInsets(types);')
+  })
 })
 
 describe('the site’s asset links (Gate 17 A3 and A4, 68c)', () => {

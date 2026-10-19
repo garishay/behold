@@ -97,14 +97,16 @@ public class MainActivity extends Activity {
             // No scrim over the bottom band under three-button navigation.
             getWindow().setNavigationBarContrastEnforced(false);
             root.setOnApplyWindowInsetsListener((view, insets) -> {
-                Insets bars =
-                        insets.getInsets(WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+                int types = WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout();
+                Insets bars = insets.getInsets(types);
                 top.getLayoutParams().height = bars.top;
                 bottom.getLayoutParams().height = bars.bottom;
                 view.setPadding(bars.left, 0, bars.right, 0);
                 top.requestLayout();
                 bottom.requestLayout();
-                return insets;
+                // The page gets none of them, or WebView would give them to the game's
+                // env(safe-area-inset-*), and the game would make room for the bars twice.
+                return new WindowInsets.Builder(insets).setInsets(types, Insets.NONE).build();
             });
         }
         return root;
