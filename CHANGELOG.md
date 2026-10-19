@@ -3,6 +3,21 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.35.0 — Gate 35, the License (#79)
+
+- **79a — the License** (#148): `LICENSE` now names, by path, what its MIT grant leaves out. Each
+  case's own folder in `src/cases/`, with the case text wherever the repository copies it, and
+  every picture, in `public/cases/`, `public/title.jpg`, `public/icons/`, `assets/`, and the Play
+  app's `android/app/src/main/res/`, are all rights reserved. The sounds in `public/audio/` keep
+  their own terms, CC0 1.0 or CC BY 4.0, as `docs/sound.md` names them, and Gradle's wrapper,
+  `android/gradlew`, `android/gradlew.bat`, and `android/gradle/wrapper/`, keeps the Apache
+  License, Version 2.0, that its files name. The README reserves the name: "Behold" and its icon
+  name this game, and a copy may use the code under MIT, but not the name, the icon, the cases, or
+  the art. The MIT License stays word for word above the new section. A test holds it so, holds
+  each path the section names to the repository, and holds every picture and sound the repository
+  tracks to one of them. GitHub now reads the licence as Other, not MIT. Behold's own code stays
+  MIT, and the game's build is unchanged.
+
 ## v0.33.1 — Gate 17, the WebView shell (#68)
 
 - **68d — the WebView shell** (#149): the Play app is now an Android app of the repository's own

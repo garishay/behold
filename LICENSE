@@ -19,3 +19,33 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+-------------------------------------------------------------------------------
+
+What the MIT License above does not cover
+
+The Software, as the MIT License above uses the word, is Behold's code and its
+documentation. It does not include the cases, the pictures, the sounds,
+Gradle's wrapper, or the name, and the permission above grants no right in any
+of them.
+
+The cases. Each case's own folder in src/cases/, such as src/cases/valley/,
+with its text, its structure, and any briefs for its pictures; and the case
+text wherever this repository copies it, such as the store listing in
+android/listing.md, the tests, and the changelog.
+
+The pictures. Every picture in this repository: the cases' in public/cases/,
+the title's, public/title.jpg, the icon's and the store listing's, in
+public/icons/ and assets/, and the Play app's, in android/app/src/main/res/.
+
+The cases and the pictures are Copyright (c) 2026 garishay. All rights
+reserved.
+
+The sounds. Each file in public/audio/ is made from recordings by others,
+under the terms docs/sound.md names for each: CC0 1.0 or CC BY 4.0.
+
+Gradle's wrapper. android/gradlew, android/gradlew.bat, and
+android/gradle/wrapper/ are Gradle's, under the terms they name: the Apache
+License, Version 2.0.
+
+The name. "Behold" and its icon name this game, and README.md reserves them.
