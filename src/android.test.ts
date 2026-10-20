@@ -267,8 +267,6 @@ describe('the shell’s activity (A3, #68)', () => {
 describe('the shell’s restart after its renderer is gone, and its links (#151)', () => {
   /** The app's build file, which reads the shell's words and makes the check build. */
   const gradle = readFileSync('android/app/build.gradle', 'utf8')
-  /** The words past the cap, as the app lays them out. */
-  const stoppedLayout = readFileSync('android/app/src/main/res/layout/stopped.xml', 'utf8')
 
   // Android's guide: while the activity is hidden, "Postponing recovery until user returns".
   it('builds the page again at once while the player can see it, and on return while hidden', () => {
@@ -292,6 +290,7 @@ describe('the shell’s restart after its renderer is gone, and its links (#151)
     const block = /\nexport const shell = \{\n([^]*?)\n\}/.exec(
       readFileSync('src/strings/en.ts', 'utf8'),
     )?.[1]
+    const stoppedLayout = readFileSync('android/app/src/main/res/layout/stopped.xml', 'utf8')
     for (const [key, words] of Object.entries(shell)) {
       expect(block).toContain(`  ${key}: '${words}',`)
       expect(words).not.toMatch(/['\\]/)
