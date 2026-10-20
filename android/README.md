@@ -135,7 +135,8 @@ $env:JAVA_HOME = "$HOME\.bubblewrap\jdk-x64\jdk-17.0.11+9"
 A build that never goes to Play: the same app as `house.shay.behold.check`, beside the Play app,
 which can make its own renderer go, as WebView's own tests do with `chrome://crash` (it crashes)
 and `chrome://kill` (it's killed, as Android kills it for memory). The Play app's build can't. It's
-for the phone check of the restart (#151).
+for the phone check of the restart (#151). It's "Behold check" on the home screen and in Recents,
+so it can't be taken for the Play app.
 
 1. **Once, on the phone:** turn on Developer options and, in them, USB debugging, then connect the
    phone to the PC and allow it. `adb` is in the SDK's `platform-tools`.
@@ -156,4 +157,6 @@ for the phone check of the restart (#151).
      `& $adb shell am start -a android.intent.action.VIEW -n house.shay.behold.check/house.shay.behold.MainActivity -d chrome://crash`
    - while the app is hidden: the same with `-d chrome://kill --ei wait 10`, then Home within
      ten seconds.
-4. **Afterwards,** `& $adb uninstall house.shay.behold.check` removes it, with its progress.
+4. **Afterwards,** uninstall it, then turn USB debugging off:
+   - `& $adb uninstall house.shay.behold.check` removes it, with its progress;
+   - on the phone, in Developer options, turn USB debugging off, and unplug the phone.
