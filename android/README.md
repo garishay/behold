@@ -138,8 +138,14 @@ and `chrome://kill` (it's killed, as Android kills it for memory). The Play app'
 for the phone check of the restart (#151). It's "Behold check" on the home screen and in Recents,
 so it can't be taken for the Play app.
 
-1. **Once, on the phone:** turn on Developer options and, in them, USB debugging, then connect the
-   phone to the PC and allow it. `adb` is in the SDK's `platform-tools`.
+1. **Once, on the phone:**
+   - **Auto Blocker off, if it's on,** on a Galaxy phone (Settings > Security and privacy > Auto
+     Blocker). Samsung's page says it "Blocks commands by USB cable" and "Blocks apps from
+     unauthorized sources" (https://www.samsung.com/us/support/answer/ANS10003636), so it would
+     stop `adb` and the install, and on some Galaxy phones it greys out USB debugging. It goes back
+     on afterwards (step 4).
+   - **USB debugging:** turn on Developer options and, in them, USB debugging, then connect the
+     phone to the PC and allow it. `adb` is in the SDK's `platform-tools`.
 2. **Build and install it,** in PowerShell from this folder. Gradle signs it with the PC's own
    debug key, which it makes on the first debug build in `$HOME\.android\`, not with the upload
    key:
@@ -157,6 +163,7 @@ so it can't be taken for the Play app.
      `& $adb shell am start -a android.intent.action.VIEW -n house.shay.behold.check/house.shay.behold.MainActivity -d chrome://crash`
    - while the app is hidden: the same with `-d chrome://kill --ei wait 10`, then Home within
      ten seconds.
-4. **Afterwards,** uninstall it, then turn USB debugging off:
+4. **Afterwards,** uninstall it, turn USB debugging off, and turn Auto Blocker back on:
    - `& $adb uninstall house.shay.behold.check` removes it, with its progress;
-   - on the phone, in Developer options, turn USB debugging off, and unplug the phone.
+   - on the phone, in Developer options, turn USB debugging off, and unplug the phone;
+   - turn Auto Blocker back on, if you turned it off.

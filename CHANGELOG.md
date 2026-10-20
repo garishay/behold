@@ -11,13 +11,14 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   the app, the page is built again at once, three times in a run at most. The fourth time the
   renderer goes while the player watches, the app shows the launch's art, "The game keeps
   stopping.", and Try again in the page's place, its words read by the app's build from the
-  strings module; Try again counts afresh, and Back leaves the app. While the app is hidden, the page waits, uncounted, and is built when the player returns. A
-  tab the page opens answers for itself when the renderer goes, and a tab sent to the browser is
-  destroyed at once, so neither can end the app. Links off the game open in the player's default
-  browser, and Android asks only when no default is set; an email address still opens the mail
-  app. The `zoomText` comment says what WebView does. A check build, "Behold check", can make its
-  own renderer go, for the phone check; it never goes to Play, and `android/README.md` gives its
-  steps. The app is version code 3, 1.1.1, and the site's build is unchanged.
+  strings module; Try again counts afresh, and Back leaves the app. While the app is hidden, the
+  page waits, uncounted, and is built when the player returns. A tab the page opens answers for
+  itself when the renderer goes, and a tab sent to the browser is destroyed at once, so neither can
+  end the app. Links off the game open in the player's default browser, and Android asks only when
+  no default is set; an email address still opens the mail app. The `zoomText` comment says what
+  WebView does. A check build, "Behold check", can make its own renderer go, for the phone check;
+  it never goes to Play, and `android/README.md` gives its steps. The app is version code 3, 1.1.1,
+  and the site's build is unchanged.
 
 ## v0.36.0 — Gate 36, the largest font (#152)
 
