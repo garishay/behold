@@ -39,9 +39,11 @@ android {
             minifyEnabled true
         }
         // The check build (#151): beside the Play app as its own package, signed with the PC's
-        // debug key, and able to make its renderer go (MainActivity's onNewIntent).
+        // debug key, and able to make its renderer go (MainActivity's onNewIntent). Its name on the
+        // home screen and in Recents is "Behold check", so it can't be taken for the Play app.
         debug {
             applicationIdSuffix '.check'
+            resValue 'string', 'launcherName', "${shell.launcherName} check"
         }
     }
 

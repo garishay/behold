@@ -329,9 +329,21 @@ describe('the shell’s restart after its renderer is gone, and its links (#151)
   })
 
   it('builds a check build beside the Play app, which alone can make its renderer go', () => {
-    expect(gradle).toMatch(/debug \{\s+applicationIdSuffix '\.check'\s+\}/)
+    expect(gradle).toMatch(/debug \{\s+applicationIdSuffix '\.check'\s/)
     expect(activity).toContain(
       'if (BuildConfig.DEBUG && url != null && "chrome".equals(url.getScheme())) {',
+    )
+  })
+
+  // Gate 37's A8. The home screen and Recents name an app by its activity's label (AOSP's
+  // LauncherActivityInfo, Launcher3's TaskIconCache), so the check build's can't be the Play app's.
+  it('names the check build “Behold check”, apart from the Play app', () => {
+    const debug = /\n {8}debug \{\n([^]*?)\n {8}\}/.exec(gradle)?.[1]
+    const name = /^ {12}resValue 'string', 'launcherName', "\$\{shell\.launcherName\} check"$/m
+    expect(debug).toMatch(name)
+    expect(`${config.launcherName} check`).toBe('Behold check')
+    expect(appManifest).toMatch(
+      /android:name="\.MainActivity"[^>]*android:label="@string\/launcherName"/,
     )
   })
 })
