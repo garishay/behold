@@ -1772,6 +1772,45 @@ describe('the tutorial’s marks (#25)', () => {
     }
   })
 
+  // The Play app applies a font size changed while a mark shows, and fires nothing that wakes the
+  // following: the words' box changing size wakes it, so they are placed by their new height
+  // (#152, from Codex's review of #154).
+  it('wakes a settled mark when its words change size', async () => {
+    const watched = new Map<Element, () => void>()
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        callback: () => void
+        constructor(callback: () => void) {
+          this.callback = callback
+        }
+        observe(el: Element) {
+          watched.set(el, this.callback)
+        }
+        disconnect() {}
+      },
+    )
+    // The first step's ring on the boy, on the picture over the dock, as at 360 × 548.
+    boxes = { '.dock': new DOMRect(0, 365, 360, 104), '.stage': new DOMRect(34, 0, 292, 365) }
+    const frames = vi.spyOn(window, 'requestAnimationFrame')
+    const pause = (ms: number) => new Promise((r) => setTimeout(r, ms))
+    try {
+      start()
+      openCase(/The valley/)
+      fireEvent.click(screen.getByRole('button', { name: 'Start' }))
+      await pause(1000)
+      const settled = frames.mock.calls.length
+      const label = document.querySelector('.coach .label')
+      expect(label).toHaveTextContent('Tap the boy with the sling.')
+      const resized = watched.get(label!)
+      expect(resized).toBeDefined()
+      resized!()
+      expect(frames.mock.calls.length).toBe(settled + 1)
+    } finally {
+      frames.mockRestore()
+    }
+  })
+
   // The last step's words cover the account's end on Solve and the caption from Look, so they
   // leave on the next tap after they show; its ring stays until the case closes (#24, ruling [3]),
   // on Solve's count until Close the case shows, and then on Close (#24, Solve's room).
@@ -3932,5 +3971,131 @@ describe('the case solved (#6, 03c; #24)', () => {
     render(<App />)
     expect(screen.getByRole('heading', { name: 'Who is who' })).toBeInTheDocument()
     expect(document.querySelector('[data-slot="t4"]')).toHaveClass('is-right')
+  })
+})
+
+// The owner's phone check of version code 2 (#152): at the phone's largest font the valley's card
+// ran past the screen's top with its Start under the dock, the title's name ran past the column,
+// and a long caption opened past the screen's top. jsdom lays nothing out, so each is given here as
+// a phone at 200% measured it, 360 × 700 in Android's fonts.
+describe('the largest font (#152)', () => {
+  afterEach(() => vi.restoreAllMocks())
+  const rects = (by: (e: Element) => DOMRect | undefined) =>
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: Element,
+    ) {
+      return by(this) ?? new DOMRect()
+    })
+
+  // The valley's row ends at 450 at 360 × 700, where the dock begins. A card whose Start would lie
+  // past it raises its row over the dock and the bar while it shows; any other leaves the row
+  // under them, as on `main` at 100%, where a card can reach a few px past its row (Gate 36 A3 as
+  // ruled). As the card goes, the row drops back, so a caption opened after Start lies over the
+  // picture ([Q34] as ruled).
+  it.each([
+    [
+      'whose Start lies under the dock, past the screen’s top, raises its row and moves down',
+      -118,
+      686,
+      552,
+      '130px',
+      '1',
+    ],
+    [
+      'whose Start is in its row, stays where it is, its row under the dock and the bar',
+      78,
+      376,
+      446,
+      '0px',
+      'auto',
+    ],
+  ])('the brief’s card, %s', (_, top, height, foot, shift, z) => {
+    rects((e) =>
+      e.classList.contains('card')
+        ? new DOMRect(16, top, 328, height)
+        : e.tagName === 'BUTTON' && e.parentElement?.classList.contains('card')
+          ? new DOMRect(34, foot - 44, 113, 44)
+          : e.classList.contains('stage-wrap')
+            ? new DOMRect(0, 0, 360, 450)
+            : undefined,
+    )
+    start()
+    openCase(/The valley/)
+    const card = screen.getByRole('dialog', { name: 'The valley' })
+    const row = document.querySelector<HTMLElement>('.stage-wrap')!
+    expect(card.style.getPropertyValue('--shift')).toBe(shift)
+    expect(row.style.getPropertyValue('--z')).toBe(z)
+    fireEvent.click(screen.getByRole('button', { name: 'Start' }))
+    expect(row.style.getPropertyValue('--z')).toBe('')
+  })
+
+  it('sets the title’s name smaller by as much as it runs past the column, and not where it fits', () => {
+    const wide = vi.spyOn(Element.prototype, 'scrollWidth', 'get')
+    vi.spyOn(Element.prototype, 'clientWidth', 'get').mockReturnValue(320)
+    wide.mockImplementation(function (this: Element) {
+      return this.tagName === 'H1' ? 390 : 0
+    })
+    const { unmount } = render(<App />)
+    expect(screen.getByRole('heading', { name: 'Behold' }).style.getPropertyValue('--fit')).toBe(
+      '0.82',
+    )
+    unmount()
+    wide.mockReturnValue(300)
+    render(<App />)
+    expect(screen.getByRole('heading', { name: 'Behold' }).style.getPropertyValue('--fit')).toBe('')
+  })
+
+  // The Play app applies a font size changed while it runs, with no reload, and the kicker under the
+  // name follows it: as the kicker changes size, the name is set smaller as the text grows, and
+  // whole again as it shrinks.
+  it('measures the title’s name again when the text size changes while it shows', () => {
+    let resized = () => {}
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: () => void) {
+          resized = callback
+        }
+        observe() {}
+        disconnect() {}
+      },
+    )
+    const wide = vi.spyOn(Element.prototype, 'scrollWidth', 'get').mockReturnValue(300)
+    vi.spyOn(Element.prototype, 'clientWidth', 'get').mockReturnValue(320)
+    render(<App />)
+    const name = screen.getByRole('heading', { name: 'Behold' })
+    expect(name.style.getPropertyValue('--fit')).toBe('')
+    wide.mockImplementation(function (this: Element) {
+      return this.tagName === 'H1' ? 390 : 0
+    })
+    resized()
+    expect(name.style.getPropertyValue('--fit')).toBe('0.82')
+    wide.mockReturnValue(300)
+    resized()
+    expect(name.style.getPropertyValue('--fit')).toBe('')
+  })
+
+  // The caption ends at 488, and the picture's row starts at 52, under a picker: the caption opens
+  // no taller than the 436 px between them, so the picker stays clear.
+  it('opens a long caption no taller than the picture’s row above where it ends', () => {
+    vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      return this.textContent?.startsWith('The Philistines') ? 90 : 0
+    })
+    rects((e) =>
+      e.classList.contains('said')
+        ? new DOMRect(16, 460, 328, 28)
+        : e.classList.contains('stage-wrap')
+          ? new DOMRect(0, 52, 360, 400)
+          : undefined,
+    )
+    start()
+    openCase(/The valley/)
+    guide()
+    tab(/Look/)
+    tapSpot('giant')
+    fireEvent.click(screen.getByRole('button', { name: 'More' }))
+    expect(document.querySelector<HTMLElement>('.dock .whole')!.style.maxHeight).toBe('436px')
   })
 })

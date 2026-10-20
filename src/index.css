@@ -122,8 +122,10 @@ button:focus-visible {
   position: relative;
 }
 
+/* The name takes the column's width at most: at a phone's larger text it is set smaller by as much
+   as it would run past it, `--fit` being the column over the name's width (#152). */
 .title h1 {
-  font-size: 60px;
+  font-size: calc(60px * var(--fit, 1));
 }
 
 .title .line {
@@ -447,9 +449,11 @@ button:focus-visible {
    foot. The picture takes what the chrome leaves; on Solve only the account scrolls. It is pinned
    to the screen the phone shows, not sized by a viewport unit: on a phone whose browser gives
    `100dvh` the height with its address bar hidden, the page came out taller than the screen by
-   the bar, and scrolled (07c, #24). Fixed, it leaves the document nothing to scroll. */
+   the bar, and scrolled (07c, #24). Fixed, it leaves the document nothing to scroll. The dock's
+   least room is 104 px, or, at a phone's larger text, a line of caption (21 px) with its More,
+   three lines of finds (18 px each), and its padding, in the dock's own em (#152). */
 .app {
-  --dock: 104px;
+  --dock: max(104px, calc((21em + 3 * 18em) / 16 + 22px));
   position: fixed;
   inset: 0;
   max-width: 430px;
@@ -521,10 +525,12 @@ button:focus-visible {
   color: var(--gold);
 }
 
-/* A tap's new words on their way to Solve: a badge that bumps as it grows (#24). */
+/* A tap's new words on their way to Solve: a badge that bumps as it grows (#24). At a phone's
+   larger text the tab's words fill it, so the badge rises over the tab's top edge as it grows,
+   clear of the count (#152). */
 .tab .new {
   position: absolute;
-  top: 3px;
+  top: calc(25px - 2em);
   right: 8px;
   padding: 1px 6px;
   border-radius: 9px;
@@ -661,10 +667,13 @@ button:focus-visible {
   line-height: 1.4;
 }
 
-/* Look: the picker, the picture as large as the screen leaves it, the pills on it. */
+/* Look: the picker, the picture as large as the screen leaves it, the pills on it. Where the
+   moments' names don't fit one row, as at a phone's larger text, the picker takes a second row
+   (#152). */
 .moment-picker {
   flex: none;
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   padding: 6px 12px;
 }
@@ -706,9 +715,14 @@ button:focus-visible {
 }
 
 /* Its natural height at the column's width, given up first when the screen is short. The brief's
-   card lies over the whole row, so a picture the height narrows doesn't narrow the card (#77). */
+   card lies over the whole row, so a picture the height narrows doesn't narrow the card (#77).
+   While a card's Start would lie past the row, `--z` raises the row over the dock and the bar, card
+   and all, and the row drops back as the card goes (#152). The row is raised, not the card: a
+   WebView from before July 2024 makes the row a stacking context, which no z-index inside it can
+   lift past the dock ([Q34] on #12). */
 .stage-wrap {
   position: relative;
+  z-index: var(--z, auto);
   flex: 0 1 calc(min(100vw, 430px) / var(--ar));
   min-height: 0;
   container-type: size;
@@ -807,18 +821,33 @@ button:focus-visible {
   color: var(--slate-deep);
 }
 
-/* The brief's card, over the picture while nothing is tapped (#24). */
+/* The brief's card, over the picture while nothing is tapped (#24). At a phone's larger text it may
+   outgrow the picture's row: then its row is raised over the dock and the bar too (above), and
+   `--shift` moves it to keep 12 px from the screen's edge. It's no taller than the screen, its
+   words scrolling above Start (#152). */
 .card {
   position: absolute;
   left: 16px;
   right: 16px;
   top: 50%;
-  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100svh - 24px);
+  transform: translateY(calc(-50% + var(--shift, 0px)));
   padding: 16px 18px;
   border-radius: 12px;
   background: var(--papyrus);
   color: var(--papyrus-ink);
   box-shadow: 0 0 0 100vmax rgba(10, 12, 20, 0.55);
+}
+
+/* The words' box reaches 6 px past them at either side, so the scroll's edge never cuts a letter
+   that leans past its line, as an italic's does. */
+.card .words {
+  min-height: 0;
+  margin: 0 -6px;
+  padding: 0 6px;
+  overflow-y: auto;
 }
 
 .card h2 {
@@ -847,6 +876,8 @@ button:focus-visible {
 }
 
 .card button {
+  flex: none;
+  align-self: flex-start;
   min-height: 44px;
   padding: 0 22px;
   border-radius: 8px;
@@ -868,11 +899,12 @@ button:focus-visible {
   overflow: hidden;
 }
 
-/* The caption gives up its last lines when the dock is short; the finds follow right under it. */
+/* The caption gives up its last lines when the dock is short, down to one, so More stays to tap
+   (#152); the finds follow right under it. */
 .dock .said {
   position: relative;
   flex: 0 1 auto;
-  min-height: 0;
+  min-height: calc(1.4em * 15 / 16);
   display: flex;
   flex-direction: column;
 }
@@ -902,7 +934,15 @@ button:focus-visible {
   background: var(--slate-deep);
 }
 
-/* A long caption opened: whole, rising over the picture's foot from where it ended. */
+/* An opened caption whose words scroll keeps Less on show at its foot, as the card keeps Start
+   (#152). Where nothing scrolls, Less sits where it always has. */
+.dock .whole .more span {
+  position: sticky;
+  bottom: 0;
+}
+
+/* A long caption opened: whole, rising over the picture's foot from where it ended, as far as the
+   top of the picture's row, and past that its words scroll, More over them however far (#152). */
 .dock.is-open {
   overflow: visible;
 }
@@ -911,9 +951,14 @@ button:focus-visible {
   position: absolute;
   left: 0;
   right: 0;
-  padding: 10px 16px 20px;
+  overflow-y: auto;
   border-top: 1px solid var(--slate);
   background: var(--slate-deep);
+}
+
+.dock .whole > div {
+  position: relative;
+  padding: 10px 16px 20px;
 }
 
 .dock .found {
@@ -925,9 +970,10 @@ button:focus-visible {
   color: var(--gold);
 }
 
-/* A line of finds that wraps breaks only between its parts, never inside one (#131). */
+/* A line of finds that wraps breaks only between its parts, never inside one (#131), unless a part
+   is longer than the line, as at a phone's largest text (#152). */
 .dock .found span {
-  white-space: nowrap;
+  display: inline-block;
 }
 
 /* A hint on offer (#29): a quiet line in the finds' place at the foot of the dock on Look, the
@@ -1166,6 +1212,16 @@ button:focus-visible {
   line-height: 1.6;
 }
 
+/* A paper opened over the screen, centred; one taller than the screen, as at a phone's larger
+   text, starts at its top and scrolls, its Close at the foot (#152). */
+.modal:not(.sheet) {
+  overflow-y: auto;
+}
+
+.modal:not(.sheet) > .paper {
+  margin: auto;
+}
+
 .modal .close {
   display: block;
   margin: 14px auto 0;
@@ -1273,14 +1329,24 @@ button:focus-visible {
   margin: 18px 0 8px;
 }
 
+/* Three faces to a row, and the order's three slots, each a third of it; at a phone's larger text
+   fewer, so each keeps 4em for its name. The order's pictures go two to a row, or one where a half
+   is less than 7.5em. A word still longer than its box breaks inside it, so Solve never scrolls
+   sideways (#152). */
 .faces {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(max(4em, (100% - 20px) / 3), 1fr));
   gap: 10px;
 }
 
+.face .slot,
+.oslot,
+.tile {
+  overflow-wrap: anywhere;
+}
+
 .faces.two {
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   max-width: 260px;
 }
 
@@ -1349,7 +1415,7 @@ button:focus-visible {
 
 .order {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(max(4em, (100% - 20px) / 3), 1fr));
   gap: 10px;
 }
 
@@ -1407,7 +1473,7 @@ button:focus-visible {
    they are shown in never reads as the answer (#77). */
 .tiles {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(max(7.5em, (100% - 10px) / 2), 1fr));
   gap: 10px;
   margin-top: 14px;
   padding: 10px;

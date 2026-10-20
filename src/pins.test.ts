@@ -123,9 +123,12 @@ describe('the words that wrap to a shape (#77)', () => {
   })
 
   // The owner's ruling on the redrafted part 3 (#131): measured in Roboto and this machine's font.
-  it('a line of finds wraps only between its parts, each part kept whole', () => {
+  // Each part is a box of its own, so a line breaks between parts, and inside one only where it is
+  // longer than the line, as at a phone's largest text (#152).
+  it('a line of finds wraps only between its parts, each part kept whole where it fits a line', () => {
     const part = /\n\.dock \.found span \{([^}]*)\}/.exec(css)?.[1] ?? ''
-    expect(part).toMatch(/white-space: nowrap;/)
+    expect(part).toMatch(/display: inline-block;/)
+    expect(part).not.toMatch(/white-space: nowrap;/)
   })
 })
 
@@ -196,6 +199,74 @@ describe('the case screen fits the phone (07c, #24)', () => {
     expect(app).toMatch(/position: fixed/)
     expect(app).toMatch(/inset: 0/)
     expect(app).not.toMatch(/\d+[sdl]?vh/)
+  })
+})
+
+// At a phone's largest font the case screen's boxes hold text twice its size (#152): what outgrows
+// its box scrolls in it, and nothing to tap leaves the screen. jsdom lays nothing out, so each
+// box's rule is pinned as text, against removal; the audit of every screen at 115% to 200% and the
+// phone are their evidence.
+describe('the case screen at the largest font (#152)', () => {
+  const rule = (selector: string) =>
+    new RegExp(`\\n${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} \\{([^}]*)\\}`).exec(
+      css,
+    )?.[1] ?? ''
+
+  // The row is raised, not the card: a WebView from before July 2024 makes the row a stacking
+  // context, which no z-index inside it can lift past the dock ([Q34] on #12).
+  it('lays the brief’s card over the dock and the bar by raising its row, no taller than the screen, its words scrolling above Start', () => {
+    expect(rule('.stage-wrap')).toMatch(/z-index: var\(--z, auto\);/)
+    const card = rule('.card')
+    expect(card).not.toMatch(/z-index/)
+    expect(card).toMatch(/max-height: calc\(100svh - 24px\);/)
+    expect(card).toMatch(/transform: translateY\(calc\(-50% \+ var\(--shift, 0px\)\)\);/)
+    expect(rule('.card .words')).toMatch(/overflow-y: auto;/)
+  })
+
+  it('keeps the dock room for a line of caption, its More, and three lines of finds', () => {
+    expect(rule('.app')).toMatch(
+      /--dock: max\(104px, calc\(\(21em \+ 3 \* 18em\) \/ 16 \+ 22px\)\);/,
+    )
+    expect(rule('.dock .said')).toMatch(/min-height: calc\(1\.4em \* 15 \/ 16\);/)
+  })
+
+  it('raises Solve’s badge over the tab’s top edge as its text grows, clear of the count', () => {
+    expect(rule('.tab .new')).toMatch(/top: calc\(25px - 2em\);/)
+  })
+
+  it('scrolls a caption opened past the picture’s row, More over the whole of it', () => {
+    expect(rule('.dock .whole')).toMatch(/overflow-y: auto;/)
+    expect(rule('.dock .whole > div')).toMatch(/position: relative;/)
+  })
+
+  // Gate 36 A4 as ruled: Less stays on show at the foot of an opened caption whose words scroll.
+  it('keeps Less at the foot of an opened caption whose words scroll', () => {
+    const less = rule('.dock .whole .more span')
+    expect(less).toMatch(/position: sticky;/)
+    expect(less).toMatch(/bottom: 0;/)
+  })
+
+  it('wraps the picker onto a second row', () => {
+    expect(rule('.moment-picker')).toMatch(/flex-wrap: wrap;/)
+  })
+
+  it('scrolls a paper taller than the screen from its top', () => {
+    expect(rule('.modal:not(.sheet)')).toMatch(/overflow-y: auto;/)
+    expect(rule('.modal:not(.sheet) > .paper')).toMatch(/margin: auto;/)
+  })
+
+  it('sets fewer faces, order slots, and pictures to a row, so Solve never scrolls sideways', () => {
+    const third = /repeat\(auto-fit, minmax\(max\(4em, \(100% - 20px\) \/ 3\), 1fr\)\)/
+    expect(rule('.faces')).toMatch(third)
+    expect(rule('.order')).toMatch(third)
+    expect(rule('.tiles')).toMatch(
+      /repeat\(auto-fit, minmax\(max\(7\.5em, \(100% - 10px\) \/ 2\), 1fr\)\)/,
+    )
+    expect(css).toMatch(/\n\.face \.slot,\n\.oslot,\n\.tile \{\s+overflow-wrap: anywhere;\s+\}/)
+  })
+
+  it('sets the title’s name by how it fits the column', () => {
+    expect(css).toMatch(/\n\.title h1 \{\s+font-size: calc\(60px \* var\(--fit, 1\)\);\s+\}/)
   })
 })
 

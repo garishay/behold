@@ -3,6 +3,22 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.36.0 — Gate 36, the largest font (#152)
+
+- **152a — the largest font** (#154): every screen stays playable at the phone's largest font,
+  where the Play app's WebView doubles every font size and the valley couldn't start, its card
+  past the screen's top and its Start under the dock. The case screen stays one screen that never
+  scrolls: a box whose words outgrow it scrolls them, and what's to be tapped stays on the screen.
+  The brief's card keeps 12 px from the screen's edge, its words scrolling above Start, and is
+  raised over the dock and the bar only where its Start would lie under the dock. The dock keeps a
+  line of caption with its More over three lines of finds, and a part of the line of finds longer
+  than the line wraps inside itself, as #131's part 3 is amended. An opened caption rises no
+  higher than the picture's row, with Less kept at its foot, and the picker takes a second row. A
+  mark's words are placed by their height, on the screen; a long paper scrolls to its Close; and
+  Solve sets fewer faces, order slots, and pictures to a row, its badge clear of the count. The
+  title's name alone gives way to fit the column. At the default size nothing moves, and every
+  screen matches `main`'s pixels.
+
 ## v0.35.0 — Gate 35, the License (#79)
 
 - **79a — the License** (#148): `LICENSE` now names, by path, what its MIT grant leaves out. Each

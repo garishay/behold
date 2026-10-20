@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { labelAt, show, showEmpty } from './place.ts'
+import { inside, labelAt, show, showEmpty } from './place.ts'
 
 // A short count with no empty slot in view (#23, the next round's second tester): the nearest
 // empty slot below what the account shows is brought into view, and the nearest above only when
@@ -103,5 +103,32 @@ describe('where a mark’s words sit (#25, #77)', () => {
     expect(labelAt(ring(431, 471), 548, 548, lines)).toEqual({ bottom: 548 - 431 + 8 })
     // Close the case, just under them: its words go below it, over the bank.
     expect(labelAt(ring(257, 315), 548, 548, { top: 0, bottom: 253 })).toEqual({ top: 323 })
+  })
+
+  // The owner's phone check of version code 2, at the largest font: a mark's words, set twice as
+  // large, take more than the room kept for them (#152). Placed by their height as drawn, they keep
+  // to the screen, as at the floor with the valley's step 4: David's chip at 407 to 461 and the
+  // account's lines to 323, the words 94 px tall.
+  it('by their height as drawn, at a phone’s larger text, and never past the screen’s foot or top', () => {
+    const lines = { top: 0, bottom: 323 }
+    // Below the chip they would end at 563, past the foot: they go to the room's foot instead.
+    expect(labelAt(ring(407, 461), 548, 548, lines)).toEqual({ top: 469 })
+    expect(labelAt(ring(407, 461), 548, 548, lines, 94)).toEqual({ bottom: 8 })
+    // Just under the account's lines, they stop where they would run past the foot.
+    expect(labelAt(ring(144.5, 182.5), 548, 548, { top: 0, bottom: 500 }, 94)).toEqual({
+      top: 548 - 94,
+    })
+    // Above a target, they stop where they would run past the top.
+    expect(labelAt(ring(300, 360), 365, 548, undefined, 400)).toEqual({ bottom: 548 - 400 })
+  })
+})
+
+// The owner's phone check of version code 2: at the largest font the valley's card ran past the
+// screen's top, and its Start lay under the dock (#152). It moves to keep 12 px from either edge.
+describe('the brief’s card kept on the screen (#152)', () => {
+  it('moves down past the top, up past the foot, and not at all where it fits', () => {
+    expect(inside({ top: -118, bottom: 568 }, 700)).toBe(130)
+    expect(inside({ top: 120, bottom: 720 }, 700)).toBe(-32)
+    expect(inside({ top: 78, bottom: 372 }, 700)).toBe(0)
   })
 })

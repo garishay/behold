@@ -29,3 +29,12 @@ if (typeof Element !== 'undefined')
     this.scrollTop += o.top ?? 0
     this.scrollLeft += o.left ?? 0
   } as Element['scrollBy']
+
+// jsdom has no ResizeObserver, which keeps the brief's card on the screen (#152); here it never
+// calls back, as jsdom lays nothing out.
+if (typeof window !== 'undefined')
+  window.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
