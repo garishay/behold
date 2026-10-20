@@ -212,9 +212,12 @@ describe('the case screen at the largest font (#152)', () => {
       css,
     )?.[1] ?? ''
 
-  it('lays the brief’s card over the dock and the bar when raised, no taller than the screen, its words scrolling above Start', () => {
+  // The row is raised, not the card: a WebView from before July 2024 makes the row a stacking
+  // context, which no z-index inside it can lift past the dock ([Q34] on #12).
+  it('lays the brief’s card over the dock and the bar by raising its row, no taller than the screen, its words scrolling above Start', () => {
+    expect(rule('.stage-wrap')).toMatch(/z-index: var\(--z, auto\);/)
     const card = rule('.card')
-    expect(card).toMatch(/z-index: var\(--z, auto\);/)
+    expect(card).not.toMatch(/z-index/)
     expect(card).toMatch(/max-height: calc\(100svh - 24px\);/)
     expect(card).toMatch(/transform: translateY\(calc\(-50% \+ var\(--shift, 0px\)\)\);/)
     expect(rule('.card .words')).toMatch(/overflow-y: auto;/)

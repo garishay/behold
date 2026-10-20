@@ -3988,11 +3988,13 @@ describe('the largest font (#152)', () => {
     })
 
   // The valley's row ends at 450 at 360 × 700, where the dock begins. A card whose Start would lie
-  // past it is raised over the dock and the bar; any other lies under them, as on `main` at 100%,
-  // where a card can reach a few px past its row (Gate 36 A3 as ruled).
+  // past it raises its row over the dock and the bar while it shows; any other leaves the row
+  // under them, as on `main` at 100%, where a card can reach a few px past its row (Gate 36 A3 as
+  // ruled). As the card goes, the row drops back, so a caption opened after Start lies over the
+  // picture ([Q34] as ruled).
   it.each([
     [
-      'whose Start lies under the dock, past the screen’s top, is raised and moves down',
+      'whose Start lies under the dock, past the screen’s top, raises its row and moves down',
       -118,
       686,
       552,
@@ -4000,7 +4002,7 @@ describe('the largest font (#152)', () => {
       '1',
     ],
     [
-      'whose Start is in its row, stays where it is, under the dock and the bar',
+      'whose Start is in its row, stays where it is, its row under the dock and the bar',
       78,
       376,
       446,
@@ -4020,8 +4022,11 @@ describe('the largest font (#152)', () => {
     start()
     openCase(/The valley/)
     const card = screen.getByRole('dialog', { name: 'The valley' })
+    const row = document.querySelector<HTMLElement>('.stage-wrap')!
     expect(card.style.getPropertyValue('--shift')).toBe(shift)
-    expect(card.style.getPropertyValue('--z')).toBe(z)
+    expect(row.style.getPropertyValue('--z')).toBe(z)
+    fireEvent.click(screen.getByRole('button', { name: 'Start' }))
+    expect(row.style.getPropertyValue('--z')).toBe('')
   })
 
   it('sets the title’s name smaller by as much as it runs past the column, and not where it fits', () => {

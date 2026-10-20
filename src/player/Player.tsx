@@ -196,16 +196,17 @@ export function Player(props: PlayerProps) {
   // The brief's card keeps its gap from the screen's top and foot at any text size: moved from the
   // middle of the picture's row by as much as its height would take it past either, again as it or
   // the screen changes size. A card whose Start would lie past the row, under the dock, as at a
-  // phone's larger text, is raised over the dock and the bar, its dim with them; any other lies under
-  // them, as it always has (#152).
+  // phone's larger text, raises the row over the dock and the bar, its dim with them; any other
+  // leaves the row under them, as it always has (#152). The row drops back as the card goes, so a
+  // caption opened after Start lies over the picture ([Q34] as ruled).
   const onScreen = useCallback((el: HTMLDivElement | null) => {
-    if (!el) return
+    const row = el?.parentElement
+    if (!el || !row) return
     const fit = () => {
       el.style.setProperty('--shift', '0px')
       el.style.setProperty('--shift', `${inside(el.getBoundingClientRect(), innerHeight)}px`)
       const start = el.querySelector(':scope > button')?.getBoundingClientRect().bottom ?? 0
-      const row = el.parentElement?.getBoundingClientRect().bottom ?? 0
-      el.style.setProperty('--z', start > row ? '1' : 'auto')
+      row.style.setProperty('--z', start > row.getBoundingClientRect().bottom ? '1' : 'auto')
     }
     fit()
     const watch = new ResizeObserver(fit)
@@ -214,6 +215,7 @@ export function Player(props: PlayerProps) {
     return () => {
       watch.disconnect()
       removeEventListener('resize', fit)
+      row.style.removeProperty('--z')
     }
   }, [])
   // Whether Look has opened during the sweep: until it has, the sweep holds Solve to Look's button,

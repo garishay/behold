@@ -715,9 +715,14 @@ button:focus-visible {
 }
 
 /* Its natural height at the column's width, given up first when the screen is short. The brief's
-   card lies over the whole row, so a picture the height narrows doesn't narrow the card (#77). */
+   card lies over the whole row, so a picture the height narrows doesn't narrow the card (#77).
+   While a card's Start would lie past the row, `--z` raises the row over the dock and the bar, card
+   and all, and the row drops back as the card goes (#152). The row is raised, not the card: a
+   WebView from before July 2024 makes the row a stacking context, which no z-index inside it can
+   lift past the dock ([Q34] on #12). */
 .stage-wrap {
   position: relative;
+  z-index: var(--z, auto);
   flex: 0 1 calc(min(100vw, 430px) / var(--ar));
   min-height: 0;
   container-type: size;
@@ -817,15 +822,14 @@ button:focus-visible {
 }
 
 /* The brief's card, over the picture while nothing is tapped (#24). At a phone's larger text it may
-   outgrow the picture's row: then `--z` raises it over the dock and the bar too, and `--shift` moves
-   it to keep 12 px from the screen's edge. It's no taller than the screen, its words scrolling
-   above Start (#152). */
+   outgrow the picture's row: then its row is raised over the dock and the bar too (above), and
+   `--shift` moves it to keep 12 px from the screen's edge. It's no taller than the screen, its
+   words scrolling above Start (#152). */
 .card {
   position: absolute;
   left: 16px;
   right: 16px;
   top: 50%;
-  z-index: var(--z, auto);
   display: flex;
   flex-direction: column;
   max-height: calc(100svh - 24px);
