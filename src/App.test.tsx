@@ -70,6 +70,14 @@ const menu = (item: string) => {
     within(screen.getByRole('dialog', { name: 'Menu' })).getByRole('button', { name: item }),
   )
 }
+// Restart's question, answered (#153): an answer steps back from the question's entry, and the
+// question goes as the step lands.
+const restart = async (answer = 'Start over') => {
+  menu('Restart')
+  const question = screen.getByRole('alertdialog', { name: 'Restart' })
+  fireEvent.click(within(question).getByRole('button', { name: answer }))
+  await waitFor(() => expect(question).not.toBeInTheDocument())
+}
 // A close's result, like a refused word's message, takes the bank's head (07c, #24 [3]).
 const result = () => document.querySelector('.bank-head')
 const coach = () => document.querySelector('.coach')
@@ -920,7 +928,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     expect(screen.queryByRole('button', { name: /Papers/ })).not.toBeInTheDocument()
   })
 
-  it('progress is kept on the device, and Restart clears the open case after a confirm', () => {
+  it('progress is kept on the device, and Restart clears the open case after Start over', async () => {
     const { unmount } = start()
     openCase(/The valley/)
     tapSpot('boy')
@@ -933,16 +941,13 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     expect(coach()).toHaveTextContent('Open Solve to name him.')
     tab(/Solve/)
     expect(chips()).toHaveLength(2)
-    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false)
-    menu('Restart')
+    await restart('Cancel')
     expect(chips()).toHaveLength(2)
-    confirm.mockReturnValue(true)
-    menu('Restart')
+    await restart()
     expect(screen.getByRole('dialog', { name: 'The valley' })).toBeInTheDocument()
     expect(coach()).toBeNull()
     tab(/Solve/)
     expect(screen.getByText('Nothing yet. Tap things in the picture.')).toBeInTheDocument()
-    confirm.mockRestore()
   })
 
   it('an open case is a history entry: back returns to the cards, and Cases pops it (Gate 03 [1])', async () => {
@@ -994,25 +999,27 @@ describe('the case screen explored (#6, 03b; #24)', () => {
 
   // A restart from Solve turns Solve's entry into a case entry and steps back to the case's own:
   // the fresh case opens on Look, forward stays on Look, and two back from there is the cases
-  // page (review round 1, #92).
-  it('a restart from Solve steps back, and leaves a case entry ahead, not Solve’s', async () => {
+  // page (review round 1, #92). Start over first steps back from its question's entry, which it
+  // makes a case entry too, so a second forward stays on Look and asks nothing (#153).
+  it('a restart from Solve steps back, and leaves case entries ahead, not Solve’s', async () => {
     let pops = 0
     const count = () => pops++
     addEventListener('popstate', count)
     start()
     openCase(/The valley/)
     tab(/Solve/)
-    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
-    menu('Restart')
-    confirm.mockRestore()
+    await restart()
     expect(screen.getByRole('tab', { name: /Look/ })).toHaveAttribute('aria-selected', 'true')
-    await waitFor(() => expect(pops).toBe(1))
-    expect(history.state).toEqual({ case: 'valley' })
-    history.forward()
     await waitFor(() => expect(pops).toBe(2))
     expect(history.state).toEqual({ case: 'valley' })
-    expect(screen.getByRole('tab', { name: /Look/ })).toHaveAttribute('aria-selected', 'true')
-    history.go(-2)
+    for (const n of [3, 4]) {
+      history.forward()
+      await waitFor(() => expect(pops).toBe(n))
+      expect(history.state).toEqual({ case: 'valley' })
+      expect(screen.getByRole('tab', { name: /Look/ })).toHaveAttribute('aria-selected', 'true')
+    }
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+    history.go(-3)
     await waitFor(() =>
       expect(screen.getByRole('heading', { level: 1, name: 'Behold' })).toBeInTheDocument(),
     )
@@ -3182,9 +3189,7 @@ describe('the close converges (#95)', () => {
     expect(result()).not.toHaveTextContent(/fit the story/)
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     expect(result()).toHaveTextContent(counted)
-    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
-    menu('Restart')
-    confirm.mockRestore()
+    await restart()
     tab(/Solve/)
     expect(result()).not.toHaveTextContent(/fit the story/)
   })
@@ -3938,20 +3943,18 @@ describe('the case solved (#6, 03c; #24)', () => {
     await waitFor(() =>
       expect(screen.getByRole('heading', { name: 'The case is closed.' })).toBeInTheDocument(),
     )
-    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
-    menu('Restart')
-    confirm.mockRestore()
+    await restart()
     expect(screen.getByRole('dialog', { name: 'The valley' })).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('0/7')
     await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
     expect(screen.getByRole('dialog', { name: 'The valley' })).toBeInTheDocument()
   })
 
-  // A restart from a closed case's own entry leaves the reveal's entry ahead; forward must not
-  // show a fresh case's solution, so the entry becomes a case entry instead (review round 1, #21).
-  // A restart from the reveal turns its entry into a case entry itself (#77), so this one starts
-  // from the case's own, a step back from the reveal.
-  it('a reveal entry left ahead by a restart shows no solution, and becomes a case entry', async () => {
+  // A restart from a closed case's own entry, a step back from the reveal: Restart's question takes
+  // the place of the reveal's entry ahead, and Start over makes it a case entry, so forward shows
+  // no solution (review round 1, #21; #153). A restart from the reveal turns its entry into a case
+  // entry itself (#77).
+  it('a restart from a closed case’s own entry leaves no reveal entry ahead', async () => {
     start()
     openCase(/The valley/)
     await solveTheValley()
@@ -3962,9 +3965,7 @@ describe('the case solved (#6, 03c; #24)', () => {
     history.back()
     await landed
     expect(history.state).toEqual({ case: 'valley' })
-    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
-    menu('Restart')
-    confirm.mockRestore()
+    await restart()
     landed = popped()
     history.forward()
     await landed
@@ -3974,6 +3975,25 @@ describe('the case solved (#6, 03c; #24)', () => {
     )
     expect(screen.queryByRole('heading', { name: 'The case is closed.' })).not.toBeInTheDocument()
     expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('0/7')
+  })
+
+  // A reveal entry ahead of a case that isn't closed, as #100's reload leaves one, shows no
+  // solution: it becomes a case entry (review round 1, #21).
+  it('a reveal entry ahead of a case not closed shows no solution, and becomes a case entry', async () => {
+    history.replaceState({ case: 'valley' }, '')
+    history.pushState({ case: 'valley', view: 'reveal' }, '')
+    const popped = () =>
+      new Promise<void>((r) => addEventListener('popstate', () => r(), { once: true }))
+    let landed = popped()
+    history.back()
+    await landed
+    render(<App />)
+    landed = popped()
+    history.forward()
+    await landed
+    expect(history.state).toEqual({ case: 'valley' })
+    expect(screen.queryByRole('heading', { name: 'The case is closed.' })).not.toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'The valley' })).toBeInTheDocument()
   })
 
   // The case entry beneath the reveal is the case with its answers: forward from the cards, or a
@@ -3994,6 +4014,103 @@ describe('the case solved (#6, 03c; #24)', () => {
     render(<App />)
     expect(screen.getByRole('heading', { name: 'Who is who' })).toBeInTheDocument()
     expect(document.querySelector('[data-slot="t4"]')).toHaveClass('is-right')
+  })
+})
+
+// The owner's phone check of version code 2 (#68): the Play app headed Restart's question 'The page
+// at "https://play.beholdgame.com" says:'. The game now asks it itself, as WAI-ARIA's guide has an
+// alert dialog asked: over a screen that takes nothing until it's answered, its focus on the
+// answer that changes nothing, Tab kept to the answers, and Escape for Cancel. Back answers it as
+// Cancel too, as it did the browser's question: while it shows it is an entry of its own.
+describe('Restart’s question, the game’s own (#153)', () => {
+  const asked = () => screen.getByRole('alertdialog', { name: 'Restart' })
+  const answer = (name: string) => fireEvent.click(within(asked()).getByRole('button', { name }))
+  const gone = () =>
+    waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument())
+  const words = () => chips().map((c) => c.textContent)
+  // The vineyard on Solve, with the cord found: the words it put in the bank.
+  const onSolve = () => {
+    start(<App />, laterStarted)
+    openCase(/The vineyard/)
+    tapSpot('cord')
+    tab(/Solve/)
+    return words()
+  }
+
+  it('asks over the menu, never the browser, its focus on Cancel and the screen under it inert', () => {
+    const confirm = vi.spyOn(window, 'confirm')
+    onSolve()
+    menu('Restart')
+    expect(asked()).toHaveAttribute('aria-modal', 'true')
+    expect(asked()).toHaveAccessibleDescription('Start this case over? Its progress is cleared.')
+    expect(
+      within(asked())
+        .getAllByRole('button')
+        .map((b) => b.textContent),
+    ).toEqual(['Start over', 'Cancel'])
+    expect(within(asked()).getByRole('button', { name: 'Cancel' })).toHaveFocus()
+    expect(document.querySelector('.app')).toHaveAttribute('inert')
+    expect(document.querySelector('.app .menu')).toBeInTheDocument()
+    expect(history.state).toEqual({ case: 'vineyard', view: 'solve', asking: true })
+    expect(confirm).not.toHaveBeenCalled()
+    confirm.mockRestore()
+  })
+
+  it('Cancel leaves the case as it was, the menu open and the focus back on Restart', async () => {
+    const found = onSolve()
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }))
+    const restarts = within(screen.getByRole('dialog', { name: 'Menu' })).getByRole('button', {
+      name: 'Restart',
+    })
+    restarts.focus()
+    fireEvent.click(restarts)
+    answer('Cancel')
+    await gone()
+    expect(restarts).toHaveFocus()
+    expect(document.querySelector('.app')).not.toHaveAttribute('inert')
+    expect(history.state).toEqual({ case: 'vineyard', view: 'solve' })
+    expect(words()).toEqual(found)
+  })
+
+  it('Escape, a tap on the dim, or back answers Cancel, and Tab keeps to the two answers', async () => {
+    const found = onSolve()
+    menu('Restart')
+    const [yes, no] = within(asked()).getAllByRole('button')
+    fireEvent.keyDown(document, { key: 'Tab' })
+    expect(yes).toHaveFocus()
+    fireEvent.keyDown(document, { key: 'Tab', shiftKey: true })
+    expect(no).toHaveFocus()
+    fireEvent.keyDown(document, { key: 'Escape' })
+    await gone()
+    menu('Restart')
+    fireEvent.click(asked().parentElement!)
+    await gone()
+    menu('Restart')
+    history.back()
+    await gone()
+    expect(history.state).toEqual({ case: 'vineyard', view: 'solve' })
+    expect(screen.getByRole('heading', { name: 'Who is who' })).toBeInTheDocument()
+    expect(words()).toEqual(found)
+  })
+
+  it('a second tap on Start over answers nothing more', async () => {
+    onSolve()
+    tab(/Look/)
+    await waitFor(() => expect(history.state).toEqual({ case: 'vineyard' }))
+    menu('Restart')
+    answer('Start over')
+    answer('Start over')
+    await gone()
+    await new Promise((r) => setTimeout(r, 50))
+    expect(history.state).toEqual({ case: 'vineyard' })
+    expect(screen.getByRole('dialog', { name: 'The vineyard' })).toBeInTheDocument()
+  })
+
+  it('a reload with its entry on top asks it again', () => {
+    history.replaceState({ case: 'valley', asking: true }, '')
+    render(<App />)
+    expect(asked()).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'The valley' })).toBeInTheDocument()
   })
 })
 

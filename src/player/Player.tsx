@@ -73,6 +73,8 @@ interface PlayerProps {
   lastClose: Progress | null
   onLastClose: (close: Progress | null) => void
   passages: PassageService
+  /** Restart's question is over the screen, which takes nothing until it's answered (#153). */
+  inert?: boolean
 }
 
 /** The view a history state names: the reveal's entry (Gate 03 [1]), Solve's (#77), or none. */
@@ -566,7 +568,7 @@ export function Player(props: PlayerProps) {
   )
   if (view === 'reveal')
     return (
-      <div className="app reading">
+      <div className="app reading" inert={props.inert}>
         {menu}
         <Reveal
           structure={s}
@@ -719,7 +721,7 @@ export function Player(props: PlayerProps) {
     </button>
   )
   return (
-    <div className="app">
+    <div className="app" inert={props.inert}>
       {view === 'look' ? (
         <>
           <Stage
