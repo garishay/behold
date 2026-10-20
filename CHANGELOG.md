@@ -51,6 +51,20 @@ is reserved when its entry is created, at the PR's open, so a lower number may l
   tracks to one of them. GitHub now reads the licence as Other, not MIT. Behold's own code stays
   MIT, and the game's build is unchanged.
 
+## v0.34.0 — Gate 15, the gift (#66)
+
+- **66a — the gift** (#156): the season's fifth case, after the room, is Naaman and Gehazi,
+  2 Kings 5. Its one new idea is a lie: the prophet's servant tells the commander that his master
+  sent him, and tells his master that he hasn't been anywhere, and Solve's second block, the
+  servant's words, sets each claim against what the pictures show. It has three moments to put in
+  the order they happened. At the prophet's door, the commander, made clean, presses silver, gold,
+  and fine clothes on the prophet, who refuses them. On the road, the servant runs after the
+  chariot and asks for silver in his master's name. In the house, the silver hidden, he answers
+  his master and turns to go, white as snow. It has fourteen spots, two faces named from people's
+  words, the servant's under his breath and the prophet's question, and four blanks. The lesson
+  rings the blank of the servant's first claim on Solve until a word is placed in it. The store
+  listing names the gift, and the registry's test counts 2 Kings 5's verses.
+
 ## v0.33.1 — Gate 17, the WebView shell (#68)
 
 - **68d — the WebView shell** (#149): the Play app is now an Android app of the repository's own
