@@ -206,7 +206,7 @@ describe('the title (#75)', () => {
     const entries = history.length
     fireEvent.click(screen.getByRole('button', { name: 'Begin' }))
     expect(screen.queryByRole('button', { name: 'Begin' })).not.toBeInTheDocument()
-    expect(cards()).toHaveLength(5)
+    expect(cards()).toHaveLength(6)
     expect([history.length, history.state]).toEqual([entries, null])
   })
 
@@ -264,7 +264,7 @@ describe('the title (#75)', () => {
     expect(screen.getByRole('dialog', { name: 'The valley' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Begin' })).not.toBeInTheDocument()
     menu('Cases')
-    await waitFor(() => expect(cards()).toHaveLength(5))
+    await waitFor(() => expect(cards()).toHaveLength(6))
     expect(screen.queryByRole('button', { name: 'Begin' })).not.toBeInTheDocument()
   })
 
@@ -314,6 +314,7 @@ describe('the cases page (Gate 01 A6, #6, #75)', () => {
       'The vineyard',
       'The battle',
       'The room',
+      'The gift',
     ])
     expect(cards()[0]).toHaveTextContent('Learn to play')
     expect(screen.queryByText('In progress')).not.toBeInTheDocument()
@@ -358,6 +359,7 @@ describe('the cases page (Gate 01 A6, #6, #75)', () => {
       'The vineyard',
       'The battle',
       'The room',
+      'The gift',
     ])
     const head = list.querySelector('.season-head')!
     expect(within(head as HTMLElement).getByRole('heading', { level: 2 })).toHaveTextContent(
@@ -372,6 +374,7 @@ describe('the cases page (Gate 01 A6, #6, #75)', () => {
       'Case two',
       'Case three',
       'Case four',
+      'Case five',
     ])
     expect(list.nextElementSibling).toHaveTextContent('Season one is being written.')
   })
@@ -394,8 +397,9 @@ describe('the season in order (#75)', () => {
       'Opens after the mountain',
       'Opens after the vineyard',
       'Opens after the battle',
+      'Opens after the room',
     ])
-    expect(locked()).toEqual([false, true, true, true, true])
+    expect(locked()).toEqual([false, true, true, true, true, true])
     expect(cards()[0]).toHaveClass('first')
   })
 
@@ -428,6 +432,7 @@ describe('the season in order (#75)', () => {
       false,
       false,
       false,
+      false,
     ])
     expect(screen.getByRole('status')).toHaveTextContent(
       'Play the mountain first. The story runs in order.',
@@ -445,8 +450,9 @@ describe('the season in order (#75)', () => {
       'In progress',
       'Opens after the vineyard',
       'Opens after the battle',
+      'Opens after the room',
     ])
-    expect(locked()).toEqual([false, true, false, true, true])
+    expect(locked()).toEqual([false, true, false, true, true, true])
     expect(cards()[0]).not.toHaveClass('first')
   })
 
@@ -457,9 +463,9 @@ describe('the season in order (#75)', () => {
       unmount()
     }
     // The mountain restarted, so no longer closed: the vineyard, never opened, waits for it again,
-    // and the battle, started, stays open; the room waits for the battle.
+    // and the battle, started, stays open; the room waits for the battle, and the gift for the room.
     start(<App />, { ...closedTo(1), carmel: fresh(carmel), micaiah: fresh(micaiah) })
-    expect(locked()).toEqual([false, false, true, false, true])
+    expect(locked()).toEqual([false, false, true, false, true, true])
     expect(statuses()[2]).toBe('Opens after the mountain')
   })
 })
@@ -1619,6 +1625,23 @@ describe('the tutorial’s marks (#25)', () => {
     expect(coach()).toBeNull()
     slot('r2')
     expect(at()).toBe('[data-slot="r2"]')
+  })
+
+  // The gift's one new idea is a lie (#66): on Solve, while the blank that sets the servant's first
+  // claim against the pictures is empty, it is ringed with the lesson's words. A word placed takes
+  // the mark away, and emptying the blank brings it back.
+  it('marks the first claim’s blank in the case that teaches it, until a word is placed', async () => {
+    start(<App />, laterStarted)
+    openCase(/The gift/)
+    tapSpot('runner')
+    tab(/Solve/)
+    await waitFor(() => expect(at()).toBe('[data-slot="l1"]'))
+    expect(said()).toBe('So the servant says. The pictures will tell.')
+    chip('asked for')
+    slot('l1')
+    expect(coach()).toBeNull()
+    slot('l1')
+    expect(at()).toBe('[data-slot="l1"]')
   })
 
   // The paid round's second session (#23, 2026-10-05): her first tap at step 1 landed on the foot

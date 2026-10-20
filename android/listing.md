@@ -50,6 +50,9 @@ A crowd of prophets tells a king to go to war, and one plain man is sent to pris
 The room
 A woman builds a small room on her roof for a holy man who often comes her way. Years later she rides hard to find him, and tells all who ask that everything is all right. Whose room is it, and what happened on its bed?
 
+The gift
+A commander of Aram comes to Israel’s prophet with leprosy, and goes home clean. Then the prophet’s servant runs after the commander, with an answer for everyone who asks. Who sent him, and where had he been?
+
 Stuck? Ask for a hint: Where to look, then Show me.
 
 Best with sound on.

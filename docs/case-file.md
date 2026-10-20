@@ -32,11 +32,21 @@ src/cases/
     case.ts
     en.ts
     scenes.md
+  shunammite/
+    case.ts
+    en.ts
+    scenes.md
+  naaman/
+    case.ts
+    en.ts
+    scenes.md
 public/cases/
   valley/             valley.jpg, d1.jpg, d2.jpg — the moment picture and the face portraits
   carmel/             water.jpg, fire.jpg, baal.jpg, c1.jpg, c2.jpg
   vineyard/           vineyard.jpg, bedchamber.jpg, gate.jpg, p1.jpg, p2.jpg, p3.jpg
   micaiah/            battle.jpg, pool.jpg, thrones.jpg, m1.jpg, m2.jpg
+  shunammite/         carmel.jpg, bed.jpg, room.jpg, f1.jpg, f2.jpg
+  naaman/             road.jpg, house.jpg, gift.jpg, f1.jpg, f2.jpg
 ```
 
 The structure and the text are modules the player imports through the registry, so they ship in

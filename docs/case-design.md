@@ -90,13 +90,16 @@ the vineyard on: hard because you have to look, never because you have to be cle
    | the vineyard | papers, and names worked out by cross-reference              |
    | the battle   | a disguise: a face without its marker, named by what happens |
    | the room     | a place known by what's in it, and whose it is               |
+   | the gift     | a lie: a person's words caught against the pictures          |
 
    The mountain marks its one idea the first time the player meets it: the pictures to place,
    then the slots they go in (`teach`, #30). The vineyard marks its own at the face of the man on
    the bed, until the player names him and has opened the seal that bears his name, so a name
    placed before the seal doesn't take the mark away (#106, #131); the battle marks the disguised
-   man's until the player names him (#53); and the room marks the blank that asks whose bed the boy
-   was laid on, until a word is placed in it (#57). In the valley and on the mountain a person's tap gives
+   man's until the player names him (#53); the room marks the blank that asks whose bed the boy
+   was laid on, until a word is placed in it (#57); and the gift marks the blank that sets the
+   servant's first claim against the pictures, until a word is placed in it (#66).
+   In the valley and on the mountain a person's tap gives
    their name; from the vineyard on, the names the faces need come from something that bears
    them — a seal, a letter, a note, or another person's words — and the player works out whose
    each one is. A person's tap says they are "a face in Solve", and from the vineyard on, one that
