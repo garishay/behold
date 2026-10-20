@@ -1317,6 +1317,12 @@ button:focus-visible {
   background: var(--wine);
 }
 
+/* An update's toast waits the question out, unseen, so a screen reader reaches the question alone,
+   as a tap does. */
+:root:has(.question) .toast {
+  visibility: hidden;
+}
+
 /* The sound switches (Gate 10 A4): two pills in a row, under the case cards and under Restart;
    gold while on, dim while off. On an iPhone a line under them says silent mode mutes the game
    (#72). */
