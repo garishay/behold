@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Try again (#151), as the title's Begin: the game's wine, its corners rounded 10 dp, with
+     Android's ripple under a tap. -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?android:attr/colorControlHighlight">
+    <item>
+        <shape>
+            <solid android:color="@color/wine" />
+            <corners android:radius="10dp" />
+        </shape>
+    </item>
+</ripple>

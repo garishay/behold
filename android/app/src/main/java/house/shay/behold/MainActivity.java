@@ -32,9 +32,15 @@ import android.window.OnBackInvokedDispatcher;
  * between Android's bars. The game's own pages open here; any other link, and any link the page
  * opens in a new tab, opens in the phone's browser. Back walks the page's history, then leaves the
  * app as Android leaves any app. The page is paused with the app, so it hears that it is hidden and
- * stops its sound, as it does in a browser.
+ * stops its sound, as it does in a browser. When the page's renderer is gone, the page is built
+ * again, as Android's guide to WebView termination has it (#151).
  */
 public class MainActivity extends Activity {
+    /** How many times in a run the page is built again at once before the app says it keeps stopping. */
+    private static final int RESTARTS = 3;
+    /** A web address no app claims, so Android answers it with the default browser (#151). */
+    private static final Uri ANYWHERE = Uri.parse("https://example.com/");
+
     private WebView web;
     private Uri start;
     /** Back's callback from Android 13, registered only while the page has history to go back to. */
@@ -43,14 +49,30 @@ public class MainActivity extends Activity {
     private boolean failed;
     /** The launch, as the TWA's splash was: the icon's art at 300 dp over the page until it paints. */
     private View launch;
+    /** The page's place between the bands, which a new page takes when the renderer is gone. */
+    private FrameLayout page;
+    /** Whether the player can see the app: from onResume to onPause. */
+    private boolean resumed;
+    /** Whether the renderer went while the app was hidden: the page is built again when it returns. */
+    private boolean pending;
+    /** The renderers that went while the player could see the game, this run or since Try again. */
+    private int restarts;
 
-    @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle saved) {
         super.onCreate(saved);
         // The volume keys set the game's sound, as in a browser, even between sounds.
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         start = Uri.parse(getString(R.string.launchUrl));
+        setContentView(layout());
+        build();
+        // After the renderer is gone, the bundle holds Android's own state but no page to restore.
+        if (saved == null || web.restoreState(saved) == null) web.loadUrl(address(getIntent()));
+    }
+
+    /** The page: a WebView set up as the game needs it, under the launch's art until it paints. */
+    @SuppressLint("SetJavaScriptEnabled")
+    private void build() {
         web = new WebView(this);
         web.setBackgroundColor(getColor(R.color.backgroundColor));
         WebSettings settings = web.getSettings();
@@ -67,9 +89,32 @@ public class MainActivity extends Activity {
         zoomText(getResources().getConfiguration());
         web.setWebViewClient(new Pages());
         web.setWebChromeClient(new Tabs());
-        setContentView(layout());
-        // After the renderer is gone, the bundle holds Android's own state but no page to restore.
-        if (saved == null || web.restoreState(saved) == null) web.loadUrl(address(getIntent()));
+        failed = false;
+        page.addView(web, 0);
+        if (launch == null) {
+            launch = new View(this);
+            launch.setBackground(getDrawable(R.drawable.launch));
+            page.addView(launch);
+        }
+    }
+
+    /** The page again, at the address the app was opened with ([Q33]), after its renderer is gone. */
+    private void restart() {
+        build();
+        web.loadUrl(address(getIntent()));
+    }
+
+    /** Past the cap: the game's words that it keeps stopping, and Try again, in the page's place. */
+    private void stopped() {
+        View stopped = getLayoutInflater().inflate(R.layout.stopped, page, false);
+        stopped.findViewById(R.id.again)
+                .setOnClickListener(
+                        again -> {
+                            page.removeView(stopped);
+                            restarts = 0;
+                            restart();
+                        });
+        page.addView(stopped);
     }
 
     /**
@@ -85,11 +130,7 @@ public class MainActivity extends Activity {
         top.setBackgroundColor(getColor(R.color.themeColor));
         View bottom = new View(this);
         bottom.setBackgroundColor(getColor(R.color.navigationColor));
-        FrameLayout page = new FrameLayout(this);
-        page.addView(web);
-        launch = new View(this);
-        launch.setBackground(getDrawable(R.drawable.launch));
-        page.addView(launch);
+        page = new FrameLayout(this);
         root.addView(top, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0));
         root.addView(page, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
         root.addView(bottom, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0));
@@ -126,15 +167,17 @@ public class MainActivity extends Activity {
     }
 
     /**
-     * A link that leaves the game, opened where Android opens it: a web address in the browser, even
-     * one on the game's own site, which this app would otherwise take back; an email address in the
-     * phone's email app. A link to anything else, or with no app to open it, does nothing.
+     * A link that leaves the game, opened where Android opens it: a web address in the player's
+     * default browser, even one on the game's own site, which this app would otherwise take back, and
+     * Android asks only when no default is set; an email address in the phone's email app. A link to
+     * anything else, or with no app to open it, does nothing.
      */
     private void open(Uri url) {
         Intent intent = new Intent(Intent.ACTION_VIEW, url).addCategory(Intent.CATEGORY_BROWSABLE);
         if (onTheWeb(url)) {
+            // Android finds the app by the selector and gives it the link (#151).
             intent.setSelector(
-                    Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_BROWSER));
+                    new Intent(Intent.ACTION_VIEW, ANYWHERE).addCategory(Intent.CATEGORY_BROWSABLE));
         } else if (!"mailto".equals(url.getScheme())) {
             return;
         }
@@ -149,7 +192,10 @@ public class MainActivity extends Activity {
         return "https".equals(url.getScheme()) || "http".equals(url.getScheme());
     }
 
-    /** The page's text follows Android's font size, which WebView leaves at 100% ("WebSettings"). */
+    /**
+     * The page's text follows Android's font size, as WebView sets it by default ("AwSettings"); set
+     * here too, so it still follows if that default changes.
+     */
     private void zoomText(Configuration configuration) {
         if (web != null) web.getSettings().setTextZoom(Math.round(configuration.fontScale * 100));
     }
@@ -158,11 +204,12 @@ public class MainActivity extends Activity {
     private void history() {
         if (Build.VERSION.SDK_INT < 33) return;
         OnBackInvokedDispatcher dispatcher = getOnBackInvokedDispatcher();
-        if (web.canGoBack() && back == null) {
+        boolean pageBack = web != null && web.canGoBack();
+        if (pageBack && back == null) {
             OnBackInvokedCallback callback = web::goBack;
             dispatcher.registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT, callback);
             back = callback;
-        } else if (!web.canGoBack() && back != null) {
+        } else if (!pageBack && back != null) {
             dispatcher.unregisterOnBackInvokedCallback((OnBackInvokedCallback) back);
             back = null;
         }
@@ -179,7 +226,18 @@ public class MainActivity extends Activity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        if (web != null && intent.getData() != null) web.loadUrl(address(intent));
+        Uri url = intent.getData();
+        if (BuildConfig.DEBUG && url != null && "chrome".equals(url.getScheme())) {
+            // The check build's way to make the renderer go (#151): chrome://crash or chrome://kill,
+            // loaded after the intent's "wait", in seconds, so the app can be hidden first.
+            page.postDelayed(
+                    () -> {
+                        if (web != null) web.loadUrl(url.toString());
+                    },
+                    intent.getIntExtra("wait", 0) * 1000L);
+        } else if (web != null && url != null) {
+            web.loadUrl(address(intent));
+        }
     }
 
     @Override
@@ -191,17 +249,23 @@ public class MainActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
+        resumed = false;
         if (web != null) web.onPause();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (web == null) return;
-        web.onResume();
-        if (failed) {
-            failed = false;
-            web.reload();
+        resumed = true;
+        if (pending) {
+            pending = false;
+            restart();
+        } else if (web != null) {
+            web.onResume();
+            if (failed) {
+                failed = false;
+                web.reload();
+            }
         }
     }
 
@@ -249,13 +313,21 @@ public class MainActivity extends Activity {
                     .withEndAction(() -> ((ViewGroup) art.getParent()).removeView(art));
         }
 
-        /** The page's renderer is gone, killed for memory or crashed: start the app again. */
+        /**
+         * The page's renderer is gone, killed for memory or crashed, and the page with it. While the
+         * player can see the app, it's built again at once, up to RESTARTS times in a run; then the
+         * app says the game keeps stopping. While the app is hidden, it's built when the player
+         * returns, as Android's guide has it.
+         */
         @Override
         public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
-            ((ViewGroup) view.getParent()).removeView(view);
+            page.removeView(view);
             view.destroy();
             web = null;
-            recreate();
+            history();
+            if (!resumed) pending = true;
+            else if (++restarts > RESTARTS) stopped();
+            else restart();
             return true;
         }
     }
@@ -279,7 +351,9 @@ public class MainActivity extends Activity {
                             if (sent || !(onTheWeb(url) || "mailto".equals(url.getScheme()))) return false;
                             sent = true;
                             open(url);
-                            from.post(from::destroy);
+                            // Posted on the page's place: the tab is never on the screen, so a post
+                            // on the tab itself would wait for it to be (#151).
+                            page.post(from::destroy);
                             return true;
                         }
 
@@ -292,6 +366,13 @@ public class MainActivity extends Activity {
                         @Override
                         public void onPageStarted(WebView from, String url, Bitmap icon) {
                             if (send(from, Uri.parse(url))) from.stopLoading();
+                        }
+
+                        /** The tab shares the page's renderer, so it answers for itself when it goes (#151). */
+                        @Override
+                        public boolean onRenderProcessGone(WebView from, RenderProcessGoneDetail detail) {
+                            from.destroy();
+                            return true;
                         }
                     });
             ((WebView.WebViewTransport) result.obj).setWebView(tab);
