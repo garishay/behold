@@ -355,3 +355,14 @@ export const copyrightPage = {
   ],
   back: 'Back to Behold',
 } satisfies Omit<Policy, 'effective'>
+
+/**
+ * The Play app's own words (#151): when the page's renderer has gone too often for the app to keep
+ * building it again, the app shows them in the page's place. The app's build reads them from here
+ * (`android/app/build.gradle`), so each stays a line of its own in single quotes; the site imports
+ * none of them.
+ */
+export const shell = {
+  stopped: 'The game keeps stopping.',
+  tryAgain: 'Try again',
+}

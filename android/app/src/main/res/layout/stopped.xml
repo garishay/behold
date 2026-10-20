@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Past the cap on the page's restarts (#151), in the page's place: the launch's art, the game's
+     words that it keeps stopping, and Try again, as the title's Begin is drawn. The words are the
+     strings module's, which the build reads (app/build.gradle). A column that scrolls, so it holds
+     at the phone's largest font. -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/backgroundColor"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <ImageView
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/splash" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp"
+            android:gravity="center"
+            android:text="@string/stopped"
+            android:textColor="@color/mist"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/again"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/again"
+            android:minHeight="50dp"
+            android:stateListAnimator="@null"
+            android:text="@string/tryAgain"
+            android:textAllCaps="false"
+            android:textColor="@color/mist"
+            android:textSize="16sp" />
+    </LinearLayout>
+</ScrollView>

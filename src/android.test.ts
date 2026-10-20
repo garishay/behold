@@ -5,7 +5,8 @@
 // Android manifest to its one permission and the flags the gate names; the site's asset links,
 // which vouch for the app (68c); and `android/listing.md`, the store listing's words, held to
 // Play's limits and to the game's own copy. The build is Vite's own, run once with the app's config
-// into a folder of its own, as the privacy page's test runs it.
+// into a folder of its own, as the privacy page's test runs it. The activity's restart, its links,
+// and the words it shows of its own are held as written (#151).
 /// <reference types="node" />
 import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
@@ -15,7 +16,7 @@ import { join } from 'node:path'
 import { build } from 'vite'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { cases } from './cases/index.ts'
-import { strings } from './strings/en.ts'
+import { shell, strings } from './strings/en.ts'
 
 /** The web manifest's fields that the config answers to. */
 interface WebManifest {
@@ -65,7 +66,7 @@ const FINGERPRINTS = [
 /**
  * A1's table as ruled for the WebView shell (#68), row by row: the package and the address the
  * app opens, its names, the bars' and the splash's colours as the TWA had them, the oldest Android
- * it installs on and the one it targets, and its version, the one after the TWA's first upload.
+ * it installs on and the one it targets, and its version: code 3, the restart's (#151).
  */
 const TABLE = {
   packageId: 'house.shay.behold',
@@ -79,8 +80,8 @@ const TABLE = {
   backgroundColor: '#1B2033',
   minSdkVersion: 24,
   targetSdkVersion: 36,
-  appVersionCode: 2,
-  appVersion: '1.1.0',
+  appVersionCode: 3,
+  appVersion: '1.1.1',
 }
 
 const config: Config = JSON.parse(readFileSync('android/shell.json', 'utf8'))
@@ -258,6 +259,81 @@ describe('the shell’s activity (A3, #68)', () => {
       'int types = WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout();',
     )
     expect(activity).toContain('Insets bars = insets.getInsets(types);')
+  })
+})
+
+// As above, the activity runs only on a phone: each test holds a behaviour of #151 as text, and
+// fails on the code before it. The check build's phone check reads what each does.
+describe('the shell’s restart after its renderer is gone, and its links (#151)', () => {
+  /** The app's build file, which reads the shell's words and makes the check build. */
+  const gradle = readFileSync('android/app/build.gradle', 'utf8')
+  /** The words past the cap, as the app lays them out. */
+  const stoppedLayout = readFileSync('android/app/src/main/res/layout/stopped.xml', 'utf8')
+
+  // Android's guide: while the activity is hidden, "Postponing recovery until user returns".
+  it('builds the page again at once while the player can see it, and on return while hidden', () => {
+    expect(activity).toMatch(
+      /if \(!resumed\) pending = true;\s+else if \(\+\+restarts > RESTARTS\) stopped\(\);\s+else restart\(\);\s+return true;/,
+    )
+    expect(activity).toMatch(/if \(pending\) \{\s+pending = false;\s+restart\(\);/)
+    expect(activity).toMatch(/super\.onResume\(\);\s+resumed = true;/)
+    expect(activity).toMatch(/super\.onPause\(\);\s+resumed = false;/)
+  })
+
+  // The guide's example stops at three; a renderer that goes while the app is hidden doesn't count.
+  it('builds it three times in a run at most, and Try again counts afresh', () => {
+    expect(activity).toContain('private static final int RESTARTS = 3;')
+    expect(activity).toMatch(/page\.removeView\(stopped\);\s+restarts = 0;\s+restart\(\);/)
+  })
+
+  // Nothing the player reads lives in code: the build reads the words from the strings module, as
+  // a line of its own in single quotes, and the layout shows them by key.
+  it('says it keeps stopping in the strings module’s words, which its build reads', () => {
+    const block = /\nexport const shell = \{\n([^]*?)\n\}/.exec(
+      readFileSync('src/strings/en.ts', 'utf8'),
+    )?.[1]
+    for (const [key, words] of Object.entries(shell)) {
+      expect(block).toContain(`  ${key}: '${words}',`)
+      expect(words).not.toMatch(/['\\]/)
+      expect(gradle).toContain(`resValue 'string', '${key}', word('${key}')`)
+      expect(stoppedLayout).toContain(`android:text="@string/${key}"`)
+    }
+  })
+
+  it('draws its words and Try again in the game’s mist and wine, as Begin is drawn', () => {
+    const css = readFileSync('src/index.css', 'utf8')
+    const colors = readFileSync('android/app/src/main/res/values/colors.xml', 'utf8')
+    for (const name of ['mist', 'wine']) {
+      const game = new RegExp(`--${name}: (#[0-9a-f]{6});`).exec(css)?.[1]
+      expect(colors.toLowerCase()).toContain(`<color name="${name}">${game}</color>`)
+    }
+  })
+
+  // Android resolves the selector, and finds the default browser for an address no app claims;
+  // with no default set, it asks, as it does for any link (AOSP's CrossProfileIntentResolverEngine).
+  it('opens a web link in the default browser, by a selector no app claims', () => {
+    expect(activity).toContain('Uri ANYWHERE = Uri.parse("https://example.com/");')
+    expect(activity).toContain(
+      'new Intent(Intent.ACTION_VIEW, ANYWHERE).addCategory(Intent.CATEGORY_BROWSABLE)',
+    )
+    expect(activity).not.toContain('CATEGORY_APP_BROWSER')
+    expect(appManifest).not.toContain('<queries>')
+  })
+
+  // Every WebView on the renderer must answer for it, or WebView ends the app; a tab is never on
+  // the screen, so a post on the tab itself would wait for it forever (AOSP's View.post).
+  it('answers for a tab when the renderer goes, and destroys a sent tab from the page’s queue', () => {
+    expect(activity).toContain('page.post(from::destroy);')
+    expect(activity).toMatch(
+      /public boolean onRenderProcessGone\(WebView from, RenderProcessGoneDetail detail\) \{\s+from\.destroy\(\);\s+return true;/,
+    )
+  })
+
+  it('builds a check build beside the Play app, which alone can make its renderer go', () => {
+    expect(gradle).toMatch(/debug \{\s+applicationIdSuffix '\.check'\s+\}/)
+    expect(activity).toContain(
+      'if (BuildConfig.DEBUG && url != null && "chrome".equals(url.getScheme())) {',
+    )
   })
 })
 
