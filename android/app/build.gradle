@@ -8,6 +8,11 @@ plugins {
 // colours, and its version. src/android.test.ts holds it to the web manifest and to A1's table.
 def shell = new JsonSlurper().parse(file('../shell.json'))
 
+// The words the app shows of its own (#151), read from the strings module, where every word the
+// player reads is kept: its `shell`, each word a line of its own in single quotes.
+def words = (file('../../src/strings/en.ts').text =~ /(?s)\nexport const shell = \{\n(.*?)\n\}/)[0][1]
+def word = { String key -> (words =~ /(?m)^  ${key}: '([^'\\]*)',$/)[0][1] }
+
 android {
     namespace 'house.shay.behold'
     compileSdk shell.targetSdkVersion
@@ -24,6 +29,8 @@ android {
         resValue 'color', 'themeColor', shell.themeColor
         resValue 'color', 'navigationColor', shell.navigationColor
         resValue 'color', 'backgroundColor', shell.backgroundColor
+        resValue 'string', 'stopped', word('stopped')
+        resValue 'string', 'tryAgain', word('tryAgain')
         manifestPlaceholders = [host: shell.host, orientation: shell.orientation]
     }
 
@@ -31,6 +38,17 @@ android {
         release {
             minifyEnabled true
         }
+        // The check build (#151): beside the Play app as its own package, signed with the PC's
+        // debug key, and able to make its renderer go (MainActivity's onNewIntent). Its name on the
+        // home screen and in Recents is "Behold check", so it can't be taken for the Play app.
+        debug {
+            applicationIdSuffix '.check'
+            resValue 'string', 'launcherName', "${shell.launcherName} check"
+        }
+    }
+
+    buildFeatures {
+        buildConfig true
     }
 
     compileOptions {

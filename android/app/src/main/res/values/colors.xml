@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The game's mist and wine (src/index.css), which the title's Begin is drawn in: the words
+         past the cap on the page's restarts, and Try again (#151). -->
+    <color name="mist">#E6E1D6</color>
+    <color name="wine">#7A2E3B</color>
+</resources>
