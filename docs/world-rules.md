@@ -54,14 +54,14 @@ Levantine skin tones and features; adult Israelite men are bearded (a shaved man
 | Micaiah | the plainest man in the room; a prisoner's undyed tunic | 1 Kings 22:27 |
 | Zedekiah son of Chenaanah | iron horns in hand | 1 Kings 22:11 |
 | Jehoshaphat | royal robes of deep blue with white and gold trim, a plain gold band — the point of the disguise scene, never to be taken for Ahab's wine-red at a glance | cast sheet; 1 Kings 22:10, 22:30 |
-| Jehu | a captain's scale armor and a bow; a chariot driven hard | 2 Kings 9:20, 9:24 |
+| Jehu | a commander's scale armor and a bow; a chariot driven hard | 2 Kings 9:20, 9:24 |
 | Joram (Ahab's son) | the wine-red of his father's house with a plainer band, no disc circlet; recovering from a wound at Jezreel in the finale | 2 Kings 8:29, 9:15 |
 | The Shunammite | a wealthy woman's dress without royal color; her roof chamber with bed, table, chair, lamp | 2 Kings 4:8–10 |
 | Naaman | an Aramean commander's armor and a foreign cut of beard; skin visibly marked until the seventh dip | 2 Kings 5:1 |
 | Gehazi | Elisha's servant: a plain tunic and a satchel; skin white as snow at the end | 2 Kings 5:27 |
 | The servant girl | a child in Naaman's household, plain dress | 2 Kings 5:2 |
 
-Characters who appear in one case only — Elijah's servant who looks toward the sea, the four hundred prophets, the Shunammite's husband and son, the watchman on the tower, Bidkar, Ahaziah of Judah, the eunuchs at the window — get their marker in that case's brief, chosen the same way: from the text where the text gives one.
+Characters who appear in one case only — Elijah's servant who looks toward the sea, the four hundred prophets, the Shunammite's husband and son, the lookout on the tower, Bidkar, Ahaziah of Judah, the eunuchs at the window — get their marker in that case's brief, chosen the same way: from the text where the text gives one.
 
 Cast sheets are generated once per character on a plain unlit background, front view, full body, and attached to every scene prompt that includes the character.
 

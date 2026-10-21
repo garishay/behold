@@ -1,5 +1,7 @@
 import { carmel } from './carmel/case.ts'
 import { en as carmelEn } from './carmel/en.ts'
+import { jehu } from './jehu/case.ts'
+import { en as jehuEn } from './jehu/en.ts'
 import { micaiah } from './micaiah/case.ts'
 import { en as micaiahEn } from './micaiah/en.ts'
 import { naaman } from './naaman/case.ts'
@@ -32,4 +34,5 @@ export const cases: readonly CaseEntry[] = [
   entry(micaiah, { en: micaiahEn }),
   entry(shunammite, { en: shunammiteEn }),
   entry(naaman, { en: naamanEn }),
+  entry(jehu, { en: jehuEn }),
 ]
