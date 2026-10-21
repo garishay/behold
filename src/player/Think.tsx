@@ -37,10 +37,12 @@ interface ThinkProps {
  */
 export function Think(props: ThinkProps) {
   const { structure: s, text, progress: p, selection } = props
-  // A blank that starts waiting brings its whole sentence into view (#24, Solve's room).
+  // A blank that starts waiting brings its whole sentence into view, or from its top as far as the
+  // blank stays in view (#24, Solve's room; #159).
   useEffect(() => {
     if (selection.target === null) return
-    show(document.querySelector(`[data-slot="${selection.target}"]`)?.closest('.sentence'))
+    const blank = document.querySelector(`[data-slot="${selection.target}"]`)
+    show(blank?.closest('.sentence'), blank)
   }, [selection.target])
   // A fill that leaves Solve short, with no empty slot in view, brings the nearest into view (#23).
   const count = filled(s, p)

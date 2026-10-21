@@ -1787,6 +1787,24 @@ describe('the tutorial’s marks (#25)', () => {
     expect(scrolled).toHaveBeenCalledWith({ top: 122.5, left: 10 })
   })
 
+  // Gate 39's survey at the largest text: tapped, the window's blank waits, and its sentence, taller
+  // than the line or two a lesson's row leaves the account, was shown from its top, which took the
+  // blank out of view under the words. It is shown from its top only as far as the blank stays in
+  // view (#24, Solve's room; #159).
+  it('keeps a waiting blank in view when its sentence is taller than the account', async () => {
+    largest(() => 72)
+    boxes['[data-slot="w1"]'] = new DOMRect(150, 30, 80, 37)
+    boxes['.sentence'] = new DOMRect(16, -40, 328, 200)
+    start(<App />, laterStarted)
+    openCase(/The window/)
+    tapSpot('aide')
+    tab(/Solve/)
+    await waitFor(() => expect(said()).toBe('Find where the pictures keep Elijah’s word.'))
+    const scrolled = vi.spyOn(document.querySelector('.solve')!, 'scrollBy')
+    slot('w1')
+    expect(scrolled).toHaveBeenLastCalledWith({ top: -5 })
+  })
+
   // The paid round's second session (#23, 2026-10-05): her first tap at step 1 landed on the foot
   // of the step's own words and fell through to the armor, and her second, inside the boy's ring
   // at his feet, opened the giant, whose smaller box is drawn over the boy's. A guided step holds

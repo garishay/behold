@@ -49,15 +49,18 @@ export const scroller = (el: Element) => el.parentElement?.closest<HTMLElement>(
 
 /**
  * Scrolls a target's scroll box the least it takes to show the target whole, or from its top when
- * it is taller than the box: a waiting blank's sentence (#24, Solve's room).
+ * it is taller than the box: a waiting blank's sentence (#24, Solve's room), though never so far
+ * that what it holds and must keep, the blank, leaves the box, as it did where a lesson's row left
+ * the account a line or two at a phone's largest text (#159).
  */
-export function show(el: Element | null | undefined) {
+export function show(el: Element | null | undefined, keep?: Element | null) {
   const box = el && scroller(el)
   if (!el || !box) return
   const r = el.getBoundingClientRect()
   const b = box.getBoundingClientRect()
-  const off =
-    r.top < b.top || r.height > b.height ? r.top - b.top : Math.max(0, r.bottom - b.bottom)
+  let off = r.top < b.top || r.height > b.height ? r.top - b.top : Math.max(0, r.bottom - b.bottom)
+  const k = keep?.getBoundingClientRect()
+  if (k && k.bottom - off > b.bottom) off = k.bottom - b.bottom
   if (off !== 0) box.scrollBy({ top: off })
 }
 
