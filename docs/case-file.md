@@ -104,13 +104,12 @@ the step is passed (#77).
 
 No mark's words cover the dock's caption, or the account's lines (#77). From Look, a step done on
 Solve, a fill or the close, rings Solve's button with no words, as the question does; the step that
-waits on Solve opening has its words above the dock. A mark's words sit below its target or above
-it, wherever that side leaves them two lines and one more, and else at the foot of the room above
-the dock. On Solve the account's lines on show split the room: a target above them or below them
-keeps its words on its own side, and a target among them, a blank, has its words just under them.
-A lesson's words take a row of their own instead, under the account and above Close's row and the
-bank, and the account gives up the height while they show, so they never cover a word in the bank
-(#159).
+waits on Solve opening has its words above the dock. On Look a mark's words sit below its target or
+above it, wherever that side leaves them two lines and one more, and else at the foot of the room
+above the dock. On Solve every mark's words take a row of their own, under the account and above
+Close's row and the bank, and the account gives up the height while they show, so they never cover
+the account, Close the case, or a word in the bank; the ring stays on its target, and the words
+stay while the mark does, its target in view or not (#159).
 
 A step that waits on a face or a blank may lead with it, `slotFirst: true` (#77): its mark rings
 the slot until the slot waits, then the answer's word, with the words of other kinds dimmed in the
