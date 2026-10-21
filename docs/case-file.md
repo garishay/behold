@@ -108,6 +108,9 @@ waits on Solve opening has its words above the dock. A mark's words sit below it
 it, wherever that side leaves them two lines and one more, and else at the foot of the room above
 the dock. On Solve the account's lines on show split the room: a target above them or below them
 keeps its words on its own side, and a target among them, a blank, has its words just under them.
+A lesson's words take a row of their own instead, under the account and above Close's row and the
+bank, and the account gives up the height while they show, so they never cover a word in the bank
+(#159).
 
 A step that waits on a face or a blank may lead with it, `slotFirst: true` (#77): its mark rings
 the slot until the slot waits, then the answer's word, with the words of other kinds dimmed in the
@@ -153,7 +156,7 @@ The type is computed from the structure, so the keys below are exactly the struc
 | `steps`    | step id → the step's words, eight or fewer, beside its mark; a step that leads with its slot may give a second form, shown once the slot waits (#102); only when the structure has steps |
 | `retry`    | the last step's words after a failed close, eight or fewer: the answers were checked, and the ringed ones don’t fit the story; only with steps                                           |
 | `ask`      | the question asked on a miss, eight or fewer, beside its mark; only when the structure names `ask`                                                                                       |
-| `teach`    | the lesson's words, eight or fewer, beside its mark; only when the structure teaches                                                                                                     |
+| `teach`    | the lesson's words, eight or fewer, in a row of their own under Solve's account (#159); only when the structure teaches                                                                  |
 | `reveal`   | the paragraphs in the game's words, shown before the passage                                                                                                                             |
 
 That is every string the player reads for a case. What the interface says around it — the view
