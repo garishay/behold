@@ -1280,6 +1280,49 @@ button:focus-visible {
   font-size: 16px;
 }
 
+/* Restart's question (#153): the game's own, in place of the browser's, centred over the menu it
+   was asked from, under a dim of its own. Its yes takes Close the case's wine, over its no. Taller
+   than the screen, as at a phone's larger text, it starts at its top and scrolls, as a paper does
+   (#152). */
+.question {
+  width: 100%;
+  max-width: 380px;
+  margin: auto;
+  padding: 20px;
+  border-radius: 12px;
+  background: var(--slate);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+
+.question p {
+  margin: 0 0 20px;
+  font-size: 17px;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+
+.question button {
+  display: block;
+  width: 100%;
+  min-height: 50px;
+  padding: 8px 16px;
+  border: 1px solid var(--mist-dim);
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+.question .yes {
+  margin-bottom: 10px;
+  border-color: var(--wine);
+  background: var(--wine);
+}
+
+/* An update's toast waits the question out, unseen, so a screen reader reaches the question alone,
+   as a tap does. */
+:root:has(.question) .toast {
+  visibility: hidden;
+}
+
 /* The sound switches (Gate 10 A4): two pills in a row, under the case cards and under Restart;
    gold while on, dim while off. On an iPhone a line under them says silent mode mutes the game
    (#72). */

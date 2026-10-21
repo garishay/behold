@@ -270,6 +270,16 @@ describe('the case screen at the largest font (#152)', () => {
   })
 })
 
+// Restart's question is a modal alert dialog (#153): nothing outside it is reached while it shows.
+// The screen under it is inert, and an update's toast, outside the game's page, waits it out
+// unseen. jsdom lays nothing out, so the toast's rule is pinned as text; Chrome's accessibility
+// tree is its evidence.
+describe('Restart’s question (#153)', () => {
+  it('hides an update’s toast while it shows', () => {
+    expect(css).toMatch(/\n:root:has\(\.question\) \.toast \{\s+visibility: hidden;\s+\}/)
+  })
+})
+
 // The bank shows three rows of words and the top of a fourth, so the eight things of the valley,
 // leading it while a blank waits, are in view whole, and two under the row above it, Close the
 // case or a hint on offer, which takes the third row's room; jsdom lays nothing out, so the

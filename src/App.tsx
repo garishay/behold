@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from 'react'
+import { useEffect, useEffectEvent, useRef, useState, type CSSProperties } from 'react'
 import { cases } from './cases/index.ts'
 import { path as copyright } from './copyright/page.ts'
 import { fetchedPassages } from './passages/proxy.ts'
@@ -8,6 +8,7 @@ import { Player } from './player/Player.tsx'
 import { fresh, type Progress } from './player/state.ts'
 import { load, save, type Saved } from './player/storage.ts'
 import { path as privacy } from './privacy/page.ts'
+import { Question } from './Question.tsx'
 import { Music } from './sound/music.ts'
 import { Switches } from './sound/Switches.tsx'
 import { strings } from './strings/en.ts'
@@ -17,11 +18,14 @@ import { Title } from './Title.tsx'
  * The history entries the app pushes (Gate 03 [1]): one for an open case, and one on top of it
  * for the case's reveal, so the system's back returns from the reveal to the case and from the
  * case to the cards, and leaves the app only from the cards. While a case is still open, Solve is
- * the entry on top of it, so back steps down from Solve to Look before it leaves (#77).
+ * the entry on top of it, so back steps down from Solve to Look before it leaves (#77). Restart's
+ * question is an entry on top of the one it was asked on while it shows, so back answers it as
+ * Cancel and leaves the screen as it was, as the browser's own question did (#153).
  */
 interface Entry {
   readonly case: string
   readonly view?: 'solve' | 'reveal'
+  readonly asking?: true
 }
 
 /**
@@ -71,15 +75,36 @@ export default function App({ passages = fetchedPassages }: AppProps) {
   )
   const [nudge, setNudge] = useState(0)
   const [restarts, setRestarts] = useState(0)
+  // Restart's question shows while its entry is on top, after a reload too (#153). An answer steps
+  // back from the entry, and the question goes as the step lands; until then a second tap answers
+  // nothing. Start over then starts the case over.
+  const [asking, setAsking] = useState(() => entry(history.state)?.asking === true)
+  const answered = useRef<boolean | null>(null)
   // The last failed close of each case, kept for the session and never stored: leaving a case and
   // coming back keeps it, and a reload, Restart, or the close that ends the case clears it (#123,
   // [Q20] on #12).
   const [closes, setCloses] = useState<Readonly<Record<string, Progress | null>>>({})
   useEffect(() => save(saved), [saved])
+  // The open case starts over: a restart from Solve or the reveal leaves that entry behind as a
+  // case entry, and the fresh case mounts on Look before the step back lands (#77).
+  const restart = useEffectEvent(() => {
+    const found = cases.find((c) => c.structure.id === open)
+    if (!found || open === null) return
+    if (entry(history.state)?.view) {
+      history.replaceState({ case: open } satisfies Entry, '')
+      history.back()
+    }
+    setSaved({ ...saved, [open]: fresh(found.structure) })
+    setCloses({ ...closes, [open]: null })
+    setRestarts(restarts + 1)
+  })
   useEffect(() => {
     const onPop = (e: PopStateEvent) => {
       setOpen(entry(e.state)?.case ?? null)
       setTitle(null)
+      setAsking(entry(e.state)?.asking === true)
+      if (answered.current) restart()
+      answered.current = null
     }
     addEventListener('popstate', onPop)
     return () => removeEventListener('popstate', onPop)
@@ -116,28 +141,38 @@ export default function App({ passages = fetchedPassages }: AppProps) {
     const progress = saved[open] ?? fresh(found.structure)
     const set = (p: Progress) => setSaved({ ...saved, [open]: p })
     return (
-      <Player
-        key={`${open}:${restarts}`}
-        entry={found}
-        progress={progress}
-        onProgress={set}
-        onCases={toCases}
-        onRestart={() => {
-          if (!window.confirm(strings.restartConfirm)) return
-          // A restart from Solve or the reveal leaves that entry behind as a case entry, and the
-          // fresh case mounts on Look before the step back lands (#77).
-          if (entry(history.state)?.view) {
-            history.replaceState({ case: open } satisfies Entry, '')
-            history.back()
-          }
-          set(fresh(found.structure))
-          setCloses({ ...closes, [open]: null })
-          setRestarts(restarts + 1)
-        }}
-        lastClose={closes[open] ?? null}
-        onLastClose={(close) => setCloses({ ...closes, [open]: close })}
-        passages={passages}
-      />
+      <>
+        <Player
+          key={`${open}:${restarts}`}
+          entry={found}
+          progress={progress}
+          onProgress={set}
+          onCases={toCases}
+          onRestart={() => {
+            history.pushState({ ...history.state, asking: true } satisfies Entry, '')
+            setAsking(true)
+          }}
+          lastClose={closes[open] ?? null}
+          onLastClose={(close) => setCloses({ ...closes, [open]: close })}
+          passages={passages}
+          inert={asking}
+        />
+        {asking && (
+          <Question
+            name={strings.restart}
+            question={strings.restartConfirm}
+            yes={strings.startOver}
+            no={strings.cancel}
+            onAnswer={(yes) => {
+              if (answered.current !== null) return
+              answered.current = yes
+              // Start over leaves a case entry ahead, as a restart from Solve does (#92).
+              if (yes) history.replaceState({ case: open } satisfies Entry, '')
+              history.back()
+            }}
+          />
+        )}
+      </>
     )
   }
   // The season plays in order (Gate 21 A5 as ruled): a case is open when it is the first, when the

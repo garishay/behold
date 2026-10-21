@@ -22,6 +22,8 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       'no-console': ['error', { allow: ['warn', 'error'] }],
+      // The game asks its own questions, never the browser's alert(), confirm(), or prompt() (#153).
+      'no-alert': 'error',
     },
   },
   {

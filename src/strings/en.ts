@@ -83,7 +83,10 @@ export const strings = {
   openSolve: 'Open Solve',
   cases: 'Cases',
   restart: 'Restart',
+  // Restart's question, the game's own, and its two answers (#153).
   restartConfirm: 'Start this case over? Its progress is cleared.',
+  startOver: 'Start over',
+  cancel: 'Cancel',
   papers: 'Papers',
   somethingLeft: 'something left to find',
   zoom: 'Zoom',
