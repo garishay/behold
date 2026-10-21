@@ -1286,13 +1286,17 @@ describe('the tutorial’s marks (#25)', () => {
     openCase(/The vineyard/)
     tab(/Solve/)
     expect(document.querySelector('.submit-row')).toBeNull()
-    expect(document.querySelector('.solve')!.nextElementSibling).toHaveClass('bank')
+    // The seal is unopened, so the lesson still marks the man on the bed, and its words' row sits
+    // under the account, above Close's row once it shows (#159).
+    expect(document.querySelector('.solve')!.nextElementSibling).toHaveClass('said-row')
+    expect(document.querySelector('.said-row')!.nextElementSibling).toHaveClass('bank')
     chip('garden')
     slot('s1')
     const row = screen.getByRole('button', { name: /Close the case/ }).parentElement!
     expect(row).toHaveClass('submit-row')
     expect(row.closest('.solve')).toBeNull()
-    expect(row.previousElementSibling).toHaveClass('solve')
+    expect(row.previousElementSibling).toHaveClass('said-row')
+    expect(row.previousElementSibling!.previousElementSibling).toHaveClass('solve')
     expect(row.nextElementSibling).toHaveClass('bank')
   })
 
@@ -1673,6 +1677,47 @@ describe('the tutorial’s marks (#25)', () => {
     expect(coach()).toBeNull()
     slot('w1')
     expect(at()).toBe('[data-slot="w1"]')
+  })
+
+  // The owner's acceptance read of the window (#67): the lesson's words lay over the bank's first
+  // row, the words its blank wants. Every lesson's words take a row of their own under the account
+  // while they show, a blank's, a face's, and the order's, so the account gives up the height, and
+  // the mark keeps its ring and its status line (#159).
+  it('sets a lesson’s words in a row of their own under the account, clear of the bank', async () => {
+    const row = () => document.querySelector('.said-row')
+    const apart = () => [
+      row()?.previousElementSibling?.className,
+      row()?.nextElementSibling?.className,
+      row()?.textContent,
+      coach()?.querySelector('.label') ?? null,
+    ]
+    start(<App />, laterStarted)
+    openCase(/The window/)
+    tapSpot('aide')
+    tab(/Solve/)
+    await waitFor(() => expect(at()).toBe('[data-slot="w1"]'))
+    expect(apart()).toEqual(['solve', 'bank', 'Find where the pictures keep Elijah’s word.', null])
+    expect(said()).toBe('Find where the pictures keep Elijah’s word.')
+    chip('Ahab')
+    slot('w1')
+    expect(row()).toBeNull()
+    menu('Cases')
+    fireEvent.click(await screen.findByRole('button', { name: /The battle/ }))
+    moment('The thrones')
+    tapSpot('plain')
+    tab(/Solve/)
+    await waitFor(() => expect(at()).toBe('[data-face="m1"]'))
+    expect(apart()).toEqual(['solve', 'bank', 'He’s in disguise. Name him by what happens.', null])
+    menu('Cases')
+    fireEvent.click(await screen.findByRole('button', { name: /The mountain/ }))
+    tab(/Solve/)
+    await waitFor(() => expect(at()).toBe('.tiles'))
+    expect(apart()).toEqual([
+      'solve',
+      'bank',
+      'These aren’t in story order. Which happened first?',
+      null,
+    ])
   })
 
   // The paid round's second session (#23, 2026-10-05): her first tap at step 1 landed on the foot

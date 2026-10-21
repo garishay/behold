@@ -112,8 +112,9 @@ describe('the Zoom pill (#24, ruling [1])', () => {
 // jsdom lays nothing out, so the two wraps are pinned as text, against removal: the browser's
 // reading of every label and the phone are their evidence (#77, review round 1 on #83).
 describe('the words that wrap to a shape (#77)', () => {
+  // A lesson's words in their row are set as every mark's are (#159).
   it('a mark’s words wrap balanced, so step 5’s two sentences take a line each', () => {
-    const label = /\n\.coach \.label \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    const label = /\n\.coach \.label,\n\.said-row \.label \{([^}]*)\}/.exec(css)?.[1] ?? ''
     expect(label).toMatch(/text-wrap: balance;/)
   })
 
@@ -136,11 +137,24 @@ describe('the words that wrap to a shape (#77)', () => {
 // label's own: three of its lines, 15 px at 1.3, inside its 8 px of padding (#77).
 describe('the room a mark’s words are given (#77)', () => {
   it('is three of the label’s lines and its padding, by the stylesheet’s numbers', () => {
-    const label = /\n\.coach \.label \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    const label = /\n\.coach \.label,\n\.said-row \.label \{([^}]*)\}/.exec(css)?.[1] ?? ''
     const size = Number(/font-size: (\d+)px;/.exec(label)?.[1])
     const line = Number(/line-height: ([\d.]+);/.exec(label)?.[1])
     const pad = Number(/padding: (\d+)px \d+px;/.exec(label)?.[1])
     expect(2 * pad + 3 * size * line).toBeCloseTo(words, 6)
+  })
+})
+
+// A lesson's words take a row of their own under Solve's account (#159): the row is tested, and
+// that it takes its height from the account and lies over the mark's dim is the stylesheet's,
+// pinned as text against removal; the audit of every mark on Solve is its evidence.
+describe('the lesson’s row (#159)', () => {
+  it('takes its height from the account, and lies over the mark’s dim', () => {
+    const row = /\n\.said-row \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    const dim = Number(/\n\.coach \{[^}]*z-index: (\d+);/.exec(css)?.[1])
+    expect(row).toMatch(/flex: none;/)
+    expect(row).toMatch(/position: relative;/)
+    expect(Number(/z-index: (\d+);/.exec(row)?.[1])).toBeGreaterThan(dim)
   })
 })
 

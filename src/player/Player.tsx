@@ -190,6 +190,8 @@ export function Player(props: PlayerProps) {
   const [nudges, setNudges] = useState(0)
   // A caption opened whole over the picture's foot; the next caption opens closed (#24).
   const [reading, setReading] = useState(false)
+  // The row a lesson's words take on Solve, under the account (#159).
+  const [row, setRow] = useState<HTMLDivElement | null>(null)
   // Solve keeps its place: the account, left for Look, opens again where it was (#24, Solve's room).
   const kept = useRef(0)
   const keep = useCallback((el: HTMLDivElement | null) => {
@@ -789,6 +791,9 @@ export function Player(props: PlayerProps) {
               orderFits={orderFits}
             />
           </div>
+          {/* The lesson's words take a row of their own under the account while they show, and the
+              account gives up the height, so they never lie over a word in the bank (#159). */}
+          {lesson && <div className="said-row" ref={setRow} />}
           {/* Close the case docks as its own row below the account, outside the scroll, so it never
               moves and never covers the account; a guided case offers it once its steps are done
               (07d, #24; #26 [4]). It shows once every slot is filled, and until then the account
@@ -888,7 +893,12 @@ export function Player(props: PlayerProps) {
       )}
       {/* A lesson's mark comes into view again once the account is full (#114). */}
       {lesson && (
-        <CoachMark key={String(leftover !== undefined)} at={lesson} label={text.teach ?? ''} />
+        <CoachMark
+          key={String(leftover !== undefined)}
+          at={lesson}
+          label={text.teach ?? ''}
+          into={row}
+        />
       )}
       {owedAt && <CoachMark at={owedAt} label={leftWords} />}
       {/* A failed close with something unfound rings Look, with no words, until it opens; the

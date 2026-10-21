@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { strings } from '../strings/en.ts'
 import { bring, labelAt, scroller, words, type Box, type Span } from './place.ts'
 
@@ -28,6 +29,12 @@ interface CoachMarkProps {
    * button over the whole label, which a keyboard reaches (#131).
    */
   release?: boolean
+  /**
+   * The row its words sit in, where the screen gives them one: the lesson's, under Solve's account
+   * and above the bank, so they never lie over a word in the bank (#159). Else they sit beside the
+   * ring, where `labelAt` places them.
+   */
+  into?: HTMLElement | null
 }
 
 /** Half a label's widest, and the gutter it keeps from the screen's edge. */
@@ -97,16 +104,18 @@ function ringFor(el: Element | null): Box | null {
 /**
  * A tutorial step shown at its target (#25): the target ringed, the rest of the screen dimmed,
  * and the step's words beside it, where `labelAt` places them, clear of the dock's caption on
- * Look (#77), and never past the gutter at either side. Through the guided steps, and as the step
- * up, it holds the screen to its ring (#77, #131); else it blocks nothing: every tap still reaches
- * the game, and one anywhere but the target lifts the dim while the ring stays until the step is
- * done. Where a step's words have gone, its dim goes with them (#24, addendum (b)). The mark shows
- * only where its target can be seen (07c). A screen reader hears the words from a live region; the
- * ring takes no focus, and pulses only to answer a tap its hold refuses (#77). Open Solve, where a
- * step carries it, and the step up's words are the parts of a mark that take a tap of their own,
- * each a button a keyboard reaches (#77, #131).
+ * Look (#77), and never past the gutter at either side; a lesson's sit in a row the screen gives
+ * them (#159). Through the guided steps, and as the step up, it holds the screen to its
+ * ring (#77, #131); else it blocks nothing: every tap still reaches the game, and one anywhere but
+ * the target lifts the dim while the ring stays until the step is done. Where a step's words have
+ * gone, its dim goes with them (#24, addendum (b)). The mark shows only where its target can be
+ * seen (07c). A screen reader hears the words from a live region; the ring takes no focus, and
+ * pulses only to answer a tap its hold refuses (#77). Open Solve, where a step carries it, and the
+ * step up's words are the parts of a mark that take a tap of their own, each a button a keyboard
+ * reaches (#77, #131).
  */
-export function CoachMark({ at, label, onTap, onNext, hold, under, release }: CoachMarkProps) {
+export function CoachMark(props: CoachMarkProps) {
+  const { at, label, onTap, onNext, hold, under, release, into } = props
   const [ring, setRing] = useState<Box | null>(null)
   const [floor, setFloor] = useState(innerHeight)
   const [lines, setLines] = useState<Span>()
@@ -214,43 +223,38 @@ export function CoachMark({ at, label, onTap, onNext, hold, under, release }: Co
     (under
       ? { top: Math.min(ring.bottom + 8, innerHeight - size) }
       : labelAt(ring, floor, innerHeight, lines, size))
+  const saying = label && (
+    <div className="label" ref={onSaid} style={into ? undefined : { left: centre ?? 0, ...room }}>
+      <span aria-hidden>{label}</span>
+      {release && (
+        <button ref={next} type="button" className="release" aria-label={label} onClick={onTap} />
+      )}
+      {onNext && (
+        <button ref={next} type="button" className="next" onClick={onNext}>
+          {strings.openSolve}
+        </button>
+      )}
+    </div>
+  )
   return (
     <div className="coach" data-at={at}>
       {ring && (
-        <>
-          <div
-            aria-hidden
-            className={'ring' + (dim.on && label ? ' dim' : '')}
-            style={{
-              left: ring.left,
-              top: ring.top,
-              width: ring.right - ring.left,
-              height: ring.bottom - ring.top,
-            }}
-          >
-            {pulse > 0 && <i key={pulse} className="pulse" onAnimationEnd={() => setPulse(0)} />}
-          </div>
-          {label && (
-            <div className="label" ref={onSaid} style={{ left: centre ?? 0, ...room }}>
-              <span aria-hidden>{label}</span>
-              {release && (
-                <button
-                  ref={next}
-                  type="button"
-                  className="release"
-                  aria-label={label}
-                  onClick={onTap}
-                />
-              )}
-              {onNext && (
-                <button ref={next} type="button" className="next" onClick={onNext}>
-                  {strings.openSolve}
-                </button>
-              )}
-            </div>
-          )}
-        </>
+        <div
+          aria-hidden
+          className={'ring' + (dim.on && label ? ' dim' : '')}
+          style={{
+            left: ring.left,
+            top: ring.top,
+            width: ring.right - ring.left,
+            height: ring.bottom - ring.top,
+          }}
+        >
+          {pulse > 0 && <i key={pulse} className="pulse" onAnimationEnd={() => setPulse(0)} />}
+        </div>
       )}
+      {/* In a row the screen gives them, the words show while the mark does, its target in view or
+          not, so the row never comes and goes as the account scrolls (#159). */}
+      {into ? saying && createPortal(saying, into) : ring && saying}
       <p className="sr" role="status">
         {label}
       </p>

@@ -591,14 +591,13 @@ button:focus-visible {
 }
 
 /* A mark's words, wrapped balanced, so a word never sits alone on the last line and step 5's two
-   sentences break between them (#77). */
-.coach .label {
-  position: fixed;
+   sentences break between them (#77): beside the ring, or a lesson's in a row of their own (#159). */
+.coach .label,
+.said-row .label {
   width: max-content;
   max-width: 300px;
   margin: 0;
   padding: 8px 12px;
-  transform: translateX(-50%);
   border-radius: 10px;
   background: var(--gold);
   color: var(--slate-deep);
@@ -607,6 +606,23 @@ button:focus-visible {
   line-height: 1.3;
   text-wrap: balance;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.coach .label {
+  position: fixed;
+  transform: translateX(-50%);
+}
+
+/* The lesson's row, under Solve's account while its words show, above Close's row and the bank: the
+   account gives up the height, so the words never lie over a word in the bank (#159). It sits over
+   the mark's dim, which shows through it around the words. */
+.said-row {
+  flex: none;
+  position: relative;
+  z-index: 16;
+  display: flex;
+  justify-content: center;
+  padding: 8px var(--inset);
 }
 
 /* Open Solve, under the found line's words (#77): the one part of a mark that takes a tap, dark on
@@ -637,7 +653,8 @@ button:focus-visible {
 }
 
 .coach .ring,
-.coach .label {
+.coach .label,
+.said-row .label {
   animation: arrive 0.25s ease-out;
 }
 
@@ -649,7 +666,8 @@ button:focus-visible {
 
 @media (prefers-reduced-motion: reduce) {
   .coach .ring,
-  .coach .label {
+  .coach .label,
+  .said-row .label {
     animation: none;
     transition: none;
   }
