@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { strings } from '../strings/en.ts'
-import { bring, labelAt, scroller, words, type Box, type Span } from './place.ts'
+import { bring, labelAt, scroller, words, type Box } from './place.ts'
 
 interface CoachMarkProps {
   /** The target's selector: a spot, a view's button, a word, a slot, or Close the case. */
@@ -20,19 +20,14 @@ interface CoachMarkProps {
    */
   hold?: boolean
   /**
-   * Whether its words sit under the ring, wherever that is: the step up's, whose ring is the bank's
-   * head under Close's row, so its words never lie over Close the case (#125).
-   */
-  under?: boolean
-  /**
    * Whether a tap on its words does what a tap on its ring does: the step up's, so they are a
    * button over the whole label, which a keyboard reaches (#131).
    */
   release?: boolean
   /**
-   * The row its words sit in, where the screen gives them one: the lesson's, under Solve's account
-   * and above the bank, so they never lie over a word in the bank (#159). Else they sit beside the
-   * ring, where `labelAt` places them.
+   * The row its words sit in, where the screen gives them one: Solve's, under the account and
+   * above Close's row and the bank, so they never lie over the account, Close the case, or a word
+   * in the bank (#159). Else they sit beside the ring, where `labelAt` places them.
    */
   into?: HTMLElement | null
 }
@@ -56,17 +51,6 @@ const floorOf = () =>
       (e) => e.getBoundingClientRect().top,
     ),
   )
-
-/** The account's lines on show: its blocks, as far as Solve's scroll shows them (#77). */
-function linesOf(): Span | undefined {
-  const view = document.querySelector('.solve')?.getBoundingClientRect()
-  const blocks = [...document.querySelectorAll('.solve .scroll')].map((e) =>
-    e.getBoundingClientRect(),
-  )
-  const top = Math.max(view?.top ?? 0, Math.min(...blocks.map((b) => b.top)))
-  const bottom = Math.min(view?.bottom ?? 0, Math.max(...blocks.map((b) => b.bottom)))
-  return top < bottom ? { top, bottom } : undefined
-}
 
 /** Where two boxes overlap, or null where they don't. */
 function overlap(a: Box, b: Box): Box | null {
@@ -104,21 +88,20 @@ function ringFor(el: Element | null): Box | null {
 /**
  * A tutorial step shown at its target (#25): the target ringed, the rest of the screen dimmed,
  * and the step's words beside it, where `labelAt` places them, clear of the dock's caption on
- * Look (#77), and never past the gutter at either side; a lesson's sit in a row the screen gives
- * them (#159). Through the guided steps, and as the step up, it holds the screen to its
- * ring (#77, #131); else it blocks nothing: every tap still reaches the game, and one anywhere but
- * the target lifts the dim while the ring stays until the step is done. Where a step's words have
- * gone, its dim goes with them (#24, addendum (b)). The mark shows only where its target can be
- * seen (07c). A screen reader hears the words from a live region; the ring takes no focus, and
- * pulses only to answer a tap its hold refuses (#77). Open Solve, where a step carries it, and the
- * step up's words are the parts of a mark that take a tap of their own, each a button a keyboard
- * reaches (#77, #131).
+ * Look (#77), and never past the gutter at either side; on Solve they sit in a row the screen gives
+ * them (#159). Through the guided steps, and as the step up, it holds the screen to its ring (#77,
+ * #131); else it blocks nothing: every tap still reaches the game, and one anywhere but the target
+ * lifts the dim while the ring stays until the step is done. Where a step's words have gone, its
+ * dim goes with them (#24, addendum (b)). The mark shows only where its target can be seen (07c),
+ * but for words in a row, which show while it does (#159). A screen reader hears the words from a
+ * live region; the ring takes no focus, and pulses only to answer a tap its hold refuses (#77).
+ * Open Solve, where a step carries it, and the step up's words are the parts of a mark that take a
+ * tap of their own, each a button a keyboard reaches (#77, #131).
  */
 export function CoachMark(props: CoachMarkProps) {
-  const { at, label, onTap, onNext, hold, under, release, into } = props
+  const { at, label, onTap, onNext, hold, release, into } = props
   const [ring, setRing] = useState<Box | null>(null)
   const [floor, setFloor] = useState(innerHeight)
-  const [lines, setLines] = useState<Span>()
   const [dim, setDim] = useState({ at, on: true })
   // A tap the hold refuses pulses the ring once, so it still answers with where to tap (#77).
   const [pulse, setPulse] = useState(0)
@@ -147,8 +130,6 @@ export function CoachMark(props: CoachMarkProps) {
       setRing((old) => (JSON.stringify(old) === now ? old : r))
       setFloor(floorOf())
       setTall(said.current?.offsetHeight ?? 0)
-      const span = linesOf()
-      setLines((old) => (JSON.stringify(old) === JSON.stringify(span) ? old : span))
       frame = held < settle ? requestAnimationFrame(follow) : 0
     }
     const wake = () => {
@@ -215,14 +196,8 @@ export function CoachMark(props: CoachMarkProps) {
   const centre =
     ring &&
     Math.min(Math.max((ring.left + ring.right) / 2, half + gutter), innerWidth - half - gutter)
-  // Under the ring when the mark asks for it (#125), and else where `labelAt` puts them; on the
-  // screen either way (#152).
-  const size = Math.max(words, tall)
-  const room =
-    ring &&
-    (under
-      ? { top: Math.min(ring.bottom + 8, innerHeight - size) }
-      : labelAt(ring, floor, innerHeight, lines, size))
+  // Where `labelAt` puts them, on the screen (#152).
+  const room = ring && labelAt(ring, floor, innerHeight, Math.max(words, tall))
   const saying = label && (
     <div className="label" ref={onSaid} style={into ? undefined : { left: centre ?? 0, ...room }}>
       <span aria-hidden>{label}</span>

@@ -591,7 +591,7 @@ button:focus-visible {
 }
 
 /* A mark's words, wrapped balanced, so a word never sits alone on the last line and step 5's two
-   sentences break between them (#77): beside the ring, or a lesson's in a row of their own (#159). */
+   sentences break between them (#77): beside the ring, or on Solve in a row of their own (#159). */
 .coach .label,
 .said-row .label {
   width: max-content;
@@ -613,9 +613,11 @@ button:focus-visible {
   transform: translateX(-50%);
 }
 
-/* The lesson's row, under Solve's account while its words show, above Close's row and the bank: the
-   account gives up the height, so the words never lie over a word in the bank (#159). It sits over
-   the mark's dim, which shows through it around the words. */
+/* Solve's row for a mark's words, under the account while they show, above Close's row and the
+   bank: the account gives up the height, so the words never lie over the account, Close the case,
+   or a word in the bank (#159). It sits over the mark's dim, which shows through it around the
+   words, and takes no room while it holds none. The step up's words are a button over the whole
+   label there too (#131). */
 .said-row {
   flex: none;
   position: relative;
@@ -623,6 +625,14 @@ button:focus-visible {
   display: flex;
   justify-content: center;
   padding: 8px var(--inset);
+}
+
+.said-row:empty {
+  display: none;
+}
+
+.said-row .label {
+  position: relative;
 }
 
 /* Open Solve, under the found line's words (#77): the one part of a mark that takes a tap, dark on
@@ -645,7 +655,7 @@ button:focus-visible {
 /* The step up's words, which let its mark go as its ring does (#131): a button over the whole
    label, so a tap anywhere on it counts, and a keyboard reaches it, its gold focus ring around the
    label's corners. */
-.coach .release {
+.label .release {
   position: absolute;
   inset: 0;
   border-radius: inherit;

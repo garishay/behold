@@ -1209,16 +1209,19 @@ describe('the tutorial’s marks (#25)', () => {
     expect([at(), said()]).toEqual(['[data-view="look"]', 'Find the other words in the picture.'])
   })
 
-  // A mark is drawn only where its target can be seen: out of the account's view it shows no ring
-  // and no words, and part in view its ring is cut at the account's edge (07c, #24 [2]). A guided
-  // step still holds the screen, and a tap there brings its target back into view (#77).
-  it('shows nothing while its target is out of view, and cuts its ring at the scroll box', async () => {
+  // A mark is drawn only where its target can be seen: out of the account's view it shows no ring,
+  // and part in view its ring is cut at the account's edge (07c, #24 [2]). Its words keep Solve's
+  // row, so the row never comes and goes as the account scrolls (#159). A guided step still holds
+  // the screen, and a tap there brings its target back into view (#77).
+  it('shows no ring while its target is out of view, and cuts its ring at the scroll box', async () => {
     boxes = { [blank]: new DOMRect(0, 500, 60, 30), '.solve': new DOMRect(0, 0, 360, 400) }
     toDavid()
     await new Promise((r) => setTimeout(r, 100))
     expect(at()).toBe(blank)
     expect(ring()).toBeNull()
-    expect(document.querySelector('.coach .label')).toBeNull()
+    expect(document.querySelector('.said-row')).toHaveTextContent(
+      'The picture shows his sling. Tap the blank.',
+    )
     const scrolled = vi.spyOn(document.querySelector('.solve')!, 'scrollBy')
     slot('t1')
     expect(document.querySelector('[data-slot="t1"]')).not.toHaveClass('is-target')
@@ -1252,16 +1255,18 @@ describe('the tutorial’s marks (#25)', () => {
 
   // The paid round's second session (#23, 2026-10-05): step 5's words sat under sling's blank,
   // over the account's lines around it, the whole time she was stuck there. No mark covers the
-  // account: the words of a target among its lines sit just under the lines on show (#77).
+  // account (#77): on Solve a step's words take the row under it, above the bank (#159).
   it('puts no mark’s words over the account’s lines', async () => {
-    boxes = {
-      [blank]: new DOMRect(34, 148.5, 72, 30),
-      '.solve': new DOMRect(0, 0, 360, 319),
-      '.scroll': new DOMRect(16, 100, 328, 420),
-    }
     toDavid()
-    await waitFor(() => expect(document.querySelector('.coach .label')).not.toBeNull())
-    expect(document.querySelector<HTMLElement>('.coach .label')!.style.top).toBe('327px')
+    const row = document.querySelector('.said-row')!
+    await waitFor(() =>
+      expect(row).toHaveTextContent('The picture shows his sling. Tap the blank.'),
+    )
+    expect([row.previousElementSibling, row.nextElementSibling]).toEqual([
+      document.querySelector('.solve'),
+      document.querySelector('.bank'),
+    ])
+    expect(document.querySelector('.coach .label')).toBeNull()
   })
 
   // Close the case docks as its own row between the account and the bank, outside the scroll, so
@@ -1680,10 +1685,10 @@ describe('the tutorial’s marks (#25)', () => {
   })
 
   // The owner's acceptance read of the window (#67): the lesson's words lay over the bank's first
-  // row, the words its blank wants. Every lesson's words take a row of their own under the account
-  // while they show, a blank's, a face's, and the order's, so the account gives up the height, and
-  // the mark keeps its ring and its status line (#159).
-  it('sets a lesson’s words in a row of their own under the account, clear of the bank', async () => {
+  // row, the words its blank wants. On Solve every mark's words take a row of their own under the
+  // account while they show, a lesson's, a blank's, a face's, or the order's, and a hint's, so the
+  // account gives up the height, and the mark keeps its ring and its status line (#159).
+  it('sets a mark’s words on Solve in a row of their own under the account, clear of the bank', async () => {
     const row = () => document.querySelector('.said-row')
     const apart = () => [
       row()?.previousElementSibling?.className,
@@ -1700,7 +1705,10 @@ describe('the tutorial’s marks (#25)', () => {
     expect(said()).toBe('Find where the pictures keep Elijah’s word.')
     chip('Ahab')
     slot('w1')
-    expect(row()).toBeNull()
+    expect(row()).toBeEmptyDOMElement()
+    menu('Hint')
+    await waitFor(() => expect(at()).toBe('[data-view="look"]'))
+    expect(apart()).toEqual(['solve', 'bank', 'Open Look: there’s more to find.', null])
     menu('Cases')
     fireEvent.click(await screen.findByRole('button', { name: /The battle/ }))
     moment('The thrones')
@@ -1925,10 +1933,10 @@ describe('the tutorial’s marks (#25)', () => {
       chip(word)
       slot(id)
     }
-    await waitFor(() => expect(document.querySelector('.coach .label')).not.toBeNull())
+    await waitFor(() => expect(document.querySelector('.said-row .label')).not.toBeNull())
     expect([at(), said()]).toEqual(['[data-view="solve"]', 'Fill the rest, then close the case.'])
     fireEvent.pointerDown(document.querySelector('[data-slot="t1"]')!)
-    expect(document.querySelector('.coach .label')).toBeNull()
+    expect(document.querySelector('.said-row')).toBeEmptyDOMElement()
     expect(document.querySelector('.coach .ring')).not.toHaveClass('dim')
     expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
     tab(/Look/)
@@ -3344,24 +3352,20 @@ describe('the close converges (#95)', () => {
   })
 
   // The owner's ruling on Gate 31 (#125): the step up's words sat over Close's row, so the tap that
-  // would clear them pressed Close the case and took them away unread. They sit under the bank's
-  // head, over the bank, never over Close, and the mark holds the screen until its ring is tapped
-  // (#131).
-  it('the step up’s words sit under the bank’s head, off Close’s row', async () => {
-    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (
-      this: Element,
-    ) {
-      return this.matches('.bank-head')
-        ? new DOMRect(16, 477, 328, 24)
-        : new DOMRect(10, 10, 100, 40)
-    })
+  // would clear them pressed Close the case and took them away unread. They sit in Solve's row,
+  // above Close's, never over Close or the bank (#159), and the mark holds the screen until its
+  // ring or its words are tapped (#131).
+  it('the step up’s words sit in Solve’s row, off Close’s', async () => {
     start(<App />, offBy(vineyard, { s4: 'ahab', s5: 'the-elders', v2: 'stoned' }))
     openCase(/The vineyard/)
     tab(/Solve/)
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
-    await waitFor(() => expect(document.querySelector('.coach .label')).not.toBeNull())
-    const words = document.querySelector<HTMLElement>('.coach .label')!
-    expect([words.style.top, words.style.bottom]).toEqual(['513px', ''])
+    const words = await screen.findByRole('button', { name: stepUp })
+    const row = words.closest('.said-row')!
+    expect([row.previousElementSibling, row.nextElementSibling]).toEqual([
+      document.querySelector('.solve'),
+      document.querySelector('.submit-row'),
+    ])
   })
 
   // The vineyard round's tester 3 (#23): every failed close showed its count, but the first tap on

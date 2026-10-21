@@ -145,16 +145,18 @@ describe('the room a mark’s words are given (#77)', () => {
   })
 })
 
-// A lesson's words take a row of their own under Solve's account (#159): the row is tested, and
-// that it takes its height from the account and lies over the mark's dim is the stylesheet's,
-// pinned as text against removal; the audit of every mark on Solve is its evidence.
-describe('the lesson’s row (#159)', () => {
-  it('takes its height from the account, and lies over the mark’s dim', () => {
+// A mark's words take a row of their own under Solve's account (#159): the row is tested, and that
+// it takes its height from the account, lies over the mark's dim, and takes no room while it holds
+// no words is the stylesheet's, pinned as text against removal; the audit of every mark on Solve
+// is its evidence.
+describe('Solve’s row for a mark’s words (#159)', () => {
+  it('takes its height from the account, lies over the mark’s dim, and none while empty', () => {
     const row = /\n\.said-row \{([^}]*)\}/.exec(css)?.[1] ?? ''
     const dim = Number(/\n\.coach \{[^}]*z-index: (\d+);/.exec(css)?.[1])
     expect(row).toMatch(/flex: none;/)
     expect(row).toMatch(/position: relative;/)
     expect(Number(/z-index: (\d+);/.exec(row)?.[1])).toBeGreaterThan(dim)
+    expect(css).toMatch(/\n\.said-row:empty \{\s+display: none;\s+\}/)
   })
 })
 
