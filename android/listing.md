@@ -6,7 +6,8 @@ The words of Behold's main store listing on Google Play, in English (United Stat
 - **The app name** is the web manifest's.
 - **The short description** is the title's line (Gate 20's note on #68).
 - **The full description** is the owner's ruling of 2026-10-15 (#68): approved copy, naming no
-  translation. Each case's PR adds its title and brief, and 67a's changes "is being written".
+  translation. Each case's PR added its title and brief, and 67a, the season's last, made it
+  complete.
 
 `src/android.test.ts` holds each field to Play's limit, the name to the manifest the build writes,
 the short description to the title's line, the full description to every case's title and brief,
@@ -36,7 +37,7 @@ Tap anything that looks like it matters. You don’t need to remember the story.
 
 Start with the valley. It teaches the game. A giant lies face-down in a valley, and a boy with a sling stands near him. Who are they, and how does it end?
 
-Season one, the house of Ahab, is being written. The story runs in order.
+Season one, the house of Ahab, is complete. The story runs in order.
 
 The mountain
 Two altars on a mountain, a bull on each, and all Israel watching. What did the people answer, what did the fire burn, and what did the people do then?
@@ -52,6 +53,9 @@ A woman builds a small room on her roof for a holy man who often comes her way. 
 
 The gift
 A commander of Aram comes to Israel’s prophet with leprosy, and goes home clean. Then the prophet’s servant runs after the commander, with an answer for everyone who asks. Who sent him, and where had he been?
+
+The window
+Years after a prophet’s word against a king, spoken in a vineyard, a commander is anointed in secret and sets out for Jezreel. Two kings ride out to meet him, and a queen watches from her window. On whom was the word kept, and how?
 
 Stuck? Ask for a hint: Where to look, then Show me.
 

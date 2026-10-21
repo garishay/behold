@@ -45,7 +45,7 @@ export const strings = {
   epigraph: 'It is the glory of God to conceal a matter and the glory of kings to search it out.',
   epigraphReference: 'Proverbs 25:2, BSB',
   line: "Look closer. There's more to every story.",
-  status: 'Season one is being written.',
+  status: 'Season one is complete.',
   // The music's credit, at the cases page's foot (Gate 10 A1): each CC BY piece by name, its
   // author, its source, that it was edited, and the licence, linked. The register's test holds
   // every CC BY file to a name here.

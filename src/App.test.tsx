@@ -214,7 +214,7 @@ describe('the title (#75)', () => {
     const entries = history.length
     fireEvent.click(screen.getByRole('button', { name: 'Begin' }))
     expect(screen.queryByRole('button', { name: 'Begin' })).not.toBeInTheDocument()
-    expect(cards()).toHaveLength(6)
+    expect(cards()).toHaveLength(7)
     expect([history.length, history.state]).toEqual([entries, null])
   })
 
@@ -272,7 +272,7 @@ describe('the title (#75)', () => {
     expect(screen.getByRole('dialog', { name: 'The valley' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Begin' })).not.toBeInTheDocument()
     menu('Cases')
-    await waitFor(() => expect(cards()).toHaveLength(6))
+    await waitFor(() => expect(cards()).toHaveLength(7))
     expect(screen.queryByRole('button', { name: 'Begin' })).not.toBeInTheDocument()
   })
 
@@ -311,7 +311,7 @@ describe('the cases page (Gate 01 A6, #6, #75)', () => {
     expect(screen.queryByText(/Crossway|ESV/)).not.toBeInTheDocument()
     // The line lives on the title now.
     expect(document.querySelector('.line')).toBeNull()
-    expect(screen.getByText('Season one is being written.')).toBeInTheDocument()
+    expect(screen.getByText('Season one is complete.')).toBeInTheDocument()
   })
 
   it('lists every registered case as a card, the tutorial first', () => {
@@ -323,6 +323,7 @@ describe('the cases page (Gate 01 A6, #6, #75)', () => {
       'The battle',
       'The room',
       'The gift',
+      'The window',
     ])
     expect(cards()[0]).toHaveTextContent('Learn to play')
     expect(screen.queryByText('In progress')).not.toBeInTheDocument()
@@ -356,7 +357,7 @@ describe('the cases page (Gate 01 A6, #6, #75)', () => {
 
   // Playtest 2's second session (#77): the valley teaches the game and the cases after it are one
   // story, the house of Ahab, so the season is named over them and they count within it. The cards
-  // give no time, and what is still being written sits under the season's last case.
+  // give no time, and under the season's last case a line says where the season stands.
   it('names the season over the cases after the valley, counted within it, and no times', () => {
     start()
     const list = document.querySelector('.case-list')!
@@ -368,6 +369,7 @@ describe('the cases page (Gate 01 A6, #6, #75)', () => {
       'The battle',
       'The room',
       'The gift',
+      'The window',
     ])
     const head = list.querySelector('.season-head')!
     expect(within(head as HTMLElement).getByRole('heading', { level: 2 })).toHaveTextContent(
@@ -383,8 +385,9 @@ describe('the cases page (Gate 01 A6, #6, #75)', () => {
       'Case three',
       'Case four',
       'Case five',
+      'Case six',
     ])
-    expect(list.nextElementSibling).toHaveTextContent('Season one is being written.')
+    expect(list.nextElementSibling).toHaveTextContent('Season one is complete.')
   })
 })
 
@@ -406,8 +409,9 @@ describe('the season in order (#75)', () => {
       'Opens after the vineyard',
       'Opens after the battle',
       'Opens after the room',
+      'Opens after the gift',
     ])
-    expect(locked()).toEqual([false, true, true, true, true, true])
+    expect(locked()).toEqual([false, true, true, true, true, true, true])
     expect(cards()[0]).toHaveClass('first')
   })
 
@@ -441,6 +445,7 @@ describe('the season in order (#75)', () => {
       false,
       false,
       false,
+      false,
     ])
     expect(screen.getByRole('status')).toHaveTextContent(
       'Play the mountain first. The story runs in order.',
@@ -459,8 +464,9 @@ describe('the season in order (#75)', () => {
       'Opens after the vineyard',
       'Opens after the battle',
       'Opens after the room',
+      'Opens after the gift',
     ])
-    expect(locked()).toEqual([false, true, false, true, true, true])
+    expect(locked()).toEqual([false, true, false, true, true, true, true])
     expect(cards()[0]).not.toHaveClass('first')
   })
 
@@ -471,9 +477,10 @@ describe('the season in order (#75)', () => {
       unmount()
     }
     // The mountain restarted, so no longer closed: the vineyard, never opened, waits for it again,
-    // and the battle, started, stays open; the room waits for the battle, and the gift for the room.
+    // and the battle, started, stays open; the room waits for the battle, the gift for the room, and
+    // the window for the gift.
     start(<App />, { ...closedTo(1), carmel: fresh(carmel), micaiah: fresh(micaiah) })
-    expect(locked()).toEqual([false, false, true, false, true, true])
+    expect(locked()).toEqual([false, false, true, false, true, true, true])
     expect(statuses()[2]).toBe('Opens after the mountain')
   })
 })
@@ -1649,6 +1656,23 @@ describe('the tutorial’s marks (#25)', () => {
     expect(coach()).toBeNull()
     slot('l1')
     expect(at()).toBe('[data-slot="l1"]')
+  })
+
+  // The window's one new idea is a word kept (#67): on Solve, while the blank that sets the first
+  // part of Elijah's word beside the picture that keeps it is empty, it is ringed with the lesson's
+  // words. A word placed takes the mark away, and emptying the blank brings it back.
+  it('marks the first kept word’s blank in the case that teaches it, until a word is placed', async () => {
+    start(<App />, laterStarted)
+    openCase(/The window/)
+    tapSpot('aide')
+    tab(/Solve/)
+    await waitFor(() => expect(at()).toBe('[data-slot="w1"]'))
+    expect(said()).toBe('Find where the pictures keep Elijah’s word.')
+    chip('Ahab')
+    slot('w1')
+    expect(coach()).toBeNull()
+    slot('w1')
+    expect(at()).toBe('[data-slot="w1"]')
   })
 
   // The paid round's second session (#23, 2026-10-05): her first tap at step 1 landed on the foot
