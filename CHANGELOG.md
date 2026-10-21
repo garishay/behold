@@ -3,6 +3,22 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.38.0 — Gate 16, the window (#67)
+
+- **67a — the window** (#158): the season's sixth case, and its last, after the gift, is Jehu at
+  Jezreel, 1 Kings 21:17–29 and 2 Kings 9. Its one new idea is a word kept: what Elijah said
+  against Ahab and Jezebel in the vineyard is kept at Jezreel, and Solve's second block, the word
+  in the vineyard, sets each part of it beside the picture that keeps it. It has three moments to
+  put in the order they happened. On the bare steps, the officers throw their cloaks under the
+  commander a young prophet has just anointed, and blow the horn. On the plot that was Naboth's, a
+  king's chariot stands stopped, an arrow in its rail, and the other king flees. At the gate, the
+  queen looks down from her window, her eunuchs at the next, and dogs wait by the wall. It has
+  fourteen spots, two faces named from people's words, the officers' shout and the fleeing king's
+  cry, and four blanks. The lesson rings the blank of the word's first part on Solve until a word
+  is placed in it. With the window, season one is complete, and the cases page, the store listing,
+  and the README say so. The store listing names the window, and the registry's test counts
+  2 Kings 9's verses.
+
 ## v0.37.0 — Gate 37, the restart (#151)
 
 - **151a — the restart** (#155): when the Play app's renderer is gone, killed for memory or

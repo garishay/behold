@@ -115,7 +115,7 @@ describe('the half of the picture (#29)', () => {
 
   // Tier 1's ring holds its whole thing (A3 as ruled): where a box crosses its half's midline, the
   // ring grows to take it in, as for the battle's horns held overhead and the mountain's burning
-  // stones. 11 of the 51 registered spots cross.
+  // stones. 21 of the 93 registered spots cross.
   it('grows past the midline to hold every registered spot whole', () => {
     const eps = 1e-9
     const holds = ([l, t, w, h]: Box, [L, T, W, H]: Box) =>
@@ -133,10 +133,11 @@ describe('the half of the picture (#29)', () => {
 
   // The next round's first tester (#102): "Where to look" rang 80% of the picture for the giant,
   // every thing in it found. A half that takes over 60% of the picture narrows little, so a hint
-  // there starts at its second tier, the thing itself (ruling [1]): ten registered spots, from the
-  // giant's 80% to the gift's commander's 61% (#66), the room's three standing or seated figures
-  // among them (#57). The next, the vineyard's cord, takes 59%.
-  it('takes most of the picture for ten registered spots, so a hint there starts at tier 2', () => {
+  // there starts at its second tier, the thing itself (ruling [1]): eleven registered spots, from
+  // the giant's 80% to the gift's commander's 61% (#66), the room's three standing or seated figures
+  // among them (#57), and the window's anointed commander's 68% (#67). The next, the window's gate,
+  // takes 60%.
+  it('takes most of the picture for eleven registered spots, so a hint there starts at tier 2', () => {
     const wide = cases.flatMap(({ structure: s }) =>
       s.moments
         .flatMap((m) => m.spots)
@@ -154,6 +155,7 @@ describe('the half of the picture (#29)', () => {
       'shunammite: standing',
       'shunammite: chair',
       'naaman: commander',
+      'jehu: anointed',
     ])
   })
 })

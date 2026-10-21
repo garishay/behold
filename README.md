@@ -10,7 +10,7 @@ Behold is a mystery game set in the stories of the Bible. Each case is a passage
 studies the pictures of its moments, works out who is who and what happened, and fills the blanks
 of the account in the game's own words — then the reveal shows the text itself. Look closer.
 There's more to every story. The tutorial is the valley of Elah; season one, the house of Ahab,
-is being written.
+is complete.
 
 ## Status
 
