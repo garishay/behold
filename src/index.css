@@ -1047,9 +1047,12 @@ button:focus-visible {
   border-bottom: 1px solid var(--slate);
 }
 
+/* The account keeps one of its lines (17 px at 1.8) and its foot's padding, in its own em so a
+   phone's larger text keeps the line, whatever a row takes from it: a lesson's words take theirs
+   from the account, and past this line the bank gives up the rest (#159). */
 .solve {
   flex: 1;
-  min-height: 0;
+  min-height: calc(17em / 16 * 1.8 + 16px);
   overflow: auto;
   overscroll-behavior: contain;
   padding: 0 var(--inset) 16px;
@@ -1070,9 +1073,10 @@ button:focus-visible {
 }
 
 /* The bank, docked on Solve above the bar (#24): its head, then its words, which give up room
-   first. */
+   first, and give up more where the account keeps its last line under a row's words (#159). */
 .bank {
-  flex: none;
+  flex: 0 1 auto;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   background: var(--slate-deep);

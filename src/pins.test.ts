@@ -158,6 +158,13 @@ describe('Solve’s row for a mark’s words (#159)', () => {
     expect(Number(/z-index: (\d+);/.exec(row)?.[1])).toBeGreaterThan(dim)
     expect(css).toMatch(/\n\.said-row:empty \{\s+display: none;\s+\}/)
   })
+
+  it('leaves the account one of its lines, in its own em, and takes the rest from the bank', () => {
+    const account = /\n\.solve \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    const bank = /\n\.bank \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    expect(account).toMatch(/min-height: calc\(17em \/ 16 \* 1\.8 \+ 16px\);/)
+    expect(bank).toMatch(/flex: 0 1 auto;\s+min-height: 0;/)
+  })
 })
 
 // The valley's failed close rings what it found wrong; the class is tested, and the ring it draws
