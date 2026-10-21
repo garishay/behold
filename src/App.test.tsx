@@ -1435,7 +1435,8 @@ describe('the tutorial’s marks (#25)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     expect(result()).toHaveTextContent('One answer doesn’t fit the story.')
     expect([at(), said()]).toEqual(['[data-slot="t5"]', 'Whose sword? Look closer at the picture.'])
-    fireEvent.pointerDown(document.querySelector('[data-slot="t1"]')!)
+    // On Solve the words are in its row, and leave on the next tap's click (#159).
+    fireEvent.click(document.querySelector('.solve')!)
     expect([at(), said()]).toEqual(['[data-slot="t5"]', ''])
     tab(/Look/)
     expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
@@ -1925,17 +1926,16 @@ describe('the tutorial’s marks (#25)', () => {
     start()
     openCase(/The valley/)
     await sweep()
-    for (const [id, word] of [
-      ['d1', 'David'],
-      ['t4', 'sling'],
-      ['t5', 'Goliath'],
-    ] as const) {
-      chip(word)
-      slot(id)
-    }
-    await waitFor(() => expect(document.querySelector('.said-row .label')).not.toBeNull())
+    await waitFor(() => expect(document.querySelector('.coach .ring')).not.toBeNull())
+    expect(document.querySelector('.said-row .label')).not.toBeNull()
     expect([at(), said()]).toEqual(['[data-view="solve"]', 'Fill the rest, then close the case.'])
+    // On Solve they sit in its row, so they leave on the tap's click, not its press: gone on the
+    // press, the row would drop the bank under the finger before the click landed (#159).
     fireEvent.pointerDown(document.querySelector('[data-slot="t1"]')!)
+    expect(document.querySelector('.said-row')).toHaveTextContent(
+      'Fill the rest, then close the case.',
+    )
+    fireEvent.click(document.querySelector('.solve')!)
     expect(document.querySelector('.said-row')).toBeEmptyDOMElement()
     expect(document.querySelector('.coach .ring')).not.toHaveClass('dim')
     expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
@@ -1944,7 +1944,7 @@ describe('the tutorial’s marks (#25)', () => {
     // The dim left with the words, and a new target doesn't bring it back (#24, addendum (b)).
     expect(document.querySelector('.coach .ring')).not.toHaveClass('dim')
     tab(/Solve/)
-    for (const [id, word] of valleyAnswers.filter(([id]) => !['d1', 't4', 't5'].includes(id))) {
+    for (const [id, word] of valleyAnswers) {
       chip(word)
       slot(id)
     }
@@ -1972,15 +1972,15 @@ describe('the tutorial’s marks (#25)', () => {
       '[data-slot="t3"]',
       'Ringed answers don’t fit the story. Look closer.',
     ])
-    fireEvent.pointerDown(document.querySelector('[data-slot="t3"]')!)
+    // On Solve the words are in its row, and leave on the next tap's click (#159).
+    fireEvent.click(document.querySelector('.solve')!)
     expect([at(), said()]).toEqual(['[data-slot="t3"]', ''])
   })
 
   // The screens for #102 [4], E5: once its last ring was changed, the retry's mark went back to
-  // Close the case still saying "Ringed answers don't fit the story", over the bank's head. A tap's
-  // press sends its words away, but moves made as a keyboard makes them, with no press, don't, nor
-  // does a mark shown again by a hint asked past its last tier. With no ring left, the retry's mark
-  // says nothing (#104).
+  // Close the case still saying "Ringed answers don't fit the story", over the bank's head. A tap
+  // sends its words away, on Solve at its click (#159), but a mark shown again by a hint asked past
+  // its last tier doesn't. With no ring left, the retry's mark says nothing (#104).
   it('the retry says nothing once no ring is left', async () => {
     start()
     openCase(/The valley/)
@@ -2340,7 +2340,8 @@ describe('hints (#29)', () => {
       openCase(/The valley/)
       tab(/Solve/)
       expect(said()).toBe('Find the other words in the picture.')
-      fireEvent.pointerDown(document.querySelector('[data-word="david"]')!)
+      // On Solve the words are in its row, and leave on the next tap's click (#159).
+      fireEvent.click(document.querySelector('.solve')!)
       expect([at(), said()]).toEqual(['[data-view="look"]', ''])
       const before = coach()
       act(() => vi.advanceTimersByTime(stuck.stranded * 1000 - 1))
@@ -3562,7 +3563,8 @@ describe('the close converges (#95)', () => {
   })
 
   // A hint says an answer doesn't fit only while it holds what the close found: changed since, it
-  // says what settles it, as a hint for an answer still empty does (#123).
+  // says what settles it, as a hint for an answer still empty does (#123). On Solve its words leave
+  // on the next tap's click (#159), so it is asked for again.
   it('a hint says an answer doesn’t fit only while it holds what the close found', () => {
     start(<App />, offBy(vineyard, { s4: 'ahab' }))
     openCase(/The vineyard/)
@@ -3572,6 +3574,7 @@ describe('the close converges (#95)', () => {
     expect(said()).toBe('“But written by ___” doesn’t fit the story. Open Look for a clue.')
     chip('Naboth')
     slot('s4')
+    menu('Hint')
     expect(said()).toBe('Open Look to settle “but written by ___”.')
   })
 

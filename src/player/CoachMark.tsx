@@ -166,9 +166,13 @@ export function CoachMark(props: CoachMarkProps) {
       if (!document.querySelector(at)?.contains(e.target as Node)) setDim({ at, on: false })
       onTap?.()
     }
-    addEventListener('pointerdown', tap, true)
-    return () => removeEventListener('pointerdown', tap, true)
-  }, [at, onTap, hold])
+    // Words in a row take room, so words that leave on the next tap leave on its click: gone on its
+    // press, they would drop the bank under the finger, and the click would land on another word
+    // (#159).
+    const on = into ? 'click' : 'pointerdown'
+    addEventListener(on, tap, true)
+    return () => removeEventListener(on, tap, true)
+  }, [at, onTap, hold, into])
   useEffect(() => {
     if (!hold) return
     // A mark that holds the screen hears a tap on its click, where it lands (#77): in the target,
