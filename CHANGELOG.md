@@ -3,6 +3,22 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.39.0 — Gate 38, the game's own dialog (#153)
+
+- **153a — the game's own dialog** (#157): Restart asks its question in the game's own dialog,
+  over the menu it was asked from, in place of the browser's `confirm()`, which the Play app's
+  WebView headed with the page's address and Chrome with the site's name. The question is
+  unchanged, "Start this case over? Its progress is cleared.", and its answers are new app copy:
+  Start over, in Close the case's wine, above Cancel. The focus starts on Cancel, Tab keeps to the
+  two answers, Escape or a tap on the dim answers Cancel, and the focus goes back to Restart. A
+  screen reader meets an alert dialog named Restart and described by its question, with the
+  screen under it inert and an update's toast hidden until it goes. While it shows, the question
+  is a history entry of its own, so back answers Cancel, in the Play app and in a browser, as it
+  did the browser's question. Start over leaves a case entry in its place, so forward shows the
+  fresh case and asks nothing. The dialog holds at every font size from 85% to 200%, and at the
+  default size nothing else moves. ESLint's `no-alert` keeps any `alert()`, `confirm()`, or
+  `prompt()` from landing. The Play app takes the dialog with the site, with no version code.
+
 ## v0.37.0 — Gate 37, the restart (#151)
 
 - **151a — the restart** (#155): when the Play app's renderer is gone, killed for memory or
