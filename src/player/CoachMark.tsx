@@ -136,14 +136,22 @@ export function CoachMark(props: CoachMarkProps) {
       held = 0
       if (frame === 0) frame = requestAnimationFrame(follow)
     }
-    waker.current = wake
+    // Words in a row take their height from the account, so as they come into it and as they
+    // change size, the target is brought again to the middle of what the account has left: else
+    // it slips under its own words, out of view, while they still show (#159).
+    waker.current = into
+      ? () => {
+          bring(target())
+          wake()
+        }
+      : wake
     frame = requestAnimationFrame(follow)
     for (const e of wakers) addEventListener(e, wake, true)
     return () => {
       cancelAnimationFrame(frame)
       for (const e of wakers) removeEventListener(e, wake, true)
     }
-  }, [at])
+  }, [at, into])
   // A font size changed while a mark shows, as the Play app applies one, resizes its words and fires
   // nothing that wakes the following: their box changing size wakes it, so they are placed by their
   // new height (#152).

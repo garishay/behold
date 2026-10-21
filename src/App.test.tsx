@@ -1729,6 +1729,64 @@ describe('the tutorial’s marks (#25)', () => {
     ])
   })
 
+  /**
+   * The account's box as at 360 × 548 at the phone's largest text: 221 px tall, and 72 px once a
+   * lesson's words take their 149 px row from its foot. The window's blank sits at 140, 37 tall.
+   */
+  const largest = (tall: () => number) => {
+    Object.defineProperty(boxes, '.solve', {
+      enumerable: true,
+      get: () => new DOMRect(0, 0, 360, tall()),
+    })
+    boxes['[data-slot="w1"]'] = new DOMRect(150, 140, 80, 37)
+  }
+
+  // Gate 39's survey at the largest text: the mark brought the window's blank to the middle of the
+  // account before its words took their row, and the row then took 149 px from the account's foot,
+  // so the blank lay under the words, out of view, while they showed. As the words come into their
+  // row, the mark brings the blank again, to the middle of what the account has left (#159).
+  it('brings a lesson’s blank to the middle of what the account keeps once its words take their row', async () => {
+    largest(() => (document.querySelector('.said-row .label') ? 72 : 221))
+    start(<App />, laterStarted)
+    openCase(/The window/)
+    tapSpot('aide')
+    const scrolled = vi.spyOn(Element.prototype, 'scrollBy')
+    tab(/Solve/)
+    await waitFor(() => expect(said()).toBe('Find where the pictures keep Elijah’s word.'))
+    expect(scrolled).toHaveBeenLastCalledWith({ top: 122.5, left: 10 })
+  })
+
+  // The Play app applies a font size changed while a lesson's words show, and they grow, and their
+  // row with them: the account's view shrinks under the blank, so as the words change size the mark
+  // brings it again (#159).
+  it('brings a lesson’s blank again when its words change size in their row', async () => {
+    const watched = new Map<Element, () => void>()
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        callback: () => void
+        constructor(callback: () => void) {
+          this.callback = callback
+        }
+        observe(el: Element) {
+          watched.set(el, this.callback)
+        }
+        disconnect() {}
+      },
+    )
+    let tall = 221
+    largest(() => tall)
+    start(<App />, laterStarted)
+    openCase(/The window/)
+    tapSpot('aide')
+    tab(/Solve/)
+    await waitFor(() => expect(said()).toBe('Find where the pictures keep Elijah’s word.'))
+    const scrolled = vi.spyOn(Element.prototype, 'scrollBy')
+    tall = 72
+    watched.get(document.querySelector('.said-row .label')!)!()
+    expect(scrolled).toHaveBeenCalledWith({ top: 122.5, left: 10 })
+  })
+
   // The paid round's second session (#23, 2026-10-05): her first tap at step 1 landed on the foot
   // of the step's own words and fell through to the armor, and her second, inside the boy's ring
   // at his feet, opened the giant, whose smaller box is drawn over the boy's. A guided step holds
