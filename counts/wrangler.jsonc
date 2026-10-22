@@ -1,0 +1,35 @@
+// The count service's Worker (#7): its name gives its address, behold-counts.<subdomain>.workers.dev;
+// its code is src/index.ts, bundled by wrangler at deploy. It is a Worker of its own, beside the
+// passage service, which keeps no count of anything (#3, as ruled), and it shares that Worker's
+// account and free plan. Nothing here is a secret: the origin it answers and its database are
+// configuration.
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "behold-counts",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  // The account, as the passage service's (worker/wrangler.jsonc) — an identifier, not a secret.
+  "account_id": "0391d5fec52f8ba5281ec9b59c76e9f5",
+  "workers_dev": true,
+  "preview_urls": false,
+  // No stored request logs: the Worker keeps nothing of a beacon but its counts in the day's totals,
+  // as the passage service keeps none (Gate 41 A7), and src/config.test.ts holds it off.
+  // `wrangler tail` still shows a live session when one is needed.
+  "observability": { "enabled": false },
+  "vars": {
+    // The game's own origin (Gate 17 A4, as amended). A copy installed at the old address never
+    // takes the beacon, since that address no longer serves it an update. A dev shell names the dev
+    // server in counts/.dev.vars.
+    "ORIGINS": "https://play.beholdgame.com",
+  },
+  // The totals (schema.sql), in the D1 database made once by the owner with
+  // `npx wrangler d1 create behold-counts`, in ENAM on 2026-10-22 (#7) — its id an identifier, not
+  // a secret.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "behold-counts",
+      "database_id": "e217131e-7b42-4574-8e57-4af40fc051f7",
+    },
+  ],
+}

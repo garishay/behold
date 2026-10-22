@@ -3,6 +3,17 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.42.0 — Gate 41, the count service (#7)
+
+- **7a — the count service** (#163): a Cloudflare Worker of its own, `behold-counts`, takes the
+  game's beacons and adds each count to that day's total in a D1 database, and keeps nothing else:
+  not the beacon, not when in the day it came, and not the address it came from, which it never
+  reads. Its stored request logs are off, as the passage service's are, and a test holds them so.
+  It takes only the names the game counts, from the game's own origin, and refuses a beacon whole
+  for one count that isn't. The passage service still keeps no count, as ruled on #3, and the two
+  share the account's free plan. The game sends it nothing yet: the beacon is 7b's, after Play's
+  Data safety answers say it.
+
 ## v0.41.0 — Gate 40, the update toast (#61)
 
 - **61a — the update toast** (#161): once tapped, the update toast's Update reads "Updating…" at
