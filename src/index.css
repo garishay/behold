@@ -327,7 +327,8 @@ button:focus-visible {
 }
 
 /* A waiting update waits out a case, from its card to its reveal, unseen, so its toast never lies
-   over the bar; it shows on the cases page (#61). */
+   over the bar; it shows on the cases page (#61). Restart's question shows only in a case, so the
+   toast waits it out too, and a screen reader reaches the question alone, as a tap does (#153). */
 :root:has(.app) .toast {
   visibility: hidden;
 }
@@ -1330,12 +1331,6 @@ button:focus-visible {
   margin-bottom: 10px;
   border-color: var(--wine);
   background: var(--wine);
-}
-
-/* An update's toast waits the question out, unseen, so a screen reader reaches the question alone,
-   as a tap does. */
-:root:has(.question) .toast {
-  visibility: hidden;
 }
 
 /* The sound switches (Gate 10 A4): two pills in a row, under the case cards and under Restart;
