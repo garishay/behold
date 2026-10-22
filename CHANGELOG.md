@@ -3,6 +3,19 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.42.1 — Gate 41, the beacon (#7)
+
+- **7b — the beacon** (#164): the game counts how it is played, never who plays it. A count names
+  what happened, the case, and one detail from a few: the game opened, Begin, a case opened,
+  Solve's first opening and each return to Look, the tutorial's steps, each close, each hint and
+  what it points at, a case started over, and where a case stood when the game was put away. The
+  counts add up in memory and go as one beacon to the count service each time the game is hidden,
+  and nothing is stored on the device for them. The cases page's foot becomes About, under a
+  heading: a line on what is counted, then Counting's switch, on until turned off and kept as
+  Music's is, then the music's credit and the two links. Off, nothing is counted, and what wasn't
+  sent is dropped. The privacy page and the store listing's last paragraph say so, and Play's Data
+  safety answers did before the merge. The Play app takes it with the site, with no version code.
+
 ## v0.42.0 — Gate 41, the count service (#7)
 
 - **7a — the count service** (#163): a Cloudflare Worker of its own, `behold-counts`, takes the
