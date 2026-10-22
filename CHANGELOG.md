@@ -3,6 +3,24 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.40.0 — Gate 39, the lesson's row (#159)
+
+- **159a — the lesson's row** (#160): on Solve, a mark's words take a row of their own under the
+  account, above Close's row and the bank, and the account gives up the height while they show,
+  so they never lie over the account, Close the case, or a word in the bank. A lesson's words had
+  lain over the bank's first row, which holds the words its ringed blank wants. Every mark on
+  Solve speaks from the row: a lesson, a hint, what's left, the order's refusal, the vineyard's
+  step up, still a button that lets it go, and the valley's guided steps, its question, and its
+  retry. The ring stays on its target, and the words show while the mark does, its target in view
+  or not. As a lesson's words come into the row, and as they change size, its blank is brought
+  again to the middle of what the account has left, and a blank that starts waiting stays in view
+  where its sentence is taller than the account. Words that leave on the next tap leave on its
+  click, not its press, so the bank never moves under the finger. At the phone's largest font the
+  account keeps one of its lines under the row, and the bank gives up the rest; under the
+  vineyard's step up on a 360 × 548 screen, the bank's words have no room, and the failure's count
+  has its second line under the bar, until it's tapped. On Look nothing changes. The Play app
+  takes the row with the site, with no version code.
+
 ## v0.39.0 — Gate 38, the game's own dialog (#153)
 
 - **153a — the game's own dialog** (#157): Restart asks its question in the game's own dialog,
