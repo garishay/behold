@@ -196,8 +196,9 @@ export function Player(props: PlayerProps) {
   const [row, setRow] = useState<HTMLDivElement | null>(null)
   // The visit, as the beacon counts it (#7): when the case opened, the tutorial's last step done and
   // when, and whether Solve has opened yet. Each step done is counted with the time since the one
-  // before, or since the case opened.
-  const visit = useRef({ at: 0, last: 0, step: progress.step, solve: false })
+  // before, or since the case opened. A visit that starts on Solve, as after a reload there, has
+  // opened it already, so no return from Look counts as its first opening (#12 [Q35]).
+  const visit = useRef({ at: 0, last: 0, step: progress.step, solve: view === 'solve' })
   useEffect(() => {
     visit.current.at = visit.current.last = performance.now()
   }, [])

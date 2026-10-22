@@ -4463,6 +4463,23 @@ describe('what the game counts (#7)', () => {
     ])
   })
 
+  // A visit that starts on Solve, as after a reload there, has opened it already, so a return
+  // from Look is not counted as its first opening (#12 [Q35]).
+  it('counts no Solve opening in a visit that starts on Solve, as after a reload there', async () => {
+    localStorage.setItem('behold.progress', JSON.stringify(laterStarted))
+    history.replaceState(null, '')
+    history.pushState({ case: 'carmel' }, '')
+    history.pushState({ case: 'carmel', view: 'solve' }, '')
+    render(<App />)
+    expect(screen.getByRole('tab', { name: /Solve/ })).toHaveAttribute('aria-selected', 'true')
+    tab(/Look/)
+    await waitFor(() => expect(history.state).toEqual({ case: 'carmel' }))
+    tab(/Solve/)
+    expect(counted().filter((c) => ['solve', 'look'].includes((c as string[])[0]))).toEqual([
+      ['look', 'carmel', 'empty', 1],
+    ])
+  })
+
   it('counts each close: how many answers didn’t fit, or closed with the hints the case took', async () => {
     start()
     openCase(/The valley/)
