@@ -295,7 +295,8 @@ button:focus-visible {
   color: var(--gold);
 }
 
-/* The "Update available" toast (Gate 01 A2), over the screen at the bottom. */
+/* The "Update available" toast (Gate 01 A2), over the screen at the bottom, as wide as its words
+   and no wider than the screen's inset allows, as the lock's note is (#61). */
 .toast {
   position: fixed;
   left: 50%;
@@ -304,6 +305,8 @@ button:focus-visible {
   display: flex;
   align-items: center;
   gap: 16px;
+  width: max-content;
+  max-width: calc(100% - 2 * var(--inset));
   padding: 10px 16px;
   border-radius: 10px;
   background: var(--slate);
@@ -316,12 +319,18 @@ button:focus-visible {
   color: var(--gold);
 }
 
-/* Why a locked card waits, said for a few seconds over the foot of the cases page (#75). */
+/* Once tapped, Update reads "Updating…" and takes no second tap, dimmed as Close the case is once
+   the case is closed (#61). */
+.toast button:disabled {
+  color: var(--mist-dim);
+  cursor: default;
+}
+
+/* Why a locked card waits, said for a few seconds over the foot of the cases page (#75), in the
+   toast's look. */
 .nudge {
   position: fixed;
   margin: 0;
-  width: max-content;
-  max-width: calc(100% - 2 * var(--inset));
 }
 
 /* While an update waits, its toast holds the foot, so the note sits above it: the toast's 16 px

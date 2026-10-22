@@ -280,6 +280,18 @@ describe('Restart’s question (#153)', () => {
   })
 })
 
+// The update toast is as wide as its words, as the lock's note is, so "Update available" no longer
+// wraps at half the screen, and Update once tapped is dimmed (#61). jsdom lays nothing out, so the
+// rules are pinned as text; the screens are their evidence.
+describe('the update toast (#61)', () => {
+  it('sizes to its words within the screen’s inset, and dims Update once tapped', () => {
+    const toast = /\n\.toast \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    expect(toast).toMatch(/width: max-content;/)
+    expect(toast).toMatch(/max-width: calc\(100% - 2 \* var\(--inset\)\);/)
+    expect(css).toMatch(/\n\.toast button:disabled \{\s+color: var\(--mist-dim\);/)
+  })
+})
+
 // The bank shows three rows of words and the top of a fourth, so the eight things of the valley,
 // leading it while a blank waits, are in view whole, and two under the row above it, Close the
 // case or a hint on offer, which takes the third row's room; jsdom lays nothing out, so the
