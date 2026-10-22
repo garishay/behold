@@ -3,6 +3,17 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.42.2 — The bank without its ring (#165)
+
+- **165a — the bank without its ring** (#166): the owner's report of 2026-10-22 asked what the
+  gold border on some of the bank's words meant. It marked a word found on Look since Solve was
+  last left, but on Solve a ring is a mark's, pointing at what to tap, or a failed close's, on an
+  answer that doesn't fit, so a ringed word read as a hint or as a wrong one. The bank now rings
+  no word, new or not. Solve's tab still counts the new words as +n while Look shows, Look's
+  caption names the words each find adds, and once a blank waits, the words that fit it lead the
+  bank. Gate 07's rule that rang them (S4, #24) is amended to match. The Play app takes it with
+  the site, with no version code.
+
 ## v0.42.1 — Gate 41, the beacon (#7)
 
 - **7b — the beacon** (#164): the game counts how it is played, never who plays it. A count names
