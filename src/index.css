@@ -326,6 +326,12 @@ button:focus-visible {
   cursor: default;
 }
 
+/* A waiting update waits out Look and Solve, unseen, so its toast never lies over the bar; it shows
+   again on the reveal and the cases page (#61). */
+:root:has(.app:not(.reading)) .toast {
+  visibility: hidden;
+}
+
 /* Why a locked card waits, said for a few seconds over the foot of the cases page (#75), in the
    toast's look. */
 .nudge {

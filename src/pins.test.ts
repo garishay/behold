@@ -290,6 +290,10 @@ describe('the update toast (#61)', () => {
     expect(toast).toMatch(/max-width: calc\(100% - 2 \* var\(--inset\)\);/)
     expect(css).toMatch(/\n\.toast button:disabled \{\s+color: var\(--mist-dim\);/)
   })
+
+  it('waits out Look and Solve unseen, and shows on the reveal and the cases page', () => {
+    expect(css).toMatch(/\n:root:has\(\.app:not\(\.reading\)\) \.toast \{\s+visibility: hidden;\s+\}/)
+  })
 })
 
 // The bank shows three rows of words and the top of a fourth, so the eight things of the valley,
