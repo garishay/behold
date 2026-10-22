@@ -23,12 +23,15 @@ describe('Shell (Gate 01 A2)', () => {
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 
-  it('hands a waiting version to the service worker on the tap, and not before', () => {
+  // A second tap before the page reloads hands it nothing more (#61).
+  it('hands a waiting version to the service worker on the tap, once, and not before', () => {
     sw.waiting = true
     render(<Shell />)
     expect(screen.getByRole('status')).toHaveTextContent('Update available')
     expect(sw.updateServiceWorker).not.toHaveBeenCalled()
-    fireEvent.click(screen.getByRole('button', { name: 'Update' }))
+    const button = screen.getByRole('button', { name: 'Update' })
+    fireEvent.click(button)
+    fireEvent.click(button)
     expect(sw.updateServiceWorker).toHaveBeenCalledTimes(1)
   })
 })

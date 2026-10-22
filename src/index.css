@@ -295,7 +295,8 @@ button:focus-visible {
   color: var(--gold);
 }
 
-/* The "Update available" toast (Gate 01 A2), over the screen at the bottom. */
+/* The "Update available" toast (Gate 01 A2), over the screen at the bottom, as wide as its words
+   and no wider than the screen's inset allows, as the lock's note is (#61). */
 .toast {
   position: fixed;
   left: 50%;
@@ -304,6 +305,8 @@ button:focus-visible {
   display: flex;
   align-items: center;
   gap: 16px;
+  width: max-content;
+  max-width: calc(100% - 2 * var(--inset));
   padding: 10px 16px;
   border-radius: 10px;
   background: var(--slate);
@@ -316,12 +319,25 @@ button:focus-visible {
   color: var(--gold);
 }
 
-/* Why a locked card waits, said for a few seconds over the foot of the cases page (#75). */
+/* Once tapped, Update reads "Updating…" and takes no second tap, dimmed as Close the case is once
+   the case is closed (#61). */
+.toast button:disabled {
+  color: var(--mist-dim);
+  cursor: default;
+}
+
+/* A waiting update waits out a case, from its card to its reveal, unseen, so its toast never lies
+   over the bar; it shows on the cases page (#61). Restart's question shows only in a case, so the
+   toast waits it out too, and a screen reader reaches the question alone, as a tap does (#153). */
+:root:has(.app) .toast {
+  visibility: hidden;
+}
+
+/* Why a locked card waits, said for a few seconds over the foot of the cases page (#75), in the
+   toast's look. */
 .nudge {
   position: fixed;
   margin: 0;
-  width: max-content;
-  max-width: calc(100% - 2 * var(--inset));
 }
 
 /* While an update waits, its toast holds the foot, so the note sits above it: the toast's 16 px
@@ -1315,12 +1331,6 @@ button:focus-visible {
   margin-bottom: 10px;
   border-color: var(--wine);
   background: var(--wine);
-}
-
-/* An update's toast waits the question out, unseen, so a screen reader reaches the question alone,
-   as a tap does. */
-:root:has(.question) .toast {
-  visibility: hidden;
 }
 
 /* The sound switches (Gate 10 A4): two pills in a row, under the case cards and under Restart;

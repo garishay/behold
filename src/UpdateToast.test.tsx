@@ -16,4 +16,15 @@ describe('UpdateToast (Gate 01 A2)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Update' }))
     expect(onUpdate).toHaveBeenCalledTimes(1)
   })
+
+  // The new version takes a few seconds to take over before the page reloads (#61).
+  it('reads "Updating…" once tapped, and takes no second tap', () => {
+    const onUpdate = vi.fn()
+    render(<UpdateToast open onUpdate={onUpdate} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Update' }))
+    const button = screen.getByRole('button', { name: 'Updating…' })
+    expect(button).toBeDisabled()
+    fireEvent.click(button)
+    expect(onUpdate).toHaveBeenCalledTimes(1)
+  })
 })
