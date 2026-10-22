@@ -10,7 +10,9 @@ and lives at `https://behold-counts.garishay.workers.dev`.
 ## The beacon, and the reply
 
 When the game is hidden (put away, switched from, or closed), it sends what it has counted since
-the last beacon, as one request, unless Counting is off on About (`src/beacon.ts`):
+the last beacon, as one request, unless Counting is off on About (`src/beacon.ts`). It sends
+sooner, at once, if what it has counted reaches the limits below, so this Worker never refuses a
+beacon of the game's own (#12 [Q36]):
 
 ```
 POST /count
@@ -24,8 +26,8 @@ Each count is a name, its case or none, one detail or none, and how many. The br
 with `navigator.sendBeacon`, as a simple request, so there is no preflight, and the game reads no
 reply. The Worker holds every count to the names the game counts, a case's id to lowercase
 letters, a detail to 40 characters of letters, digits, and `<+./-`, and how many to 1–1,000; a
-beacon of at most 200 counts. One count that isn't refuses the whole beacon, and nothing of it is
-kept.
+beacon of at most 200 counts. The two limits are `most` in `src/counted.ts`, which the game reads
+too. One count that isn't refuses the whole beacon, and nothing of it is kept.
 
 | status | reason   | when                                             |
 | ------ | -------- | ------------------------------------------------ |
