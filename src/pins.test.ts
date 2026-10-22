@@ -293,13 +293,22 @@ describe('the case screen at the largest font (#152)', () => {
   })
 })
 
-// Restart's question is a modal alert dialog (#153): nothing outside it is reached while it shows.
-// The screen under it is inert, and an update's toast, outside the game's page, waits it out
-// unseen. jsdom lays nothing out, so the toast's rule is pinned as text; Chrome's accessibility
-// tree is its evidence.
-describe('Restart’s question (#153)', () => {
-  it('hides an update’s toast while it shows', () => {
-    expect(css).toMatch(/\n:root:has\(\.question\) \.toast \{\s+visibility: hidden;\s+\}/)
+// The update toast is as wide as its words, as the lock's note is, so "Update available" no longer
+// wraps at half the screen, and Update once tapped is dimmed (#61). jsdom lays nothing out, so the
+// rules are pinned as text; the screens are their evidence.
+describe('the update toast (#61)', () => {
+  it('sizes to its words within the screen’s inset, and dims Update once tapped', () => {
+    const toast = /\n\.toast \{([^}]*)\}/.exec(css)?.[1] ?? ''
+    expect(toast).toMatch(/width: max-content;/)
+    expect(toast).toMatch(/max-width: calc\(100% - 2 \* var\(--inset\)\);/)
+    expect(css).toMatch(/\n\.toast button:disabled \{\s+color: var\(--mist-dim\);/)
+  })
+
+  // Restart's question is a modal alert dialog that shows only while a case is open (#153), so
+  // this rule also keeps the toast unseen while it shows, and nothing outside the question is
+  // reached; Chrome's accessibility tree was the question's evidence (Gate 38).
+  it('waits out a case unseen, Restart’s question included, and shows on the cases page', () => {
+    expect(css).toMatch(/\n:root:has\(\.app\) \.toast \{\s+visibility: hidden;\s+\}/)
   })
 })
 

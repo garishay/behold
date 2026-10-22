@@ -57,8 +57,11 @@ export const strings = {
   // The copyright page's link, beside the privacy policy's (Gate 33 A3). Its words are
   // `copyrightPage`, below.
   copyright: 'Copyright',
+  // The update toast (Gate 01 A2): its words, its button, and the button once tapped, until the
+  // new version reloads the page (#61).
   updateAvailable: 'Update available',
   update: 'Update',
+  updating: 'Updating…',
 
   // The case cards (#6), and the season in order (#75, Gate 21 A5): a case opens when the one
   // before it is closed, and a tap on a locked card names the case to play first.
