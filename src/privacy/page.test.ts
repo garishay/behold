@@ -52,7 +52,8 @@ describe('what the page says, held to the code (#9, [G13])', () => {
     save({})
     turn('music', true)
     turn('effects', true)
-    expect(localStorage).toHaveLength(3)
+    turn('counting', true)
+    expect(localStorage).toHaveLength(4)
     for (let i = 0; i < localStorage.length; i++) expect(said).toContain(localStorage.key(i))
     expect(using(/\blocalStorage\b/)).toEqual(['player/storage.ts', 'sound/settings.ts'])
     expect(using(/\b(sessionStorage|indexedDB)\b|document\.cookie/)).toEqual([])
@@ -67,11 +68,11 @@ describe('what the page says, held to the code (#9, [G13])', () => {
     expect(said).toContain('up to 30 days')
   })
 
-  it('names every site the game asks or links to, and asks from three modules alone', () => {
+  it('names every site the game asks or links to, and asks from four modules alone', () => {
     const hosts = modules.flatMap((m) => [...m.text.matchAll(/https:\/\/([\w.-]+)/g)])
     for (const [, host] of hosts) expect(html).toContain(host)
     expect(
       using(/\bfetch\(|new Image\(|\b(sendBeacon|XMLHttpRequest|WebSocket|EventSource)\b/),
-    ).toEqual(['passages/proxy.ts', 'player/pictures.ts', 'sound/engine.ts'])
+    ).toEqual(['beacon.ts', 'passages/proxy.ts', 'player/pictures.ts', 'sound/engine.ts'])
   })
 })

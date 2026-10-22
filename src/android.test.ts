@@ -16,7 +16,7 @@ import { join } from 'node:path'
 import { build } from 'vite'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { cases } from './cases/index.ts'
-import { shell, strings } from './strings/en.ts'
+import { policy, shell, strings } from './strings/en.ts'
 
 /** The web manifest's fields that the config answers to. */
 interface WebManifest {
@@ -423,5 +423,12 @@ describe('the store listing (Gate 17 A8, #68)', () => {
 
   it('sets every apostrophe of the full description curly, as ruled', () => {
     expect(listing['Full description']).not.toContain("'")
+  })
+
+  // The listing's last paragraph is the privacy policy's In short but for its line on the
+  // services, so what Play shows and what the page says change together ([G13], #7).
+  it('ends with the privacy policy’s In short, so the listing says what the page says', () => {
+    const short = policy.sections.find((s) => s.heading === 'In short')!.points
+    expect(listing['Full description'].endsWith(`\n\n${short.slice(0, -1).join(' ')}`)).toBe(true)
   })
 })

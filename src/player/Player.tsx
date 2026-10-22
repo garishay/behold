@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react'
+import * as beacon from '../beacon.ts'
 import type { CaseEntry } from '../cases/index.ts'
 import type { PassageService } from '../passages/service.ts'
 import { play } from '../sound/engine.ts'
@@ -193,6 +194,20 @@ export function Player(props: PlayerProps) {
   const [reading, setReading] = useState(false)
   // The row a mark's words take on Solve, under the account (#159).
   const [row, setRow] = useState<HTMLDivElement | null>(null)
+  // The visit, as the beacon counts it (#7): when the case opened, the tutorial's last step done and
+  // when, and whether Solve has opened yet. Each step done is counted with the time since the one
+  // before, or since the case opened. A visit that starts on Solve, as after a reload there, has
+  // opened it already, so no return from Look counts as its first opening (#12 [Q35]).
+  const visit = useRef({ at: 0, last: 0, step: progress.step, solve: view === 'solve' })
+  useEffect(() => {
+    visit.current.at = visit.current.last = performance.now()
+  }, [])
+  useEffect(() => {
+    const v = visit.current
+    if (progress.step <= v.step) return
+    beacon.count('step', s.id, `${progress.step}/${beacon.since(v.last)}`)
+    Object.assign(v, { step: progress.step, last: performance.now() })
+  }, [progress.step, s.id])
   // Solve keeps its place: the account, left for Look, opens again where it was (#24, Solve's room).
   const kept = useRef(0)
   const keep = useCallback((el: HTMLDivElement | null) => {
@@ -257,6 +272,16 @@ export function Player(props: PlayerProps) {
   const nudge = () => setNudges(nudges + 1)
   // Close the case shows once it can close: every slot filled (#24, Solve's room).
   const full = filled(s, progress) === total(s)
+  // Put away while still open, the case counts where it stands: its view, and the shares of its
+  // things found and its slots filled (#7).
+  const seen = beacon.share(progress.tapped.length, spots.length)
+  const where = progress.solved
+    ? null
+    : `${view}/${seen}/${beacon.share(filled(s, progress), total(s))}`
+  useEffect(
+    () => (where === null ? undefined : beacon.whenAway(() => beacon.count('away', s.id, where))),
+    [where, s.id],
+  )
   // Once the account is full, what's left of the job, the first face or the order still empty, is
   // rung with what it wants: by the tutorial's last step, and else by its own mark (#114). The
   // order is rung as the mountain's lesson rings it: the pictures, then the slots once one is
@@ -390,6 +415,11 @@ export function Player(props: PlayerProps) {
   const held = quiet && failed !== null ? count(wrong(s, failed)) + rest : ''
   const onSubmit = () => {
     const off = wrong(s, progress)
+    beacon.count(
+      'close',
+      s.id,
+      off > 0 ? beacon.few(off) : `closed/${beacon.few(progress.hints.length)}`,
+    )
     // How many don't match, as a number, and how many things are still to find (#95).
     setNote(off === 0 || quiet ? '' : strings.noMatch(off) + rest)
     // Kept until the next close, and the one that ends the case clears it ([Q20] on #12).
@@ -441,6 +471,13 @@ export function Player(props: PlayerProps) {
    * a tab does but its step in the history.
    */
   const land = (v: 'look' | 'solve') => {
+    // Solve's first opening in the visit, and each return to Look from it, are counted (#7).
+    if (v === 'solve' && view !== 'solve' && !visit.current.solve && !progress.solved) {
+      visit.current.solve = true
+      beacon.count('solve', s.id, `${beacon.since(visit.current.at)}/${seen}`)
+    }
+    if (view === 'solve' && v === 'look' && !progress.solved)
+      beacon.count('look', s.id, failed !== null ? 'failed' : full ? 'full' : 'empty')
     // The rings clear when Solve is left, not when its own tab is tapped again (review round 1),
     // and what was picked up or waiting is let go (#24, Solve's room), a mark that answered a move
     // with it (#123, #125).
@@ -519,6 +556,19 @@ export function Player(props: PlayerProps) {
     const next = hint
       ? { ...hint, tier: 2 as const }
       : { ...target, tier: (box && broad(box)) || again ? (2 as const) : (1 as const) }
+    // The hint given, its tier and what offered it, and the thing a new one points at (#7).
+    const signal =
+      run >= stuck.taps
+        ? 'taps'
+        : stayed
+          ? 'stay'
+          : waited === placements
+            ? 'wait'
+            : fails >= stuck.closes
+              ? 'closes'
+              : 'menu'
+    beacon.count('hint', s.id, `${next.tier}/${hint ? 'more' : signal}`)
+    if (!hint) beacon.count('aim', s.id, next.spot ?? 'close')
     setHint(next)
     setRun(0)
     setStayed(false)

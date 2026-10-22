@@ -57,6 +57,11 @@ export const strings = {
   // The copyright page's link, beside the privacy policy's (Gate 33 A3). Its words are
   // `copyrightPage`, below.
   copyright: 'Copyright',
+  // About, the cases page's foot (#7): its heading, what the game counts, and Counting's switch,
+  // which turns it off. The switch reads as Music's and Effects' do, "Counting · On".
+  about: 'About',
+  countingLine: 'Behold counts how its cases are played, never who plays them.',
+  counting: 'Counting',
   // The update toast (Gate 01 A2): its words, its button, and the button once tapped, until the
   // new version reloads the page (#61).
   updateAvailable: 'Update available',
@@ -247,15 +252,16 @@ export interface Policy {
 export const policy: Policy = {
   tab: 'Behold: Privacy policy',
   title: 'Privacy policy',
-  effective: 'Takes effect 19 October 2026.',
+  effective: 'Takes effect 22 October 2026.',
   intro:
     'Behold is a Bible mystery game that runs in your web browser, at play.beholdgame.com or installed on your device, and in its own app from Google Play. This page says what the game keeps, what it sends, and who sees it.',
   sections: [
     {
       heading: 'In short',
       points: [
-        'Behold has no accounts, no ads, and no analytics, and it collects nothing about you.',
+        'Behold has no accounts and no ads, and it collects nothing that says who you are.',
         'Your progress stays on your device, and the game never sends it anywhere.',
+        'It counts how its cases are played, never who plays them. You can turn Counting off in About, at the foot of the cases page.',
         'Like any website, the services the game uses see your device’s internet (IP) address. What each one does with it is below.',
       ],
     },
@@ -263,7 +269,7 @@ export const policy: Policy = {
       heading: 'What stays on your device',
       points: [
         'Your progress in each case: where you left off, what you’ve found, the words you’ve placed, the order you’ve set, the hints you asked for, the answers a close found wrong, and whether the case is closed. Your browser keeps it for this site, under behold.progress. The Google Play app keeps its own, apart from your browser’s.',
-        'Whether Music and Effects are on, under behold.music and behold.effects, each kept once you first switch it.',
+        'Whether Music, Effects, and Counting are on, under behold.music, behold.effects, and behold.counting, each kept once you first switch it.',
         'Copies that let the game work offline: its own files; the title’s and the cases’ pictures as the game loads them, up to 200; the passages shown when a case closes, up to 11, each for up to 30 days; and the music you hear, up to 8 pieces. The game notes when each copy was last used, so that the one used longest ago goes first.',
         'None of this leaves your device, and the game sets no cookies.',
       ],
@@ -275,7 +281,9 @@ export const policy: Policy = {
         'In the Google Play app, Android’s WebView checks the addresses the game opens with Google Safe Browsing.',
         'When a closed case shows its passages, the game asks its passage service for them, and shows your device’s own copy when the service can’t be reached. Each request names a passage and its translation, such as 1 Kings 21 in the NIV, and nothing about you.',
         'Like any request a browser makes, each one carries your device’s IP address and the usual details a browser sends, such as its type and language.',
-        'Nothing else is sent: no analytics, no ads, no tracking, and no scripts or fonts from other sites.',
+        'While Counting is on, the game counts how it is played: the game opened, Begin tapped, a case opened, Solve or Look opened, a tutorial step done, a hint asked for and what it points at, a close and how many answers didn’t fit, a case closed or started over, and where a case stood when you left it. Each count says what happened, in which case, and one detail from a few, such as how long it took, from under 30 seconds to 5 minutes or more, or how much of the case was found.',
+        'The counts are added up in memory while you play, never stored, and sent together when you leave the game or switch away from it, or sooner in a very long session. They never say who you are, what you put in a blank, or anything about your device. With Counting off, nothing is counted, and counts not yet sent are dropped.',
+        'Nothing else is sent: no ads, no tracking, and no scripts or fonts from other sites.',
         'Links to other sites, such as api.bible when a case closes, biblica.com on the copyright page, and the music’s licence at creativecommons.org, open in your browser only if you tap them.',
       ],
     },
@@ -286,7 +294,8 @@ export const policy: Policy = {
         'Cloudflare runs the passage service, at behold-passages.garishay.workers.dev. The service sees the passage asked for. Cloudflare receives your device’s IP address with each request, as any host does, and the service never reads it. It keeps no log, and stores nothing about you.',
         'The service gets the passages’ text from API.Bible, run by the American Bible Society, on a schedule of its own, and keeps a copy. It answers your requests from that copy.',
         'Each time it shows a passage, it tells API.Bible’s Fair Use Management System, at fums.api.bible, which passage was shown, as API.Bible asks of every app that shows its text. That report comes from Cloudflare, not your device. It carries two random numbers made for that one view, and nothing about you.',
-        'The game’s developer receives nothing about you from the game, except while fixing a fault, when the developer may watch the passage service’s requests as they arrive and keeps none of them.',
+        'Cloudflare runs the count service too, at behold-counts.garishay.workers.dev. The service sees the counts sent. Cloudflare receives your device’s IP address with them, as any host does, and the service never reads it. It adds each count to that day’s total, keeps nothing else, and keeps no log.',
+        'The game’s developer receives nothing about you from the game, only each day’s totals of the counts. While fixing a fault, the developer may watch the passage service’s and the count service’s requests as they arrive, and keeps none of them.',
       ],
       links: [
         {
@@ -300,7 +309,7 @@ export const policy: Policy = {
       heading: 'How long things are kept',
       points: [
         'What the game keeps on your device stays until you clear it, within the limits above. Restart, in a case’s menu, clears that case’s progress. To clear everything, clear the stored data for play.beholdgame.com in your browser’s settings, or the Google Play app’s storage in your phone’s settings.',
-        'The passage service keeps no record of your requests. GitHub and Cloudflare keep what their own policies say.',
+        'The passage service keeps no record of your requests. The count service keeps each day’s totals for as long as the game runs; they hold nothing that says who you are, so nothing in them can be found or deleted as yours. GitHub and Cloudflare keep what their own policies say.',
         'If you write to the address below, your message reaches the developer’s own inbox. It stays in the developer’s inbox, and is deleted if you ask.',
       ],
     },

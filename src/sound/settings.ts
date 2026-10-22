@@ -1,8 +1,9 @@
 /**
- * The player's two sound switches, Music and Effects (Gate 10 A4): each on unless the player turned
- * it off, kept on the device beside progress, and read by the switches wherever they are shown.
+ * The player's switches: the two for sound, Music and Effects (Gate 10 A4), and Counting, on About
+ * (#7): each on unless the player turned it off, kept on the device beside progress, and read by
+ * the switches wherever they are shown.
  */
-export type Switch = 'music' | 'effects'
+export type Switch = 'music' | 'effects' | 'counting'
 
 const key = (s: Switch) => `behold.${s}`
 
@@ -14,7 +15,11 @@ const stored = (s: Switch) => {
   }
 }
 
-const state: Record<Switch, boolean> = { music: stored('music'), effects: stored('effects') }
+const state: Record<Switch, boolean> = {
+  music: stored('music'),
+  effects: stored('effects'),
+  counting: stored('counting'),
+}
 const listeners = new Set<() => void>()
 
 export const isOn = (s: Switch) => state[s]

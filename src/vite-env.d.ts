@@ -7,7 +7,11 @@ declare const __TITLE_HASH__: string
 /** Each sound file's hash by its path under `public/audio/`, for the music's addresses (Gate 10 A6). */
 declare const __AUDIO_HASHES__: Readonly<Record<string, string>>
 
-/** A dev shell's override of the proxy's address (#3); unset in the build. */
+/**
+ * A dev shell's override of the proxy's address (#3), and of the count service's (#7); both unset
+ * in the build.
+ */
 interface ImportMetaEnv {
   readonly VITE_PASSAGES_URL?: string
+  readonly VITE_COUNTS_URL?: string
 }

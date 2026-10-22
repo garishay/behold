@@ -1,4 +1,5 @@
 import { useEffect, useEffectEvent, useRef, useState, type CSSProperties } from 'react'
+import { count } from './beacon.ts'
 import { cases } from './cases/index.ts'
 import { path as copyright } from './copyright/page.ts'
 import { fetchedPassages } from './passages/proxy.ts'
@@ -10,7 +11,7 @@ import { load, save, type Saved } from './player/storage.ts'
 import { path as privacy } from './privacy/page.ts'
 import { Question } from './Question.tsx'
 import { Music } from './sound/music.ts'
-import { Switches } from './sound/Switches.tsx'
+import { Switches, Toggle } from './sound/Switches.tsx'
 import { strings } from './strings/en.ts'
 import { Title } from './Title.tsx'
 
@@ -85,11 +86,15 @@ export default function App({ passages = fetchedPassages }: AppProps) {
   // [Q20] on #12).
   const [closes, setCloses] = useState<Readonly<Record<string, Progress | null>>>({})
   useEffect(() => save(saved), [saved])
+  // The game opened, counted once: new on a device with no case begun (#7).
+  const opened = useEffectEvent(() => count('open', '', Object.keys(saved).length ? 'back' : 'new'))
+  useEffect(() => opened(), [])
   // The open case starts over: a restart from Solve or the reveal leaves that entry behind as a
   // case entry, and the fresh case mounts on Look before the step back lands (#77).
   const restart = useEffectEvent(() => {
     const found = cases.find((c) => c.structure.id === open)
     if (!found || open === null) return
+    count('restart', open)
     if (entry(history.state)?.view) {
       history.replaceState({ case: open } satisfies Entry, '')
       history.back()
@@ -121,6 +126,7 @@ export default function App({ passages = fetchedPassages }: AppProps) {
   }, [nudge])
 
   const openCase = (id: string, progress: Progress) => {
+    count('case', id, saved[id]?.solved ? 'closed' : saved[id] ? 'back' : 'new')
     setSaved({ ...saved, [id]: progress })
     history.pushState({ case: id } satisfies Entry, '')
     // A closed case opens on its reveal, which is its own entry, so back returns to the case.
@@ -189,8 +195,10 @@ export default function App({ passages = fetchedPassages }: AppProps) {
       <p>{strings.seasonName}</p>
     </header>
   )
-  const begin = () =>
+  const begin = () => {
+    count('begin')
     setTitle(matchMedia('(prefers-reduced-motion: reduce)').matches ? 'settling' : 'leaving')
+  }
   if (title === 'shown') return <Title leaving={false} onBegin={begin} />
   return (
     <main className={title === 'leaving' ? 'screen arriving' : 'screen'} inert={title !== null}>
@@ -253,18 +261,25 @@ export default function App({ passages = fetchedPassages }: AppProps) {
         <footer>{strings.epigraphReference}</footer>
       </blockquote>
       <Switches />
-      <p className="credit">
-        {strings.credit}{' '}
-        <a href={strings.creditLicence.href} target="_blank" rel="noreferrer">
-          {strings.creditLicence.text}
-        </a>
-      </p>
-      {/* The privacy policy and the copyright page, each its own page on the site, opened in
-          place (#9, Gate 33 A3). */}
-      <p className="privacy">
-        <a href={`${import.meta.env.BASE_URL}${privacy}`}>{strings.privacy}</a>
-        <a href={`${import.meta.env.BASE_URL}${copyright}`}>{strings.copyright}</a>
-      </p>
+      {/* About (#7): the foot's small print under a heading, as Gate 01 A5 kept the credits for an
+          About: what the game counts, with Counting's switch; the music's credit; and the privacy
+          policy and the copyright page, each its own page on the site, opened in place (#9, Gate 33
+          A3). */}
+      <section className="about" aria-labelledby="about">
+        <h2 id="about">{strings.about}</h2>
+        <p className="counts">{strings.countingLine}</p>
+        <Toggle which="counting" />
+        <p className="credit">
+          {strings.credit}{' '}
+          <a href={strings.creditLicence.href} target="_blank" rel="noreferrer">
+            {strings.creditLicence.text}
+          </a>
+        </p>
+        <p className="privacy">
+          <a href={`${import.meta.env.BASE_URL}${privacy}`}>{strings.privacy}</a>
+          <a href={`${import.meta.env.BASE_URL}${copyright}`}>{strings.copyright}</a>
+        </p>
+      </section>
       <p className={nudge > 0 ? 'nudge toast' : 'nudge'} role="status">
         {nudge > 0 &&
           (next > 0 ? strings.playFirst(cases[next].text.en.title) : strings.startWithTheValley)}

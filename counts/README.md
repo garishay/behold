@@ -10,7 +10,9 @@ and lives at `https://behold-counts.garishay.workers.dev`.
 ## The beacon, and the reply
 
 When the game is hidden (put away, switched from, or closed), it sends what it has counted since
-the last beacon, as one request, unless Counting is off on About (`src/beacon.ts`):
+the last beacon, as one request, unless Counting is off on About (`src/beacon.ts`). It sends
+sooner, at once, if what it has counted reaches the limits below, so this Worker never refuses a
+beacon of the game's own (#12 [Q36]):
 
 ```
 POST /count
@@ -24,8 +26,8 @@ Each count is a name, its case or none, one detail or none, and how many. The br
 with `navigator.sendBeacon`, as a simple request, so there is no preflight, and the game reads no
 reply. The Worker holds every count to the names the game counts, a case's id to lowercase
 letters, a detail to 40 characters of letters, digits, and `<+./-`, and how many to 1–1,000; a
-beacon of at most 200 counts. One count that isn't refuses the whole beacon, and nothing of it is
-kept.
+beacon of at most 200 counts. The two limits are `most` in `src/counted.ts`, which the game reads
+too. One count that isn't refuses the whole beacon, and nothing of it is kept.
 
 | status | reason   | when                                             |
 | ------ | -------- | ------------------------------------------------ |
@@ -45,12 +47,12 @@ came, not the address it came from, which the Worker never reads, and no request
 (`observability.enabled: false`, held by `src/config.test.ts`). So a total says how many times
 something happened that day, and nothing can tie two counts to one player or one visit.
 
-**The free plan.** D1 gives 100,000 rows written a day, and each count added should write one: an
-index adds a row to a write, and the table has none but its key, which `WITHOUT ROWID` makes the
-table itself. Local D1 doesn't report rows written, so the live database's reply to one made-up
-count is read once its table is made (Gate 41 A5). A beacon carries one count for each different
-thing counted, 8 for a first visit that opens the
-valley and Solve, so the day's writes cover thousands of visits. Past them, D1 refuses writes until
+**The free plan.** D1 gives 100,000 rows written a day, and each count added writes one, new or
+not: an index adds a row to a write, and the table has none but its key, which `WITHOUT ROWID`
+makes the table itself. The live database said so on 2026-10-22, to the Worker's own upsert of a
+made-up count, run twice and then deleted (#7). A beacon carries one count for each different thing
+counted, 8 for a first visit that opens the valley and Solve, so the day's writes cover thousands
+of visits. Past them, D1 refuses writes until
 00:00 UTC: the rest of that day's beacons are let go, and the game never notices. Cloudflare's
 100,000 requests a day are the account's, shared with the passage service; the beacon spends one
 each time the game is hidden.
