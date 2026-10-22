@@ -292,7 +292,9 @@ describe('the update toast (#61)', () => {
   })
 
   it('waits out Look and Solve unseen, and shows on the reveal and the cases page', () => {
-    expect(css).toMatch(/\n:root:has\(\.app:not\(\.reading\)\) \.toast \{\s+visibility: hidden;\s+\}/)
+    expect(css).toMatch(
+      /\n:root:has\(\.app:not\(\.reading\)\) \.toast \{\s+visibility: hidden;\s+\}/,
+    )
   })
 })
 
