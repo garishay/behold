@@ -1,4 +1,4 @@
-import type { Name } from './counted.ts'
+import { most, type Name } from './counted.ts'
 import { isOn, subscribe } from './sound/settings.ts'
 
 /**
@@ -20,9 +20,10 @@ import { isOn, subscribe } from './sound/settings.ts'
  *
  * The game adds them up while it is on screen, and when it is hidden (put away, switched from, or
  * closed) it sends what it has added up as one beacon to the count service (`counts/`), which adds
- * it to the day's totals, and starts again from nothing. Nothing in a beacon names the player, the
- * device, or the visit, and the device keeps nothing for it but Counting's switch, on About. Off,
- * nothing is counted, and what wasn't sent yet is dropped.
+ * it to the day's totals, and starts again from nothing. A beacon goes sooner, at once, when the
+ * tally reaches the service's limits (`counted.ts`), so the service never refuses one (#12 [Q36]).
+ * Nothing in a beacon names the player, the device, or the visit, and the device keeps nothing for
+ * it but Counting's switch, on About. Off, nothing is counted, and what wasn't sent yet is dropped.
  */
 
 /** The count service, or a dev shell's own; the dev server and the tests send nothing unless told. */
@@ -35,13 +36,27 @@ const tally = new Map<string, [Name, string, string, number]>()
 /** What a case on screen counts as the game is put away: where it stands. */
 const leaving = new Set<() => void>()
 
-/** One more of a count: what happened, the case it happened in, and its detail. */
+/**
+ * One more of a count: what happened, the case it happened in, and its detail. At the service's
+ * limits, 200 different counts or 1,000 of one, the beacon goes at once and the tally starts over.
+ * The counts a hide adds come through here too, so they can't carry a beacon past the limits
+ * either (#12 [Q36]).
+ */
 export function count(name: Name, at = '', detail = '') {
   if (!isOn('counting')) return
   const key = `${name} ${at} ${detail}`
   const kept = tally.get(key)
-  if (kept) kept[3]++
-  else tally.set(key, [name, at, detail, 1])
+  const n = kept ? ++kept[3] : 1
+  if (!kept) tally.set(key, [name, at, detail, n])
+  if (tally.size >= most.counts || n >= most.each) send()
+}
+
+/** What has been counted goes as one beacon, and the tally starts over. */
+function send() {
+  const to = service()
+  if (to !== undefined && tally.size > 0)
+    navigator.sendBeacon(`${to}/count`, JSON.stringify([...tally.values()]))
+  tally.clear()
 }
 
 /** Runs `fn` each time the game is put away, before its beacon goes, until the returned function is called. */
@@ -52,13 +67,10 @@ export function whenAway(fn: () => void) {
   }
 }
 
-/** The game put away: what it counted goes as one beacon, and the count starts over. */
+/** The game put away: where an open case stands is counted, and what was counted goes. */
 export function away() {
   for (const fn of leaving) fn()
-  const to = service()
-  if (to !== undefined && tally.size > 0)
-    navigator.sendBeacon(`${to}/count`, JSON.stringify([...tally.values()]))
-  tally.clear()
+  send()
 }
 
 document.addEventListener('visibilitychange', () => {

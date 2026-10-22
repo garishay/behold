@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it, vi } from 'vitest'
-import { handle, most, type D1, type Env, type Statement } from './index.ts'
+import { most } from '../../src/counted.ts'
+import { handle, type D1, type Env, type Statement } from './index.ts'
 
 const site = 'https://play.beholdgame.com'
 const at = 'https://behold-counts.example.workers.dev'

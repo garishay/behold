@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { away, count, few, share, since, whenAway } from './beacon.ts'
+import { most } from './counted.ts'
 import { turn } from './sound/settings.ts'
 
 const sent = vi.fn<(url: string, body: string) => boolean>(() => true)
@@ -96,5 +97,52 @@ describe('the beacon (#7)', () => {
       'all',
     ])
     expect([0, 1, 2, 3, 9].map(few)).toEqual(['0', '1', '2', '3+', '3+'])
+  })
+})
+
+/** Each beacon's counts, as sent. */
+const bodies = () =>
+  sent.mock.calls.map(([, body]) => JSON.parse(body) as [string, string, string, number][])
+/** Whether every beacon sent is within the count service's limits, which refuse it whole past them. */
+const within = () =>
+  bodies().every((b) => b.length <= most.counts && b.every(([, , , n]) => n <= most.each))
+/** `n` different counts, each an aim in the valley, as a long session might gather them. */
+const different = (n: number) => {
+  for (let i = 0; i < n; i++) count('aim', 'valley', `t${i}`)
+}
+
+describe('the beacon within the count service’s limits (#12 [Q36])', () => {
+  it('goes at once when the tally holds 200 different counts, and starts over', () => {
+    different(most.counts)
+    expect(bodies().map((b) => b.length)).toEqual([most.counts])
+    count('begin')
+    hide()
+    expect(bodies().map((b) => b.length)).toEqual([most.counts, 1])
+    expect(within()).toBe(true)
+  })
+
+  it('goes at once when one count reaches 1,000, and starts over', () => {
+    for (let i = 0; i < most.each; i++) count('look', 'carmel', 'failed')
+    expect(bodies()).toEqual([[['look', 'carmel', 'failed', most.each]]])
+    count('look', 'carmel', 'failed')
+    hide()
+    expect(bodies()).toEqual([
+      [['look', 'carmel', 'failed', most.each]],
+      [['look', 'carmel', 'failed', 1]],
+    ])
+  })
+
+  // The counts a hide adds are held to the limits as any count is, so they can't carry a beacon
+  // past them: a tally one short goes at the first of them, and the hide sends the rest.
+  it('holds the counts a hide adds to the limits too', () => {
+    different(most.counts - 1)
+    const away1 = whenAway(() => count('away', 'valley', 'look/some/none'))
+    const away2 = whenAway(() => count('away', 'carmel', 'solve/all/half'))
+    hide()
+    away1()
+    away2()
+    expect(bodies().map((b) => b.length)).toEqual([most.counts, 1])
+    expect(bodies()[1]).toEqual([['away', 'carmel', 'solve/all/half', 1]])
+    expect(within()).toBe(true)
   })
 })

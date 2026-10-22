@@ -7,7 +7,7 @@
  * came, and nothing else is kept: not the beacon, not when in the day, not who sent it. Nothing
  * here reads the player's address.
  */
-import { names, type Name } from '../../src/counted.ts'
+import { most, names, type Name } from '../../src/counted.ts'
 
 /** As much of a D1 database as the Worker uses: a statement, bound, and a batch of them. */
 export interface Statement {
@@ -26,9 +26,6 @@ export interface Env {
 
 /** A count as a beacon carries it: its name, its case or none, its detail or none, and how many. */
 type Count = readonly [Name, string, string, number]
-
-/** The most counts a beacon may carry, and the most of one, so no beacon outweighs a long visit. */
-export const most = { counts: 200, each: 1000 } as const
 
 const count = (x: unknown): x is Count =>
   Array.isArray(x) &&
