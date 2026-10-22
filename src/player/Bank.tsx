@@ -8,8 +8,6 @@ interface BankProps {
   text: CaseText<CaseStructure>
   progress: Progress
   selection: Selection
-  /** The words found on Look since Solve was last left, ringed. */
-  fresh: readonly string[]
   /** A refused word's message or a close's result; it takes the bank's head (07c, #24 [3]). */
   note: string
   onWord: (id: string) => void
@@ -19,14 +17,14 @@ const kinds: readonly Kind[] = ['name', 'noun', 'action', 'number']
 
 /**
  * The word bank (#6), docked on Solve above the bar, where it is used (#24): the words found so far
- * as chips, each with its kind's dot, the ones new since Solve was last open ringed, and all but
- * the kind a waiting slot takes dimmed. A word refused by a slot, and how far off a close was,
- * say so in the bank's head, where the player is looking (07c). While a slot waits, the words
- * that fit it lead the bank, shown from its top, so every one of them is in view (#24, Solve's
- * room).
+ * as chips, each with its kind's dot, and all but the kind a waiting slot takes dimmed. A word new
+ * since Solve was last open looks like the rest: on Solve a ring is a mark's, or a failed close's
+ * (#165). A word refused by a slot, and how far off a close was, say so in the bank's head, where
+ * the player is looking (07c). While a slot waits, the words that fit it lead the bank, shown from
+ * its top, so every one of them is in view (#24, Solve's room).
  */
 export function Bank(props: BankProps) {
-  const { structure, text, progress, selection, fresh, note, onWord } = props
+  const { structure, text, progress, selection, note, onWord } = props
   const wants = selection.target === null ? undefined : kindOf(structure, selection.target)
   const later = (id: string) => (structure.words[id] === wants ? 0 : 1)
   const words =
@@ -57,7 +55,6 @@ export function Bank(props: BankProps) {
           const kind = structure.words[id]
           const state =
             (selection.word === id ? ' is-on' : '') +
-            (fresh.includes(id) ? ' is-new' : '') +
             (wants !== undefined && kind !== wants ? ' is-dim' : '')
           return (
             <button

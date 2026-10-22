@@ -130,8 +130,8 @@ export function Player(props: PlayerProps) {
   const [sheet, setSheet] = useState<Sheet>(null)
   // The brief's card, over the picture of a fresh case until Start or the first tap (#24).
   const [brief, setBrief] = useState(true)
-  // Words found on Look since Solve was last left: the badge on Solve's button, then ringed in the
-  // bank while Solve is open (#24).
+  // Words found on Look since Solve was last left, counted by the badge on Solve's button (#24).
+  // The bank doesn't ring them: on Solve a ring is a mark's, or a failed close's (#165).
   const [fresh, setFresh] = useState<readonly string[]>([])
   // A step whose words would sit over what the player reads or uses shows them until the next tap,
   // and keeps its ring: the last step's, over the account (#24 [3]), the sweep's, over the bank
@@ -478,9 +478,9 @@ export function Player(props: PlayerProps) {
     }
     if (view === 'solve' && v === 'look' && !progress.solved)
       beacon.count('look', s.id, failed !== null ? 'failed' : full ? 'full' : 'empty')
-    // The rings clear when Solve is left, not when its own tab is tapped again (review round 1),
-    // and what was picked up or waiting is let go (#24, Solve's room), a mark that answered a move
-    // with it (#123, #125).
+    // The new words' count clears when Solve is left, not when its own tab is tapped again (review
+    // round 1), and what was picked up or waiting is let go (#24, Solve's room), a mark that
+    // answered a move with it (#123, #125).
     if (view === 'solve' && v !== 'solve') {
       setFresh([])
       setSelection(nothing)
@@ -871,7 +871,6 @@ export function Player(props: PlayerProps) {
             text={text}
             progress={progress}
             selection={selection}
-            fresh={fresh}
             note={note || held}
             onWord={(id) => apply(chooseWord(s, progress, selection, id))}
           />
