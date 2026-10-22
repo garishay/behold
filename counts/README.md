@@ -42,12 +42,14 @@ One table in the D1 database `behold-counts` (`schema.sql`): each count's total 
 UTC, by its name, its case, and its detail. A beacon's counts go in one batch, each added to its
 total, the day's first starting it. Nothing else is kept: not the beacon, not when in the day it
 came, not the address it came from, which the Worker never reads, and no request log
-(`observability.enabled: false`). So a total says how many times something happened that day, and
-nothing can tie two counts to one player or one visit.
+(`observability.enabled: false`, held by `src/config.test.ts`). So a total says how many times
+something happened that day, and nothing can tie two counts to one player or one visit.
 
-**The free plan.** D1 gives 100,000 rows written a day, and each count added is one: an index adds
-a row to a write, and the table has none but its key, which `WITHOUT ROWID` makes the table itself.
-A beacon carries one count for each different thing counted, 8 for a first visit that opens the
+**The free plan.** D1 gives 100,000 rows written a day, and each count added should write one: an
+index adds a row to a write, and the table has none but its key, which `WITHOUT ROWID` makes the
+table itself. Local D1 doesn't report rows written, so the live database's reply to one made-up
+count is read once its table is made (Gate 41 A5). A beacon carries one count for each different
+thing counted, 8 for a first visit that opens the
 valley and Solve, so the day's writes cover thousands of visits. Past them, D1 refuses writes until
 00:00 UTC: the rest of that day's beacons are let go, and the game never notices. Cloudflare's
 100,000 requests a day are the account's, shared with the passage service; the beacon spends one
@@ -109,6 +111,7 @@ table. The dev server sends no beacon unless `VITE_COUNTS_URL` is set.
 ## Done once, by hand
 
 Under the owner's login, from this folder (Gate 41): the database,
-`npx wrangler d1 create behold-counts`, whose id is `database_id` in `wrangler.jsonc`, an identifier
-like the account's; its table, `npx wrangler d1 execute behold-counts --remote --file=schema.sql`;
+`npx wrangler d1 create behold-counts`, made in ENAM on 2026-10-22, whose id is `database_id` in
+`wrangler.jsonc`, an identifier like the account's; its table,
+`npx wrangler d1 execute behold-counts --remote --file=schema.sql`, once this Worker is deployed;
 and, if the repository's `CLOUDFLARE_API_TOKEN` can't yet edit D1, that permission added to it.

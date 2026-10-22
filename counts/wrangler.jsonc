@@ -12,7 +12,8 @@
   "account_id": "0391d5fec52f8ba5281ec9b59c76e9f5",
   "workers_dev": true,
   "preview_urls": false,
-  // No stored request logs: the Worker keeps nothing of a beacon but its counts in the day's totals.
+  // No stored request logs: the Worker keeps nothing of a beacon but its counts in the day's totals,
+  // as the passage service keeps none (Gate 41 A7), and src/config.test.ts holds it off.
   // `wrangler tail` still shows a live session when one is needed.
   "observability": { "enabled": false },
   "vars": {
@@ -22,12 +23,13 @@
     "ORIGINS": "https://play.beholdgame.com",
   },
   // The totals (schema.sql), in the D1 database made once by the owner with
-  // `npx wrangler d1 create behold-counts` — its id an identifier, not a secret.
+  // `npx wrangler d1 create behold-counts`, in ENAM on 2026-10-22 (#7) — its id an identifier, not
+  // a secret.
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "behold-counts",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "e217131e-7b42-4574-8e57-4af40fc051f7",
     },
   ],
 }
