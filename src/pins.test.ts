@@ -291,10 +291,8 @@ describe('the update toast (#61)', () => {
     expect(css).toMatch(/\n\.toast button:disabled \{\s+color: var\(--mist-dim\);/)
   })
 
-  it('waits out Look and Solve unseen, and shows on the reveal and the cases page', () => {
-    expect(css).toMatch(
-      /\n:root:has\(\.app:not\(\.reading\)\) \.toast \{\s+visibility: hidden;\s+\}/,
-    )
+  it('waits out a case unseen, and shows on the cases page', () => {
+    expect(css).toMatch(/\n:root:has\(\.app\) \.toast \{\s+visibility: hidden;\s+\}/)
   })
 })
 

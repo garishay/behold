@@ -326,9 +326,9 @@ button:focus-visible {
   cursor: default;
 }
 
-/* A waiting update waits out Look and Solve, unseen, so its toast never lies over the bar; it shows
-   again on the reveal and the cases page (#61). */
-:root:has(.app:not(.reading)) .toast {
+/* A waiting update waits out a case, from its card to its reveal, unseen, so its toast never lies
+   over the bar; it shows on the cases page (#61). */
+:root:has(.app) .toast {
   visibility: hidden;
 }
 
