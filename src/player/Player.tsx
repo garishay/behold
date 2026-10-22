@@ -54,10 +54,10 @@ import { Think } from './Think.tsx'
 type View = 'look' | 'solve' | 'reveal'
 type Sheet = 'menu' | 'papers' | null
 /**
- * A mark that answers a move: where it rings, its words, whether they sit under it (#125), and
- * whether it holds the screen until it is tapped (#131).
+ * A mark that answers a move: where it rings, its words, and whether it holds the screen until it
+ * is tapped (#131).
  */
-type Notice = { at: string; label: string; n: number; under?: boolean; hold?: boolean }
+type Notice = { at: string; label: string; n: number; hold?: boolean }
 
 interface PlayerProps {
   entry: CaseEntry
@@ -134,8 +134,9 @@ export function Player(props: PlayerProps) {
   const [fresh, setFresh] = useState<readonly string[]>([])
   // A step whose words would sit over what the player reads or uses shows them until the next tap,
   // and keeps its ring: the last step's, over the account (#24 [3]), the sweep's, over the bank
-  // (#25), and a question's, over the account's last lines (#77). `said` is the step whose words
-  // have left and the showing they left at, so a step shown again brings them back.
+  // (#25), and a question's, over the account's last lines (#77). On Solve they take its row, and
+  // still leave on the next tap, giving the account its height back (#159). `said` is the step
+  // whose words have left and the showing they left at, so a step shown again brings them back.
   const [said, setSaid] = useState<string | null>(null)
   // A failed close in the tutorial brings the last step's words back as its retry, which says the
   // answers were checked (#25). One that finds wrong the slot the case asks about asks its question
@@ -168,8 +169,8 @@ export function Player(props: PlayerProps) {
   const [note, setNote] = useState('')
   // A mark that answers a move at what it's about: the order's refusal of the pictures as listed, at
   // the order, where the next tap is, until the next move (#123); and the step up, at the bank's
-  // head on the vineyard's first failed close, its words under it, off Close's row (#125), until a
-  // tap on it lets it go (#131). Counted, so a refusal again shows it again.
+  // head on the vineyard's first failed close, its words off Close (#125), until a tap on it lets it
+  // go (#131). Counted, so a refusal again shows it again.
   const [notice, setNotice] = useState<Notice | null>(null)
   // The stuck signals (#29): taps on the picture that find nothing new while something is unfound,
   // a stay on a moment with something left, a wait on Solve with nothing left to place (#65), and
@@ -190,6 +191,8 @@ export function Player(props: PlayerProps) {
   const [nudges, setNudges] = useState(0)
   // A caption opened whole over the picture's foot; the next caption opens closed (#24).
   const [reading, setReading] = useState(false)
+  // The row a mark's words take on Solve, under the account (#159).
+  const [row, setRow] = useState<HTMLDivElement | null>(null)
   // Solve keeps its place: the account, left for Look, opens again where it was (#24, Solve's room).
   const kept = useRef(0)
   const keep = useCallback((el: HTMLDivElement | null) => {
@@ -392,10 +395,10 @@ export function Player(props: PlayerProps) {
     // Kept until the next close, and the one that ends the case clears it ([Q20] on #12).
     onLastClose(off > 0 ? progress : null)
     // The case's first failed close says the step up at the bank's head, once: the vineyard's. Its
-    // words sit under the head, over the bank, never on Close (#125), and it holds the screen until
-    // it is tapped, as the guided steps do: tester 4's next tap, on a blank, took it unread (#131).
+    // words take Solve's row, never on Close (#125, #159), and it holds the screen until it is
+    // tapped, as the guided steps do: tester 4's next tap, on a blank, took it unread (#131).
     const harder = off > 0 && Object.keys(progress.misses).length === 0 ? text.harder : undefined
-    setNotice(harder ? { at: '.bank-head', label: harder, n: 1, under: true, hold: true } : null)
+    setNotice(harder ? { at: '.bank-head', label: harder, n: 1, hold: true } : null)
     if (off > 0) {
       const first = firstWrong(s, progress) ?? null
       play('notYet')
@@ -789,6 +792,10 @@ export function Player(props: PlayerProps) {
               orderFits={orderFits}
             />
           </div>
+          {/* A mark's words take a row of their own under the account while they show, and the
+              account gives up the height, so they never lie over the account, Close the case, or a
+              word in the bank. While none show, the row is empty and takes no room (#159). */}
+          <div className="said-row" ref={setRow} />
           {/* Close the case docks as its own row below the account, outside the scroll, so it never
               moves and never covers the account; a guided case offers it once its steps are done
               (07d, #24; #26 [4]). It shows once every slot is filled, and until then the account
@@ -838,10 +845,10 @@ export function Player(props: PlayerProps) {
           key={noticed.n}
           at={noticed.at}
           label={noticed.label}
-          under={noticed.under}
           hold={noticed.hold}
           release={noticed.hold}
           onTap={noticed.hold ? () => setNotice(null) : undefined}
+          into={row}
         />
       )}
       {hinted && hint && (
@@ -862,6 +869,7 @@ export function Player(props: PlayerProps) {
                     : strings.hintSays[hint.why]
           }
           onTap={() => setSaidAt(hinted)}
+          into={row}
         />
       )}
       {!hinted && !noticed && at && current && (
@@ -884,13 +892,19 @@ export function Player(props: PlayerProps) {
           }
           onNext={meet && (() => show('solve'))}
           hold={holds}
+          into={row}
         />
       )}
       {/* A lesson's mark comes into view again once the account is full (#114). */}
       {lesson && (
-        <CoachMark key={String(leftover !== undefined)} at={lesson} label={text.teach ?? ''} />
+        <CoachMark
+          key={String(leftover !== undefined)}
+          at={lesson}
+          label={text.teach ?? ''}
+          into={row}
+        />
       )}
-      {owedAt && <CoachMark at={owedAt} label={leftWords} />}
+      {owedAt && <CoachMark at={owedAt} label={leftWords} into={row} />}
       {/* A failed close with something unfound rings Look, with no words, until it opens; the
           tutorial's last step rings it instead (#95). */}
       {seek && view === 'solve' && !current && !at && (

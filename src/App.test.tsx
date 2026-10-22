@@ -1209,16 +1209,19 @@ describe('the tutorial’s marks (#25)', () => {
     expect([at(), said()]).toEqual(['[data-view="look"]', 'Find the other words in the picture.'])
   })
 
-  // A mark is drawn only where its target can be seen: out of the account's view it shows no ring
-  // and no words, and part in view its ring is cut at the account's edge (07c, #24 [2]). A guided
-  // step still holds the screen, and a tap there brings its target back into view (#77).
-  it('shows nothing while its target is out of view, and cuts its ring at the scroll box', async () => {
+  // A mark is drawn only where its target can be seen: out of the account's view it shows no ring,
+  // and part in view its ring is cut at the account's edge (07c, #24 [2]). Its words keep Solve's
+  // row, so the row never comes and goes as the account scrolls (#159). A guided step still holds
+  // the screen, and a tap there brings its target back into view (#77).
+  it('shows no ring while its target is out of view, and cuts its ring at the scroll box', async () => {
     boxes = { [blank]: new DOMRect(0, 500, 60, 30), '.solve': new DOMRect(0, 0, 360, 400) }
     toDavid()
     await new Promise((r) => setTimeout(r, 100))
     expect(at()).toBe(blank)
     expect(ring()).toBeNull()
-    expect(document.querySelector('.coach .label')).toBeNull()
+    expect(document.querySelector('.said-row')).toHaveTextContent(
+      'The picture shows his sling. Tap the blank.',
+    )
     const scrolled = vi.spyOn(document.querySelector('.solve')!, 'scrollBy')
     slot('t1')
     expect(document.querySelector('[data-slot="t1"]')).not.toHaveClass('is-target')
@@ -1252,16 +1255,18 @@ describe('the tutorial’s marks (#25)', () => {
 
   // The paid round's second session (#23, 2026-10-05): step 5's words sat under sling's blank,
   // over the account's lines around it, the whole time she was stuck there. No mark covers the
-  // account: the words of a target among its lines sit just under the lines on show (#77).
+  // account (#77): on Solve a step's words take the row under it, above the bank (#159).
   it('puts no mark’s words over the account’s lines', async () => {
-    boxes = {
-      [blank]: new DOMRect(34, 148.5, 72, 30),
-      '.solve': new DOMRect(0, 0, 360, 319),
-      '.scroll': new DOMRect(16, 100, 328, 420),
-    }
     toDavid()
-    await waitFor(() => expect(document.querySelector('.coach .label')).not.toBeNull())
-    expect(document.querySelector<HTMLElement>('.coach .label')!.style.top).toBe('327px')
+    const row = document.querySelector('.said-row')!
+    await waitFor(() =>
+      expect(row).toHaveTextContent('The picture shows his sling. Tap the blank.'),
+    )
+    expect([row.previousElementSibling, row.nextElementSibling]).toEqual([
+      document.querySelector('.solve'),
+      document.querySelector('.bank'),
+    ])
+    expect(document.querySelector('.coach .label')).toBeNull()
   })
 
   // Close the case docks as its own row between the account and the bank, outside the scroll, so
@@ -1286,13 +1291,17 @@ describe('the tutorial’s marks (#25)', () => {
     openCase(/The vineyard/)
     tab(/Solve/)
     expect(document.querySelector('.submit-row')).toBeNull()
-    expect(document.querySelector('.solve')!.nextElementSibling).toHaveClass('bank')
+    // The seal is unopened, so the lesson still marks the man on the bed, and its words' row sits
+    // under the account, above Close's row once it shows (#159).
+    expect(document.querySelector('.solve')!.nextElementSibling).toHaveClass('said-row')
+    expect(document.querySelector('.said-row')!.nextElementSibling).toHaveClass('bank')
     chip('garden')
     slot('s1')
     const row = screen.getByRole('button', { name: /Close the case/ }).parentElement!
     expect(row).toHaveClass('submit-row')
     expect(row.closest('.solve')).toBeNull()
-    expect(row.previousElementSibling).toHaveClass('solve')
+    expect(row.previousElementSibling).toHaveClass('said-row')
+    expect(row.previousElementSibling!.previousElementSibling).toHaveClass('solve')
     expect(row.nextElementSibling).toHaveClass('bank')
   })
 
@@ -1426,7 +1435,8 @@ describe('the tutorial’s marks (#25)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
     expect(result()).toHaveTextContent('One answer doesn’t fit the story.')
     expect([at(), said()]).toEqual(['[data-slot="t5"]', 'Whose sword? Look closer at the picture.'])
-    fireEvent.pointerDown(document.querySelector('[data-slot="t1"]')!)
+    // On Solve the words are in its row, and leave on the next tap's click (#159).
+    fireEvent.click(document.querySelector('.solve')!)
     expect([at(), said()]).toEqual(['[data-slot="t5"]', ''])
     tab(/Look/)
     expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
@@ -1675,6 +1685,126 @@ describe('the tutorial’s marks (#25)', () => {
     expect(at()).toBe('[data-slot="w1"]')
   })
 
+  // The owner's acceptance read of the window (#67): the lesson's words lay over the bank's first
+  // row, the words its blank wants. On Solve every mark's words take a row of their own under the
+  // account while they show, a lesson's, a blank's, a face's, or the order's, and a hint's, so the
+  // account gives up the height, and the mark keeps its ring and its status line (#159).
+  it('sets a mark’s words on Solve in a row of their own under the account, clear of the bank', async () => {
+    const row = () => document.querySelector('.said-row')
+    const apart = () => [
+      row()?.previousElementSibling?.className,
+      row()?.nextElementSibling?.className,
+      row()?.textContent,
+      coach()?.querySelector('.label') ?? null,
+    ]
+    start(<App />, laterStarted)
+    openCase(/The window/)
+    tapSpot('aide')
+    tab(/Solve/)
+    await waitFor(() => expect(at()).toBe('[data-slot="w1"]'))
+    expect(apart()).toEqual(['solve', 'bank', 'Find where the pictures keep Elijah’s word.', null])
+    expect(said()).toBe('Find where the pictures keep Elijah’s word.')
+    chip('Ahab')
+    slot('w1')
+    expect(row()).toBeEmptyDOMElement()
+    menu('Hint')
+    await waitFor(() => expect(at()).toBe('[data-view="look"]'))
+    expect(apart()).toEqual(['solve', 'bank', 'Open Look: there’s more to find.', null])
+    menu('Cases')
+    fireEvent.click(await screen.findByRole('button', { name: /The battle/ }))
+    moment('The thrones')
+    tapSpot('plain')
+    tab(/Solve/)
+    await waitFor(() => expect(at()).toBe('[data-face="m1"]'))
+    expect(apart()).toEqual(['solve', 'bank', 'He’s in disguise. Name him by what happens.', null])
+    menu('Cases')
+    fireEvent.click(await screen.findByRole('button', { name: /The mountain/ }))
+    tab(/Solve/)
+    await waitFor(() => expect(at()).toBe('.tiles'))
+    expect(apart()).toEqual([
+      'solve',
+      'bank',
+      'These aren’t in story order. Which happened first?',
+      null,
+    ])
+  })
+
+  /**
+   * The account's box as at 360 × 548 at the phone's largest text: 221 px tall, and 72 px once a
+   * lesson's words take their 149 px row from its foot. The window's blank sits at 140, 37 tall.
+   */
+  const largest = (tall: () => number) => {
+    Object.defineProperty(boxes, '.solve', {
+      enumerable: true,
+      get: () => new DOMRect(0, 0, 360, tall()),
+    })
+    boxes['[data-slot="w1"]'] = new DOMRect(150, 140, 80, 37)
+  }
+
+  // Gate 39's survey at the largest text: the mark brought the window's blank to the middle of the
+  // account before its words took their row, and the row then took 149 px from the account's foot,
+  // so the blank lay under the words, out of view, while they showed. As the words come into their
+  // row, the mark brings the blank again, to the middle of what the account has left (#159).
+  it('brings a lesson’s blank to the middle of what the account keeps once its words take their row', async () => {
+    largest(() => (document.querySelector('.said-row .label') ? 72 : 221))
+    start(<App />, laterStarted)
+    openCase(/The window/)
+    tapSpot('aide')
+    const scrolled = vi.spyOn(Element.prototype, 'scrollBy')
+    tab(/Solve/)
+    await waitFor(() => expect(said()).toBe('Find where the pictures keep Elijah’s word.'))
+    expect(scrolled).toHaveBeenLastCalledWith({ top: 122.5, left: 10 })
+  })
+
+  // The Play app applies a font size changed while a lesson's words show, and they grow, and their
+  // row with them: the account's view shrinks under the blank, so as the words change size the mark
+  // brings it again (#159).
+  it('brings a lesson’s blank again when its words change size in their row', async () => {
+    const watched = new Map<Element, () => void>()
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        callback: () => void
+        constructor(callback: () => void) {
+          this.callback = callback
+        }
+        observe(el: Element) {
+          watched.set(el, this.callback)
+        }
+        disconnect() {}
+      },
+    )
+    let tall = 221
+    largest(() => tall)
+    start(<App />, laterStarted)
+    openCase(/The window/)
+    tapSpot('aide')
+    tab(/Solve/)
+    await waitFor(() => expect(said()).toBe('Find where the pictures keep Elijah’s word.'))
+    const scrolled = vi.spyOn(Element.prototype, 'scrollBy')
+    tall = 72
+    watched.get(document.querySelector('.said-row .label')!)!()
+    expect(scrolled).toHaveBeenCalledWith({ top: 122.5, left: 10 })
+  })
+
+  // Gate 39's survey at the largest text: tapped, the window's blank waits, and its sentence, taller
+  // than the line or two a lesson's row leaves the account, was shown from its top, which took the
+  // blank out of view under the words. It is shown from its top only as far as the blank stays in
+  // view (#24, Solve's room; #159).
+  it('keeps a waiting blank in view when its sentence is taller than the account', async () => {
+    largest(() => 72)
+    boxes['[data-slot="w1"]'] = new DOMRect(150, 30, 80, 37)
+    boxes['.sentence'] = new DOMRect(16, -40, 328, 200)
+    start(<App />, laterStarted)
+    openCase(/The window/)
+    tapSpot('aide')
+    tab(/Solve/)
+    await waitFor(() => expect(said()).toBe('Find where the pictures keep Elijah’s word.'))
+    const scrolled = vi.spyOn(document.querySelector('.solve')!, 'scrollBy')
+    slot('w1')
+    expect(scrolled).toHaveBeenLastCalledWith({ top: -5 })
+  })
+
   // The paid round's second session (#23, 2026-10-05): her first tap at step 1 landed on the foot
   // of the step's own words and fell through to the armor, and her second, inside the boy's ring
   // at his feet, opened the giant, whose smaller box is drawn over the boy's. A guided step holds
@@ -1872,18 +2002,17 @@ describe('the tutorial’s marks (#25)', () => {
     start()
     openCase(/The valley/)
     await sweep()
-    for (const [id, word] of [
-      ['d1', 'David'],
-      ['t4', 'sling'],
-      ['t5', 'Goliath'],
-    ] as const) {
-      chip(word)
-      slot(id)
-    }
-    await waitFor(() => expect(document.querySelector('.coach .label')).not.toBeNull())
+    await waitFor(() => expect(document.querySelector('.coach .ring')).not.toBeNull())
+    expect(document.querySelector('.said-row .label')).not.toBeNull()
     expect([at(), said()]).toEqual(['[data-view="solve"]', 'Fill the rest, then close the case.'])
+    // On Solve they sit in its row, so they leave on the tap's click, not its press: gone on the
+    // press, the row would drop the bank under the finger before the click landed (#159).
     fireEvent.pointerDown(document.querySelector('[data-slot="t1"]')!)
-    expect(document.querySelector('.coach .label')).toBeNull()
+    expect(document.querySelector('.said-row')).toHaveTextContent(
+      'Fill the rest, then close the case.',
+    )
+    fireEvent.click(document.querySelector('.solve')!)
+    expect(document.querySelector('.said-row')).toBeEmptyDOMElement()
     expect(document.querySelector('.coach .ring')).not.toHaveClass('dim')
     expect([at(), said()]).toEqual(['[data-view="solve"]', ''])
     tab(/Look/)
@@ -1891,7 +2020,7 @@ describe('the tutorial’s marks (#25)', () => {
     // The dim left with the words, and a new target doesn't bring it back (#24, addendum (b)).
     expect(document.querySelector('.coach .ring')).not.toHaveClass('dim')
     tab(/Solve/)
-    for (const [id, word] of valleyAnswers.filter(([id]) => !['d1', 't4', 't5'].includes(id))) {
+    for (const [id, word] of valleyAnswers) {
       chip(word)
       slot(id)
     }
@@ -1919,15 +2048,15 @@ describe('the tutorial’s marks (#25)', () => {
       '[data-slot="t3"]',
       'Ringed answers don’t fit the story. Look closer.',
     ])
-    fireEvent.pointerDown(document.querySelector('[data-slot="t3"]')!)
+    // On Solve the words are in its row, and leave on the next tap's click (#159).
+    fireEvent.click(document.querySelector('.solve')!)
     expect([at(), said()]).toEqual(['[data-slot="t3"]', ''])
   })
 
   // The screens for #102 [4], E5: once its last ring was changed, the retry's mark went back to
-  // Close the case still saying "Ringed answers don't fit the story", over the bank's head. A tap's
-  // press sends its words away, but moves made as a keyboard makes them, with no press, don't, nor
-  // does a mark shown again by a hint asked past its last tier. With no ring left, the retry's mark
-  // says nothing (#104).
+  // Close the case still saying "Ringed answers don't fit the story", over the bank's head. A tap
+  // sends its words away, on Solve at its click (#159), but a mark shown again by a hint asked past
+  // its last tier doesn't. With no ring left, the retry's mark says nothing (#104).
   it('the retry says nothing once no ring is left', async () => {
     start()
     openCase(/The valley/)
@@ -2287,7 +2416,8 @@ describe('hints (#29)', () => {
       openCase(/The valley/)
       tab(/Solve/)
       expect(said()).toBe('Find the other words in the picture.')
-      fireEvent.pointerDown(document.querySelector('[data-word="david"]')!)
+      // On Solve the words are in its row, and leave on the next tap's click (#159).
+      fireEvent.click(document.querySelector('.solve')!)
       expect([at(), said()]).toEqual(['[data-view="look"]', ''])
       const before = coach()
       act(() => vi.advanceTimersByTime(stuck.stranded * 1000 - 1))
@@ -3299,24 +3429,20 @@ describe('the close converges (#95)', () => {
   })
 
   // The owner's ruling on Gate 31 (#125): the step up's words sat over Close's row, so the tap that
-  // would clear them pressed Close the case and took them away unread. They sit under the bank's
-  // head, over the bank, never over Close, and the mark holds the screen until its ring is tapped
-  // (#131).
-  it('the step up’s words sit under the bank’s head, off Close’s row', async () => {
-    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (
-      this: Element,
-    ) {
-      return this.matches('.bank-head')
-        ? new DOMRect(16, 477, 328, 24)
-        : new DOMRect(10, 10, 100, 40)
-    })
+  // would clear them pressed Close the case and took them away unread. They sit in Solve's row,
+  // above Close's, never over Close or the bank (#159), and the mark holds the screen until its
+  // ring or its words are tapped (#131).
+  it('the step up’s words sit in Solve’s row, off Close’s', async () => {
     start(<App />, offBy(vineyard, { s4: 'ahab', s5: 'the-elders', v2: 'stoned' }))
     openCase(/The vineyard/)
     tab(/Solve/)
     fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
-    await waitFor(() => expect(document.querySelector('.coach .label')).not.toBeNull())
-    const words = document.querySelector<HTMLElement>('.coach .label')!
-    expect([words.style.top, words.style.bottom]).toEqual(['513px', ''])
+    const words = await screen.findByRole('button', { name: stepUp })
+    const row = words.closest('.said-row')!
+    expect([row.previousElementSibling, row.nextElementSibling]).toEqual([
+      document.querySelector('.solve'),
+      document.querySelector('.submit-row'),
+    ])
   })
 
   // The vineyard round's tester 3 (#23): every failed close showed its count, but the first tap on
@@ -3513,7 +3639,8 @@ describe('the close converges (#95)', () => {
   })
 
   // A hint says an answer doesn't fit only while it holds what the close found: changed since, it
-  // says what settles it, as a hint for an answer still empty does (#123).
+  // says what settles it, as a hint for an answer still empty does (#123). On Solve its words leave
+  // on the next tap's click (#159), so it is asked for again.
   it('a hint says an answer doesn’t fit only while it holds what the close found', () => {
     start(<App />, offBy(vineyard, { s4: 'ahab' }))
     openCase(/The vineyard/)
@@ -3523,6 +3650,7 @@ describe('the close converges (#95)', () => {
     expect(said()).toBe('“But written by ___” doesn’t fit the story. Open Look for a clue.')
     chip('Naboth')
     slot('s4')
+    menu('Hint')
     expect(said()).toBe('Open Look to settle “but written by ___”.')
   })
 

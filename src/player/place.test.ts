@@ -60,7 +60,8 @@ describe('a target shown whole in its scroll box (#24)', () => {
 })
 
 // jsdom lays nothing out, so where a mark's words go is held here on the floor's numbers, 360 ×
-// 548: on Look the dock's top is at 365, with the bar under it; on Solve there is no dock (#77).
+// 548: on Look the dock's top is at 365, with the bar under it (#77). On Solve the words take a
+// row of their own (#159).
 describe('where a mark’s words sit (#25, #77)', () => {
   const ring = (top: number, bottom: number) => ({ left: 100, right: 200, top, bottom })
 
@@ -75,11 +76,6 @@ describe('where a mark’s words sit (#25, #77)', () => {
     expect(labelAt(ring(471, 523), 365, 548)).toEqual({ bottom: 548 - 365 + 8 })
   })
 
-  it('on Solve, with no dock, either side of the screen’s middle, as before', () => {
-    expect(labelAt(ring(471, 523), 548, 548)).toEqual({ bottom: 548 - 471 + 8 })
-    expect(labelAt(ring(100, 200), 548, 548)).toEqual({ top: 208 })
-  })
-
   // A hint's first tier may ring the left or right half: its ring runs the picture's height, so
   // neither side leaves the words their room with a line to spare (74.5 px), and they sit at the
   // room's foot, over the ring, above the dock, for one moment's picture and for several.
@@ -89,37 +85,15 @@ describe('where a mark’s words sit (#25, #77)', () => {
     expect(labelAt(ring(50, 290), 365, 548)).toEqual({ bottom: 548 - 365 + 8 })
   })
 
-  // The paid round's second session (#23, 2026-10-05): step 5's words sat under sling's blank,
-  // over the account's lines, the whole time she was stuck there. On Solve the account's lines on
-  // show split the room: the valley's at the floor run from 232 to the scroll's foot at 319, with
-  // the faces above them and the bank and the bar below (#77).
-  it('on Solve, never over the account’s lines: beside a target clear of them, else just under them', () => {
-    const lines = { top: 232, bottom: 319 }
-    // Sling's blank, among the lines: its words go just under them.
-    expect(labelAt(ring(144.5, 182.5), 548, 548, { top: 0, bottom: 319 })).toEqual({ top: 327 })
-    // The slot under the boy, above them: its words keep above them, where they have room.
-    expect(labelAt(ring(133.2, 185.2), 548, 548, lines)).toEqual({ bottom: 548 - 133.2 + 8 })
-    // A word in the bank, below them, low in its room: its words stay below the lines.
-    expect(labelAt(ring(431, 471), 548, 548, lines)).toEqual({ bottom: 548 - 431 + 8 })
-    // Close the case, just under them: its words go below it, over the bank.
-    expect(labelAt(ring(257, 315), 548, 548, { top: 0, bottom: 253 })).toEqual({ top: 323 })
-  })
-
   // The owner's phone check of version code 2, at the largest font: a mark's words, set twice as
   // large, take more than the room kept for them (#152). Placed by their height as drawn, they keep
-  // to the screen, as at the floor with the valley's step 4: David's chip at 407 to 461 and the
-  // account's lines to 323, the words 94 px tall.
-  it('by their height as drawn, at a phone’s larger text, and never past the screen’s foot or top', () => {
-    const lines = { top: 0, bottom: 323 }
-    // Below the chip they would end at 563, past the foot: they go to the room's foot instead.
-    expect(labelAt(ring(407, 461), 548, 548, lines)).toEqual({ top: 469 })
-    expect(labelAt(ring(407, 461), 548, 548, lines, 94)).toEqual({ bottom: 8 })
-    // Just under the account's lines, they stop where they would run past the foot.
-    expect(labelAt(ring(144.5, 182.5), 548, 548, { top: 0, bottom: 500 }, 94)).toEqual({
-      top: 548 - 94,
-    })
+  // to the screen.
+  it('by their height as drawn, at a phone’s larger text, and never past the screen’s top', () => {
+    // Below a target in the top half, where they fit; too tall for that, at the room's foot.
+    expect(labelAt(ring(10, 150), 365, 548)).toEqual({ top: 158 })
+    expect(labelAt(ring(10, 150), 365, 548, 220)).toEqual({ bottom: 548 - 365 + 8 })
     // Above a target, they stop where they would run past the top.
-    expect(labelAt(ring(300, 360), 365, 548, undefined, 400)).toEqual({ bottom: 548 - 400 })
+    expect(labelAt(ring(300, 360), 365, 548, 400)).toEqual({ bottom: 548 - 400 })
   })
 })
 

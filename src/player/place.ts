@@ -12,31 +12,26 @@ export interface Box {
  */
 export const words = 16 + 3 * 19.5
 
-/** A stretch of the screen from top to bottom, in CSS px: the account's lines on show. */
+/** A stretch of the screen from top to bottom, in CSS px: a box's top and foot. */
 export interface Span {
   readonly top: number
   readonly bottom: number
 }
 
 /**
- * Where a mark's words sit (#25): below a target in the top half of their room, above one in its
- * bottom half, wherever that side leaves them their room, and else at the room's foot, over the
- * ring, as a hint's ring on half the picture needs. On Look the room ends at the dock, so the
- * words never cover its caption, and a target below the dock's top, in the bar, has its words
- * above the dock (#77). On Solve the account's lines on show split the room, so the words of a
- * target above them or below them stay that side, and a target among them has its words just
- * under them: no words cover the account (#77). The words take `size`, the room above or, where a
- * phone's larger text sets them taller, their own height, and never run past the screen's top or
- * foot (#152).
+ * Where a mark's words sit on Look (#25): below a target in the top half of their room, above one
+ * in its bottom half, wherever that side leaves them their room, and else at the room's foot, over
+ * the ring, as a hint's ring on half the picture needs. The room ends at the dock, so the words
+ * never cover its caption, and a target below the dock's top, in the bar, has its words above the
+ * dock (#77). On Solve they take a row of their own instead (#159). They take `size`, the room
+ * above or, where a phone's larger text sets them taller, their own height, and never run past the
+ * screen's top (#152).
  */
-export function labelAt(ring: Box, floor: number, height: number, lines?: Span, size = words) {
+export function labelAt(ring: Box, floor: number, height: number, size = words) {
   const mid = (ring.top + ring.bottom) / 2
-  if (lines && mid >= lines.top && mid <= lines.bottom)
-    return { top: Math.min(lines.bottom + 8, height - size) }
-  const [lo, hi] = !lines ? [0, floor] : mid < lines.top ? [0, lines.top] : [lines.bottom, floor]
-  if (mid - lo < (hi - lo) / 2 && ring.bottom + 8 + size <= hi) return { top: ring.bottom + 8 }
-  const top = Math.min(ring.top, hi)
-  return { bottom: Math.min(height - (top - 8 - size >= lo ? top : hi) + 8, height - size) }
+  if (mid < floor / 2 && ring.bottom + 8 + size <= floor) return { top: ring.bottom + 8 }
+  const top = Math.min(ring.top, floor)
+  return { bottom: Math.min(height - (top - 8 - size >= 0 ? top : floor) + 8, height - size) }
 }
 
 /**
@@ -54,15 +49,18 @@ export const scroller = (el: Element) => el.parentElement?.closest<HTMLElement>(
 
 /**
  * Scrolls a target's scroll box the least it takes to show the target whole, or from its top when
- * it is taller than the box: a waiting blank's sentence (#24, Solve's room).
+ * it is taller than the box: a waiting blank's sentence (#24, Solve's room), though never so far
+ * that what it holds and must keep, the blank, leaves the box, as it did where a lesson's row left
+ * the account a line or two at a phone's largest text (#159).
  */
-export function show(el: Element | null | undefined) {
+export function show(el: Element | null | undefined, keep?: Element | null) {
   const box = el && scroller(el)
   if (!el || !box) return
   const r = el.getBoundingClientRect()
   const b = box.getBoundingClientRect()
-  const off =
-    r.top < b.top || r.height > b.height ? r.top - b.top : Math.max(0, r.bottom - b.bottom)
+  let off = r.top < b.top || r.height > b.height ? r.top - b.top : Math.max(0, r.bottom - b.bottom)
+  const k = keep?.getBoundingClientRect()
+  if (k && k.bottom - off > b.bottom) off = k.bottom - b.bottom
   if (off !== 0) box.scrollBy({ top: off })
 }
 
