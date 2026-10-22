@@ -83,3 +83,5 @@ jobs:
       # The Worker's bundle, built by wrangler without a deploy or a token (#3): a Worker that
       # will not bundle fails the required check, not the deploy after the merge.
       - run: npm run check -w worker
+      # The count service's too (#7).
+      - run: npm run check -w counts

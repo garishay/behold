@@ -1,0 +1,38 @@
+name: Deploy counts
+
+# The count service ships from here (#7), as the passage service does (deploy-worker.yml): a merge to
+# `main` that touches it, or the names the game counts, deploys it with wrangler from the lockfile
+# and the API token the repository holds. Nothing runs on a PC after a merge, and nothing here is a
+# secret but the token.
+on:
+  push:
+    branches: [main]
+    paths:
+      - counts/**
+      # The service takes only the names the game counts, so a change to them redeploys it.
+      - src/counted.ts
+      - package-lock.json
+      - .github/workflows/deploy-counts.yml
+
+# One deploy at a time, never cancelled, so a deploy always completes.
+concurrency:
+  group: counts
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: deploy (counts)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run deploy -w counts
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
