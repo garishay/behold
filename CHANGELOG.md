@@ -3,6 +3,20 @@
 Entries run in one list in version order, newest first; within a version, by PR number. A version
 is reserved when its entry is created, at the PR's open, so a lower number may land later.
 
+## v0.41.0 — Gate 40, the update toast (#61)
+
+- **61a — the update toast** (#161): once tapped, the update toast's Update reads "Updating…" at
+  once, dimmed and disabled, until the new version reloads the page, so the wait no longer looks
+  like a freeze, and a second tap hands the service worker nothing more. "Updating…" is new app
+  copy beside "Update available" and "Update". If no reload comes, it stays until the page next
+  loads, where the toast offers Update again. The toast is as wide as its words and no wider than
+  the screen's inset allows, as the lock's note is, so "Update available" no longer wraps at half
+  the screen; at the phone's largest font its words take two lines beside the button. A waiting
+  update now waits out a case, from the brief's card to the reveal, unseen, so its toast never
+  lies over the bar, and shows on the cases page. Gate 38's own rule for the toast under
+  Restart's question retires with it, since the question shows only in a case. The Play app
+  takes it with the site, with no version code.
+
 ## v0.39.0 — Gate 38, the game's own dialog (#153)
 
 - **153a — the game's own dialog** (#157): Restart asks its question in the game's own dialog,
