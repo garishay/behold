@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
+import { away } from './beacon.ts'
 import { carmel } from './cases/carmel/case.ts'
 import { cases } from './cases/index.ts'
 import { micaiah } from './cases/micaiah/case.ts'
@@ -4389,5 +4390,147 @@ describe('the largest font (#152)', () => {
     tapSpot('giant')
     fireEvent.click(screen.getByRole('button', { name: 'More' }))
     expect(document.querySelector<HTMLElement>('.dock .whole')!.style.maxHeight).toBe('436px')
+  })
+})
+
+// What the game counts (#7): each count taken at its moment, and sent in the beacon as the game is
+// hidden, here to a test's own address, the beacon caught as it goes.
+describe('what the game counts (#7)', () => {
+  const sent = vi.fn<(url: string, body: string) => boolean>(() => true)
+  beforeEach(() => {
+    Object.defineProperty(navigator, 'sendBeacon', { value: sent, configurable: true })
+    vi.stubEnv('VITE_COUNTS_URL', 'https://counts.test')
+    // What the file's earlier tests counted goes, unread.
+    away()
+    sent.mockClear()
+  })
+  afterEach(() => vi.unstubAllEnvs())
+  /** The game hidden, as a phone hides it, and what its beacon carried. */
+  const counted = () => {
+    Object.defineProperty(document, 'hidden', { value: true, configurable: true })
+    document.dispatchEvent(new Event('visibilitychange'))
+    Object.defineProperty(document, 'hidden', { value: false, configurable: true })
+    const beacons = sent.mock.calls.map(([, body]) => JSON.parse(body) as unknown[])
+    sent.mockClear()
+    return beacons.flat()
+  }
+
+  it('counts the game opening on a device with no case begun, Begin, and a new case opened', () => {
+    start()
+    openCase(/The valley/)
+    expect(counted()).toEqual([
+      ['open', '', 'new', 1],
+      ['begin', '', '', 1],
+      ['case', 'valley', 'new', 1],
+      ['away', 'valley', 'look/none/none', 1],
+    ])
+  })
+
+  it('counts the game opening back, and each case opened: back to one begun, or closed', async () => {
+    start(<App />, { valley: closedCase(valley), carmel: fresh(carmel) })
+    openCase(/The valley/)
+    fireEvent.click(await screen.findByRole('button', { name: 'Back to cases' }))
+    await waitFor(() => expect(history.state).toBeNull())
+    openCase(/The mountain/)
+    expect(counted()).toEqual([
+      ['open', '', 'back', 1],
+      ['begin', '', '', 1],
+      ['case', 'valley', 'closed', 1],
+      ['case', 'carmel', 'back', 1],
+      ['away', 'carmel', 'look/none/none', 1],
+    ])
+  })
+
+  it('counts each tutorial step as it is done, with the time since the one before', () => {
+    start()
+    openCase(/The valley/)
+    guide()
+    const steps = counted().filter((c) => (c as string[])[0] === 'step')
+    expect(steps).toEqual([1, 2, 3, 4, 5].map((n) => ['step', 'valley', `${n}/<30s`, 1]))
+  })
+
+  it('counts Solve’s first opening in a visit, with the time and the share found, and each return to Look', async () => {
+    start(<App />, laterStarted)
+    openCase(/The mountain/)
+    tapSpot('altar')
+    tab(/Solve/)
+    tab(/Look/)
+    await waitFor(() => expect(history.state).toEqual({ case: 'carmel' }))
+    tab(/Solve/)
+    expect(counted().filter((c) => ['solve', 'look'].includes((c as string[])[0]))).toEqual([
+      ['solve', 'carmel', '<30s/some', 1],
+      ['look', 'carmel', 'empty', 1],
+    ])
+  })
+
+  it('counts each close: how many answers didn’t fit, or closed with the hints the case took', async () => {
+    start()
+    openCase(/The valley/)
+    await sweep()
+    for (const [id, word] of valleyAnswers) {
+      chip(id === 't2' ? 'Goliath' : word)
+      slot(id)
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    chip('Saul')
+    slot('t2')
+    fireEvent.click(screen.getByRole('button', { name: 'Close the case' }))
+    expect(counted().filter((c) => (c as string[])[0] === 'close')).toEqual([
+      ['close', 'valley', '1', 1],
+      ['close', 'valley', 'closed/0', 1],
+    ])
+  })
+
+  it('counts a hint by its tier and what offered it, and the thing a new one points at', () => {
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue(
+      new DOMRect(10, 10, 100, 40),
+    )
+    start(<App />, laterStarted)
+    openCase(/The vineyard/)
+    moment('Bedchamber')
+    for (const id of ['window', 'man-bed', 'tray', 'woman', 'sheets', 'purse']) tapSpot(id)
+    for (let i = 0; i < stuck.taps; i++) tapSpot('window')
+    fireEvent.click(screen.getByRole('button', { name: 'Stuck? Where to look' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Still stuck? Show me' }))
+    expect(counted().filter((c) => ['hint', 'aim'].includes((c as string[])[0]))).toEqual([
+      ['hint', 'vineyard', '1/taps', 1],
+      ['aim', 'vineyard', 'seal', 1],
+      ['hint', 'vineyard', '2/more', 1],
+    ])
+    vi.restoreAllMocks()
+  })
+
+  it('counts where an open case stands when the game is put away, and Start over', async () => {
+    start(<App />, laterStarted)
+    openCase(/The mountain/)
+    tapSpot('altar')
+    tab(/Solve/)
+    expect(counted().filter((c) => (c as string[])[0] === 'away')).toEqual([
+      ['away', 'carmel', 'solve/some/none', 1],
+    ])
+    await restart()
+    expect(counted().filter((c) => ['restart', 'away'].includes((c as string[])[0]))).toEqual([
+      ['restart', 'carmel', '', 1],
+      ['away', 'carmel', 'look/none/none', 1],
+    ])
+  })
+
+  // About, the cases page's foot (#7): what the game counts, and Counting's switch, kept on the
+  // device as Music's and Effects' are; it is About's alone, not the menu's.
+  it('shows About with what the game counts and Counting’s switch, which stops all counting and is kept', () => {
+    start()
+    const about = screen.getByRole('region', { name: 'About' })
+    expect(about).toHaveTextContent('Behold counts how its cases are played, never who plays them.')
+    const counting = within(about).getByRole('button', { name: 'Counting' })
+    expect(counting).toHaveAttribute('aria-pressed', 'true')
+    fireEvent.click(counting)
+    expect(counting).toHaveAttribute('aria-pressed', 'false')
+    expect(localStorage.getItem('behold.counting')).toBe('off')
+    openCase(/The valley/)
+    expect(counted()).toEqual([])
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }))
+    const menuSheet = screen.getByRole('dialog', { name: 'Menu' })
+    expect(within(menuSheet).queryByRole('button', { name: 'Counting' })).toBeNull()
+    fireEvent.click(within(menuSheet).getByRole('button', { name: 'Cases' }))
   })
 })

@@ -2,7 +2,8 @@ import { useSyncExternalStore } from 'react'
 import { strings } from '../strings/en.ts'
 import { isOn, subscribe, turn, type Switch } from './settings.ts'
 
-function Toggle({ which }: { which: Switch }) {
+/** One switch, as a pill: the two for sound below, and Counting on About (#7). */
+export function Toggle({ which }: { which: Switch }) {
   const on = useSyncExternalStore(subscribe, () => isOn(which))
   // The state is the button's pressed state, so a screen reader hears "Music, on, toggle button";
   // the word beside the name is for the eye.

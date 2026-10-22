@@ -61,5 +61,5 @@ Stuck? Ask for a hint: Where to look, then Show me.
 
 Best with sound on.
 
-Behold has no accounts, no ads, and no analytics, and it collects nothing about you. Your progress stays on your device, and the game never sends it anywhere.
+Behold has no accounts and no ads, and it collects nothing that says who you are. Your progress stays on your device, and the game never sends it anywhere. It counts how its cases are played, never who plays them. You can turn Counting off in About, at the foot of the cases page.
 ```
