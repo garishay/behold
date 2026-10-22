@@ -1217,10 +1217,6 @@ button:focus-visible {
   border-color: var(--wine);
 }
 
-.chip.is-new {
-  border-color: var(--gold);
-}
-
 .chip.is-dim {
   opacity: 0.3;
 }

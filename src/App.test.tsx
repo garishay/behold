@@ -725,7 +725,7 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     ])
   })
 
-  it('a tap shows the caption and what it found, and its words wait on Solve, ringed', () => {
+  it('a tap shows the caption and what it found, and its words wait on Solve', () => {
     start()
     openCase(/The valley/)
     tapSpot('boy')
@@ -736,10 +736,8 @@ describe('the case screen explored (#6, 03b; #24)', () => {
     expect(screen.getByRole('tab', { name: /Look/ })).toHaveTextContent('Look1/6')
     expect(coach()).toHaveTextContent('That tap found his name, David, and sling.')
     expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('Solve0/7+2')
-    // The guided steps hold the screen until sling is in its blank (#77), and Solve opened by them
-    // rings the two words its first time.
+    // The guided steps hold the screen until sling is in its blank (#77).
     guideOn()
-    expect(chips().every((c) => c.classList.contains('is-new'))).toBe(true)
     tab(/Look/)
     tapSpot('giant')
     expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('Solve2/7+4')
@@ -753,16 +751,22 @@ describe('the case screen explored (#6, 03b; #24)', () => {
       'spear',
       'sword',
     ])
-    expect(chips().filter((c) => c.classList.contains('is-new'))).toHaveLength(4)
+  })
+
+  // A word found since Solve was last left is counted by Solve's tab, and in the bank it has no
+  // ring: on Solve a ring is a mark's, or a failed close's (#165, amending Gate 07's S4). jsdom
+  // draws nothing, so a ring would be a class: each chip is a plain chip, a new word as an old one.
+  it('a new word on Solve has no ring, though Solve’s tab counted it', async () => {
+    start()
+    openCase(/The valley/)
+    guide()
     tab(/Look/)
+    await waitFor(() => expect(history.state).toEqual({ case: 'valley' }))
     tapSpot('brook')
-    tapSpot('boy')
+    expect(screen.getByRole('tab', { name: /Solve/ })).toHaveTextContent('Solve2/7+2')
     tab(/Solve/)
-    const ringed = chips().filter((c) => c.classList.contains('is-new'))
-    expect(ringed.map((c) => c.textContent)).toEqual(['stones', 'five'])
-    // Solve tapped again is not Solve left: the rings stay (review round 1, #41).
-    tab(/Solve/)
-    expect(chips().filter((c) => c.classList.contains('is-new'))).toHaveLength(2)
+    expect(chips().map((c) => c.textContent)).toEqual(['David', 'sling', 'stones', 'five'])
+    expect(chips().map((c) => c.className)).toEqual(['chip', 'chip', 'chip', 'chip'])
   })
 
   it('a chip picked up is marked, and put down on a second tap', async () => {
