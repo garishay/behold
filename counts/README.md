@@ -45,12 +45,12 @@ came, not the address it came from, which the Worker never reads, and no request
 (`observability.enabled: false`, held by `src/config.test.ts`). So a total says how many times
 something happened that day, and nothing can tie two counts to one player or one visit.
 
-**The free plan.** D1 gives 100,000 rows written a day, and each count added should write one: an
-index adds a row to a write, and the table has none but its key, which `WITHOUT ROWID` makes the
-table itself. Local D1 doesn't report rows written, so the live database's reply to one made-up
-count is read once its table is made (Gate 41 A5). A beacon carries one count for each different
-thing counted, 8 for a first visit that opens the
-valley and Solve, so the day's writes cover thousands of visits. Past them, D1 refuses writes until
+**The free plan.** D1 gives 100,000 rows written a day, and each count added writes one, new or
+not: an index adds a row to a write, and the table has none but its key, which `WITHOUT ROWID`
+makes the table itself. The live database said so on 2026-10-22, to the Worker's own upsert of a
+made-up count, run twice and then deleted (#7). A beacon carries one count for each different thing
+counted, 8 for a first visit that opens the valley and Solve, so the day's writes cover thousands
+of visits. Past them, D1 refuses writes until
 00:00 UTC: the rest of that day's beacons are let go, and the game never notices. Cloudflare's
 100,000 requests a day are the account's, shared with the passage service; the beacon spends one
 each time the game is hidden.
